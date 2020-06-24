@@ -13,14 +13,13 @@
 #include "bar.h"
 #include "die.h"
 #include "config.h"
+#include "version.h"
 
 unsigned char kchar;
 
-#define VERSION_SHORT v0.1.9
-
 extern union
 {
-  struct
+  struct _adapterconfig
   {
     char ssid[32];
     char hostname[64];
@@ -30,8 +29,9 @@ extern union
     unsigned char dnsIP[4];
     unsigned char macAddress[6];
     unsigned char bssid[6];
+    char firmware[15];
   };
-  unsigned char rawData[124];
+  unsigned char rawData[139];
 } adapterConfig;
 
 
@@ -89,17 +89,18 @@ void info_run(void)
   POKE(0x610,2);
 
   screen_puts(0,4, "  #FUJINET  CONFIG  ");
-  screen_puts(11,15,"Press \xD9\xA3\x19 reconnect");
-  screen_puts(9,16,"Any other key to return");
-  screen_puts( 5,5, "      SSID:");
-  screen_puts( 5,6, "  Hostname:");
-  screen_puts( 5,7, "IP Address:");
-  screen_puts( 5,8, "   Gateway:");
-  screen_puts( 5,9,"       DNS:");
-  screen_puts( 5,10,"   Netmask:");
-  screen_puts( 5,11,"       MAC:");
-  screen_puts( 5,12,"     BSSID:");
-  screen_puts( 5,13,"   Version:");
+  screen_puts(11,16,"Press \xD9\xA3\x19 reconnect");
+  screen_puts(9,17,"Any other key to return");
+  screen_puts( 5,5, "            SSID:");
+  screen_puts( 5,6, "        Hostname:");
+  screen_puts( 5,7, "      IP Address:");
+  screen_puts( 5,8, "         Gateway:");
+  screen_puts( 5,9, "             DNS:");
+  screen_puts( 5,10,"         Netmask:");
+  screen_puts( 5,11,"             MAC:");
+  screen_puts( 5,12,"           BSSID:");
+  screen_puts( 5,13,"  Config Version:");
+  screen_puts( 5,14,"FujiNet Firmware:");
 
   // Grab adapter config
   OS.dcb.ddevic=0x70;
@@ -112,15 +113,16 @@ void info_run(void)
   OS.dcb.daux=0;
   siov();    
   
-  screen_puts(17,5,adapterConfig.ssid);
-  screen_puts(17,6,adapterConfig.hostname);
-  print_ip(17,7,adapterConfig.localIP);
-  print_ip(17,8,adapterConfig.gateway);
-  print_ip(17,9,adapterConfig.dnsIP);
-  print_ip(17,10,adapterConfig.netmask);
-  print_mac(17,11,adapterConfig.macAddress);
-  print_mac(17,12,adapterConfig.bssid);
-  screen_puts(17,13, "VERSION_SHORT" );
+  screen_puts(23,5,adapterConfig.ssid);
+  screen_puts(23,6,adapterConfig.hostname);
+  print_ip(23,7,adapterConfig.localIP);
+  print_ip(23,8,adapterConfig.gateway);
+  print_ip(23,9,adapterConfig.dnsIP);
+  print_ip(23,10,adapterConfig.netmask);
+  print_mac(23,11,adapterConfig.macAddress);
+  print_mac(23,12,adapterConfig.bssid);
+  screen_puts(23,13, CONFIG_VERSION_FULL );
+  screen_puts(23,14, adapterConfig.firmware );
 
   while (!kbhit()) { } // Wait for key.
   
