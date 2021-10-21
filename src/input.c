@@ -1,8 +1,12 @@
+\
 /** 
  * Input routines
  */
 
+#include <msx.h>
 #include <eos.h>
+#include <conio.h>
+#include <stdbool.h>
 #include "input.h"
 
 static GameControllerData cont;
@@ -82,4 +86,42 @@ unsigned char input()
     }
   
   return key;
+}
+
+static void input_clear_bottom(void)
+{
+  msx_vfill(0x1200,0x00,768);
+}
+
+unsigned char input_line(char *c, bool password)
+{
+  unsigned char pos=0;
+  
+  input_clear_bottom();
+
+  gotoxy(0,18);
+
+  while (key = eos_read_keyboard())
+    {
+      if (key == 0x0d)
+	break;
+      else if (key == 0x08)
+	{
+	  if (pos > 0)
+	    {
+	      pos--;
+	      c--;
+	      putchar(0x08);
+	      putchar(0x20);
+	      putchar(0x08);
+	    }
+	}
+      else if (key > 0x1F && key < 0x7F) 
+	{
+	  pos++;
+	  *c=key;
+	  c++;
+	  putchar(password ? 0x7F : key);
+	}
+    }
 }

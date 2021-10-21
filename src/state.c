@@ -9,6 +9,7 @@
 #include "state.h"
 #include "set_wifi.h"
 #include "connect_wifi.h"
+#include "diskulator_hosts.h"
 
 /**
  * Set up initial context
@@ -43,9 +44,9 @@ void state(Context *context)
 	case CONNECT_WIFI:
 	  context->state = connect_wifi(context);
 	  break;
-	/* case DISKULATOR_HOSTS: */
-	/*   context->state = diskulator_hosts(context); */
-	/*   break; */
+	case DISKULATOR_HOSTS:
+	  context->state = diskulator_hosts(context);
+	  break;
 	/* case DISKULATOR_SELECT: */
 	/*   context->state = diskulator_select(context); */
 	/*   break; */

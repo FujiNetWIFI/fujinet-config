@@ -9,6 +9,11 @@
 #include "fuji_typedefs.h"
 
 /**
+ * Get SSID
+ */
+unsigned char fuji_adamnet_get_ssid(NetConfig* n);
+
+/**
  * Return number of networks
  */
 unsigned char fuji_adamnet_do_scan(void);

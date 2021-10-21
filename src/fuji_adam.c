@@ -34,6 +34,22 @@ unsigned char fuji_read_sync(char* buf, unsigned short len)
 }
 
 /**
+ * Get SSID
+ */
+unsigned char fuji_adamnet_get_ssid(NetConfig* n)
+{
+  char get_ssid_cmd = 0xFE;
+
+  // Issue command
+  fuji_write_sync(&get_ssid_cmd,sizeof(get_ssid_cmd));
+
+  // Wait for response
+  fuji_read_sync(n->rawData,sizeof(n->rawData));
+
+  return true;
+}
+
+/**
  * Return number of networks
  */
 unsigned char fuji_adamnet_do_scan(void)

@@ -6,6 +6,7 @@
 #include <smartkeys.h>
 #include "fuji_typedefs.h"
 #include "state.h"
+#include "fuji_adam.h"
 
 Context context;
 
@@ -13,7 +14,11 @@ char tmp[256];
 
 State configured(Context *context)
 {
-  return SET_WIFI;
+  NetConfig n;
+
+  fuji_adamnet_get_ssid(&n);
+  
+  return n.ssid[0] == '\0' ? SET_WIFI : CONNECT_WIFI;
 }
 
 void main(void)
