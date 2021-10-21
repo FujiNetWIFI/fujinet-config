@@ -4,6 +4,7 @@
  */
 
 #include <msx.h>
+#include <eos.h>
 #include <stdlib.h>
 #include <string.h>
 #include <smartkeys.h>
@@ -12,6 +13,8 @@
 #include "fuji_adam.h"
 #include "set_wifi.h"
 #include "fuji_typedefs.h"
+#include "bar.h"
+#include "input.h"
 
 #define MAX_NETWORKS 16 // Max visible networks on screen
 
@@ -43,7 +46,6 @@ void set_wifi_setup(void)
   msx_vfill_v(ADDR_FILE_TYPE+8,ATTR_FILE_TYPE,136);
   msx_vfill_v(ADDR_FILE_TYPE+16,ATTR_FILE_TYPE,136);
   
-
   msx_color(15,5,7);
   gotoxy(7,0); cprintf("WELCOME TO #FUJINET");
 }
@@ -108,16 +110,6 @@ State set_wifi_select_network(unsigned char numNetworks, Context *context)
 }
 
 /**
- * Bar to select SSID
- */
-void set_wifi_bar(unsigned char oldy, unsigned char y)
-{
-  msx_vfill(ADDR_FILE_LIST * (oldy * 256) + 256, ATTR_PATH_LINE, 24);
-  msx_vfill(ADDR_FILE_LIST + (oldy * 256) + 256 + 24,ATTR_FILE_LIST, 232);
-  msx_vfill(ADDR_FILE_LIST * (y * 256) + 256, ATTR_BAR, 256);
-}
-
-/**
  * Set wifi State
  */
 State set_wifi(Context *context)
@@ -130,7 +122,7 @@ State set_wifi(Context *context)
   
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  SCANNING FOR NETWORKS. PLEASE WAIT...");
-
+  
   numNetworks = fuji_adamnet_do_scan();
   
   while (numNetworks == 0)
@@ -152,9 +144,22 @@ State set_wifi(Context *context)
       set_wifi_print_ssid(&s,i);
     }
 
-  set_wifi_bar(1,0);
+  bar_set(0,3,numNetworks,0);
+
+  eos_start_read_keyboard();
   
-  while (1) {}
+  while (1)
+    {
+      switch(input())
+	{
+	case 0xA0:
+	  bar_up();
+	  break;
+	case 0xA2:
+	  bar_down();
+	  break;
+	}
+    }
   
   return new_state;
 }

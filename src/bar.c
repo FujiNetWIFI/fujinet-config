@@ -49,7 +49,7 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 {
   bar_y = y;
   bar_c = c;
-  bar_m = m;
+  bar_m = m-1;
   bar_i = i;
   bar_oldi = bar_i;
   bar_update();
