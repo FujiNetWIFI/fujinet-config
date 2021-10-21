@@ -20,7 +20,7 @@ void connect_wifi_setup(char* ssid)
 {
   clrscr();
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-  sprintf(tmp,"  CONNECTING TO NETWORK:\n%s",ssid);
+  sprintf(tmp,"  CONNECTING TO NETWORK:\n  %s",ssid);
   smartkeys_status(tmp);
 }
 
@@ -33,7 +33,7 @@ State connect_wifi_wait_for_network(NetConfig* n, Context *context)
   unsigned char wifiStatus=0;
   unsigned char retries=0;
 
-  while (retries > 10)
+  while (retries < 10)
     {
       sleep(1);
       fuji_adamnet_get_wifi_status(&wifiStatus);
@@ -48,7 +48,7 @@ State connect_wifi_wait_for_network(NetConfig* n, Context *context)
 	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
 	  smartkeys_status("  CONNECTION SUCCESSFUL.");
 	  sleep(2);
-	  new_state = DISKULATOR_HOSTS;
+	  return DISKULATOR_HOSTS;
 	  break;
 	case 4:
 	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
@@ -61,14 +61,9 @@ State connect_wifi_wait_for_network(NetConfig* n, Context *context)
 	  sleep(5);
 	  break;
 	case 6:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  DISCONNECTED.");
-	  sleep(5);
-	  break;
 	default:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  WAITING FOR NETWORK.");
 	  retries++;
+	  new_state=CONNECT_WIFI;
 	  break;
 	}
     }
@@ -81,6 +76,16 @@ State connect_wifi_wait_for_network(NetConfig* n, Context *context)
 State connect_wifi(Context *context)
 {
   NetConfig n;
+  unsigned char s;
+
+  sleep(1); // So we don't fire command too fast.
+  
+  fuji_adamnet_get_wifi_status(&s);
+
+  if (s==3)
+    return DISKULATOR_HOSTS;
+  
+  memset(n,0,sizeof(n));
   
   fuji_adamnet_get_ssid(&n);
   

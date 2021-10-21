@@ -113,6 +113,9 @@ State set_wifi_save_network(unsigned char selectedNetwork, Context *context)
   SSIDInfo s;
   NetConfig n;
 
+  memset(s,0,sizeof(s));
+  memset(n,0,sizeof(n));
+  
   if (selectedNetwork == 0xFF)
     return DISKULATOR_HOSTS;
   else if (selectedNetwork == 0xFE)
