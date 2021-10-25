@@ -203,6 +203,10 @@ void diskulator_hosts_hosts(Context *context, SubState *new_substate)
           fuji_adamnet_mount_host(context->host_slot,&context->hostSlots);
 	  *new_substate=DONE;
           break;
+	case 0x84:
+	  *new_substate=DONE;
+	  context->state=DISKULATOR_INFO;
+	  break;
 	case 0x85:
 	  diskulator_hosts_edit_host_slot(bar_get(),context);
 	  break;
@@ -241,7 +245,7 @@ void diskulator_hosts_devices(Context *context, SubState *new_substate)
 	  bar_clear();
 	  break;
         case 0x0d: // RETURN
-          break;
+          break;	  
 	case 0x85:
 	  diskulator_hosts_edit_host_slot(bar_get(),context);
 	  break;
