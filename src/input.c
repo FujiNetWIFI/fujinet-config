@@ -88,6 +88,13 @@ unsigned char input()
   return key;
 }
 
+unsigned char input_ucase(void)
+{
+  unsigned char c = input();
+  if ((c>='a') && (c<='z')) c&=~32;
+  return c;
+}
+
 static void input_clear_bottom(void)
 {
   msx_vfill(0x1200,0x00,768);

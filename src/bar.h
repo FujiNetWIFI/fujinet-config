@@ -6,6 +6,11 @@
 #define BAR_H
 
 /**
+ * Clear the currently displayed bar from screen
+ */
+void bar_clear(void);
+
+/**
  * Set up bar and start display on row
  * @param y Y column for bar display
  * @param c # of columns for left

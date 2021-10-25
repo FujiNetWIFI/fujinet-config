@@ -23,6 +23,7 @@ State configured(Context *context)
 
 void main(void)
 {
+  context_setup(&context);
   smartkeys_set_mode();
   context.net_connected = false;
   context.state = configured(&context);

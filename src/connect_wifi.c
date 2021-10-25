@@ -47,7 +47,6 @@ State connect_wifi_wait_for_network(NetConfig* n, Context *context)
 	case 3:
 	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
 	  smartkeys_status("  CONNECTION SUCCESSFUL.");
-	  sleep(2);
 	  return DISKULATOR_HOSTS;
 	  break;
 	case 4:

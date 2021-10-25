@@ -16,6 +16,7 @@
  */
 void context_setup(Context* context)
 {
+  memset(context,0,sizeof(Context));
   context->net_connected = false;
   context->copySubState = DISABLED;
 }

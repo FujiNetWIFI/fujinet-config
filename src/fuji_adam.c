@@ -115,3 +115,69 @@ bool fuji_adamnet_get_wifi_status(unsigned char* wifiStatus)
   fuji_read_sync((char *)wifiStatus,1);  
 }
 
+/**
+ * Read host slots
+ */
+void fuji_adamnet_read_host_slots(HostSlots* hostSlots)
+{
+  char read_host_slots_cmd=0xF4;
+
+  // Issue command
+  fuji_write_sync(&read_host_slots_cmd,1);
+
+  // Get response
+  fuji_read_sync((char *)hostSlots,sizeof(HostSlots));    
+}
+
+/**
+ * Read drive tables
+ */
+void fuji_adamnet_read_device_slots(DeviceSlots* deviceSlots)
+{
+  char read_device_slots_cmd=0xF2;
+
+  // Issue command
+  fuji_write_sync(&read_device_slots_cmd,1);
+
+  // Get response
+  fuji_read_sync((char *)deviceSlots,304);
+}
+
+/**
+ * Mount a host slot
+ */
+void fuji_adamnet_mount_host(unsigned char c, HostSlots* hostSlots)
+{
+  char mount_host_cmd[2]={0xF9,0x00};
+
+  // Issue command
+  mount_host_cmd[1]=c;
+  fuji_write_sync(mount_host_cmd,sizeof(mount_host_cmd));
+}
+
+/**
+ * Read #FujiNet Adapter configuration
+ */
+void fuji_adamnet_read_adapter_config(AdapterConfig* adapterConfig)
+{
+  char get_adapter_config_cmd=0xE8;
+
+  // Issue Command
+  fuji_write_sync(&get_adapter_config_cmd,1);
+
+  // Get Response
+  fuji_read_sync((char *)&adapterConfig->rawData,sizeof(adapterConfig->rawData));
+}
+
+/**
+ * Write host slots
+ */
+void fuji_adamnet_write_host_slots(HostSlots* hostSlots)
+{
+  char write_host_slots_cmd[257];
+  write_host_slots_cmd[0]=0xF3;
+  memcpy(&write_host_slots_cmd[1],hostSlots,sizeof(HostSlots));
+
+  // Issue Command
+  fuji_write_sync(write_host_slots_cmd,sizeof(write_host_slots_cmd));
+}

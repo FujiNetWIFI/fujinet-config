@@ -23,16 +23,21 @@
  */
 static unsigned char bar_y, bar_c, bar_m, bar_i, bar_oldi;
 
-/**
- * Update bar display
- */
-void bar_update(void)
+void bar_clear(void)
 {
   // Fill column color in old row
   msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_oldi), ATTR_PATH_LINE, COL(bar_c));
 
   // Fill background color in old row
-  msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_oldi)+COL(bar_c),ATTR_FILE_LIST,256-COL(bar_c));
+  msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_oldi)+COL(bar_c),ATTR_FILE_LIST,256-COL(bar_c));  
+}
+
+/**
+ * Update bar display
+ */
+void bar_update(void)
+{
+  bar_clear();
   
   // Fill bar color in new row
   msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i),ATTR_BAR,256);

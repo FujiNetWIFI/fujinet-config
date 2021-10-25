@@ -33,4 +33,29 @@ bool fuji_adamnet_set_ssid(bool save, NetConfig* netConfig);
  */
 bool fuji_adamnet_get_wifi_status(unsigned char* wifiStatus);
 
+/**
+ * Read host slots
+ */
+void fuji_adamnet_read_host_slots(HostSlots* hostSlots);
+
+/**
+ * Read drive tables
+ */
+void fuji_adamnet_read_device_slots(DeviceSlots* deviceSlots);
+
+/**
+ * Mount a host slot
+ */
+void fuji_adamnet_mount_host(unsigned char c, HostSlots* hostSlots);
+
+/**
+ * Read #FujiNet Adapter configuration
+ */
+void fuji_adamnet_read_adapter_config(AdapterConfig* adapterConfig);
+
+/**
+ * Write host slots
+ */
+void fuji_adamnet_write_host_slots(HostSlots* hostSlots);
+
 #endif /* FUJINET_ADAM_H */
