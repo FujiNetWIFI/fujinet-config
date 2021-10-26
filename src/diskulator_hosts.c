@@ -195,9 +195,6 @@ void diskulator_hosts_hosts(Context *context, SubState *new_substate)
 	  bar_clear();
 	  break;
         case 0x0d: // RETURN
-          if (context->hostSlots.host[i][0]==0x00 || (context->net_connected == false && strcmp(context->hostSlots.host[i],"SD") != 0)) // empty host slot?
-            break; // do nothing
-	  
           context->state=DISKULATOR_SELECT;
           context->host_slot=i;
           fuji_adamnet_mount_host(context->host_slot,&context->hostSlots);

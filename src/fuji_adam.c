@@ -181,3 +181,69 @@ void fuji_adamnet_write_host_slots(HostSlots* hostSlots)
   // Issue Command
   fuji_write_sync(write_host_slots_cmd,sizeof(write_host_slots_cmd));
 }
+
+/**
+ * Open Directory
+ */
+void fuji_adamnet_open_directory(unsigned char hs, char *p)
+{
+  char open_dir_cmd[258];
+
+  // Prepare command
+  memset(open_dir_cmd,0,258);
+  open_dir_cmd[0]=0xF7;
+  open_dir_cmd[1]=hs;
+  strcpy(&open_dir_cmd[2],p);
+
+  // Issue command
+  fuji_write_sync(open_dir_cmd,sizeof(open_dir_cmd));
+}
+
+/**
+ * Read next dir entry
+ */
+void fuji_adamnet_read_directory(char *e, unsigned char len, unsigned char addtl)
+{
+  char read_dir_cmd[3];
+
+  // Prepare command
+  read_dir_cmd[0]=0xF6;
+  read_dir_cmd[1]=len;
+  read_dir_cmd[2]=addtl;
+
+  // Issue command
+  fuji_write_sync(read_dir_cmd,3);
+
+  // Get Response
+  fuji_read_sync((unsigned char *)&e,len);  
+}
+
+/**
+ * Get current directory cursor
+ */
+DirectoryPosition fuji_adamnet_get_directory_position(void)
+{
+  char get_dir_pos_cmd=0xE5;
+  DirectoryPosition pos=0;
+  
+  // Issue command
+  fuji_write_sync(&get_dir_pos_cmd,1);
+
+  // Get response
+  fuji_read_sync((unsigned char *)&pos,2);
+}
+
+/**
+ * Set current directory cursor
+ */
+void fuji_adamnet_set_directory_position(DirectoryPosition pos)
+{
+  
+}
+
+/**
+ * Close directory
+ */
+void fuji_adamnet_close_directory(unsigned char hs)
+{
+}

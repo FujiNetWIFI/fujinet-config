@@ -58,4 +58,29 @@ void fuji_adamnet_read_adapter_config(AdapterConfig* adapterConfig);
  */
 void fuji_adamnet_write_host_slots(HostSlots* hostSlots);
 
+/**
+ * Open Directory
+ */
+void fuji_adamnet_open_directory(unsigned char hs, char *p);
+
+/**
+ * Read next dir entry
+ */
+void fuji_adamnet_read_directory(char *e, unsigned char len, unsigned char addtl);
+
+/**
+ * Get current directory cursor
+ */
+DirectoryPosition fuji_adamnet_get_directory_position(void);
+
+/**
+ * Set current directory cursor
+ */
+void fuji_adamnet_set_directory_position(DirectoryPosition pos);
+
+/**
+ * Close directory
+ */
+void fuji_adamnet_close_directory(unsigned char hs);
+
 #endif /* FUJINET_ADAM_H */
