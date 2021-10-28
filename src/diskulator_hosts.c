@@ -150,6 +150,8 @@ void diskulator_hosts_edit_host_slot(unsigned char i, Context *context)
 {
   gotoxy(1,i+1); cgets(context->hostSlots.host[i]);
   fuji_adamnet_write_host_slots(context->hostSlots);
+  eos_end_read_keyboard();
+  eos_start_read_keyboard();
 }
 
 /**

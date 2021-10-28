@@ -25,11 +25,65 @@ typedef enum _substate
    DONE
   } SubState;
 
+#define DIRECTORY_LIST_ENTRIES_PER_PAGE 15
+#define DIRECTORY_LIST_SCREEN_WIDTH 31
+
+void diskulator_select_open_directory(Context *context)
+{
+  DirectoryPosition pos=context->dir_page*DIRECTORY_LIST_ENTRIES_PER_PAGE;
+
+  if (context->filter[0]!=0x00)
+    {
+      memset(context->directory_plus_filter,0,sizeof(context->directory_plus_filter));
+      strcpy(context->directory_plus_filter,context->directory);
+      strcpy(&context->directory_plus_filter[strlen(context->directory_plus_filter)+1],context->filter);
+      fuji_adamnet_open_directory(context->host_slot,context->directory_plus_filter);
+    }
+  else
+    fuji_adamnet_open_directory(context->host_slot,context->directory_plus_filter);
+
+  // Position directory cursor
+  fuji_adamnet_set_directory_position(pos);
+}
+
+void diskulator_select_display_directory_page(Context *context)
+{
+  char current_entry[DIRECTORY_LIST_SCREEN_WIDTH];
+
+  msx_color(1,15,7);
+  
+  // Clear content area
+  msx_vfill(0x0000,0x00,5120);
+
+  // Open Directory
+  diskulator_select_open_directory(context);
+
+  // Iterate over directory display
+  for (char i=0;i<DIRECTORY_LIST_ENTRIES_PER_PAGE;i++)
+    {
+      gotoxy(1,i+1);
+      fuji_adamnet_read_directory(current_entry,DIRECTORY_LIST_SCREEN_WIDTH,0);
+      if (current_entry[0]==0x7F)
+	{
+	  if (i==0)
+	    cprintf("--EMPTY--");
+	  break;
+	}
+      else
+	{
+	  cprintf("%31s",current_entry);
+	}
+    }
+ 
+  // Close directory
+  fuji_adamnet_close_directory(context->host_slot);
+}
+
 void diskulator_select_select_file(Context *context, SubState *ss)
 {
   smartkeys_display(NULL,NULL," UP  DIR","  NEW\n DISK"," FILTER","  BOOT");
-  
-  while(1)
+  diskulator_select_display_directory_page(context);
+  while (1)
     {
     }
 }
