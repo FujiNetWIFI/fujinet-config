@@ -19,6 +19,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS)
+	cp autorun.ddp ../fujinet-platformio/data/
 
 # c source
 $(BUILD_DIR)/%.c.o: %.c
