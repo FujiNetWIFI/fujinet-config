@@ -30,6 +30,12 @@ void bar_up();
 void bar_down();
 
 /**
+ * Jump to location 
+ * @param i new y offset
+ */
+void bar_jump(unsigned char i);
+
+/**
  * Get current bar position
  * @return bar index
  */

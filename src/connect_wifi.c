@@ -1,103 +1,57 @@
 /**
- * #FUJINET CONFIG
- * Connect Wifi Network
+ * FujiNet for #Adam configuration program
+ *
+ * Connect to existing WiFi connection
  */
 
-#include <msx.h>
-#include <eos.h>
-#include <smartkeys.h>
 #include <conio.h>
+#include <string.h>
+#include "io.h"
 #include "connect_wifi.h"
-#include "fuji_typedefs.h"
-#include "fuji_adam.h"
+#include "screen.h"
+#include "globals.h"
 
-extern char tmp[256];
-
-/**
- * Setup
- */
-void connect_wifi_setup(char* ssid)
+void connect_wifi(void)
 {
-  clrscr();
-  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-  sprintf(tmp,"  CONNECTING TO NETWORK:\n  %s",ssid);
-  smartkeys_status(tmp);
-}
+  unsigned char retries=20;
+  NetConfig nc;
+  unsigned char s;
+    
+  memcpy(&nc,io_get_ssid(),sizeof(NetConfig));
 
-/**
- * Wait for network connection
- */
-State connect_wifi_wait_for_network(NetConfig* n, Context *context)
-{
-  State new_state = SET_WIFI;
-  unsigned char wifiStatus=0;
-  unsigned char retries=0;
+  state = SET_WIFI;
+  
+  screen_connect_wifi(&nc);
 
-  while (retries < 10)
+  while (retries>0)
     {
       sleep(1);
-      fuji_adamnet_get_wifi_status(&wifiStatus);
-      switch (wifiStatus)
+      s=io_get_wifi_status();
+      switch (s)
 	{
 	case 1:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  NO SSID AVAILABLE.");
+	  screen_error("  NO SSID AVAILABLE.");
 	  sleep(5);
-	  break;
+	  return;
 	case 3:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  CONNECTION SUCCESSFUL.");
-	  return DISKULATOR_HOSTS;
-	  break;
+	  screen_error("  CONNECTION SUCCESSFUL.");
+	  state=HOSTS_AND_DEVICES;
+	  sleep(2);
+	  return;
 	case 4:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  CONNECT FAILED.");
+	  screen_error("  CONNECT FAILED.");
 	  sleep(5);
-	  break;
+	  return;
 	case 5:
-	  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-	  smartkeys_status("  CONNECTION LOST.");
+	  screen_error("  CONNECTION LOST.");
 	  sleep(5);
-	  break;
-	case 6:
+	  return;
 	default:
-	  retries++;
-	  new_state=CONNECT_WIFI;
+	  retries--;
 	  break;
 	}
     }
-  return new_state;
-}
 
-/**
- * Connect wifi State
- */
-State connect_wifi(Context *context)
-{
-  NetConfig n;
-  unsigned char s;
-
-  sleep(1); // So we don't fire command too fast.
-  
-  fuji_adamnet_get_wifi_status(&s);
-
-  if (s==3)
-    return DISKULATOR_HOSTS;
-  
-  memset(n,0,sizeof(n));
-  
-  fuji_adamnet_get_ssid(&n);
-  
-  if (n.ssid[0] == 0)
-  {
-    connect_wifi_setup("NO SSID");
-    return context->state=SET_WIFI;
-  }
-  else
-  {
-    connect_wifi_setup(n.ssid);
-    fuji_adamnet_set_ssid(false,&n);
-  }
-
-  return connect_wifi_wait_for_network(&n,context);
+  screen_error("  UNABLE TO CONNECT.");
+  sleep(5);
 }

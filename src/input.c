@@ -100,13 +100,15 @@ static void input_clear_bottom(void)
   msx_vfill(0x1200,0x00,768);
 }
 
-unsigned char input_line(char *c, bool password)
+void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
 {
-  unsigned char pos=0;
+  unsigned char pos=o;
+
+  c += o;
   
   input_clear_bottom();
 
-  gotoxy(0,18);
+  gotoxy(x,y);
 
   while (key = eos_read_keyboard())
     {
@@ -125,10 +127,28 @@ unsigned char input_line(char *c, bool password)
 	}
       else if (key > 0x1F && key < 0x7F) 
 	{
-	  pos++;
-	  *c=key;
-	  c++;
-	  putchar(password ? 0x7F : key);
+	  if (pos < len)
+	    {
+	      pos++;
+	      *c=key;
+	      c++;
+	      putchar(password ? 0x85 : key);
+	    }
 	}
     }
+}
+
+void input_line_set_wifi_custom(char *c)
+{
+  input_line(0,19,0,c,32,false);
+}
+
+void input_line_set_wifi_password(char *c)
+{
+  input_line(0,19,0,c,64,true);
+}
+
+void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
+{
+  input_line(1,i+1,o,c,32,false);
 }

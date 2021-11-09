@@ -1,16 +1,12 @@
 /**
- * #FUJINET CONFIG
- * Set Wifi Network
+ * FujiNet for #Adam configuration program
+ *
+ * Set to existing WiFi Connection
  */
 
 #ifndef SET_WIFI_H
 #define SET_WIFI_H
 
-#include "state.h"
+void set_wifi(void);
 
-/**
- * Set wifi State
- */
-State set_wifi(Context *context);
-
-#endif /* SET_WIFI_H */
+#endif /* SET_WIFI */

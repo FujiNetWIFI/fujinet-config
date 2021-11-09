@@ -89,6 +89,16 @@ void bar_down()
 }
 
 /**
+ * Jump to bar slot
+ */
+void bar_jump(unsigned char i)
+{
+  bar_oldi=bar_i;
+  bar_i=i;
+  bar_update();
+}
+
+/**
  * Get current bar position
  * @return bar index
  */

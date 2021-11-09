@@ -1,16 +1,12 @@
 /**
- * #FUJINET CONFIG
- * Connect to Wifi Network
+ * FujiNet for #Adam configuration program
+ *
+ * Connect to existing WiFi Connection
  */
 
 #ifndef CONNECT_WIFI_H
 #define CONNECT_WIFI_H
 
-#include "state.h"
+void connect_wifi(void);
 
-/**
- * Set wifi State
- */
-State connect_wifi(Context *context);
-
-#endif /* CONNECT_WIFI_H */
+#endif /* CONNECT_WIFI */

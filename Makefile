@@ -10,7 +10,7 @@ SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.asm)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
-CFLAGS=+coleco -subtype=adam -pragma-redirect:CRT_FONT=_font_8x8_coleco_adam_system -O3
+CFLAGS=+coleco -subtype=adam
 LDFLAGS=+coleco -subtype=adam -pragma-redirect:CRT_FONT=_font_8x8_coleco_adam_system -o$(TARGET_EXEC) -create-app -lsmartkeys -leos
 ASFLAGS=+coleco -subtype=adam
 
@@ -34,7 +34,7 @@ $(BUILD_DIR)/%.asm.o: %.asm
 .PHONY: clean
 
 clean:
-	$(RM) -r $(TARGET_EXEC)* $(BUILD_DIR)
+	$(RM) -r autorun* $(BUILD_DIR)
 
 -include $(DEPS)
 
