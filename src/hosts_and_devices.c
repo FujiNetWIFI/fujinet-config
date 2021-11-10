@@ -5,6 +5,7 @@
  */
 
 #include <string.h>
+#include <eos.h>
 #include "globals.h"
 #include "fuji_typedefs.h"
 #include "hosts_and_devices.h"
@@ -19,12 +20,12 @@ HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_host_name[32];
 
-static enum
-  {
+static enum 
+{
    HOSTS,
    DEVICES,
    DONE
-  } subState = HOSTS;
+} subState;
 
 void hosts_and_devices_edit_host_slot(unsigned char i)
 {
@@ -80,7 +81,6 @@ void hosts_and_devices_hosts(void)
 	  break;
 	case 0x86:
 	  subState=DONE;
-	  state=DONE;
 	  break;
 	case 0xA0:
 	  bar_up();
@@ -98,6 +98,17 @@ void hosts_and_devices_devices(void)
 
 void hosts_and_devices_done(void)
 {
+    for (int i=0;i<4;i++)
+    {
+      if (deviceSlots[i].hostSlot != 0xFF)
+	{
+	  io_mount_host_slot(deviceSlots[i].hostSlot);
+	  io_mount_disk_image(i,deviceSlots[i].mode);
+	}
+    }
+    
+    io_set_boot_config(0); // disable config
+    eos_init(); // and reboot.
 }
 
 void hosts_and_devices(void)
@@ -107,7 +118,7 @@ void hosts_and_devices(void)
   io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0]);
 
-  while (subState != DONE)
+  while (state == HOSTS_AND_DEVICES)
     {
       switch(subState)
 	{

@@ -15,6 +15,10 @@
 
 #define ENTRIES_PER_PAGE 15
 
+char path[224];
+char filter[32];
+DirectoryPosition pos=0;
+
 static enum
   {
    INIT,
@@ -25,19 +29,16 @@ static enum
    DONE
   } subState;
 
-DirectoryPosition selected_pos;
-
-void select_file_init(DirectoryPosition *pos, char *path, char *filter)
+void select_file_init(void)
 {
-  selected_pos=0;
-  *pos=0;
+  pos=0;
   memset(path,0,256);
   memset(filter,0,32);
   screen_select_file();
   subState=DISPLAY;
 }
 
-unsigned char select_file_display(DirectoryPosition *pos, char *path, char *filter)
+unsigned char select_file_display(void)
 {
   char visibleEntries=0;
   
@@ -63,7 +64,7 @@ unsigned char select_file_display(DirectoryPosition *pos, char *path, char *filt
       return;
     }
   
-  if (*pos>0)
+  if (pos>0)
     io_set_directory_position(pos);
   
   for (char i=0;i<ENTRIES_PER_PAGE;i++)
@@ -89,9 +90,10 @@ void select_next_page(void)
 
 void select_prev_page(void)
 {
+  
 }
 
-void select_file_choose(char visibleEntries, DirectoryPosition pos)
+void select_file_choose(char visibleEntries)
 {
   char k=0;
   
@@ -103,9 +105,13 @@ void select_file_choose(char visibleEntries, DirectoryPosition pos)
       switch(k)
 	{
 	case 0x0d:
-	  selected_pos=pos+bar_get();
+	  pos+=bar_get();
 	  subState=DONE;
 	  state=SELECT_SLOT;
+	  break;
+	case 0x1b:
+	  subState=DONE;
+	  state=HOSTS_AND_DEVICES;
 	  break;
 	case 0xA0:
 	  bar_up();
@@ -119,13 +125,11 @@ void select_file_choose(char visibleEntries, DirectoryPosition pos)
 
 void select_file_done(void)
 {
+  state=SELECT_SLOT;
 }
 
 void select_file(void)
 {
-  char path[224];
-  char filter[32];
-  DirectoryPosition pos=0;
   char visibleEntries=0;
 
   subState=INIT;
@@ -135,10 +139,10 @@ void select_file(void)
       switch(subState)
 	{
 	case INIT:
-	  select_file_init(&pos,path,filter);
+	  select_file_init();
 	  break;
 	case DISPLAY:
-	  visibleEntries=select_file_display(&pos,path,filter);
+	  visibleEntries=select_file_display();
 	  break;
 	case NEXT_PAGE:
 	  select_next_page();
@@ -147,7 +151,7 @@ void select_file(void)
 	  select_prev_page();
 	  break;
 	case CHOOSE:
-	  select_file_choose(visibleEntries,pos);
+	  select_file_choose(visibleEntries);
 	  break;
 	case DONE:
 	  select_file_done();

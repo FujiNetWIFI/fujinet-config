@@ -254,6 +254,48 @@ void screen_select_file_choose(char visibleEntries)
   smartkeys_display(NULL,NULL,NULL,"  UP","FILTER","  BOOT");
 }
 
-void screen_select_slot()
+void screen_select_slot(char *e)
 {
+  unsigned long *s;
+  
+  smartkeys_set_mode();
+
+  e++;
+  gotoxy(0,7);
+  cprintf("%32s","FILE DETAILS");
+  cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
+  
+  s=(unsigned long *)e; // Cast the next four bytes as a long integer.
+  
+  cprintf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+
+  e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
+  
+  gotoxy(0,0);
+  cprintf("%32s",e);
+
+  screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
+  
+  msx_vfill(MODE2_ATTR,0xF4,256);
+  msx_vfill(MODE2_ATTR+0x100,0x1F,0x400);
+  msx_vfill_v(MODE2_ATTR,0xF4,40);
+
+  msx_vfill(MODE2_ATTR+0x700,0xF6,320);
+  msx_vfill(MODE2_ATTR+0x800+64,0x1F,192);
+  msx_vfill(MODE2_ATTR+0x900,0xF6,64);
+  msx_vfill(MODE2_ATTR+0x900+64,0x1F,192);
+  
+  bar_set(0,1,4,0);
+}
+
+void screen_select_slot_choose(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,"  EJECT");
+  smartkeys_status("  [1-4] SELECT SLOT\n  [RETURN] INSERT INTO SLOT");
+}
+
+void screen_select_slot_mode(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL," READ\n ONLY","  READ\n  WRITE");
+  smartkeys_status("  SELECT DESIRED MODE\n  [RETURN] SELECTS READ ONLY.");
 }

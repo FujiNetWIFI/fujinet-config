@@ -17,11 +17,16 @@
 #include "screen.h"
 
 State state=CHECK_WIFI;
+extern DeviceSlot deviceSlots[8];
 
 void setup(void)
 {
   io_init();
   screen_init();
+}
+
+void done(void)
+{
 }
 
 void run(void)
@@ -55,19 +60,14 @@ void run(void)
 	  show_info();
 	  break;
 	case DONE:
-	  // Will fall through.
+	  done();
 	  break;
 	}
     }
-}
-
-void done(void)
-{
 }
 
 void main(void)
 {
   setup();
   run();
-  done();
 }

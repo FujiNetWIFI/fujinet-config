@@ -23,6 +23,8 @@ void screen_connect_wifi(NetConfig *nc);
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_devices(void);
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d);
+
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
 void screen_hosts_and_devices_edit_host_slot(unsigned char i);
 
@@ -34,5 +36,9 @@ void screen_select_file_next(void);
 void screen_select_file_prev(void);
 void screen_select_file_display_entry(unsigned char y, char* e);
 void screen_select_file_choose(char visibleEntries);
+
+void screen_select_slot(char *e);
+void screen_select_slot_choose(void);
+void screen_select_slot_mode(void);
 
 #endif /* SCREEN_H */
