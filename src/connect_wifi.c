@@ -31,7 +31,7 @@ void connect_wifi(void)
 	{
 	case 1:
 	  screen_error("  NO SSID AVAILABLE.");
-	  sleep(5);
+	  sleep(2);
 	  return;
 	case 3:
 	  screen_error("  CONNECTION SUCCESSFUL.");
@@ -40,11 +40,11 @@ void connect_wifi(void)
 	  return;
 	case 4:
 	  screen_error("  CONNECT FAILED.");
-	  sleep(5);
+	  sleep(2);
 	  return;
 	case 5:
 	  screen_error("  CONNECTION LOST.");
-	  sleep(5);
+	  sleep(2);
 	  return;
 	default:
 	  retries--;
@@ -53,5 +53,6 @@ void connect_wifi(void)
     }
 
   screen_error("  UNABLE TO CONNECT.");
-  sleep(5);
+  sleep(2);
+  state=SET_WIFI;
 }

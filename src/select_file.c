@@ -18,6 +18,7 @@
 char path[224];
 char filter[32];
 DirectoryPosition pos=0;
+bool dir_eof=false;
 
 static enum
   {
@@ -36,6 +37,7 @@ void select_file_init(void)
   memset(filter,0,32);
   screen_select_file();
   subState=DISPLAY;
+  dir_eof=false;
 }
 
 unsigned char select_file_display(void)
@@ -71,7 +73,10 @@ unsigned char select_file_display(void)
     {
       char *e = io_read_directory(31,0);
       if (e[1]==0x7F)
-	break;
+	{
+	  dir_eof=true;
+	  break;
+	}
       else
 	{
 	  visibleEntries++;
@@ -86,11 +91,16 @@ unsigned char select_file_display(void)
 
 void select_next_page(void)
 {
+  pos += ENTRIES_PER_PAGE;
+  subState=DISPLAY;
+  dir_eof=false;
 }
 
 void select_prev_page(void)
 {
-  
+  pos -= ENTRIES_PER_PAGE;
+  subState=DISPLAY;
+  dir_eof=false;
 }
 
 void select_file_choose(char visibleEntries)
@@ -114,10 +124,20 @@ void select_file_choose(char visibleEntries)
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case 0xA0:
-	  bar_up();
+	  if ((bar_get() == 0) && (pos > 0))
+	    {
+	      subState=PREV_PAGE;
+	    }
+	  else
+	    bar_up();
 	  break;
 	case 0xA2:
-	  bar_down();
+	  if ((bar_get() == 14) && (dir_eof==false))
+	    {
+	      subState=NEXT_PAGE;
+	    }
+	  else
+	    bar_down();
 	  break;
 	}
     }
