@@ -78,6 +78,7 @@ void hosts_and_devices_hosts(void)
 	case 0x85:
 	  hosts_and_devices_edit_host_slot(bar_get());
 	  k=0;
+	  subState=HOSTS;
 	  break;
 	case 0x86:
 	  subState=DONE;

@@ -136,6 +136,8 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	    }
 	}
     }
+  eos_end_read_keyboard();
+  eos_start_read_keyboard();
 }
 
 void input_line_set_wifi_custom(char *c)

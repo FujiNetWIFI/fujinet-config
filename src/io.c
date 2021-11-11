@@ -141,7 +141,8 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 {
   char c[258]={0xF7};
 
-  strcpy(&c[1],p);
+  c[1]=hs;
+  strcpy(&c[2],p);
   strcpy(c[strlen(c)],f);
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
