@@ -67,6 +67,9 @@ void select_slot_choose()
 	  selected_device_slot=bar_get();
 	  subState=MODE;
 	  break;
+	case 0x1B:
+	  state=HOSTS_AND_DEVICES;
+	  break;
 	case '1':
 	case '2':
 	case '3':

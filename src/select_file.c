@@ -28,6 +28,8 @@ static enum
    NEXT_PAGE,
    PREV_PAGE,
    CHOOSE,
+   ADVANCE_FOLDER,
+   DEVANCE_FOLDER,
    DONE
   } subState;
 
@@ -118,13 +120,13 @@ void select_file_choose(char visibleEntries)
 	case 0x0d:
 	  pos+=bar_get();
 	  subState=DONE;
-	  state=SELECT_SLOT;
 	  break;
 	case 0x1b:
 	  subState=DONE;
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case 0x84:
+	  state=DEVANCE_FOLDER;
 	  break;
 	case 0x85:
 	  break;
@@ -154,9 +156,57 @@ void select_file_choose(char visibleEntries)
     }
 }
 
+void select_file_advance(void)
+{
+  char *e;
+  
+  io_open_directory(selected_host_slot,path,filter);
+
+  io_set_directory_position(pos);
+
+  e = io_read_directory(256,1);
+  
+  io_close_directory();
+
+  strcat(path,e); // append directory entry to end of current path
+
+  subState=DISPLAY; // and display the result.
+}
+
+void select_file_devance(void)
+{
+  char *p = strrchr(path,'/'); // find end of directory string (last /)
+  
+  while (*--p != '/'); // scoot backward until we reach next /
+
+  p++; // scoot forward 
+
+  *p = 0; // truncate string.
+  
+  subState=DISPLAY; // And display the result.
+}
+
+bool select_file_is_folder(void)
+{
+  char *e;
+  
+  io_open_directory(selected_host_slot,path,filter);
+
+  io_set_directory_position(pos);
+
+  e = io_read_directory(31,1);
+  
+  io_close_directory();
+
+  return e[10]; // Offset 10 = directory flag.
+}
+
 void select_file_done(void)
 {
-  state=SELECT_SLOT;
+  if (select_file_is_folder())
+      subState=ADVANCE_FOLDER;
+  else
+    state=SELECT_SLOT;
 }
 
 void select_file(void)
@@ -183,6 +233,12 @@ void select_file(void)
 	  break;
 	case CHOOSE:
 	  select_file_choose(visibleEntries);
+	  break;
+	case ADVANCE_FOLDER:
+	  select_file_advance();
+	  break;
+	case DEVANCE_FOLDER:
+	  select_file_devance();
 	  break;
 	case DONE:
 	  select_file_done();
