@@ -19,6 +19,7 @@ char path[224];
 char filter[32];
 DirectoryPosition pos=0;
 bool dir_eof=false;
+bool quick_boot=false;
 
 static enum
   {
@@ -37,7 +38,7 @@ void select_file_init(void)
   memset(filter,0,32);
   screen_select_file();
   subState=DISPLAY;
-  dir_eof=false;
+  quick_boot=dir_eof=false;
 }
 
 unsigned char select_file_display(void)
@@ -122,6 +123,16 @@ void select_file_choose(char visibleEntries)
 	case 0x1b:
 	  subState=DONE;
 	  state=HOSTS_AND_DEVICES;
+	  break;
+	case 0x84:
+	  break;
+	case 0x85:
+	  break;
+	case 0x86:
+	  quick_boot=true;
+	  pos+=bar_get();
+	  subState=DONE;
+	  state=SELECT_SLOT;
 	  break;
 	case 0xA0:
 	  if ((bar_get() == 0) && (pos > 0))

@@ -21,15 +21,16 @@ void show_info(void)
 	{
 	case 0x00:
 	  break;
+	case 0x0D:
+	case 0x1B:
+	case 0x20:
 	case 0x85:
+	  state=HOSTS_AND_DEVICES;
+	  break;
 	  state=SET_WIFI;
 	  break;
 	case 0x86:
 	  state=CONNECT_WIFI;
-	  break;
-	default:
-	  if (k>0x01 && k<0xFF)
-	    state=HOSTS_AND_DEVICES;
 	  break;
 	}
     }

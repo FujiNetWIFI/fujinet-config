@@ -13,6 +13,7 @@
 #include "bar.h"
 
 extern DeviceSlot deviceSlots[8];
+extern bool quick_boot;
 
 static enum
   {
@@ -28,7 +29,14 @@ static char selected_device_slot=0;
 
 void select_slot_init()
 {
-  subState=DISPLAY;
+  if (quick_boot==true)
+    {
+      mode=0;
+      selected_device_slot=0;
+      subState=DONE;
+    }
+  else
+    subState=DISPLAY;
 }
 
 void select_slot_display()

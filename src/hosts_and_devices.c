@@ -20,6 +20,8 @@ HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_host_name[32];
 
+extern bool quick_boot;
+
 static enum 
 {
    HOSTS,
@@ -114,7 +116,11 @@ void hosts_and_devices_done(void)
 
 void hosts_and_devices(void)
 {
-  subState=HOSTS;
+  if (quick_boot==true)
+    subState=DONE;
+  else
+    subState=HOSTS;
+  
   io_get_host_slots(&hostSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0]);
