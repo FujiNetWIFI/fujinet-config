@@ -21,7 +21,8 @@ static enum
    DISPLAY,
    CHOOSE,
    MODE,
-   DONE
+   DONE,
+   ABORT
   } subState;
 
 static char mode=0;
@@ -68,6 +69,7 @@ void select_slot_choose()
 	  subState=MODE;
 	  break;
 	case 0x1B:
+	  subState=ABORT;
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case '1':
@@ -166,6 +168,8 @@ void select_slot(void)
 	  break;
 	case DONE:
 	  select_slot_done();
+	case ABORT:
+	  break;
 	}
     }
 }
