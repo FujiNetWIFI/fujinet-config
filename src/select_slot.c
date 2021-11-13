@@ -4,6 +4,7 @@
  * Select a Destination Device Slot
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "select_slot.h"
 #include "screen.h"
@@ -46,7 +47,7 @@ void select_slot_display()
 
   io_set_directory_position(pos);
 
-  screen_select_slot(io_read_directory(41,0x80));
+  screen_select_slot(io_read_directory(42,0x80));
   
   io_close_directory();
 
@@ -105,7 +106,7 @@ void select_slot_mode()
 	  subState=DONE;
 	  break;
 	case 0x86:
-	  mode=3;
+	  mode=2;
 	  subState=DONE;
 	case 0xA0:
 	  bar_up();
@@ -125,21 +126,31 @@ void select_slot_done()
   
   io_open_directory(selected_host_slot,path,filter);
 
+  csleep(100);
+  
   io_set_directory_position(pos);
 
+  csleep(40);
+  
   memcpy(deviceSlots[selected_device_slot].file,io_read_directory(31,0),31);
   deviceSlots[selected_device_slot].mode=mode;
   deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
   
   io_put_device_slots(&deviceSlots[0]);
+
+  csleep(10);
   
   io_set_directory_position(pos);
 
+  csleep(10);
+  
   strcat(filename,io_read_directory(255,0));
 
-  sleep(1);
+  csleep(10);
   
   io_set_device_filename(selected_device_slot,filename);
+
+  csleep(10);
   
   io_close_directory();
 

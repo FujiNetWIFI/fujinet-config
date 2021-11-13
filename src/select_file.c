@@ -4,6 +4,7 @@
  * Select file from Host Slot
  */
 
+#include <conio.h>
 #include <string.h>
 #include "fuji_typedefs.h"
 #include "screen.h"
@@ -28,6 +29,7 @@ static enum
    NEXT_PAGE,
    PREV_PAGE,
    CHOOSE,
+   FILTER,
    ADVANCE_FOLDER,
    DEVANCE_FOLDER,
    DONE
@@ -37,6 +39,7 @@ void select_file_init(void)
 {
   pos=0;
   memset(path,0,256);
+  path[0]='/';
   memset(filter,0,32);
   screen_select_file();
   subState=DISPLAY;
@@ -58,6 +61,10 @@ unsigned char select_file_display(void)
     }
 
   screen_select_file_display(path,filter);
+
+  // I do not know why the hell we need this right now.
+  io_open_directory(selected_host_slot,path,filter);
+  io_close_directory();
   
   io_open_directory(selected_host_slot,path,filter);
   
@@ -74,8 +81,8 @@ unsigned char select_file_display(void)
   
   for (char i=0;i<ENTRIES_PER_PAGE;i++)
     {
-      char *e = io_read_directory(31,0);
-      if (e[1]==0x7F)
+      char *e = io_read_directory(32,0);
+      if (e[2]==0x7F)
 	{
 	  dir_eof=true;
 	  break;
@@ -106,6 +113,16 @@ void select_prev_page(void)
   dir_eof=false;
 }
 
+void select_file_filter(void)
+{
+  memset(filter,0,32);
+  screen_select_file_filter();
+  input_line_filter(filter);
+  dir_eof=quick_boot=false;
+  pos=0;
+  subState=DISPLAY;
+}
+
 void select_file_choose(char visibleEntries)
 {
   char k=0;
@@ -125,10 +142,16 @@ void select_file_choose(char visibleEntries)
 	  subState=DONE;
 	  state=HOSTS_AND_DEVICES;
 	  break;
+	case 0x80:
+	  pos=0;
+	  dir_eof=quick_boot=false;
+	  subState=DISPLAY;
+	  break;
 	case 0x84:
-	  state=DEVANCE_FOLDER;
+	  subState=strcmp(path,"/") == 0 ? CHOOSE : DEVANCE_FOLDER;
 	  break;
 	case 0x85:
+	  subState=FILTER;
 	  break;
 	case 0x86:
 	  quick_boot=true;
@@ -138,19 +161,23 @@ void select_file_choose(char visibleEntries)
 	  break;
 	case 0xA0:
 	  if ((bar_get() == 0) && (pos > 0))
-	    {
-	      subState=PREV_PAGE;
-	    }
+	    subState=PREV_PAGE;
 	  else
 	    bar_up();
 	  break;
 	case 0xA2:
 	  if ((bar_get() == 14) && (dir_eof==false))
-	    {
-	      subState=NEXT_PAGE;
-	    }
+	    subState=NEXT_PAGE;
 	  else
 	    bar_down();
+	  break;
+	case 0xA4:
+	  if (pos>0)
+	    subState=PREV_PAGE;
+	  break;
+	case 0xA6:
+	  if (dir_eof==false)
+	    subState=NEXT_PAGE;
 	  break;
 	}
     }
@@ -159,17 +186,20 @@ void select_file_choose(char visibleEntries)
 void select_file_advance(void)
 {
   char *e;
-  
+
   io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
-
-  e = io_read_directory(256,1);
+  
+  e = io_read_directory(128,1);
   
   io_close_directory();
 
   strcat(path,e); // append directory entry to end of current path
 
+  pos=0;
+  dir_eof=quick_boot=false;
+  
   subState=DISPLAY; // and display the result.
 }
 
@@ -179,9 +209,12 @@ void select_file_devance(void)
   
   while (*--p != '/'); // scoot backward until we reach next /
 
-  p++; // scoot forward 
-
+  p++;
+  
   *p = 0; // truncate string.
+
+  pos=0;
+  dir_eof=quick_boot=false;
   
   subState=DISPLAY; // And display the result.
 }
@@ -189,16 +222,16 @@ void select_file_devance(void)
 bool select_file_is_folder(void)
 {
   char *e;
-  
+
   io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
 
-  e = io_read_directory(31,1);
-  
-  io_close_directory();
+  e = io_read_directory(128,0);
 
-  return e[10]; // Offset 10 = directory flag.
+  io_close_directory();
+ 
+  return strrchr(e,'/') != NULL; // Offset 10 = directory flag.
 }
 
 void select_file_done(void)
@@ -233,6 +266,9 @@ void select_file(void)
 	  break;
 	case CHOOSE:
 	  select_file_choose(visibleEntries);
+	  break;
+	case FILTER:
+	  select_file_filter();
 	  break;
 	case ADVANCE_FOLDER:
 	  select_file_advance();

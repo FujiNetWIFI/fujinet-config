@@ -21,7 +21,7 @@
 /**
  * static local variables for bar y, max, and index.
  */
-static unsigned char bar_y, bar_c, bar_m, bar_i, bar_oldi;
+static unsigned char bar_y, bar_c=1, bar_m, bar_i, bar_oldi;
 
 void bar_clear(void)
 {

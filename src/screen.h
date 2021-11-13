@@ -28,10 +28,13 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d);
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
 void screen_hosts_and_devices_edit_host_slot(unsigned char i);
 
+void screen_hosts_and_devices_eject(unsigned char ds);
+
 void screen_show_info(AdapterConfig* ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);
+void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_prev(void);
 void screen_select_file_display_entry(unsigned char y, char* e);

@@ -139,11 +139,13 @@ void io_mount_host_slot(unsigned char hs)
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
-  char c[258]={0xF7};
-
+  char c[258];
+  char *e;
+  
+  memset(&c,0,258);
+  c[0]=0xF7;
   c[1]=hs;
-  strcpy(&c[2],p);
-  strcpy(c[strlen(c)],f);
+  e=strcpy(&c[2],p);
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
@@ -197,6 +199,14 @@ void io_set_boot_config(unsigned char toggle)
 {
   char c[2]={0xD9,0x00};
   c[1]=toggle;
+
+  eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+}
+
+void io_umount_disk_image(unsigned char ds)
+{
+  char c[2]={0xE8,0x00};
+  c[1]=ds;
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }

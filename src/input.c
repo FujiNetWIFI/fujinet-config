@@ -132,7 +132,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	      pos++;
 	      *c=key;
 	      c++;
-	      putchar(password ? 0x85 : key);
+	      putchar(password ? 0x84 : key);
 	    }
 	}
     }
@@ -153,4 +153,9 @@ void input_line_set_wifi_password(char *c)
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
   input_line(1,i+1,o,c,32,false);
+}
+
+void input_line_filter(char *c)
+{
+  input_line(0,19,0,c,32,false);
 }

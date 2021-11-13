@@ -12,6 +12,7 @@
 #include <conio.h>
 #include <sys/ioctl.h>
 #include <eos.h>
+#include <string.h>
 
 static char udg[64] =
   {
@@ -19,7 +20,7 @@ static char udg[64] =
    0,0,3,3,51,51,51,51,                            // WIFI 2
    48,48,48,48,48,48,48,48,                        // WIFI 3
    0,120,135,255,255,255,255,0,                    // FOLDER
-   0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81, // Password smudge
+   0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, // Password smudge
    0xFF,0x81,0x81,0xA5,0x81,0x81,0xFF,0x00,        // DDP
    0xFF,0x81,0x8D,0x8D,0xAD,0x81,0xFF,0x00,        // DSK
    0xFF,0x81,0xBD,0xBD,0xBD,0x81,0xFF,0x00         // ROM
@@ -152,11 +153,16 @@ void screen_hosts_and_devices_hosts(void)
 {
   smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT","  BOOT");
   smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
+  bar_clear();
   bar_set(0,1,8,0);
 }
 
 void screen_hosts_and_devices_devices(void)
 {
+  smartkeys_display(NULL,NULL,NULL," EJECT","  READ\n  ONLY","  READ\n WRITE");
+  smartkeys_status("  [TAB] GO TO HOST SLOTS");
+  bar_clear();
+  bar_set(11,1,4,0);
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -225,7 +231,7 @@ void screen_select_file_display(char *p, char *f)
   if (f[0]==0x00)
     cprintf("%32s",p);
   else
-    cprintf("%24s|%8s|",p,f);
+    cprintf("%22s|%8s|",p,f);
 
 }
 
@@ -251,7 +257,13 @@ void screen_select_file_display_entry(unsigned char y, char* e)
 void screen_select_file_choose(char visibleEntries)
 {
   bar_set(2,1,visibleEntries,0); // TODO: Handle previous
-  smartkeys_display(NULL,NULL,NULL,"  UP","FILTER","  BOOT");
+  smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "  UP","FILTER","  BOOT");
+}
+
+void screen_select_file_filter(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  ENTER A WILDCARD FILTER.\n  E.G. *Coleco*");
 }
 
 void screen_select_slot(char *e)
@@ -260,7 +272,6 @@ void screen_select_slot(char *e)
   
   smartkeys_set_mode();
 
-  e++;
   gotoxy(0,7);
   cprintf("%32s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
@@ -298,4 +309,11 @@ void screen_select_slot_mode(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL," READ\n ONLY","  READ\n  WRITE");
   smartkeys_status("  SELECT DESIRED MODE\n  [RETURN] SELECTS READ ONLY.");
+}
+
+void screen_hosts_and_devices_eject(unsigned char ds)
+{
+  msx_vfill(0x0c00+(ds<<8)+8,0x00,248);
+  gotoxy(1,12+ds); cprintf("Empty");
+  bar_jump(bar_get());
 }

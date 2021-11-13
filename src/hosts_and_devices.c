@@ -67,6 +67,9 @@ void hosts_and_devices_hosts(void)
 	case '8':
 	  bar_jump(k-0x31);
 	  break;
+	case 0x09:
+	  subState=DEVICES;
+	  break;
 	case 0x0d:
 	  selected_host_slot=bar_get();
 	  strcpy(selected_host_name,hostSlots[selected_host_slot]);
@@ -95,8 +98,45 @@ void hosts_and_devices_hosts(void)
     }
 }
 
+void hosts_and_devices_eject(unsigned char ds)
+{
+  io_umount_disk_image(ds);
+  memset(deviceSlots[ds].file,0,FILE_MAXLEN);
+  deviceSlots[ds].hostSlot=0xFF;
+  io_put_device_slots(&deviceSlots[0]);
+  screen_hosts_and_devices_eject(ds);
+}
+
 void hosts_and_devices_devices(void)
 {
+  char k=0;
+
+  screen_hosts_and_devices_devices();
+  while (subState==DEVICES)
+    {
+      k=input();
+      switch(k)
+	{
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	  bar_jump(k-0x31);
+	  break;
+	case 0x09:
+	  subState=HOSTS;
+	  break;
+	case 0x84:
+	  hosts_and_devices_eject(bar_get());
+	  break;
+	case 0xA0:
+	  bar_up();
+	  break;
+	case 0xA2:
+	  bar_down();
+	  break;
+	}
+    }
 }
 
 void hosts_and_devices_done(void)

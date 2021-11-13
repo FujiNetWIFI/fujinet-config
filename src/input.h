@@ -33,5 +33,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 void input_line_set_wifi_custom(char *c);
 void input_line_set_wifi_password(char *c);
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c);
+void input_line_filter(char *c);
 
 #endif /* INPUT_H */
