@@ -33,16 +33,20 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 {
   unsigned char o;
 
-  if (strlen(hostSlots[i]==0))
+  if (strlen(hostSlots[i])==0)
     {
       screen_hosts_and_devices_clear_host_slot(i);
       o=0;
     }
   else
-    o=strlen(hostSlots[i])-1;
+    o=strlen(hostSlots[i]);
 
   screen_hosts_and_devices_edit_host_slot(i);
   input_line_hosts_and_devices_host_slot(i,o,hostSlots[i]);
+
+  if (strlen(hostSlots[i])==0)
+    screen_hosts_and_devices_host_slot_empty(i);
+  
   io_put_host_slots(&hostSlots[0]);
   screen_hosts_and_devices_hosts();
 }

@@ -14,17 +14,23 @@
 #include <eos.h>
 #include <string.h>
 
-static char udg[64] =
+static char udg[] =
   {
    0,0,0,0,0,0,3,51,                               // WIFI 1
    0,0,3,3,51,51,51,51,                            // WIFI 2
    48,48,48,48,48,48,48,48,                        // WIFI 3
-   0,120,135,255,255,255,255,0,                    // FOLDER
-   0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, // Password smudge
-   0xFF,0x81,0x81,0xA5,0x81,0x81,0xFF,0x00,        // DDP
-   0xFF,0x81,0x8D,0x8D,0xAD,0x81,0xFF,0x00,        // DSK
-   0xFF,0x81,0xBD,0xBD,0xBD,0x81,0xFF,0x00         // ROM
+   0x00,0x07,0x08,0x0F,0x0F,0x0F,0x0F,0x0F,        // FOLDER 1 0x83
+   0x00,0x80,0x70,0xF0,0xF0,0xF0,0xF0,0xF0,        // FOLDER 2 0x84
+   0x0F,0x08,0x08,0x0A,0x08,0x08,0x0F,0x00,        // DDP 1    0x85
+   0xF0,0x10,0x10,0x50,0x10,0x10,0xF0,0x00,        // DDP 2    0x86
+   0x0F,0x08,0x08,0x08,0x0A,0x08,0x0F,0x00,        // DSK 1    0x87
+   0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // DSK 2    0x88
+   0x0F,0x08,0x0B,0x0B,0x0B,0x08,0x0F,0x00,        // ROM 1    0x89
+   0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // ROM 2    0x8a
+   0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55  // Password smudge 0x8b
   };
+
+static const char *empty="Empty";
 
 void screen_init(void)
 {
@@ -116,7 +122,7 @@ void screen_connect_wifi(NetConfig *nc)
 
 char* screen_hosts_and_devices_slot(char *c)
 {
-  return c[0]==0x00 ? "Empty" : c;
+  return c[0]==0x00 ? &empty[0] : c;
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
@@ -214,7 +220,8 @@ void screen_select_file(void)
   msx_vfill(MODE2_ATTR,0xF4,512);
 
   // Paint content area
-  msx_vfill(MODE2_ATTR+0x200,0x1F,0x1100);
+  msx_vfill(MODE2_ATTR+0x200,0xF5,256);
+  msx_vfill(MODE2_ATTR+0x300,0x1F,0x0F00);
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  OPENING...");
 }
@@ -223,6 +230,10 @@ void screen_select_file_display(char *p, char *f)
 {
   // Clear content area
   msx_vfill(0x0000,0x00,0x1400);
+  msx_vfill(MODE2_ATTR+0x0100,0xF5,256);
+  msx_vfill(MODE2_ATTR+0x1200,0xF5,256);
+  msx_vfill_v(MODE2_ATTR+0x0200,0xF5,136);
+  msx_vfill_v(MODE2_ATTR+0x0200+8,0xF5,136);
 
   // Update content area
   msx_color(15,4,7);
@@ -237,27 +248,30 @@ void screen_select_file_display(char *p, char *f)
 
 void screen_select_file_prev(void)
 {
-  msx_color(1,15,7);
-  gotoxy(1,0); cprintf("%32s","[...]");
+  msx_color(1,5,7);
+  gotoxy(0,2); cprintf("%32s","[...]");
 }
 
-void screen_selecct_file_next(void)
+void screen_select_file_next(void)
 {
-  msx_color(1,15,7);
-  gotoxy(17,0); cprintf("%32s","[...]");
+  msx_color(1,5,7);
+  gotoxy(0,18); cprintf("%32s","[...]");
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e)
 {
-  msx_color(1,15,7);
   gotoxy(0,y+3);
-  cprintf("%-31s",e);
+  msx_color(15,5,7);
+  cprintf("%c%c",*e++,*e++);
+  msx_color(1,15,7);
+  cprintf("%-30s",e);
 }
 
 void screen_select_file_choose(char visibleEntries)
 {
-  bar_set(2,1,visibleEntries,0); // TODO: Handle previous
-  smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "  UP","FILTER","  BOOT");
+  bar_set(2,2,visibleEntries,0); // TODO: Handle previous
+  smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER","  BOOT");
+  smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
 }
 
 void screen_select_file_filter(void)
@@ -301,8 +315,8 @@ void screen_select_slot(char *e)
 
 void screen_select_slot_choose(void)
 {
-  smartkeys_display(NULL,NULL,NULL,NULL,NULL,"  EJECT");
-  smartkeys_status("  [1-4] SELECT SLOT\n  [RETURN] INSERT INTO SLOT\n  [ESC] TO ABORT.");
+  smartkeys_display(NULL,NULL,NULL," EJECT",NULL,NULL);
+  smartkeys_status(" [1-4] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
 }
 
 void screen_select_slot_mode(void)
@@ -311,9 +325,21 @@ void screen_select_slot_mode(void)
   smartkeys_status("  SELECT DESIRED MODE\n  [RETURN] SELECTS READ ONLY.");
 }
 
+void screen_select_slot_eject(unsigned char ds)
+{
+  msx_vfill(0x0100+(ds<<8)+8,0x00,248);
+  gotoxy(1,1+ds); cprintf("%s",empty);
+  bar_jump(bar_get());
+}
+
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
   msx_vfill(0x0c00+(ds<<8)+8,0x00,248);
-  gotoxy(1,12+ds); cprintf("Empty");
+  gotoxy(1,12+ds); cprintf(empty);
   bar_jump(bar_get());
 }
+
+void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+{
+  gotoxy(1,1+hs); cprintf(empty);
+}  

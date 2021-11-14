@@ -47,11 +47,22 @@ void select_slot_display()
 
   io_set_directory_position(pos);
 
+  io_get_device_slots(&deviceSlots[0]);
+  
   screen_select_slot(io_read_directory(42,0x80));
   
   io_close_directory();
 
   subState=CHOOSE;
+}
+
+void select_slot_eject(unsigned char ds)
+{
+  io_umount_disk_image(ds);
+  memset(deviceSlots[ds].file,0,FILE_MAXLEN);
+  deviceSlots[ds].hostSlot=0xFF;
+  io_put_device_slots(&deviceSlots[0]);
+  screen_select_slot_eject(ds);
 }
 
 void select_slot_choose()
@@ -78,6 +89,9 @@ void select_slot_choose()
 	case '3':
 	case '4':
 	  bar_jump(k-0x31);
+	  break;
+	case 0x84:
+	  select_slot_eject(bar_get());
 	  break;
 	case 0xA0:
 	  bar_up();

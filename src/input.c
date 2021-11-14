@@ -1,4 +1,3 @@
-\
 /** 
  * Input routines
  */
@@ -8,6 +7,7 @@
 #include <conio.h>
 #include <stdbool.h>
 #include "input.h"
+#include "cursor.h"
 
 static GameControllerData cont;
 static unsigned char key=0;
@@ -105,24 +105,33 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   unsigned char pos=o;
 
   c += o;
-  
+  x += o;
+
+  cursor(true);
   input_clear_bottom();
 
   gotoxy(x,y);
+  cursor_pos(x,y);
 
   while (key = eos_read_keyboard())
     {
       if (key == 0x0d)
-	break;
+	{
+	  cursor(false);
+	  break;
+	}
       else if (key == 0x08)
 	{
 	  if (pos > 0)
 	    {
 	      pos--;
+	      x--;
 	      c--;
+	      *c=0x00;
 	      putchar(0x08);
 	      putchar(0x20);
 	      putchar(0x08);
+	      cursor_pos(x,y);
 	    }
 	}
       else if (key > 0x1F && key < 0x7F) 
@@ -130,9 +139,11 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	  if (pos < len)
 	    {
 	      pos++;
+	      x++;
 	      *c=key;
 	      c++;
-	      putchar(password ? 0x84 : key);
+	      putchar(password ? 0x8B : key);
+	      cursor_pos(x,y);
 	    }
 	}
     }

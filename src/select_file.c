@@ -81,7 +81,7 @@ unsigned char select_file_display(void)
   
   for (char i=0;i<ENTRIES_PER_PAGE;i++)
     {
-      char *e = io_read_directory(32,0);
+      char *e = io_read_directory(31,0);
       if (e[2]==0x7F)
 	{
 	  dir_eof=true;
@@ -93,8 +93,20 @@ unsigned char select_file_display(void)
 	  screen_select_file_display_entry(i,e);
 	}
     }
+
+  // Do one more read to check EOF
+  char *e = io_read_directory(31,0);
+  if (e[2]==0x7F)
+    dir_eof==true;
   
   io_close_directory();
+
+  if (pos > 0)
+    screen_select_file_prev();
+  
+  if (dir_eof != true)
+    screen_select_file_next();
+  
   subState=CHOOSE;
   return visibleEntries;
 }

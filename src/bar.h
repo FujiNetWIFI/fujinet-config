@@ -41,4 +41,11 @@ void bar_jump(unsigned char i);
  */
 unsigned char bar_get();
 
+/**
+ * Set Bar Color
+ * @param f foreground color 0-15
+ * @param b background color 0-15
+ */
+void bar_color(unsigned char f,unsigned char b);
+
 #endif /* BAR_H */

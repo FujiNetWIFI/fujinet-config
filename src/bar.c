@@ -21,7 +21,7 @@
 /**
  * static local variables for bar y, max, and index.
  */
-static unsigned char bar_y, bar_c=1, bar_m, bar_i, bar_oldi;
+static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0, bar_co=0x13;
 
 void bar_clear(void)
 {
@@ -40,7 +40,7 @@ void bar_update(void)
   bar_clear();
   
   // Fill bar color in new row
-  msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i),ATTR_BAR,256);
+  msx_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i),bar_co,256);
 }
 
 /**
@@ -105,4 +105,9 @@ void bar_jump(unsigned char i)
 unsigned char bar_get()
 {
   return bar_i;
+}
+
+void bar_color(unsigned char f,unsigned char b)
+{
+  bar_co = (f << 4) | b;
 }
