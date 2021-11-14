@@ -127,6 +127,7 @@ void io_put_device_slots(DeviceSlot *d)
   memcpy(&c[1],d,304);
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  csleep(10);
 }
 
 void io_mount_host_slot(unsigned char hs)
@@ -149,6 +150,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
   e=strcpy(&c[2],p);
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  csleep(100);
 }
 
 char *io_read_directory(unsigned char l, unsigned char a)
@@ -157,6 +159,7 @@ char *io_read_directory(unsigned char l, unsigned char a)
   c[1]=l;
   c[2]=a;
   io_command_and_response(&c,3);
+  csleep(10);
   return response;
 }
 
@@ -174,6 +177,7 @@ void io_set_directory_position(DirectoryPosition pos)
   memcpy(&c[1],&pos,sizeof(DirectoryPosition));
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  csleep(10);
 }
 
 void io_set_device_filename(unsigned char ds, char* e)
@@ -185,6 +189,7 @@ void io_set_device_filename(unsigned char ds, char* e)
   strcpy(&c[2],e);
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  csleep(40);
 }
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
@@ -211,4 +216,10 @@ void io_umount_disk_image(unsigned char ds)
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
+
+void io_boot(void)
+{
+  eos_init();
+}
+
 #endif /* BUILD_ADAM */

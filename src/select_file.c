@@ -17,6 +17,15 @@
 #include "adam/bar.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_APPLE2
+#include "apple2/fuji_typedefs.h"
+#include "apple2/screen.h"
+#include "apple2/io.h"
+#include "apple2/globals.h"
+#include "apple2/input.h"
+#include "apple2/bar.h"
+#endif /* BUILD_APPLE2 */
+
 #define ENTRIES_PER_PAGE 15
 
 char path[224];
@@ -27,15 +36,15 @@ bool quick_boot=false;
 
 static enum
   {
-   INIT,
-   DISPLAY,
-   NEXT_PAGE,
-   PREV_PAGE,
-   CHOOSE,
-   FILTER,
-   ADVANCE_FOLDER,
-   DEVANCE_FOLDER,
-   DONE
+   SF_INIT,
+   SF_DISPLAY,
+   SF_NEXT_PAGE,
+   SF_PREV_PAGE,
+   SF_CHOOSE,
+   SF_FILTER,
+   SF_ADVANCE_FOLDER,
+   SF_DEVANCE_FOLDER,
+   SF_DONE
   } subState;
 
 void select_file_init(void)
@@ -45,22 +54,24 @@ void select_file_init(void)
   path[0]='/';
   memset(filter,0,32);
   screen_select_file();
-  subState=DISPLAY;
+  subState=SF_DISPLAY;
   quick_boot=dir_eof=false;
 }
 
 unsigned char select_file_display(void)
 {
   char visibleEntries=0;
+  char i;
+  char *e;
   
   io_mount_host_slot(selected_host_slot);
 
   if (io_error())
     {
       screen_error("  COULD NOT MOUNT HOST SLOT.");
-      subState=DONE;
+      subState=SF_DONE;
       state=SET_WIFI;
-      return;
+      return 0;
     }
 
   screen_select_file_display(path,filter);
@@ -74,17 +85,17 @@ unsigned char select_file_display(void)
   if (io_error())
     {
       screen_error("  COULD NOT OPEN DIRECTORY.");
-      subState=DONE;
+      subState=SF_DONE;
       state=SET_WIFI;
-      return;
+      return 0;
     }
   
   if (pos>0)
     io_set_directory_position(pos);
   
-  for (char i=0;i<ENTRIES_PER_PAGE;i++)
+  for (i=0;i<ENTRIES_PER_PAGE;i++)
     {
-      char *e = io_read_directory(31,0);
+      e = io_read_directory(31,0);
       if (e[2]==0x7F)
 	{
 	  dir_eof=true;
@@ -98,7 +109,7 @@ unsigned char select_file_display(void)
     }
 
   // Do one more read to check EOF
-  char *e = io_read_directory(31,0);
+  e = io_read_directory(31,0);
   if (e[2]==0x7F)
     dir_eof==true;
   
@@ -110,21 +121,21 @@ unsigned char select_file_display(void)
   if (dir_eof != true)
     screen_select_file_next();
   
-  subState=CHOOSE;
+  subState=SF_CHOOSE;
   return visibleEntries;
 }
 
 void select_next_page(void)
 {
   pos += ENTRIES_PER_PAGE;
-  subState=DISPLAY;
+  subState=SF_DISPLAY;
   dir_eof=false;
 }
 
 void select_prev_page(void)
 {
   pos -= ENTRIES_PER_PAGE;
-  subState=DISPLAY;
+  subState=SF_DISPLAY;
   dir_eof=false;
 }
 
@@ -135,7 +146,7 @@ void select_file_filter(void)
   input_line_filter(filter);
   dir_eof=quick_boot=false;
   pos=0;
-  subState=DISPLAY;
+  subState=SF_DISPLAY;
 }
 
 void select_file_choose(char visibleEntries)
@@ -144,55 +155,55 @@ void select_file_choose(char visibleEntries)
   
   screen_select_file_choose(visibleEntries);
 
-  while (subState==CHOOSE)
+  while (subState==SF_CHOOSE)
     {
       k=input();
       switch(k)
 	{
 	case 0x0d:
 	  pos+=bar_get();
-	  subState=DONE;
+	  subState=SF_DONE;
 	  break;
 	case 0x1b:
-	  subState=DONE;
+	  subState=SF_DONE;
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case 0x80:
 	  pos=0;
 	  dir_eof=quick_boot=false;
-	  subState=DISPLAY;
+	  subState=SF_DISPLAY;
 	  break;
 	case 0x84:
-	  subState=strcmp(path,"/") == 0 ? CHOOSE : DEVANCE_FOLDER;
+	  subState=strcmp(path,"/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
 	  break;
 	case 0x85:
-	  subState=FILTER;
+	  subState=SF_FILTER;
 	  break;
 	case 0x86:
 	  quick_boot=true;
 	  pos+=bar_get();
-	  subState=DONE;
+	  subState=SF_DONE;
 	  state=SELECT_SLOT;
 	  break;
 	case 0xA0:
 	  if ((bar_get() == 0) && (pos > 0))
-	    subState=PREV_PAGE;
+	    subState=SF_PREV_PAGE;
 	  else
 	    bar_up();
 	  break;
 	case 0xA2:
 	  if ((bar_get() == 14) && (dir_eof==false))
-	    subState=NEXT_PAGE;
+	    subState=SF_NEXT_PAGE;
 	  else
 	    bar_down();
 	  break;
 	case 0xA4:
 	  if (pos>0)
-	    subState=PREV_PAGE;
+	    subState=SF_PREV_PAGE;
 	  break;
 	case 0xA6:
 	  if (dir_eof==false)
-	    subState=NEXT_PAGE;
+	    subState=SF_NEXT_PAGE;
 	  break;
 	}
     }
@@ -215,7 +226,7 @@ void select_file_advance(void)
   pos=0;
   dir_eof=quick_boot=false;
   
-  subState=DISPLAY; // and display the result.
+  subState=SF_DISPLAY; // and display the result.
 }
 
 void select_file_devance(void)
@@ -231,7 +242,7 @@ void select_file_devance(void)
   pos=0;
   dir_eof=quick_boot=false;
   
-  subState=DISPLAY; // And display the result.
+  subState=SF_DISPLAY; // And display the result.
 }
 
 bool select_file_is_folder(void)
@@ -252,7 +263,7 @@ bool select_file_is_folder(void)
 void select_file_done(void)
 {
   if (select_file_is_folder())
-      subState=ADVANCE_FOLDER;
+      subState=SF_ADVANCE_FOLDER;
   else
     state=SELECT_SLOT;
 }
@@ -261,37 +272,37 @@ void select_file(void)
 {
   char visibleEntries=0;
 
-  subState=INIT;
+  subState=SF_INIT;
   
   while (state==SELECT_FILE)
     {
       switch(subState)
 	{
-	case INIT:
+	case SF_INIT:
 	  select_file_init();
 	  break;
-	case DISPLAY:
+	case SF_DISPLAY:
 	  visibleEntries=select_file_display();
 	  break;
-	case NEXT_PAGE:
+	case SF_NEXT_PAGE:
 	  select_next_page();
 	  break;
-	case PREV_PAGE:
+	case SF_PREV_PAGE:
 	  select_prev_page();
 	  break;
-	case CHOOSE:
+	case SF_CHOOSE:
 	  select_file_choose(visibleEntries);
 	  break;
-	case FILTER:
+	case SF_FILTER:
 	  select_file_filter();
 	  break;
-	case ADVANCE_FOLDER:
+	case SF_ADVANCE_FOLDER:
 	  select_file_advance();
 	  break;
-	case DEVANCE_FOLDER:
+	case SF_DEVANCE_FOLDER:
 	  select_file_devance();
 	  break;
-	case DONE:
+	case SF_DONE:
 	  select_file_done();
 	  break;
 	}

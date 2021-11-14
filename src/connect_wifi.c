@@ -12,7 +12,13 @@
 #include "adam/screen.h"
 #include "adam/globals.h"
 #endif /* BUILD_ADAM */
- 
+
+#ifdef BUILD_APPLE2
+#include "apple2/io.h"
+#include "apple2/screen.h"
+#include "apple2/globals.h"
+#endif /* BUILD_APPLE2 */
+
 void connect_wifi(void)
 {
   unsigned char retries=20;
@@ -27,26 +33,21 @@ void connect_wifi(void)
 
   while (retries>0)
     {
-      sleep(1);
       s=io_get_wifi_status();
       switch (s)
 	{
 	case 1:
 	  screen_error("  NO SSID AVAILABLE.");
-	  sleep(2);
 	  return;
 	case 3:
 	  screen_error("  CONNECTION SUCCESSFUL.");
 	  state=HOSTS_AND_DEVICES;
-	  sleep(2);
 	  return;
 	case 4:
 	  screen_error("  CONNECT FAILED.");
-	  sleep(2);
 	  return;
 	case 5:
 	  screen_error("  CONNECTION LOST.");
-	  sleep(2);
 	  return;
 	default:
 	  retries--;
@@ -55,6 +56,5 @@ void connect_wifi(void)
     }
 
   screen_error("  UNABLE TO CONNECT.");
-  sleep(2);
   state=SET_WIFI;
 }

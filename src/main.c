@@ -19,6 +19,11 @@
 #include "adam/screen.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_APPLE2
+#include "apple2/io.h"
+#include "apple2/screen.h"
+#endif /* BUILD_APPLE2 */
+
 State state=CHECK_WIFI;
 extern DeviceSlot deviceSlots[8];
 

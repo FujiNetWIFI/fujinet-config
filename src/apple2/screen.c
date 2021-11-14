@@ -50,10 +50,6 @@ char* screen_hosts_and_devices_slot(char *c)
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 {
-  for (char i=0;i<4;i++)
-    {
-      gotoxy(0,i+y); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
-    }
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
@@ -81,6 +77,10 @@ void screen_show_info(AdapterConfig* ac)
 }
 
 void screen_select_file(void)
+{
+}
+
+void screen_select_file_display(char *p, char *f)
 {
 }
 

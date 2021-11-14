@@ -16,17 +16,25 @@
 #include "adam/bar.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_APPLE2
+#include "apple2/screen.h"
+#include "apple2/input.h"
+#include "apple2/globals.h"
+#include "apple2/io.h"
+#include "apple2/bar.h"
+#endif /* BUILD_APPLE2 */
+
 extern DeviceSlot deviceSlots[8];
 extern bool quick_boot;
 
 static enum
   {
-   INIT,
-   DISPLAY,
-   CHOOSE,
-   MODE,
-   DONE,
-   ABORT
+   SF_INIT,
+   SF_DISPLAY,
+   SF_CHOOSE,
+   SF_MODE,
+   SF_DONE,
+   SF_ABORT
   } subState;
 
 static char mode=0;
@@ -38,10 +46,10 @@ void select_slot_init()
     {
       mode=0;
       selected_device_slot=0;
-      subState=DONE;
+      subState=SF_DONE;
     }
   else
-    subState=DISPLAY;
+    subState=SF_DISPLAY;
 }
 
 void select_slot_display()
@@ -56,7 +64,7 @@ void select_slot_display()
   
   io_close_directory();
 
-  subState=CHOOSE;
+  subState=SF_CHOOSE;
 }
 
 void select_slot_eject(unsigned char ds)
@@ -74,17 +82,17 @@ void select_slot_choose()
   
   screen_select_slot_choose();
 
-  while (subState==CHOOSE)
+  while (subState==SF_CHOOSE)
     {
       k=input();
       switch(k)
 	{
 	case 0x0d:
 	  selected_device_slot=bar_get();
-	  subState=MODE;
+	  subState=SF_MODE;
 	  break;
 	case 0x1B:
-	  subState=ABORT;
+	  subState=SF_ABORT;
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case '1':
@@ -112,7 +120,7 @@ void select_slot_mode()
   
   screen_select_slot_mode();
 
-  while (subState==MODE)
+  while (subState==SF_MODE)
     {
       k=input();
       switch(k)
@@ -120,11 +128,11 @@ void select_slot_mode()
 	case 0x0d:
 	case 0x85:
 	  mode=0;
-	  subState=DONE;
+	  subState=SF_DONE;
 	  break;
 	case 0x86:
 	  mode=2;
-	  subState=DONE;
+	  subState=SF_DONE;
 	case 0xA0:
 	  bar_up();
 	  break;
@@ -142,32 +150,20 @@ void select_slot_done()
   strcat(filename,path);
   
   io_open_directory(selected_host_slot,path,filter);
-
-  csleep(100);
   
   io_set_directory_position(pos);
-
-  csleep(40);
   
   memcpy(deviceSlots[selected_device_slot].file,io_read_directory(31,0),31);
   deviceSlots[selected_device_slot].mode=mode;
   deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
   
   io_put_device_slots(&deviceSlots[0]);
-
-  csleep(10);
   
   io_set_directory_position(pos);
-
-  csleep(10);
   
   strcat(filename,io_read_directory(255,0));
-
-  csleep(10);
   
   io_set_device_filename(selected_device_slot,filename);
-
-  csleep(10);
   
   io_close_directory();
 
@@ -176,27 +172,27 @@ void select_slot_done()
 
 void select_slot(void)
 {
-  subState=INIT;
+  subState=SF_INIT;
   
   while (state==SELECT_SLOT)
     {
       switch(subState)
 	{
-	case INIT:
+	case SF_INIT:
 	  select_slot_init();
 	  break;
-	case DISPLAY:
+	case SF_DISPLAY:
 	  select_slot_display();
 	  break;
-	case CHOOSE:
+	case SF_CHOOSE:
 	  select_slot_choose();
 	  break;
-	case MODE:
+	case SF_MODE:
 	  select_slot_mode();
 	  break;
-	case DONE:
+	case SF_DONE:
 	  select_slot_done();
-	case ABORT:
+	case SF_ABORT:
 	  break;
 	}
     }

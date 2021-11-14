@@ -13,6 +13,13 @@
 #include "adam/io.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_APPLE2
+#include "apple2/screen.h"
+#include "apple2/input.h"
+#include "apple2/globals.h"
+#include "apple2/io.h"
+#endif /* BUILD_APPLE2 */
+
 void show_info(void)
 {
   screen_show_info(io_get_adapter_config());

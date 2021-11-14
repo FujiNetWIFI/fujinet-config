@@ -71,12 +71,12 @@ void io_set_ssid(NetConfig *nc)
 
 void io_get_device_slots(DeviceSlot *d)
 {
-  d=&_ds;
+  d=_ds;
 }
 
 void io_get_host_slots(HostSlot *h)
 {
-  h=&_hs;
+  h=_hs;
 }
 
 void io_put_host_slots(HostSlot *h)
@@ -124,6 +124,10 @@ void io_set_boot_config(unsigned char toggle)
 }
 
 void io_umount_disk_image(unsigned char ds)
+{
+}
+
+void io_boot(void)
 {
 }
 

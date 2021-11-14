@@ -6,7 +6,6 @@
 #include <conio.h>
 #include <stdbool.h>
 #include "input.h"
-#include "cursor.h"
 
 /**
  * Get input from keyboard/joystick

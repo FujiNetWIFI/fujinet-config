@@ -17,14 +17,23 @@
 #include "adam/globals.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_APPLE2
+#include "apple2/io.h"
+#include "apple2/fuji_typedefs.h"
+#include "apple2/screen.h"
+#include "apple2/bar.h"
+#include "apple2/input.h"
+#include "apple2/globals.h"
+#endif /* BUILD_APPLE2 */
+
 static enum
   {
-   SCAN,
-   SELECT,
-   CUSTOM,
-   PASSWORD,
-   DONE
-  } subState=SCAN;
+   SF_SCAN,
+   SF_SELECT,
+   SF_CUSTOM,
+   SF_PASSWORD,
+   SF_DONE
+  } subState=SF_SCAN;
 
 NetConfig nc;
 
@@ -44,7 +53,7 @@ void set_wifi_select(void)
 
   bar_set(0,3,numNetworks,0);
 
-  while(subState==SELECT)
+  while(subState==SF_SELECT)
     {
       k=input();
       
@@ -52,16 +61,16 @@ void set_wifi_select(void)
 	{
 	case 0x0D:
 	  set_wifi_set_ssid(bar_get());
-	  subState=PASSWORD;
+	  subState=SF_PASSWORD;
 	  break;
 	case 0x84:
-	  subState=CUSTOM;
+	  subState=SF_CUSTOM;
 	  break;
 	case 0x85:
-	  subState=SCAN;
+	  subState=SF_SCAN;
 	  break;
 	case 0x86:
-	  subState=DONE;
+	  subState=SF_DONE;
 	  state=HOSTS_AND_DEVICES;
 	  break;
 	case 0xA0:
@@ -78,18 +87,20 @@ void set_wifi_custom(void)
 {
   screen_set_wifi_custom();
   input_line_set_wifi_custom(nc.ssid);
-  subState=PASSWORD;
+  subState=SF_PASSWORD;
 }
 
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
   input_line_set_wifi_password(nc.password);
-  subState=DONE;
+  subState=SF_DONE;
 }
 
 void set_wifi_scan(void)
 {
+  char i;
+  
   screen_set_wifi(io_get_adapter_config());
 
   numNetworks = io_scan_for_networks();
@@ -99,17 +110,17 @@ void set_wifi_scan(void)
 
   if (io_error())
     {
-      screen_error("COULD NOT SCAN NETWORKS");
+      screen_error("COULD NOT SF_SCAN NETWORKS");
       die();
     }
 
-  for (char i=0;i<numNetworks;i++)
+  for (i=0;i<numNetworks;i++)
     {
       SSIDInfo *s = io_get_scan_result(i);
       screen_set_wifi_display_ssid(i,s);
     }
 
-  subState=SELECT;
+  subState=SF_SELECT;
 }
 
 void set_wifi_done(void)
@@ -124,19 +135,19 @@ void set_wifi(void)
     {
       switch(subState)
 	{
-	case SCAN:
+	case SF_SCAN:
 	  set_wifi_scan();
 	  break;
-	case SELECT:
+	case SF_SELECT:
 	  set_wifi_select();
 	  break;
-	case CUSTOM:
+	case SF_CUSTOM:
 	  set_wifi_custom();
 	  break;
-	case PASSWORD:
+	case SF_PASSWORD:
 	  set_wifi_password();
 	  break;
-	case DONE:
+	case SF_DONE:
 	  set_wifi_done();
 	  break;
 	}
