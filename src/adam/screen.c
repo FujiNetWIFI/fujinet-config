@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * #FujiNet CONFIG FOR #adam
  *
@@ -343,3 +344,4 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
   gotoxy(1,1+hs); cprintf(empty);
 }  
+#endif /* BUILD_ADAM */

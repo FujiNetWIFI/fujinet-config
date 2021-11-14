@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * Global variables
  */
@@ -21,3 +22,4 @@ extern char path[224];
 extern char filter[32];
 
 #endif /* GLOBALS_H */
+#endif /* BUILD_ADAM */

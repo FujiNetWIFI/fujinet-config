@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * Bar routines
  */
@@ -49,3 +50,4 @@ unsigned char bar_get();
 void bar_color(unsigned char f,unsigned char b);
 
 #endif /* BAR_H */
+#endif /* BUILD_ADAM */

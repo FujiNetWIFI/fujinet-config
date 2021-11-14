@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * Input Routines
  */
@@ -36,3 +37,4 @@ void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, ch
 void input_line_filter(char *c);
 
 #endif /* INPUT_H */
+#endif /* BUILD_ADAM */

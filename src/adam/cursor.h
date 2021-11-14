@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * FujiNet Config for Adam
  * 
@@ -13,3 +14,4 @@ void cursor(bool t);
 void cursor_pos(unsigned char x, unsigned char y);
 
 #endif /* CURSOR_H */
+#endif /* BUILD_ADAM */

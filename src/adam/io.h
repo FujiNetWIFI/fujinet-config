@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * FujiNet CONFIG for #Adam
  *
@@ -34,3 +35,4 @@ void io_set_boot_config(unsigned char toggle);
 void io_umount_disk_image(unsigned char ds);
 
 #endif /* IO_H */
+#endif /* BUILD_ADAM */

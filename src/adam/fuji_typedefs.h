@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * CONFIG custom types
  */
@@ -64,3 +65,4 @@ typedef struct
 } NewDisk;
 
 #endif /* FUJI_TYPEDEFS_H */
+#endif

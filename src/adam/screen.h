@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * FujiNet Config for #Adam
  * 
@@ -47,3 +48,4 @@ void screen_select_slot_mode(void);
 void screen_select_slot_eject(unsigned char ds);
 
 #endif /* SCREEN_H */
+#endif /* BUILD_ADAM */

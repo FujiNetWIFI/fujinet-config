@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /** 
  * Input routines
  */
@@ -170,3 +171,4 @@ void input_line_filter(char *c)
 {
   input_line(0,19,0,c,32,false);
 }
+#endif /* BUILD_ADAM */

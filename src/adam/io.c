@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * FujiNet CONFIG for #Adam
  *
@@ -210,3 +211,4 @@ void io_umount_disk_image(unsigned char ds)
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
+#endif /* BUILD_ADAM */
