@@ -2,7 +2,7 @@
  * Global variables
  */
 
-#include "typedefs.h"
+#include "../typedefs.h"
 #include "fuji_typedefs.h"
 
 #ifndef GLOBALS_H

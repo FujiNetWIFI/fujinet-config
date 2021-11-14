@@ -4,13 +4,15 @@
  * Connect to existing WiFi connection
  */
 
-#include <conio.h>
 #include <string.h>
-#include "io.h"
 #include "connect_wifi.h"
-#include "screen.h"
-#include "globals.h"
 
+#ifdef BUILD_ADAM
+#include "adam/io.h"
+#include "adam/screen.h"
+#include "adam/globals.h"
+#endif /* BUILD_ADAM */
+ 
 void connect_wifi(void)
 {
   unsigned char retries=20;

@@ -7,11 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "select_slot.h"
-#include "screen.h"
-#include "input.h"
-#include "globals.h"
-#include "io.h"
-#include "bar.h"
+
+#ifdef BUILD_ADAM
+#include "adam/screen.h"
+#include "adam/input.h"
+#include "adam/globals.h"
+#include "adam/io.h"
+#include "adam/bar.h"
+#endif /* BUILD_ADAM */
 
 extern DeviceSlot deviceSlots[8];
 extern bool quick_boot;

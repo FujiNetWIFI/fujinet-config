@@ -5,14 +5,17 @@
  */
 
 #include <string.h>
-#include "io.h"
-#include "fuji_typedefs.h"
-#include "screen.h"
 #include "set_wifi.h"
 #include "die.h"
-#include "bar.h"
-#include "input.h"
-#include "globals.h"
+
+#ifdef BUILD_ADAM
+#include "adam/io.h"
+#include "adam/fuji_typedefs.h"
+#include "adam/screen.h"
+#include "adam/bar.h"
+#include "adam/input.h"
+#include "adam/globals.h"
+#endif /* BUILD_ADAM */
 
 static enum
   {

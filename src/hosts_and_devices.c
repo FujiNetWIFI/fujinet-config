@@ -6,14 +6,17 @@
 
 #include <string.h>
 #include <eos.h>
-#include "globals.h"
-#include "fuji_typedefs.h"
 #include "hosts_and_devices.h"
 #include "die.h"
-#include "io.h"
-#include "screen.h"
-#include "input.h"
-#include "bar.h"
+
+#ifdef BUILD_ADAM
+#include "adam/globals.h"
+#include "adam/fuji_typedefs.h"
+#include "adam/io.h"
+#include "adam/screen.h"
+#include "adam/input.h"
+#include "adam/bar.h"
+#endif /* BUILD_ADAM */
 
 DeviceSlot deviceSlots[8];
 HostSlot hostSlots[8];

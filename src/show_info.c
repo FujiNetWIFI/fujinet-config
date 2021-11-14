@@ -5,10 +5,13 @@
  */
 
 #include "show_info.h"
-#include "screen.h"
-#include "input.h"
-#include "globals.h"
-#include "io.h"
+
+#ifdef BUILD_ADAM
+#include "adam/screen.h"
+#include "adam/input.h"
+#include "adam/globals.h"
+#include "adam/io.h"
+#endif /* BUILD_ADAM */
 
 void show_info(void)
 {

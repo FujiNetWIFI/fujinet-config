@@ -6,13 +6,16 @@
 
 #include <conio.h>
 #include <string.h>
-#include "fuji_typedefs.h"
-#include "screen.h"
-#include "io.h"
 #include "select_file.h"
-#include "globals.h"
-#include "input.h"
-#include "bar.h"
+
+#ifdef BUILD_ADAM
+#include "adam/fuji_typedefs.h"
+#include "adam/screen.h"
+#include "adam/io.h"
+#include "adam/globals.h"
+#include "adam/input.h"
+#include "adam/bar.h"
+#endif /* BUILD_ADAM */
 
 #define ENTRIES_PER_PAGE 15
 

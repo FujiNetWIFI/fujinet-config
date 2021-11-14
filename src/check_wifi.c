@@ -4,9 +4,12 @@
  * Check for Wifi Configuration and/or connection.
  */
 
-#include "io.h"
+#ifdef BUILD_ADAM
+#include "adam/io.h"
+#include "adam/globals.h"
+#endif /* BUILD_ADAM */
+
 #include "check_wifi.h"
-#include "globals.h"
 
 void check_wifi(void)
 {

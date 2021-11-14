@@ -13,8 +13,11 @@
 #include "select_slot.h"
 #include "perform_copy.h"
 #include "show_info.h"
-#include "io.h"
-#include "screen.h"
+
+#ifdef BUILD_ADAM
+#include "adam/io.h"
+#include "adam/screen.h"
+#endif /* BUILD_ADAM */
 
 State state=CHECK_WIFI;
 extern DeviceSlot deviceSlots[8];
