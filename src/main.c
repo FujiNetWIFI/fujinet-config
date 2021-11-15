@@ -24,6 +24,11 @@
 #include "apple2/screen.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/io.h"
+#include "c64/screen.h"
+#endif /* BUILD_C64 */
+
 State state=CHECK_WIFI;
 extern DeviceSlot deviceSlots[8];
 

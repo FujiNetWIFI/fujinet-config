@@ -24,6 +24,14 @@
 #include "apple2/bar.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/screen.h"
+#include "c64/input.h"
+#include "c64/globals.h"
+#include "c64/io.h"
+#include "c64/bar.h"
+#endif /* BUILD_APPLE2 */
+
 extern DeviceSlot deviceSlots[8];
 extern bool quick_boot;
 

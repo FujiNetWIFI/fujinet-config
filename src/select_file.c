@@ -26,6 +26,15 @@
 #include "apple2/bar.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/fuji_typedefs.h"
+#include "c64/screen.h"
+#include "c64/io.h"
+#include "c64/globals.h"
+#include "c64/input.h"
+#include "c64/bar.h"
+#endif /* BUILD_C64 */
+
 #define ENTRIES_PER_PAGE 15
 
 char path[224];

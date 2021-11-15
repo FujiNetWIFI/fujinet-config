@@ -20,6 +20,13 @@
 #include "apple2/io.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/screen.h"
+#include "c64/input.h"
+#include "c64/globals.h"
+#include "c64/io.h"
+#endif /* BUILD_C64 */
+
 void show_info(void)
 {
   screen_show_info(io_get_adapter_config());

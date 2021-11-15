@@ -26,6 +26,15 @@
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/io.h"
+#include "c64/fuji_typedefs.h"
+#include "c64/screen.h"
+#include "c64/bar.h"
+#include "c64/input.h"
+#include "c64/globals.h"
+#endif /* BUILD_APPLE2 */
+
 static enum
   {
    SF_SCAN,

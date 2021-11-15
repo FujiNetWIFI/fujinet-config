@@ -14,6 +14,11 @@
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+#include "c64/io.h"
+#include "c64/globals.h"
+#endif /* BUILD_C64 */
+
 #include "check_wifi.h"
 
 void check_wifi(void)
