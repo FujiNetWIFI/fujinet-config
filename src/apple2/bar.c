@@ -3,18 +3,33 @@
  * Bar routines
  */
 
+#include <peekpoke.h>
 #include "bar.h"
+
+unsigned char *ram = (unsigned char *)0x0000;
+
+const unsigned short row[24]= {
+			       0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700,
+			       0x0780, 0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 0x07A8,
+			       0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0
+};
 
 /**
  * static local variables for bar y, max, and index.
  */
 static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
+unsigned short bar_coord(unsigned char x, unsigned char y)
+{
+  return row[y]+x;
+}
+
 void bar_clear(void)
 {
-  // Fill column color in old row
+  char i;
 
-  // Fill background color in old row
+  for (i=0;i<40;i++)
+    ram[bar_coord(i,bar_y+bar_oldi)]|=0xC0;
 }
 
 /**
@@ -22,9 +37,13 @@ void bar_clear(void)
  */
 void bar_update(void)
 {
+  char i;
+  
   bar_clear();
   
   // Fill bar color in new row
+  for (i=0;i<40;i++)
+    ram[bar_coord(i,bar_y+bar_i)] &= 0x3f;
 }
 
 /**
