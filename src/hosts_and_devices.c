@@ -100,6 +100,9 @@ void hosts_and_devices_hosts(void)
 	  subState=HD_DONE;
 	  state=SELECT_FILE;
 	  break;
+	case 0x1b:
+	  quit();
+	  break;
 	case 0x84:
 	  subState=HD_DONE;
 	  state=SHOW_INFO;

@@ -8,5 +8,6 @@
 #define DIE_H
 
 void die(void);
+void quit(void);
 
 #endif /* DIE_H */

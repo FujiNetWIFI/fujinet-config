@@ -5,6 +5,7 @@
  * I/O Routines
  */
 
+#include <stdlib.h>
 #include <eos.h>
 #include <string.h>
 #include "io.h"
