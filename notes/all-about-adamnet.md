@@ -268,6 +268,7 @@ This is an example status response from device 4, the first disk drive.
 Which breaks down into:
 
 | Bytes | Description
+|---    |---
 | 84    | RESPONSE.STATUS for device 4
 | 00 04 | maximum message size of 1024 bytes
 | 01    | This is a block device
@@ -328,6 +329,7 @@ B1 00 01 0D 0D
 Which breaks down into:
 
 | Bytes | Description
+|---    |---
 | B1    | RESPONSE.SEND for Device 1
 | 00 01 | Message size is one byte
 | 0D    | keyboard code for RETURN (which happens to be ASCII)
