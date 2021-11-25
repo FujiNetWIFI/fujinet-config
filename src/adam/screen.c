@@ -209,7 +209,7 @@ void screen_show_info(AdapterConfig* ac)
       msx_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
       msx_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
     }
-  smartkeys_display(NULL,NULL,"  KYBD?\n  YES","PRINTER?\n  YES"," CHANGE\n  SSID","RECONNECT");    
+  smartkeys_display(NULL,NULL," KEYBD?\n  YES","PRINTER?\n  YES"," CHANGE\n  SSID","RECONNECT");    
 }
 
 void screen_select_file(void)
