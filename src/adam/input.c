@@ -7,6 +7,7 @@
 #include <eos.h>
 #include <conio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "input.h"
 #include "cursor.h"
 
@@ -171,4 +172,63 @@ void input_line_filter(char *c)
 {
   input_line(0,19,0,c,32,false);
 }
+
+unsigned char input_select_file_new_type(void)
+{
+  switch(cgetc())
+    {
+    case 0x85:
+      return 1;
+    case 0x86:
+      return 2;
+    default:
+      return 0;
+    }
+}
+
+unsigned long input_select_file_new_size(unsigned char t)
+{  
+  switch (t)
+    {
+    case 1: // DDP
+      switch(cgetc())
+	{
+	case 0x83:
+	  return 128;
+	case 0x84:
+	  return 256;
+	case 0x85:
+	  return 320;
+	case 0x86:
+	  return 1; // CUSTOM
+	}
+      break;
+    case 2: // DSK
+      switch(cgetc())
+	{
+	case 0x83:
+	  return 160;
+	case 0x84:
+	  return 320;
+	case 0x85:
+	  return 8192;
+	case 0x86:
+	  return 1; // CUSTOM 
+	}
+      break;
+    }
+}
+
+unsigned long input_select_file_new_custom(void)
+{
+  char c[12];
+  input_line(0,19,0,c,32,false);
+  return atol(c);
+}
+
+void input_select_file_new_name(char *c)
+{
+  input_line(0,19,0,c,255,false);
+}
+
 #endif /* BUILD_ADAM */

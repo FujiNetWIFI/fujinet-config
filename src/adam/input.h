@@ -35,6 +35,10 @@ void input_line_set_wifi_custom(char *c);
 void input_line_set_wifi_password(char *c);
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c);
 void input_line_filter(char *c);
+unsigned char input_select_file_new_type(void);
+unsigned long input_select_file_new_size(unsigned char t);
+unsigned long input_select_file_new_custom(void);
+void input_select_file_new_name(char *c);
 
 #endif /* INPUT_H */
 #endif /* BUILD_ADAM */

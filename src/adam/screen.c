@@ -279,6 +279,39 @@ void screen_select_file_filter(void)
   smartkeys_status("  ENTER A WILDCARD FILTER.\n  E.G. *Coleco*");
 }
 
+void screen_select_file_new_type(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,"  DSK","  DDP");
+  smartkeys_status("  NEW DISK:\n  SELECT MEDIA TYPE.");
+}
+
+void screen_select_file_new_size(unsigned char k)
+{
+  if (k==1) // DDP
+    smartkeys_display(NULL,NULL," 128K", " 256K", " 320K", " CUSTOM");
+  else if (k==2) // DSK
+    smartkeys_display(NULL,NULL," 160K"," 320K","8192K"," CUSTOM");
+  smartkeys_status("  SIZE?");
+}
+
+void screen_select_file_new_custom(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  PLEASE ENTER DESIRED CUSTOM SIZE\n  IN NUMBER OF 1K BLOCKS\n");
+}
+
+void screen_select_file_new_name(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  PLEASE ENTER A FILENAME\n  FOR THIS DISK/DDP:");
+}
+
+void screen_select_file_new_creating(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  CREATING FILE... PLEASE WAIT.");
+}
+
 void screen_select_slot(char *e)
 {
   unsigned long *s;
@@ -343,3 +376,4 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
   gotoxy(1,1+hs); cprintf(empty);
 }  
 #endif /* BUILD_ADAM */
+

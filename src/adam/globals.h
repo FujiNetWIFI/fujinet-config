@@ -3,6 +3,7 @@
  * Global variables
  */
 
+#include <stdbool.h>
 #include "../typedefs.h"
 #include "fuji_typedefs.h"
 
@@ -20,6 +21,7 @@ extern HostSlot hostSlots[8];
 extern DirectoryPosition pos;
 extern char path[224];
 extern char filter[32];
+extern bool create;
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_ADAM */

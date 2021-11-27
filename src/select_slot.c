@@ -40,13 +40,14 @@ static enum
    SF_INIT,
    SF_DISPLAY,
    SF_CHOOSE,
-   SF_MODE,
    SF_DONE,
    SF_ABORT
   } subState;
 
 static char mode=0;
 static char selected_device_slot=0;
+
+bool create=false;
 
 void select_slot_init()
 {
@@ -95,10 +96,6 @@ void select_slot_choose()
       k=input();
       switch(k)
 	{
-	case 0x0d:
-	  selected_device_slot=bar_get();
-	  subState=SF_MODE;
-	  break;
 	case 0x1B:
 	  subState=SF_ABORT;
 	  state=HOSTS_AND_DEVICES;
@@ -112,33 +109,14 @@ void select_slot_choose()
 	case 0x84:
 	  select_slot_eject(bar_get());
 	  break;
-	case 0xA0:
-	  bar_up();
-	  break;
-	case 0xA2:
-	  bar_down();
-	  break;
-	}
-    }
-}
-
-void select_slot_mode()
-{
-  char k;
-  
-  screen_select_slot_mode();
-
-  while (subState==SF_MODE)
-    {
-      k=input();
-      switch(k)
-	{
 	case 0x0d:
 	case 0x85:
+	  selected_device_slot=bar_get();
 	  mode=0;
 	  subState=SF_DONE;
 	  break;
 	case 0x86:
+	  selected_device_slot=bar_get();
 	  mode=2;
 	  subState=SF_DONE;
 	case 0xA0:
@@ -148,7 +126,7 @@ void select_slot_mode()
 	  bar_down();
 	  break;
 	}
-    }  
+    }
 }
 
 void select_slot_done()
@@ -194,9 +172,6 @@ void select_slot(void)
 	  break;
 	case SF_CHOOSE:
 	  select_slot_choose();
-	  break;
-	case SF_MODE:
-	  select_slot_mode();
 	  break;
 	case SF_DONE:
 	  select_slot_done();

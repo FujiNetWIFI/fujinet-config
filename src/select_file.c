@@ -53,6 +53,7 @@ static enum
    SF_FILTER,
    SF_ADVANCE_FOLDER,
    SF_DEVANCE_FOLDER,
+   SF_NEW,
    SF_DONE
   } subState;
 
@@ -194,6 +195,9 @@ void select_file_choose(char visibleEntries)
 	  subState=SF_DONE;
 	  state=SELECT_SLOT;
 	  break;
+	case 0x94:
+	  subState=SF_NEW;
+	  break;
 	case 0xA0:
 	  if ((bar_get() == 0) && (pos > 0))
 	    subState=SF_PREV_PAGE;
@@ -269,6 +273,50 @@ bool select_file_is_folder(void)
   return strrchr(e,'/') != NULL; // Offset 10 = directory flag.
 }
 
+void select_file_new(void)
+{
+  char f[256];
+  char k;
+  unsigned long blocks;
+  
+  screen_select_file_new_type();
+  k=input_select_file_new_type();
+  if (k==0)
+    {
+      subState=SF_CHOOSE;
+      return;
+    }
+
+  screen_select_file_new_size(k);
+  blocks=input_select_file_new_size(k);
+
+  if (blocks == 1) // User selected custom
+    {
+      screen_select_file_new_custom();
+      blocks=input_select_file_new_custom();
+    }
+
+  if (blocks==0) // Aborted from size
+    {
+      subState=SF_CHOOSE;
+      return;
+    }
+
+  screen_select_file_new_name();
+  input_select_file_new_name(f);
+
+  if (f[0]==0x00)
+    {
+      subState=SF_CHOOSE;
+      return;
+    }
+  else
+    {
+      create=true;
+      subState=SF_DONE;
+    }
+}
+
 void select_file_done(void)
 {
   if (select_file_is_folder())
@@ -310,6 +358,9 @@ void select_file(void)
 	  break;
 	case SF_DEVANCE_FOLDER:
 	  select_file_devance();
+	  break;
+	case SF_NEW:
+	  select_file_new();
 	  break;
 	case SF_DONE:
 	  select_file_done();

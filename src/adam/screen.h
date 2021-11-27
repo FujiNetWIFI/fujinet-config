@@ -41,6 +41,11 @@ void screen_select_file_next(void);
 void screen_select_file_prev(void);
 void screen_select_file_display_entry(unsigned char y, char* e);
 void screen_select_file_choose(char visibleEntries);
+void screen_select_file_new_type(void);
+void screen_select_file_new_size(unsigned char k);
+void screen_select_file_new_custom(void);
+void screen_select_file_new_name(void);
+void screen_select_file_new_creating(void);
 
 void screen_select_slot(char *e);
 void screen_select_slot_choose(void);
