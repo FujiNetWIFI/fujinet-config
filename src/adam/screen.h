@@ -49,7 +49,6 @@ void screen_select_file_new_creating(void);
 
 void screen_select_slot(char *e);
 void screen_select_slot_choose(void);
-void screen_select_slot_mode(void);
 void screen_select_slot_eject(unsigned char ds);
 
 #endif /* SCREEN_H */
