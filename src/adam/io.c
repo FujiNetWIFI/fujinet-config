@@ -241,10 +241,10 @@ void io_build_directory(unsigned char ds, unsigned int numBlocks, char *v)
 
   // Write simple block 0 to jump to SmartWriter
   memset(response,0,1024);
-
   response[0]=0xC3;  // JP $FCE7
   response[1]=0xE7;
   response[2]=0xFC;
+  eos_write_block(ds, 0, response);
 }
 
 #endif /* BUILD_ADAM */
