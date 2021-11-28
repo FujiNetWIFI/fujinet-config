@@ -162,7 +162,7 @@ void select_slot_done()
 	  input_select_slot_build_eos_directory_label(filename);
 	  screen_select_slot_build_eos_directory_creating();
 	  io_mount_disk_image(selected_device_slot,2); // R/W
-	  io_build_directory(selected_device_slot,(unsigned int)selected_size,filename);
+	  io_build_directory(selected_device_slot,selected_size&0xFFFF,filename);
 	}
 #endif
     }

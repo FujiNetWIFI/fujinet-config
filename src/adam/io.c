@@ -233,11 +233,13 @@ void io_boot(void)
   eos_init();
 }
 
-void io_build_directory(unsigned char ds, unsigned int numBlocks, char *v)
+void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
 {
+  unsigned int nb = numBlocks & 0xFFFF;
+  
   ds += 4; // Adjust device slot to EOS device #
 
-  eos_initialize_directory(ds, 1, numBlocks, v);
+  eos_initialize_directory(ds, 1, nb, v);
 
   // Write simple block 0 to jump to SmartWriter
   memset(response,0,1024);

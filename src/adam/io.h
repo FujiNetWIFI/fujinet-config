@@ -35,7 +35,7 @@ void io_set_boot_config(unsigned char toggle);
 void io_umount_disk_image(unsigned char ds);
 void io_boot(void);
 void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path);
-void io_build_directory(unsigned char ds, unsigned int numBlocks, char *v);
+void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v);
 
 #endif /* IO_H */
 #endif /* BUILD_ADAM */
