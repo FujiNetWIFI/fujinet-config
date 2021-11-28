@@ -189,6 +189,20 @@ void io_set_device_filename(unsigned char ds, char* e)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
 
+void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
+{
+  char nd[263]={0xE7,0x00,0x00,0x00,0x00,0x00,0x00};
+  char *c = &nd[3];
+  unsigned long *l = (unsigned long *)c;
+  
+  nd[1]=selected_host_slot;
+  nd[2]=selected_device_slot;
+  *l=selected_size;
+  strcpy(&nd[7],path);
+
+  eos_write_character_device(FUJI_DEV,&nd,sizeof(nd));
+}
+
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
   char c[3]={0xF8,0x00,0x00};
@@ -217,6 +231,20 @@ void io_umount_disk_image(unsigned char ds)
 void io_boot(void)
 {
   eos_init();
+}
+
+void io_build_directory(unsigned char ds, unsigned int numBlocks, char *v)
+{
+  ds += 4; // Adjust device slot to EOS device #
+
+  eos_initialize_directory(ds, 1, numBlocks, v);
+
+  // Write simple block 0 to jump to SmartWriter
+  memset(response,0,1024);
+
+  response[0]=0xC3;  // JP $FCE7
+  response[1]=0xE7;
+  response[2]=0xFC;
 }
 
 #endif /* BUILD_ADAM */

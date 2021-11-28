@@ -39,6 +39,8 @@ unsigned char input_select_file_new_type(void);
 unsigned long input_select_file_new_size(unsigned char t);
 unsigned long input_select_file_new_custom(void);
 void input_select_file_new_name(char *c);
+bool input_select_slot_build_eos_directory(void);
+void input_select_slot_build_eos_directory_label(char *c);
 
 #endif /* INPUT_H */
 #endif /* BUILD_ADAM */

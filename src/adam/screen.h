@@ -50,6 +50,10 @@ void screen_select_file_new_creating(void);
 void screen_select_slot(char *e);
 void screen_select_slot_choose(void);
 void screen_select_slot_eject(unsigned char ds);
+void screen_select_slot_build_eos_directory(void);
+void screen_select_slot_build_eos_directory_label(void);
+void screen_select_slot_build_eos_directory_creating(void);
+
 
 #endif /* SCREEN_H */
 #endif /* BUILD_ADAM */

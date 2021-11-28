@@ -369,5 +369,24 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
   gotoxy(1,1+hs); cprintf(empty);
 }  
+
+void screen_select_slot_build_eos_directory(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,"  YES","   NO");
+  smartkeys_status("  DO YOU WISH TO WRITE\n  AN EOS DIRECTORY\n  TO THIS IMAGE?");
+}
+
+void screen_select_slot_build_eos_directory_label(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  ENTER A VOLUME LABEL. (12 CHARACTERS MAX)");
+}
+
+void screen_select_slot_build_eos_directory_creating(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  CREATING THE DIRECTORY.\n  PLEASE WAIT.");
+}
+
 #endif /* BUILD_ADAM */
 

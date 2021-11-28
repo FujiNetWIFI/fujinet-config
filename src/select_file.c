@@ -42,6 +42,7 @@ char filter[32];
 DirectoryPosition pos=0;
 bool dir_eof=false;
 bool quick_boot=false;
+unsigned long selected_size=0;
 
 static enum
   {
@@ -275,9 +276,10 @@ bool select_file_is_folder(void)
 
 void select_file_new(void)
 {
-  char f[256];
+  char f[128];
   char k;
-  unsigned long blocks;
+
+  memset(f,0,128);
   
   screen_select_file_new_type();
   k=input_select_file_new_type();
@@ -288,15 +290,15 @@ void select_file_new(void)
     }
 
   screen_select_file_new_size(k);
-  blocks=input_select_file_new_size(k);
+  selected_size=input_select_file_new_size(k);
 
-  if (blocks == 1) // User selected custom
+  if (selected_size == 1) // User selected custom
     {
       screen_select_file_new_custom();
-      blocks=input_select_file_new_custom();
+      selected_size=input_select_file_new_custom();
     }
 
-  if (blocks==0) // Aborted from size
+  if (selected_size==0) // Aborted from size
     {
       subState=SF_CHOOSE;
       return;
@@ -313,7 +315,8 @@ void select_file_new(void)
   else
     {
       create=true;
-      subState=SF_DONE;
+      strcat(path,f);
+      state=SELECT_SLOT;
     }
 }
 

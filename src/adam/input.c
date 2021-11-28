@@ -231,4 +231,14 @@ void input_select_file_new_name(char *c)
   input_line(0,19,0,c,255,false);
 }
 
+bool input_select_slot_build_eos_directory(void)
+{
+  return (cgetc() == 0x85);
+}
+
+void input_select_slot_build_eos_directory_label(char *c)
+{
+  input_line(0,19,0,c,12,false);
+}
+
 #endif /* BUILD_ADAM */
