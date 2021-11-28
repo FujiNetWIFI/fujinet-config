@@ -281,8 +281,8 @@ void screen_select_file_filter(void)
 
 void screen_select_file_new_type(void)
 {
-  smartkeys_display(NULL,NULL,NULL,NULL,"  DSK","  DDP");
-  smartkeys_status("  NEW DISK:\n  SELECT MEDIA TYPE.");
+  smartkeys_display(NULL,NULL,NULL,NULL,"  DDP"," DISK");
+  smartkeys_status("  NEW MEDIA:\n  SELECT MEDIA TYPE.");
 }
 
 void screen_select_file_new_size(unsigned char k)
