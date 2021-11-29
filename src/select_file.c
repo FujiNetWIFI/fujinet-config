@@ -88,8 +88,8 @@ unsigned char select_file_display(void)
   screen_select_file_display(path,filter);
 
   // I do not know why the hell we need this right now.
-  io_open_directory(selected_host_slot,path,filter);
-  io_close_directory();
+  // io_open_directory(selected_host_slot,path,filter);
+  // io_close_directory();
   
   io_open_directory(selected_host_slot,path,filter);
   
