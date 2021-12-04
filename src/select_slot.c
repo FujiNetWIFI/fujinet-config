@@ -9,6 +9,8 @@
 #include "select_slot.h"
 
 #ifdef BUILD_ADAM
+#include <eos.h>
+#include <conio.h>
 #include "adam/screen.h"
 #include "adam/input.h"
 #include "adam/globals.h"
@@ -158,11 +160,11 @@ void select_slot_done()
       screen_select_slot_build_eos_directory();
       if (input_select_slot_build_eos_directory())
 	{
+	  io_mount_disk_image(selected_device_slot,2); // R/W
 	  screen_select_slot_build_eos_directory_label();
 	  input_select_slot_build_eos_directory_label(filename);
 	  screen_select_slot_build_eos_directory_creating();
-	  io_mount_disk_image(selected_device_slot,2); // R/W
-	  io_build_directory(selected_device_slot,selected_size&0xFFFF,filename);
+	  io_build_directory(selected_device_slot,selected_size,filename);
 	}
 #endif
     }

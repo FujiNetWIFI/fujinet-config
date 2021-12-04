@@ -235,18 +235,31 @@ void io_boot(void)
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
 {
-  unsigned int nb = numBlocks & 0xFFFF;
+  unsigned int nb = numBlocks;
+
+  // End volume label
+  v[strlen(v)]=0x03;
+
+  // Adjust device slot to EOS device #
+  ds += 4;
   
-  ds += 4; // Adjust device slot to EOS device #
-
-  eos_initialize_directory(ds, 1, nb, v);
-
-  // Write simple block 0 to jump to SmartWriter
+  // Set up block 0 to boot right into SmartWriter
   memset(response,0,1024);
-  response[0]=0xC3;  // JP $FCE7
+  response[0]=0xC3;
   response[1]=0xE7;
   response[2]=0xFC;
-  eos_write_block(ds, 0, response);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+  eos_write_block(ds,0,&response[0]);
+
+  // Write directory
+  eos_initialize_directory(ds, 1, nb, v);
+  eos_initialize_directory(ds, 1, nb, v);
 }
 
 #endif /* BUILD_ADAM */
