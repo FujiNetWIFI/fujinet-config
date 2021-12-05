@@ -145,6 +145,8 @@ void select_slot_done()
 {
   char filename[256];
 
+  memset(filename,0,sizeof(filename));
+  
   if (create==true)
     {
       create=false; // we're done with this until next time.
@@ -169,11 +171,17 @@ void select_slot_done()
 #endif
     }
   else
-    {    
+    {
       strcat(filename,path);
-      
+      sleep(2);
       io_open_directory(selected_host_slot,path,filter);
+
+      io_set_directory_position(pos);
       
+      strcat(filename,io_read_directory(255-strlen(path),0));
+      sleep(2);
+      io_set_device_filename(selected_device_slot,filename);
+     
       io_set_directory_position(pos);
       
       memcpy(deviceSlots[selected_device_slot].file,io_read_directory(31,0),31);
@@ -181,13 +189,7 @@ void select_slot_done()
       deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
       
       io_put_device_slots(&deviceSlots[0]);
-      
-      io_set_directory_position(pos);
-      
-      strcat(filename,io_read_directory(255,0));
-      
-      io_set_device_filename(selected_device_slot,filename);
-      
+            
       io_close_directory();
       
     }

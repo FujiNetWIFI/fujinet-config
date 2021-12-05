@@ -131,6 +131,7 @@ void hosts_and_devices_eject(unsigned char ds)
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
   io_put_device_slots(&deviceSlots[0]);
+  io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices_eject(ds);
 }
 

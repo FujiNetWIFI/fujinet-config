@@ -222,7 +222,7 @@ void io_set_boot_config(unsigned char toggle)
 
 void io_umount_disk_image(unsigned char ds)
 {
-  char c[2]={0xE8,0x00};
+  char c[2]={0xE9,0x00};
   c[1]=ds;
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
