@@ -38,6 +38,7 @@
 DeviceSlot deviceSlots[8];
 HostSlot hostSlots[8];
 char selected_host_slot;
+char selected_device_slot;
 char selected_host_name[32];
 
 extern bool quick_boot;
@@ -111,6 +112,7 @@ void hosts_and_devices_hosts(void)
 	case 0x85:
 	  hosts_and_devices_edit_host_slot(bar_get());
 	  bar_clear(false);
+	  bar_jump(selected_host_slot);
 	  k=0;
 	  subState=HD_HOSTS;
 	  break;
@@ -119,9 +121,11 @@ void hosts_and_devices_hosts(void)
 	  break;
 	case 0xA0:
 	  bar_up();
+	  selected_host_slot=bar_get();
 	  break;
 	case 0xA2:
 	  bar_down();
+	  selected_host_slot=bar_get();
 	  break;
 	}
     }
@@ -162,9 +166,11 @@ void hosts_and_devices_devices(void)
 	  break;
 	case 0xA0:
 	  bar_up();
+	  selected_device_slot=bar_get();
 	  break;
 	case 0xA2:
 	  bar_down();
+	  selected_device_slot=bar_get();
 	  break;
 	}
     }

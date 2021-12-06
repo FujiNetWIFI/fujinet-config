@@ -161,7 +161,7 @@ void screen_hosts_and_devices_hosts(void)
   smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT","  BOOT");
   smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
   bar_clear(false);
-  bar_set(0,1,8,0);
+  bar_set(0,1,8,selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -169,7 +169,7 @@ void screen_hosts_and_devices_devices(void)
   smartkeys_display(NULL,NULL,NULL," EJECT","  READ\n  ONLY","  READ\n WRITE");
   smartkeys_status("  [TAB] GO TO HOST SLOTS");
   bar_clear(false);
-  bar_set(11,1,4,0);
+  bar_set(11,1,4,selected_device_slot);
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
