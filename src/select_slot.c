@@ -173,13 +173,13 @@ void select_slot_done()
   else
     {
       strcat(filename,path);
-      sleep(2);
+
       io_open_directory(selected_host_slot,path,filter);
 
       io_set_directory_position(pos);
       
       strcat(filename,io_read_directory(255-strlen(path),0));
-      sleep(2);
+
       io_set_device_filename(selected_device_slot,filename);
      
       io_set_directory_position(pos);
