@@ -5,6 +5,7 @@
  * I/O Routines
  */
 
+#include <conio.h> // for sleep() 
 #include <stdlib.h>
 #include <eos.h>
 #include <string.h>
@@ -40,7 +41,8 @@ bool io_error(void)
 unsigned char io_get_wifi_status(void)
 {
   unsigned char c=0xFA;
-  
+
+  sleep(1);
   io_command_and_response(&c,1);
   
   return response[0];

@@ -13,6 +13,7 @@
 extern State state;
 extern char response[1024];
 extern char selected_host_slot;
+extern char selected_device_slot;
 extern char selected_host_name[32];
 extern unsigned long selected_size;
 
