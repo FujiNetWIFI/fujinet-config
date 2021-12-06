@@ -138,6 +138,7 @@ unsigned char select_file_display(void)
 
 void select_next_page(void)
 {
+  bar_clear(false);
   pos += ENTRIES_PER_PAGE;
   subState=SF_DISPLAY;
   dir_eof=false;
@@ -145,6 +146,7 @@ void select_next_page(void)
 
 void select_prev_page(void)
 {
+  bar_clear(false);
   pos -= ENTRIES_PER_PAGE;
   subState=SF_DISPLAY;
   dir_eof=false;
@@ -227,6 +229,8 @@ void select_file_advance(void)
 {
   char *e;
 
+  bar_clear(false);
+  
   io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
@@ -246,7 +250,9 @@ void select_file_advance(void)
 void select_file_devance(void)
 {
   char *p = strrchr(path,'/'); // find end of directory string (last /)
-  
+
+  bar_clear(false);
+
   while (*--p != '/'); // scoot backward until we reach next /
 
   p++;
