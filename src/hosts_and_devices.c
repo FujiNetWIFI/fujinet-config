@@ -92,6 +92,7 @@ void hosts_and_devices_hosts(void)
 	  bar_jump(k-0x31);
 	  break;
 	case 0x09:
+	  bar_clear(false);
 	  subState=HD_DEVICES;
 	  break;
 	case 0x0d:
@@ -109,6 +110,7 @@ void hosts_and_devices_hosts(void)
 	  break;
 	case 0x85:
 	  hosts_and_devices_edit_host_slot(bar_get());
+	  bar_clear(false);
 	  k=0;
 	  subState=HD_HOSTS;
 	  break;
@@ -152,6 +154,7 @@ void hosts_and_devices_devices(void)
 	  bar_jump(k-0x31);
 	  break;
 	case 0x09:
+	  bar_clear(false);
 	  subState=HD_HOSTS;
 	  break;
 	case 0x84:

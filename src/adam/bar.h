@@ -6,10 +6,13 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include <stdbool.h>
+
 /**
  * Clear the currently displayed bar from screen
+ * @param old true = old position, false = current position
  */
-void bar_clear(void);
+void bar_clear(bool old);
 
 /**
  * Set up bar and start display on row
