@@ -92,20 +92,23 @@ void hosts_and_devices_hosts(void)
 	case '8':
 	  bar_jump(k-0x31);
 	  break;
-	case 0x09:
+	case 0x09: // TAB
 	  bar_clear(false);
 	  subState=HD_DEVICES;
 	  break;
-	case 0x0d:
+	case 0x0d: // RETURN
 	  selected_host_slot=bar_get();
-	  strcpy(selected_host_name,hostSlots[selected_host_slot]);
-	  subState=HD_DONE;
-	  state=SELECT_FILE;
+	  if (hostSlots[selected_host_slot][0] != 0)
+	  {
+	  	strcpy(selected_host_name,hostSlots[selected_host_slot]);
+	  	subState=HD_DONE;
+	  	state=SELECT_FILE;
+	  }
 	  break;
-	case 0x1b:
+	case 0x1b: // ESC
 	  quit();
 	  break;
-	case 0x84:
+	case 0x84: // 
 	  subState=HD_DONE;
 	  state=SHOW_INFO;
 	  break;
