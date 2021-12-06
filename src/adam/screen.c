@@ -181,7 +181,7 @@ void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-  sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i);
+  sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i+1);
   smartkeys_status(response);
 }
 
