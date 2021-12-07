@@ -201,6 +201,17 @@ void io_set_device_filename(unsigned char ds, char* e)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
 
+char *io_get_device_filename(unsigned char ds)
+{
+  char c[2]={0xDA,0x00};
+
+  c[1] = ds;
+
+  io_command_and_response(&c,2);
+
+  return response;
+}
+
 void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
 {
   char nd[263]={0xE7,0x00,0x00,0x00,0x00,0x00,0x00};

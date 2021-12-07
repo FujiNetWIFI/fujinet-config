@@ -134,6 +134,13 @@ void hosts_and_devices_hosts(void)
     }
 }
 
+void hosts_and_devices_long_filename(void)
+{
+  char *f = io_get_device_filename(selected_device_slot);
+  
+  screen_hosts_and_devices_long_filename(f);
+}
+
 void hosts_and_devices_eject(unsigned char ds)
 {
   io_umount_disk_image(ds);
@@ -142,6 +149,7 @@ void hosts_and_devices_eject(unsigned char ds)
   io_put_device_slots(&deviceSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices_eject(ds);
+  hosts_and_devices_long_filename();
 }
 
 void hosts_and_devices_devices(void)
@@ -149,6 +157,8 @@ void hosts_and_devices_devices(void)
   char k=0;
 
   screen_hosts_and_devices_devices();
+  hosts_and_devices_long_filename();
+  
   while (subState==HD_DEVICES)
     {
       k=input();
@@ -159,6 +169,8 @@ void hosts_and_devices_devices(void)
 	case '3':
 	case '4':
 	  bar_jump(k-0x31);
+	  selected_device_slot=bar_get();
+	  hosts_and_devices_long_filename();
 	  break;
 	case 0x09:
 	  bar_clear(false);
@@ -170,10 +182,12 @@ void hosts_and_devices_devices(void)
 	case 0xA0:
 	  bar_up();
 	  selected_device_slot=bar_get();
+	  hosts_and_devices_long_filename();
 	  break;
 	case 0xA2:
 	  bar_down();
 	  selected_device_slot=bar_get();
+	  hosts_and_devices_long_filename();
 	  break;
 	}
     }

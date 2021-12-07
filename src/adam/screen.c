@@ -193,6 +193,17 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   smartkeys_status(response);
 }
 
+void screen_hosts_and_devices_long_filename(char *f)
+{
+  if (strlen(f)>31)
+    {
+      gotoxy(0,17);
+      cprintf("%s",f);
+    }
+  else
+    msx_vfill(0x1100,0x00,1024);
+}
+
 void screen_show_info(AdapterConfig* ac)
 {
   smartkeys_set_mode();
