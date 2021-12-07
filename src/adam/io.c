@@ -150,7 +150,17 @@ void io_open_directory(unsigned char hs, char *p, char *f)
   memset(&c,0,258);
   c[0]=0xF7;
   c[1]=hs;
-  e=strcpy(&c[2],p);
+  strcpy(&c[2],p);
+  e=&c[2];
+
+  if (f[0]!=0x00)
+    {
+      while (*e != 0x00)
+	e++;
+
+      e++;
+      strcpy(e,f);
+    }
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
