@@ -50,15 +50,18 @@ unsigned char input()
 	  switch (keypad)
 	    {
 	    case 1: // Slot 1
-	      key=0x83;
+	      key=0x31;
 	      break;
 	    case 2: // Slot 2
-	      key=0x84;
+	      key=0x32;
 	      break;
 	    case 3: // Slot 3
-	      key=0x85;
+	      key=0x33;
 	      break;
 	    case 4: // Slot 4
+	      key=0x34;
+	      break;
+	    case 0x0a: // *
 	      key=0x86;
 	      break;
 	    }
