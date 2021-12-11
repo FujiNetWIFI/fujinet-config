@@ -35,7 +35,7 @@
 #include "c64/globals.h"
 #endif /* BUILD_APPLE2 */
 
-SFSubState sf_subState;
+WSSubState ws_subState;
 
 NetConfig nc;
 
@@ -55,22 +55,22 @@ void set_wifi_select(void)
 
   bar_set(0,3,numNetworks,0);
 
-  while(sf_subState==SF_SELECT)
-    sf_subState=input_set_wifi_select();
+  while(ws_subState==WS_SELECT)
+    ws_subState=input_set_wifi_select();
 }
 
 void set_wifi_custom(void)
 {
   screen_set_wifi_custom();
   input_line_set_wifi_custom(nc.ssid);
-  sf_subState=SF_PASSWORD;
+  ws_subState=WS_PASSWORD;
 }
 
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
   input_line_set_wifi_password(nc.password);
-  sf_subState=SF_DONE;
+  ws_subState=WS_DONE;
 }
 
 void set_wifi_scan(void)
@@ -86,7 +86,7 @@ void set_wifi_scan(void)
 
   if (io_error())
     {
-      screen_error("COULD NOT SF_SCAN NETWORKS");
+      screen_error("COULD NOT WS_SCAN NETWORKS");
       die();
     }
 
@@ -96,7 +96,7 @@ void set_wifi_scan(void)
       screen_set_wifi_display_ssid(i,s);
     }
 
-  sf_subState=SF_SELECT;
+  ws_subState=WS_SELECT;
 }
 
 void set_wifi_done(void)
@@ -109,21 +109,21 @@ void set_wifi(void)
 {
   while (state == SET_WIFI)
     {
-      switch(sf_subState)
+      switch(ws_subState)
 	{
-	case SF_SCAN:
+	case WS_SCAN:
 	  set_wifi_scan();
 	  break;
-	case SF_SELECT:
+	case WS_SELECT:
 	  set_wifi_select();
 	  break;
-	case SF_CUSTOM:
+	case WS_CUSTOM:
 	  set_wifi_custom();
 	  break;
-	case SF_PASSWORD:
+	case WS_PASSWORD:
 	  set_wifi_password();
 	  break;
-	case SF_DONE:
+	case WS_DONE:
 	  set_wifi_done();
 	  break;
 	}

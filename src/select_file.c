@@ -37,26 +37,13 @@
 
 #define ENTRIES_PER_PAGE 15
 
+SFSubState sf_subState;
 char path[224];
 char filter[32];
 DirectoryPosition pos=0;
 bool dir_eof=false;
 bool quick_boot=false;
 unsigned long selected_size=0;
-
-static enum
-  {
-   SF_INIT,
-   SF_DISPLAY,
-   SF_NEXT_PAGE,
-   SF_PREV_PAGE,
-   SF_CHOOSE,
-   SF_FILTER,
-   SF_ADVANCE_FOLDER,
-   SF_DEVANCE_FOLDER,
-   SF_NEW,
-   SF_DONE
-  } subState;
 
 void select_file_init(void)
 {
@@ -65,7 +52,7 @@ void select_file_init(void)
   path[0]='/';
   memset(filter,0,32);
   screen_select_file();
-  subState=SF_DISPLAY;
+  sf_subState=SF_DISPLAY;
   quick_boot=dir_eof=false;
 }
 
@@ -80,7 +67,7 @@ unsigned char select_file_display(void)
   if (io_error())
     {
       screen_error("  COULD NOT MOUNT HOST SLOT.");
-      subState=SF_DONE;
+      sf_subState=SF_DONE;
       state=SET_WIFI;
       return 0;
     }
@@ -92,7 +79,7 @@ unsigned char select_file_display(void)
   if (io_error())
     {
       screen_error("  COULD NOT OPEN DIRECTORY.");
-      subState=SF_DONE;
+      sf_subState=SF_DONE;
       state=SET_WIFI;
       return 0;
     }
@@ -128,7 +115,7 @@ unsigned char select_file_display(void)
   if (dir_eof != true)
     screen_select_file_next();
   
-  subState=SF_CHOOSE;
+  sf_subState=SF_CHOOSE;
   return visibleEntries;
 }
 
@@ -136,7 +123,7 @@ void select_next_page(void)
 {
   bar_clear(false);
   pos += ENTRIES_PER_PAGE;
-  subState=SF_DISPLAY;
+  sf_subState=SF_DISPLAY;
   dir_eof=false;
 }
 
@@ -144,7 +131,7 @@ void select_prev_page(void)
 {
   bar_clear(false);
   pos -= ENTRIES_PER_PAGE;
-  subState=SF_DISPLAY;
+  sf_subState=SF_DISPLAY;
   dir_eof=false;
 }
 
@@ -155,7 +142,7 @@ void select_file_filter(void)
   input_line_filter(filter);
   dir_eof=quick_boot=false;
   pos=0;
-  subState=SF_DISPLAY;
+  sf_subState=SF_DISPLAY;
 }
 
 void select_file_choose(char visibleEntries)
@@ -164,61 +151,8 @@ void select_file_choose(char visibleEntries)
   
   screen_select_file_choose(visibleEntries);
 
-  while (subState==SF_CHOOSE)
-    {
-      k=input();
-      switch(k)
-	{
-	case 0x0d:
-	  pos+=bar_get();
-	  subState=SF_DONE;
-	  break;
-	case 0x1b:
-	  subState=SF_DONE;
-	  state=HOSTS_AND_DEVICES;
-	  break;
-	case 0x80:
-	  pos=0;
-	  dir_eof=quick_boot=false;
-	  subState=SF_DISPLAY;
-	  break;
-	case 0x84:
-	  subState=strcmp(path,"/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
-	  break;
-	case 0x85:
-	  subState=SF_FILTER;
-	  break;
-	case 0x86:
-	  quick_boot=true;
-	  pos+=bar_get();
-	  subState=SF_DONE;
-	  state=SELECT_SLOT;
-	  break;
-	case 0x94:
-	  subState=SF_NEW;
-	  break;
-	case 0xA0:
-	  if ((bar_get() == 0) && (pos > 0))
-	    subState=SF_PREV_PAGE;
-	  else
-	    bar_up();
-	  break;
-	case 0xA2:
-	  if ((bar_get() == 14) && (dir_eof==false))
-	    subState=SF_NEXT_PAGE;
-	  else
-	    bar_down();
-	  break;
-	case 0xA4:
-	  if (pos>0)
-	    subState=SF_PREV_PAGE;
-	  break;
-	case 0xA6:
-	  if (dir_eof==false)
-	    subState=SF_NEXT_PAGE;
-	  break;
-	}
-    }
+  while (sf_subState==SF_CHOOSE)
+    sf_subState=input_select_file_choose();
 }
 
 void select_file_advance(void)
@@ -240,7 +174,7 @@ void select_file_advance(void)
   pos=0;
   dir_eof=quick_boot=false;
   
-  subState=SF_DISPLAY; // and display the result.
+  sf_subState=SF_DISPLAY; // and display the result.
 }
 
 void select_file_devance(void)
@@ -258,7 +192,7 @@ void select_file_devance(void)
   pos=0;
   dir_eof=quick_boot=false;
   
-  subState=SF_DISPLAY; // And display the result.
+  sf_subState=SF_DISPLAY; // And display the result.
 }
 
 bool select_file_is_folder(void)
@@ -287,7 +221,7 @@ void select_file_new(void)
   k=input_select_file_new_type();
   if (k==0)
     {
-      subState=SF_CHOOSE;
+      sf_subState=SF_CHOOSE;
       return;
     }
 
@@ -302,7 +236,7 @@ void select_file_new(void)
 
   if (selected_size==0) // Aborted from size
     {
-      subState=SF_CHOOSE;
+      sf_subState=SF_CHOOSE;
       return;
     }
 
@@ -311,7 +245,7 @@ void select_file_new(void)
 
   if (f[0]==0x00)
     {
-      subState=SF_CHOOSE;
+      sf_subState=SF_CHOOSE;
       return;
     }
   else
@@ -325,7 +259,7 @@ void select_file_new(void)
 void select_file_done(void)
 {
   if (select_file_is_folder())
-      subState=SF_ADVANCE_FOLDER;
+      sf_subState=SF_ADVANCE_FOLDER;
   else
     state=SELECT_SLOT;
 }
@@ -334,11 +268,11 @@ void select_file(void)
 {
   char visibleEntries=0;
 
-  subState=SF_INIT;
+  sf_subState=SF_INIT;
   
   while (state==SELECT_FILE)
     {
-      switch(subState)
+      switch(sf_subState)
 	{
 	case SF_INIT:
 	  select_file_init();

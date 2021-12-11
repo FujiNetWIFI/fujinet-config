@@ -42,7 +42,12 @@ unsigned long input_select_file_new_custom(void);
 void input_select_file_new_name(char *c);
 bool input_select_slot_build_eos_directory(void);
 void input_select_slot_build_eos_directory_label(char *c);
-SFSubState input_set_wifi_select(void);
+WSSubState input_set_wifi_select(void);
+HDSubState input_hosts_and_devices_hosts(void);
+HDSubState input_hosts_and_devices_devices(void);
+SFSubState input_select_file_choose(void);
+SSSubState input_select_slot_choose(void);
+SISubState input_show_info(void);
 
 #endif /* INPUT_H */
 #endif /* BUILD_ADAM */

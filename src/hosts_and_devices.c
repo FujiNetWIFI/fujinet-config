@@ -7,6 +7,7 @@
 #include <string.h>
 #include "hosts_and_devices.h"
 #include "die.h"
+#include "typedefs.h"
 
 #ifdef BUILD_ADAM
 #include "adam/globals.h"
@@ -35,6 +36,7 @@
 #include "c64/bar.h"
 #endif /* BUILD_C64 */
 
+HDSubState hd_subState;
 DeviceSlot deviceSlots[8];
 HostSlot hostSlots[8];
 char selected_host_slot;
@@ -42,13 +44,6 @@ char selected_device_slot;
 char selected_host_name[32];
 
 extern bool quick_boot;
-
-static enum 
-{
-   HD_HOSTS,
-   HD_DEVICES,
-   HD_DONE
-} subState;
 
 void hosts_and_devices_edit_host_slot(unsigned char i)
 {
@@ -74,64 +69,10 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 
 void hosts_and_devices_hosts(void)
 {
-  char k=0;
-
   screen_hosts_and_devices_hosts();
-  while (subState==HD_HOSTS)
-    {
-      k=input();
-      switch(k)
-	{
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	  bar_jump(k-0x31);
-	  break;
-	case 0x09: // TAB
-	  bar_clear(false);
-	  subState=HD_DEVICES;
-	  break;
-	case 0x0d: // RETURN
-	  selected_host_slot=bar_get();
-	  if (hostSlots[selected_host_slot][0] != 0)
-	  {
-	  	strcpy(selected_host_name,hostSlots[selected_host_slot]);
-	  	subState=HD_DONE;
-	  	state=SELECT_FILE;
-	  }
-	  break;
-	case 0x1b: // ESC
-	  quit();
-	  break;
-	case 0x84: // 
-	  subState=HD_DONE;
-	  state=SHOW_INFO;
-	  break;
-	case 0x85:
-	  hosts_and_devices_edit_host_slot(bar_get());
-	  bar_clear(false);
-	  bar_jump(selected_host_slot);
-	  k=0;
-	  subState=HD_HOSTS;
-	  break;
-	case 0x86:
-	  subState=HD_DONE;
-	  break;
-	case 0xA0:
-	  bar_up();
-	  selected_host_slot=bar_get();
-	  break;
-	case 0xA2:
-	  bar_down();
-	  selected_host_slot=bar_get();
-	  break;
-	}
-    }
+
+  while (hd_subState==HD_HOSTS)
+    hd_subState=input_hosts_and_devices_hosts();
 }
 
 void hosts_and_devices_long_filename(void)
@@ -159,38 +100,8 @@ void hosts_and_devices_devices(void)
   screen_hosts_and_devices_devices();
   hosts_and_devices_long_filename();
   
-  while (subState==HD_DEVICES)
-    {
-      k=input();
-      switch(k)
-	{
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	  bar_jump(k-0x31);
-	  selected_device_slot=bar_get();
-	  hosts_and_devices_long_filename();
-	  break;
-	case 0x09:
-	  bar_clear(false);
-	  subState=HD_HOSTS;
-	  break;
-	case 0x84:
-	  hosts_and_devices_eject(bar_get());
-	  break;
-	case 0xA0:
-	  bar_up();
-	  selected_device_slot=bar_get();
-	  hosts_and_devices_long_filename();
-	  break;
-	case 0xA2:
-	  bar_down();
-	  selected_device_slot=bar_get();
-	  hosts_and_devices_long_filename();
-	  break;
-	}
-    }
+  while (hd_subState==HD_DEVICES)
+    hd_subState=input_hosts_and_devices_devices();
 }
 
 void hosts_and_devices_done(void)
@@ -213,9 +124,9 @@ void hosts_and_devices_done(void)
 void hosts_and_devices(void)
 {
   if (quick_boot==true)
-    subState=HD_DONE;
+    hd_subState=HD_DONE;
   else
-    subState=HD_HOSTS;
+    hd_subState=HD_HOSTS;
   
   io_get_host_slots(&hostSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
@@ -223,7 +134,7 @@ void hosts_and_devices(void)
 
   while (state == HOSTS_AND_DEVICES)
     {
-      switch(subState)
+      switch(hd_subState)
 	{
 	case HD_HOSTS:
 	  hosts_and_devices_hosts();

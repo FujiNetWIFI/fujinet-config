@@ -37,19 +37,10 @@
 extern DeviceSlot deviceSlots[8];
 extern bool quick_boot;
 
-static enum
-  {
-   SF_INIT,
-   SF_DISPLAY,
-   SF_CHOOSE,
-   SF_DONE,
-   SF_ABORT
-  } subState;
-
-static char mode=0;
-static char selected_device_slot=0;
+char mode=0;
 
 bool create=false;
+SSSubState ss_subState;
 
 void select_slot_init()
 {
@@ -57,10 +48,10 @@ void select_slot_init()
     {
       mode=0;
       selected_device_slot=0;
-      subState=SF_DONE;
+      ss_subState=SS_DONE;
     }
   else
-    subState=SF_DISPLAY;
+    ss_subState=SS_DISPLAY;
 }
 
 void select_slot_display()
@@ -85,7 +76,7 @@ void select_slot_display()
       io_close_directory();
     }
   
-  subState=SF_CHOOSE;
+  ss_subState=SS_CHOOSE;
 }
 
 void select_slot_eject(unsigned char ds)
@@ -103,42 +94,8 @@ void select_slot_choose()
   
   screen_select_slot_choose();
 
-  while (subState==SF_CHOOSE)
-    {
-      k=input();
-      switch(k)
-	{
-	case 0x1B:
-	  subState=SF_ABORT;
-	  state=HOSTS_AND_DEVICES;
-	  break;
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	  bar_jump(k-0x31);
-	  break;
-	case 0x84:
-	  select_slot_eject(bar_get());
-	  break;
-	case 0x0d:
-	case 0x85:
-	  selected_device_slot=bar_get();
-	  mode=0;
-	  subState=SF_DONE;
-	  break;
-	case 0x86:
-	  selected_device_slot=bar_get();
-	  mode=2;
-	  subState=SF_DONE;
-	case 0xA0:
-	  bar_up();
-	  break;
-	case 0xA2:
-	  bar_down();
-	  break;
-	}
-    }
+  while (ss_subState==SS_CHOOSE)
+    ss_subState=input_select_slot_choose();
 }
 
 void select_slot_done()
@@ -198,24 +155,24 @@ void select_slot_done()
 
 void select_slot(void)
 {
-  subState=SF_INIT;
+  ss_subState=SS_INIT;
   
   while (state==SELECT_SLOT)
     {
-      switch(subState)
+      switch(ss_subState)
 	{
-	case SF_INIT:
+	case SS_INIT:
 	  select_slot_init();
 	  break;
-	case SF_DISPLAY:
+	case SS_DISPLAY:
 	  select_slot_display();
 	  break;
-	case SF_CHOOSE:
+	case SS_CHOOSE:
 	  select_slot_choose();
 	  break;
-	case SF_DONE:
+	case SS_DONE:
 	  select_slot_done();
-	case SF_ABORT:
+	case SS_ABORT:
 	  break;
 	}
     }

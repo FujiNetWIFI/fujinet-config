@@ -7,14 +7,50 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+typedef enum _ws_subState
+  {
+   WS_SCAN,
+   WS_SELECT,
+   WS_CUSTOM,
+   WS_PASSWORD,
+   WS_DONE
+  } WSSubState;
+
+typedef enum _hd_subState 
+{
+   HD_HOSTS,
+   HD_DEVICES,
+   HD_DONE
+} HDSubState;
+
 typedef enum _sf_subState
   {
-   SF_SCAN,
-   SF_SELECT,
-   SF_CUSTOM,
-   SF_PASSWORD,
+   SF_INIT,
+   SF_DISPLAY,
+   SF_NEXT_PAGE,
+   SF_PREV_PAGE,
+   SF_CHOOSE,
+   SF_FILTER,
+   SF_ADVANCE_FOLDER,
+   SF_DEVANCE_FOLDER,
+   SF_NEW,
    SF_DONE
   } SFSubState;
+
+typedef enum _ss_subState
+  {
+   SS_INIT,
+   SS_DISPLAY,
+   SS_CHOOSE,
+   SS_DONE,
+   SS_ABORT
+  } SSSubState;
+
+typedef enum _si_subState
+  {
+   SI_SHOWINFO,
+   SI_DONE
+  } SISubState;
 
 typedef enum _state
   {
