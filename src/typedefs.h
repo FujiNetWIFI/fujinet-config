@@ -7,6 +7,15 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+typedef enum _sf_subState
+  {
+   SF_SCAN,
+   SF_SELECT,
+   SF_CUSTOM,
+   SF_PASSWORD,
+   SF_DONE
+  } SFSubState;
+
 typedef enum _state
   {
    CHECK_WIFI,

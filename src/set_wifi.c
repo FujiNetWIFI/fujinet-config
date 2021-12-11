@@ -35,14 +35,7 @@
 #include "c64/globals.h"
 #endif /* BUILD_APPLE2 */
 
-static enum
-  {
-   SF_SCAN,
-   SF_SELECT,
-   SF_CUSTOM,
-   SF_PASSWORD,
-   SF_DONE
-  } subState=SF_SCAN;
+SFSubState sf_subState;
 
 NetConfig nc;
 
@@ -62,48 +55,22 @@ void set_wifi_select(void)
 
   bar_set(0,3,numNetworks,0);
 
-  while(subState==SF_SELECT)
-    {
-      k=input();
-      
-      switch(k)
-	{
-	case 0x0D:
-	  set_wifi_set_ssid(bar_get());
-	  subState=SF_PASSWORD;
-	  break;
-	case 0x84:
-	  subState=SF_CUSTOM;
-	  break;
-	case 0x85:
-	  subState=SF_SCAN;
-	  break;
-	case 0x86:
-	  subState=SF_DONE;
-	  state=HOSTS_AND_DEVICES;
-	  break;
-	case 0xA0:
-	  bar_up();
-	  break;
-	case 0xA2:
-	  bar_down();
-	  break;
-	}
-    }
+  while(sf_subState==SF_SELECT)
+    sf_subState=input_set_wifi_select();
 }
 
 void set_wifi_custom(void)
 {
   screen_set_wifi_custom();
   input_line_set_wifi_custom(nc.ssid);
-  subState=SF_PASSWORD;
+  sf_subState=SF_PASSWORD;
 }
 
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
   input_line_set_wifi_password(nc.password);
-  subState=SF_DONE;
+  sf_subState=SF_DONE;
 }
 
 void set_wifi_scan(void)
@@ -129,7 +96,7 @@ void set_wifi_scan(void)
       screen_set_wifi_display_ssid(i,s);
     }
 
-  subState=SF_SELECT;
+  sf_subState=SF_SELECT;
 }
 
 void set_wifi_done(void)
@@ -142,7 +109,7 @@ void set_wifi(void)
 {
   while (state == SET_WIFI)
     {
-      switch(subState)
+      switch(sf_subState)
 	{
 	case SF_SCAN:
 	  set_wifi_scan();

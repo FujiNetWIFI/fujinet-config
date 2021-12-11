@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include "input.h"
 #include "cursor.h"
+#include "globals.h"
+#include "bar.h"
+#include "../set_wifi.h"
 
 static GameControllerData cont;
 static unsigned char key=0;
@@ -154,6 +157,30 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     }
   eos_end_read_keyboard();
   eos_start_read_keyboard();
+}
+
+SFSubState input_set_wifi_select(void)
+{
+  unsigned char k=input();
+  switch(k)
+    {
+    case 0x0D:
+      set_wifi_set_ssid(bar_get());
+      return SF_PASSWORD;
+    case 0x84:
+      return SF_CUSTOM;
+    case 0x85:
+      return SF_SCAN;
+    case 0x86:
+      state=HOSTS_AND_DEVICES;
+      return SF_DONE;
+    case 0xA0:
+      bar_up();
+      return SF_SELECT;
+    case 0xA2:
+      bar_down();
+      return SF_SELECT;
+    }
 }
 
 void input_line_set_wifi_custom(char *c)

@@ -7,6 +7,7 @@
 #define INPUT_H
 
 #include <stdbool.h>
+#include "../typedefs.h"
 
 /**
  * Get input from keyboard/joystick
@@ -41,6 +42,7 @@ unsigned long input_select_file_new_custom(void);
 void input_select_file_new_name(char *c);
 bool input_select_slot_build_eos_directory(void);
 void input_select_slot_build_eos_directory_label(char *c);
+SFSubState input_set_wifi_select(void);
 
 #endif /* INPUT_H */
 #endif /* BUILD_ADAM */
