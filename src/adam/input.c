@@ -110,6 +110,18 @@ unsigned char input()
 	    case 4: // Slot 4
 	      key=KEY_4;
 	      break;
+	    case 5: // Slot 5
+	      key=KEY_5;
+	      break;
+	    case 6: // Slot 6
+	      key=KEY_6;
+	      break;
+	    case 7: // Slot 7
+	      key=KEY_7;
+	      break;
+	    case 8: // Slot 8
+	      key=KEY_8;
+	      break;
 	    case 0x0a: // *
 	      key=KEY_SMART_VI;
 	      break;
