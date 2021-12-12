@@ -29,6 +29,48 @@ static unsigned char keypad_copy=0;
 static unsigned char repeat=0;
 
 /**
+ * ADAM keyboard mapping
+ */
+#define KEY_BACKSPACE    0x08
+#define KEY_TAB          0x09
+#define KEY_RETURN       0x0D
+#define KEY_ESCAPE       0x1B
+#define KEY_SPACE        0x20
+#define KEY_1            0x31
+#define KEY_2            0x32
+#define KEY_3            0x33
+#define KEY_4            0x34
+#define KEY_5            0x35
+#define KEY_6            0x36
+#define KEY_7            0x37
+#define KEY_8            0x38
+#define KEY_HOME         0x80
+#define KEY_SMART_I      0x81
+#define KEY_SMART_II     0x82
+#define KEY_SMART_III    0x83
+#define KEY_SMART_IV     0x84
+#define KEY_SMART_V      0x85
+#define KEY_SMART_VI     0x86
+#define KEY_WILD_CARD    0x90
+#define KEY_UNDO         0x91
+#define KEY_MOVE         0x92
+#define KEY_GET          0x93
+#define KEY_INSERT       0x94
+#define KEY_PRINT        0x95
+#define KEY_CLEAR        0x96
+#define KEY_DELETE       0x97
+#define KEY_COPY         0x9A
+#define KEY_STORE        0x9B
+#define KEY_S_INSERT     0x9C
+#define KEY_S_PRINT      0x9D
+#define KEY_S_CLEAR      0x9E
+#define KEY_S_DELETE     0x9F
+#define KEY_UP_ARROW     0xA0
+#define KEY_DOWN_ARROW   0xA2
+#define KEY_C_UP_ARROW   0xA4
+#define KEY_C_DOWN_ARROW 0xA6
+
+/**
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
@@ -57,19 +99,19 @@ unsigned char input()
 	  switch (keypad)
 	    {
 	    case 1: // Slot 1
-	      key=0x31;
+	      key=KEY_1;
 	      break;
 	    case 2: // Slot 2
-	      key=0x32;
+	      key=KEY_2;
 	      break;
 	    case 3: // Slot 3
-	      key=0x33;
+	      key=KEY_3;
 	      break;
 	    case 4: // Slot 4
-	      key=0x34;
+	      key=KEY_4;
 	      break;
 	    case 0x0a: // *
-	      key=0x86;
+	      key=KEY_SMART_VI;
 	      break;
 	    }
 	}
@@ -84,10 +126,10 @@ unsigned char input()
 	  switch(joystick)
 	    {
 	    case 1: // UP
-	      key=0xA0;
+	      key=KEY_UP_ARROW;
 	      break;
 	    case 4: // DOWN
-	      key=0xA2;
+	      key=KEY_DOWN_ARROW;
 	      break;
 	    }
 	}
@@ -127,12 +169,12 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
   while (key = eos_read_keyboard())
     {
-      if (key == 0x0d)
+      if (key == KEY_RETURN)
 	{
 	  cursor(false);
 	  break;
 	}
-      else if (key == 0x08)
+      else if (key == KEY_BACKSPACE)
 	{
 	  if (pos > 0)
 	    {
@@ -140,13 +182,13 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	      x--;
 	      c--;
 	      *c=0x00;
-	      putchar(0x08);
-	      putchar(0x20);
-	      putchar(0x08);
+	      putchar(KEY_BACKSPACE);
+	      putchar(KEY_SPACE);
+	      putchar(KEY_BACKSPACE);
 	      cursor_pos(x,y);
 	    }
 	}
-      else if (key > 0x1F && key < 0x7F) 
+      else if (key > 0x1F && key < 0x7F) // Printable characters 
 	{
 	  if (pos < len)
 	    {
@@ -203,20 +245,20 @@ HDSubState input_hosts_and_devices_hosts(void)
   
   switch(k)
     {
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-      bar_jump(k-0x31);
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-KEY_1);
       return HD_HOSTS;
-    case 0x09: // TAB
+    case KEY_TAB:
       bar_clear(false);
       return HD_DEVICES;
-    case 0x0d: // RETURN
+    case KEY_RETURN:
       selected_host_slot=bar_get();
       if (hostSlots[selected_host_slot][0] != 0)
 	{
@@ -226,25 +268,25 @@ HDSubState input_hosts_and_devices_hosts(void)
 	}
       else
 	return HD_HOSTS;
-    case 0x1b: // ESC
+    case KEY_ESCAPE: // ESC
       quit();
       break;
-    case 0x84: // 
+    case KEY_SMART_IV: 
       state=SHOW_INFO;
       return HD_DONE;
-    case 0x85:
+    case KEY_SMART_V:
       hosts_and_devices_edit_host_slot(bar_get());
       bar_clear(false);
       bar_jump(selected_host_slot);
       k=0;
       return HD_HOSTS;
-    case 0x86:
+    case KEY_SMART_VI:
       return HD_DONE;
-    case 0xA0:
+    case KEY_UP_ARROW:
       bar_up();
       selected_host_slot=bar_get();
       return HD_HOSTS;
-    case 0xA2:
+    case KEY_DOWN_ARROW:
       bar_down();
       selected_host_slot=bar_get();
       return HD_HOSTS;
@@ -256,26 +298,26 @@ HDSubState input_hosts_and_devices_devices(void)
   unsigned char k=input();
   switch(k)
     {
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-      bar_jump(k-0x31);
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+      bar_jump(k-KEY_1);
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
-    case 0x09:
+    case KEY_TAB:
       bar_clear(false);
       return HD_HOSTS;
-    case 0x84:
+    case KEY_SMART_IV:
       hosts_and_devices_eject(bar_get());
       return HD_DEVICES;
-    case 0xA0:
+    case KEY_UP_ARROW:
       bar_up();
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
-    case 0xA2:
+    case KEY_DOWN_ARROW:
       bar_down();
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
@@ -299,28 +341,28 @@ SFSubState input_select_file_choose(void)
   
   switch(k)
     {
-    case 0x0d:
+    case KEY_RETURN:
       pos+=bar_get();
       return SF_DONE;
-    case 0x1b:
+    case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
       return SF_DONE;
-    case 0x80:
+    case KEY_HOME:
       pos=0;
       dir_eof=quick_boot=false;
       return SF_DISPLAY;
-    case 0x84:
+    case KEY_SMART_IV:
       return strcmp(path,"/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
-    case 0x85:
+    case KEY_SMART_V:
       return SF_FILTER;
-    case 0x86:
+    case KEY_SMART_VI:
       quick_boot=true;
       pos+=bar_get();
       state=SELECT_SLOT;
       return SF_DONE;
-    case 0x94:
+    case KEY_INSERT:
       return SF_NEW;
-    case 0xA0:
+    case KEY_UP_ARROW:
       if ((bar_get() == 0) && (pos > 0))
 	return SF_PREV_PAGE;
       else
@@ -328,7 +370,7 @@ SFSubState input_select_file_choose(void)
 	  bar_up();
 	  return SF_CHOOSE;
 	}
-    case 0xA2:
+    case KEY_DOWN_ARROW:
       if ((bar_get() == 14) && (dir_eof==false))
 	return SF_NEXT_PAGE;
       else
@@ -337,10 +379,10 @@ SFSubState input_select_file_choose(void)
 	  return SF_CHOOSE;
 	}
       break;
-    case 0xA4:
+    case KEY_C_UP_ARROW:
       if (pos>0)
 	return SF_PREV_PAGE;
-    case 0xA6:
+    case KEY_C_DOWN_ARROW:
       if (dir_eof==false)
 	return SF_NEXT_PAGE;
     }
@@ -350,9 +392,9 @@ unsigned char input_select_file_new_type(void)
 {
   switch(cgetc())
     {
-    case 0x85:
+    case KEY_SMART_V:
       return 1;
-    case 0x86:
+    case KEY_SMART_VI:
       return 2;
     default:
       return 0;
@@ -366,26 +408,26 @@ unsigned long input_select_file_new_size(unsigned char t)
     case 1: // DDP
       switch(cgetc())
 	{
-	case 0x83:
+	case KEY_SMART_III:
 	  return 128;
-	case 0x84:
+	case KEY_SMART_IV:
 	  return 256;
-	case 0x85:
+	case KEY_SMART_V:
 	  return 320;
-	case 0x86:
+	case KEY_SMART_VI:
 	  return 1; // CUSTOM
 	}
       break;
     case 2: // DSK
       switch(cgetc())
 	{
-	case 0x83:
+	case KEY_SMART_III:
 	  return 160;
-	case 0x84:
+	case KEY_SMART_IV:
 	  return 320;
-	case 0x85:
+	case KEY_SMART_V:
 	  return 8192;
-	case 0x86:
+	case KEY_SMART_VI:
 	  return 1; // CUSTOM 
 	}
       break;
@@ -410,31 +452,31 @@ SSSubState input_select_slot_choose(void)
 
   switch(k)
     {
-    case 0x1B:
+    case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
       return SS_ABORT;
-    case '1':
-    case '2':
-    case '3':
-    case '4':
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
       bar_jump(k-0x31);
       return SS_CHOOSE;
-    case 0x84:
+    case KEY_SMART_IV:
       select_slot_eject(bar_get());
       return SS_CHOOSE;
-    case 0x0d:
-    case 0x85:
+    case KEY_RETURN:
+    case KEY_SMART_V:
       selected_device_slot=bar_get();
       mode=0;
       return SF_DONE;
-    case 0x86:
+    case KEY_SMART_VI:
       selected_device_slot=bar_get();
       mode=2;
       return SF_DONE;
-    case 0xA0:
+    case KEY_UP_ARROW:
       bar_up();
       return SS_CHOOSE;
-    case 0xA2:
+    case KEY_DOWN_ARROW:
       bar_down();
       return SS_CHOOSE;
     }
@@ -448,15 +490,15 @@ SISubState input_show_info(void)
     {
     case 0x00:
       return SI_SHOWINFO;
-    case 0x0D:
-    case 0x1B:
-    case 0x20:
+    case KEY_RETURN:
+    case KEY_ESCAPE:
+    case KEY_SPACE:
       state=HOSTS_AND_DEVICES;
       return SI_DONE;
-    case 0x85:
+    case KEY_SMART_V:
       state=SET_WIFI;
       return SI_DONE;
-    case 0x86:
+    case KEY_SMART_VI:
       state=CONNECT_WIFI;
       return SI_DONE;
     }
@@ -464,7 +506,7 @@ SISubState input_show_info(void)
 
 bool input_select_slot_build_eos_directory(void)
 {
-  return (cgetc() == 0x85);
+  return (cgetc() == KEY_SMART_V);
 }
 
 void input_select_slot_build_eos_directory_label(char *c)
