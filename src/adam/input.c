@@ -238,6 +238,8 @@ WSSubState input_set_wifi_select(void)
     case 0xA2:
       bar_down();
       return WS_SELECT;
+    default:
+      return WS_SELECT;
     }
 }
 
@@ -302,6 +304,8 @@ HDSubState input_hosts_and_devices_hosts(void)
       bar_down();
       selected_host_slot=bar_get();
       return HD_HOSTS;
+    default:
+      return HD_HOSTS;
     }
 }
 
@@ -335,6 +339,8 @@ HDSubState input_hosts_and_devices_devices(void)
       bar_down();
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    default:
       return HD_DEVICES;
     }
 }
@@ -399,6 +405,8 @@ SFSubState input_select_file_choose(void)
     case KEY_C_DOWN_ARROW:
       if (dir_eof==false)
 	return SF_NEXT_PAGE;
+    default:
+      return SF_CHOOSE;
     }
 }
 
@@ -482,16 +490,18 @@ SSSubState input_select_slot_choose(void)
     case KEY_SMART_V:
       selected_device_slot=bar_get();
       mode=0;
-      return SF_DONE;
+      return SS_DONE;
     case KEY_SMART_VI:
       selected_device_slot=bar_get();
       mode=2;
-      return SF_DONE;
+      return SS_DONE;
     case KEY_UP_ARROW:
       bar_up();
       return SS_CHOOSE;
     case KEY_DOWN_ARROW:
       bar_down();
+      return SS_CHOOSE;
+    default:
       return SS_CHOOSE;
     }
 }
@@ -515,6 +525,8 @@ SISubState input_show_info(void)
     case KEY_SMART_VI:
       state=CONNECT_WIFI;
       return SI_DONE;
+    default:
+      return SI_SHOWINFO;
     }
 }
 
