@@ -175,9 +175,15 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
   smartkeys_display(NULL,NULL,NULL," EJECT","  READ\n  ONLY","  READ\n WRITE");
-  smartkeys_status("  [TAB] GO TO HOST SLOTS");
+  smartkeys_status("  [TAB] GO TO HOST SLOTS\n  [CLEAR] EJECT ALL SLOTS");
   bar_clear(false);
   bar_set(11,1,4,selected_device_slot);
+}
+
+void screen_hosts_and_devices_devices_clear_all(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  CLEARING ALL SLOTS...");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)

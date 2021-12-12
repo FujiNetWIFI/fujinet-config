@@ -93,6 +93,18 @@ void hosts_and_devices_eject(unsigned char ds)
   hosts_and_devices_long_filename();
 }
 
+void hosts_and_devices_devices_clear_all(void)
+{
+  char i;
+  
+  screen_hosts_and_devices_devices_clear_all();
+  
+  for (i=0;i<4;i++)
+    hosts_and_devices_eject(i);
+
+  hd_subState=HD_DEVICES;
+}
+
 void hosts_and_devices_devices(void)
 {
   char k=0;
@@ -141,6 +153,9 @@ void hosts_and_devices(void)
 	  break;
 	case HD_DEVICES:
 	  hosts_and_devices_devices();
+	  break;
+	case HD_CLEAR_ALL_DEVICES:
+	  hosts_and_devices_devices_clear_all();
 	  break;
 	case HD_DONE:
 	  hosts_and_devices_done();
