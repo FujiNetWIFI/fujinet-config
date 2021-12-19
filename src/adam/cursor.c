@@ -10,7 +10,7 @@
 
 void cursor(bool t)
 {
-  msx_vfill(0x3800,t == true ? 0xFF : 0x00, 8);
+  msx_vfill(0x3806,t == true ? 0xFF : 0x00, 2);
   msx_vfill(0x1b00,0x00,4);
   msx_vpoke(0x1b03,4);
 }
