@@ -26,6 +26,7 @@ void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_devices(void);
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d);
 
+void screen_hosts_and_devices_devices_clear_all(void);
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
 void screen_hosts_and_devices_edit_host_slot(unsigned char i);
 

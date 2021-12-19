@@ -38,6 +38,7 @@
 
 HDSubState hd_subState;
 DeviceSlot deviceSlots[8];
+DeviceSlot temp_deviceSlot;
 HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_device_slot;
@@ -118,19 +119,25 @@ void hosts_and_devices_devices(void)
 
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
-  unsigned char temp_hostSlot;
-  unsigned char temp_file[36];
-  unsigned char temp_filename[256];
+  char temp_filename[256];
+
+  memset(temp_filename,0,sizeof(temp_filename));
   
-  temp_hostSlot=deviceSlots[selected_device_slot].hostSlot;
-  memcpy(temp_file,deviceSlots[selected_device_slot].file,36);
-  memcpy(temp_filename,io_get_device_filename(selected_device_slot),256);
+  // Stow device slot temporarily
+  memcpy(temp_deviceSlot,&deviceSlots[selected_device_slot],sizeof(DeviceSlot));
+  temp_deviceSlot.mode=m;
+  memcpy(temp_filename,io_get_device_filename(selected_device_slot),sizeof(temp_filename));
+
+  // unmount disk image
   io_umount_disk_image(selected_device_slot);
-  deviceSlots[selected_device_slot].hostSlot=temp_hostSlot;
-  deviceSlots[selected_device_slot].mode=m;
-  memcpy(deviceSlots[selected_device_slot],temp_file,36);
+
+  // copy device slot back in.
+  memcpy(&deviceSlots[selected_device_slot],temp_deviceSlot,sizeof(DeviceSlot));
   io_set_device_filename(selected_device_slot,temp_filename);
+
   io_put_device_slots(&deviceSlots[0]);
+  
+  // Remount
   io_mount_disk_image(selected_device_slot,m);
 }
 
