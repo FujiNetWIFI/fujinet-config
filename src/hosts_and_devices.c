@@ -124,12 +124,11 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   
   temp_hostSlot=deviceSlots[selected_device_slot].hostSlot;
   memcpy(temp_file,deviceSlots[selected_device_slot].file,36);
-  memcpy(temp_filename,io_get_device_filename(selected_device_slot));
+  memcpy(temp_filename,io_get_device_filename(selected_device_slot),256);
   io_umount_disk_image(selected_device_slot);
   deviceSlots[selected_device_slot].hostSlot=temp_hostSlot;
   deviceSlots[selected_device_slot].mode=m;
-  memcpy(deviceSlots[select_device_slot],temp_file);
-  io_set_filename(temp_filename);
+  memcpy(deviceSlots[selected_device_slot],temp_file,36);
   io_set_device_filename(selected_device_slot,temp_filename);
   io_put_device_slots(&deviceSlots[0]);
   io_mount_disk_image(selected_device_slot,m);
