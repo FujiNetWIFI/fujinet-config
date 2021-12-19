@@ -328,6 +328,14 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_SMART_IV:
       hosts_and_devices_eject(bar_get());
       return HD_DEVICES;
+    case KEY_SMART_V:
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(0);
+      break;
+    case KEY_SMART_VI:
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(2);
+      break;
     case KEY_CLEAR:
       return HD_CLEAR_ALL_DEVICES;
     case KEY_UP_ARROW:

@@ -116,6 +116,25 @@ void hosts_and_devices_devices(void)
     hd_subState=input_hosts_and_devices_devices();
 }
 
+void hosts_and_devices_devices_set_mode(unsigned char m)
+{
+  unsigned char temp_hostSlot;
+  unsigned char temp_file[36];
+  unsigned char temp_filename[256];
+  
+  temp_hostSlot=deviceSlots[selected_device_slot].hostSlot;
+  memcpy(temp_file,deviceSlots[selected_device_slot].file,36);
+  memcpy(temp_filename,io_get_device_filename(selected_device_slot));
+  io_umount_disk_image(selected_device_slot);
+  deviceSlots[selected_device_slot].hostSlot=temp_hostSlot;
+  deviceSlots[selected_device_slot].mode=m;
+  memcpy(deviceSlots[select_device_slot],temp_file);
+  io_set_filename(temp_filename);
+  io_set_device_filename(selected_device_slot,temp_filename);
+  io_put_device_slots(&deviceSlots[0]);
+  io_mount_disk_image(selected_device_slot,m);
+}
+
 void hosts_and_devices_done(void)
 {
   char i;

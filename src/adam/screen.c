@@ -376,7 +376,7 @@ void screen_select_slot(char *e)
 
 void screen_select_slot_choose(void)
 {
-  smartkeys_display(NULL,NULL,NULL," EJECT"," READ\n ONLY","  READ\n  WRITE");
+  smartkeys_display(NULL,NULL,NULL," EJECT",create == false ? " READ\n ONLY" : NULL,create == false ? "  READ\n  WRITE" : NULL);
   smartkeys_status(" [1-4] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
 }
 
