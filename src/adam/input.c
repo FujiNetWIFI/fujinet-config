@@ -5,6 +5,7 @@
 
 #include <msx.h>
 #include <eos.h>
+#include <smartkeys.h>
 #include <conio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -81,6 +82,8 @@ unsigned char input()
   if (key > 1)
     {
       eos_start_read_keyboard();
+      if (key != 0x0D && key != 0x1B)
+	smartkeys_sound_play(SOUND_KEY_PRESS);
       return key;
     }
   else
@@ -181,6 +184,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
   while (key = eos_read_keyboard())
     {
+      smartkeys_sound_play(SOUND_KEY_PRESS);
       if (key == KEY_RETURN)
 	{
 	  cursor(false);
@@ -278,6 +282,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 	{
 	  strcpy(selected_host_name,hostSlots[selected_host_slot]);
 	  state=SELECT_FILE;
+	  smartkeys_sound_play(SOUND_CONFIRM);
 	  return HD_DONE;
 	}
       else
@@ -289,12 +294,14 @@ HDSubState input_hosts_and_devices_hosts(void)
       state=SHOW_INFO;
       return HD_DONE;
     case KEY_SMART_V:
+      smartkeys_sound_play(SOUND_POSITIVE_CHIME);
       hosts_and_devices_edit_host_slot(bar_get());
       bar_clear(false);
       bar_jump(selected_host_slot);
       k=0;
       return HD_HOSTS;
     case KEY_SMART_VI:
+      smartkeys_sound_play(SOUND_CONFIRM);
       return HD_DONE;
     case KEY_UP_ARROW:
       bar_up();
@@ -389,6 +396,7 @@ SFSubState input_select_file_choose(void)
       quick_boot=true;
       pos+=bar_get();
       state=SELECT_SLOT;
+      smartkeys_sound_play(SOUND_CONFIRM);
       return SF_DONE;
     case KEY_INSERT:
       return SF_NEW;

@@ -36,10 +36,12 @@ static const char *empty="Empty";
 void screen_init(void)
 {
   void *param = &udg;
+  smartkeys_sound_init();
   console_ioctl(IOCTL_GENCON_SET_UDGS,&param);
   smartkeys_set_mode();
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  WELCOME TO #FUJINET");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
   eos_start_read_keyboard();
 }
 
@@ -66,6 +68,7 @@ void screen_set_wifi(AdapterConfig *ac)
 
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,"   SKIP");
   smartkeys_status("  SCANNING FOR NETWORKS...");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -96,6 +99,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   gotoxy(0,n+1); cprintf("%s",meter);
   msx_color(1,15,7);
   cprintf("%s",ds);
+  smartkeys_sound_play(SOUND_TYPEWRITER_CLACK);
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
@@ -103,18 +107,21 @@ void screen_set_wifi_select_network(unsigned char nn)
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
   sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);
   smartkeys_status(response);
+  smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
 void screen_set_wifi_custom(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  ENTER NAME OF HIDDEN NETWORK");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_set_wifi_password(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  ENTER NETWORK PASSWORD\n  AND PRESS [RETURN]");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_connect_wifi(NetConfig *nc)
@@ -124,6 +131,7 @@ void screen_connect_wifi(NetConfig *nc)
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   sprintf(response,"  CONNECTING TO NETWORK\n  %s",nc->ssid);
   smartkeys_status(response);
+  smartkeys_sound_play(SOUND_CONFIRM);
 }
 
 char* screen_hosts_and_devices_slot(char *c)
@@ -159,6 +167,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
   msx_vfill(MODE2_ATTR+0x0C00,0x1F,1024);
   msx_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
   msx_vfill_v(MODE2_ATTR+0x0C00,0xF4,32);
+  smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
 // shown on initial screen
@@ -184,6 +193,7 @@ void screen_hosts_and_devices_devices_clear_all(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  CLEARING ALL SLOTS...");
+  smartkeys_sound_play(SOUND_CONFIRM);
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -197,6 +207,7 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i+1);
   smartkeys_status(response);
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_hosts_and_devices_long_filename(char *f)
@@ -235,6 +246,7 @@ void screen_show_info(AdapterConfig* ac)
       msx_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
     }
   smartkeys_display(NULL,NULL," KEYBD?\n  YES","PRINTER?\n  YES"," CHANGE\n  SSID","RECONNECT");    
+  smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
 void screen_select_file(void)
@@ -289,6 +301,7 @@ void screen_select_file_display_entry(unsigned char y, char* e)
   cprintf("%c%c",*e++,*e++);
   msx_color(1,15,7);
   cprintf("%-30s",e);
+  smartkeys_sound_play(SOUND_TYPEWRITER_CLACK);
 }
 
 // Shown on directory screen
@@ -300,18 +313,21 @@ void screen_select_file_choose(char visibleEntries)
 
   smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", slot_1_occupied ? " SLOT 1\n BOOT" : "  QUICK\n  BOOT");
   smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
+  smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
 void screen_select_file_filter(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  ENTER A WILDCARD FILTER.\n  E.G. *Coleco*");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_type(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,"  DDP"," DISK");
   smartkeys_status("  NEW MEDIA:\n  SELECT MEDIA TYPE.");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_size(unsigned char k)
@@ -321,24 +337,28 @@ void screen_select_file_new_size(unsigned char k)
   else if (k==2) // DSK
     smartkeys_display(NULL,NULL," 160K"," 320K","8192K"," CUSTOM");
   smartkeys_status("  SIZE?");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_custom(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  PLEASE ENTER DESIRED CUSTOM SIZE\n  IN NUMBER OF 1K BLOCKS\n");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_name(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  PLEASE ENTER A FILENAME\n  FOR THIS DISK/DDP:");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_creating(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  CREATING FILE... PLEASE WAIT.");
+  smartkeys_sound_play(SOUND_CONFIRM);
 }
 
 void screen_select_slot(char *e)
@@ -372,12 +392,14 @@ void screen_select_slot(char *e)
   msx_vfill(MODE2_ATTR+0x900+64,0x1F,192);
   
   bar_set(0,1,4,0);
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_slot_choose(void)
 {
   smartkeys_display(NULL,NULL,NULL," EJECT",create == false ? " READ\n ONLY" : NULL,create == false ? "  READ\n  WRITE" : NULL);
   smartkeys_status(" [1-4] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_slot_eject(unsigned char ds)
@@ -385,6 +407,7 @@ void screen_select_slot_eject(unsigned char ds)
   msx_vfill(0x0100+(ds<<8)+8,0x00,248);
   gotoxy(1,1+ds); cprintf("%s",empty);
   bar_jump(bar_get());
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
@@ -392,6 +415,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   msx_vfill(0x0c00+(ds<<8)+8,0x00,248);
   gotoxy(1,12+ds); cprintf(empty);
   bar_jump(bar_get());
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
@@ -403,18 +427,21 @@ void screen_select_slot_build_eos_directory(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,"  YES","   NO");
   smartkeys_status("  DO YOU WISH TO WRITE\n  AN EOS DIRECTORY\n  TO THIS IMAGE?");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_slot_build_eos_directory_label(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  ENTER A VOLUME LABEL. (12 CHARACTERS MAX)");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_slot_build_eos_directory_creating(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  CREATING THE DIRECTORY.\n  PLEASE WAIT.");
+  smartkeys_sound_play(SOUND_CONFIRM);
 }
 
 #endif /* BUILD_ADAM */
