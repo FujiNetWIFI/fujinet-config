@@ -44,10 +44,14 @@ DirectoryPosition pos=0;
 bool dir_eof=false;
 bool quick_boot=false;
 unsigned long selected_size=0;
+unsigned char entry_size[ENTRIES_PER_PAGE];
+unsigned short entry_timer=ENTRY_TIMER_DUR;
+bool long_entry_displayed=false;
 
 void select_file_init(void)
 {
   pos=0;
+  memset(entry_size,0,ENTRIES_PER_PAGE);
   memset(path,0,256);
   path[0]='/';
   memset(filter,0,32);
@@ -97,6 +101,7 @@ unsigned char select_file_display(void)
 	}
       else
 	{
+	  entry_size[i]=strlen(e);
 	  visibleEntries++;
 	  screen_select_file_display_entry(i,e);
 	}
@@ -117,6 +122,29 @@ unsigned char select_file_display(void)
   
   sf_subState=SF_CHOOSE;
   return visibleEntries;
+}
+
+void select_display_long_filename(void)
+{
+  char *e;
+  
+  if ((entry_size[bar_get()]>30) && (entry_timer == 0))
+    {
+      if (long_entry_displayed==false)
+	{
+	  io_open_directory(selected_host_slot,path,filter);
+	  io_set_directory_position(pos+bar_get());
+	  e = io_read_directory(64,0);
+	  screen_select_file_display_long_filename(e);
+	  io_close_directory();
+	  long_entry_displayed=true;
+	}
+    }
+  else
+    {
+      long_entry_displayed=false;
+      screen_select_file_clear_long_filename();
+    }
 }
 
 void select_next_page(void)
@@ -152,7 +180,10 @@ void select_file_choose(char visibleEntries)
   screen_select_file_choose(visibleEntries);
 
   while (sf_subState==SF_CHOOSE)
-    sf_subState=input_select_file_choose();
+    {
+      sf_subState=input_select_file_choose();
+      select_display_long_filename();
+    }
 }
 
 void select_file_advance(void)

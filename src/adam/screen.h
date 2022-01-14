@@ -39,6 +39,8 @@ void screen_show_info(AdapterConfig* ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);
+void screen_select_file_display_long_filename(char *e);
+void screen_select_file_clear_long_filename(void);
 void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_prev(void);

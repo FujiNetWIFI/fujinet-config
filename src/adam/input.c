@@ -29,6 +29,9 @@ static unsigned char keypad=0;
 static unsigned char keypad_copy=0;
 static unsigned char repeat=0;
 
+extern unsigned short entry_timer;
+extern bool long_entry_displayed;
+
 /**
  * ADAM keyboard mapping
  */
@@ -78,7 +81,9 @@ static unsigned char repeat=0;
 unsigned char input()
 {
   key = eos_end_read_keyboard();
-  
+  if (entry_timer>0)
+    entry_timer--;
+
   if (key > 1)
     {
       eos_start_read_keyboard();
@@ -375,6 +380,9 @@ void input_line_filter(char *c)
 SFSubState input_select_file_choose(void)
 {
   unsigned char k=input();
+
+  if (entry_timer>0)
+    entry_timer--;
   
   switch(k)
     {
@@ -405,7 +413,10 @@ SFSubState input_select_file_choose(void)
 	return SF_PREV_PAGE;
       else
 	{
+	  long_entry_displayed=false;
+	  entry_timer=ENTRY_TIMER_DUR;
 	  bar_up();
+	  select_display_long_filename();
 	  return SF_CHOOSE;
 	}
     case KEY_DOWN_ARROW:
@@ -413,7 +424,10 @@ SFSubState input_select_file_choose(void)
 	return SF_NEXT_PAGE;
       else
 	{
+	  long_entry_displayed=false;
+	  entry_timer=ENTRY_TIMER_DUR;
 	  bar_down();
+	  select_display_long_filename();
 	  return SF_CHOOSE;
 	}
       break;

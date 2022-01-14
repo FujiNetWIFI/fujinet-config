@@ -282,6 +282,18 @@ void screen_select_file_display(char *p, char *f)
 
 }
 
+void screen_select_file_display_long_filename(char *e)
+{
+  gotoxy(0,19);
+  cprintf("%-64s",e);
+}
+
+void screen_select_file_clear_long_filename(void)
+{
+  gotoxy(0,0);
+  msx_vfill(0x1300,0,512);
+}
+
 void screen_select_file_prev(void)
 {
   msx_color(1,5,7);
