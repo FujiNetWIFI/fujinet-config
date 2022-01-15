@@ -141,32 +141,39 @@ char* screen_hosts_and_devices_slot(char *c)
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 {
+  gotoxy(0,11); cprintf("%32s","DISK SLOTS");
+
   for (char i=0;i<4;i++)
     {
       gotoxy(0,i+y); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
     }
+  msx_vfill(MODE2_ATTR+0x0B00,0xF4,256);
+  msx_vfill(MODE2_ATTR+0x0C00,0x1F,1024);
+  msx_vfill_v(MODE2_ATTR+0x0C00,0xF4,32);
+}
+
+void screen_hosts_and_devices_host_slots(HostSlot *h)
+{
+  gotoxy(0,0);  cprintf("%32s","HOST SLOTS");
+
+  for (char i=0;i<8;i++)
+    {
+      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(h[i])); 
+    }
+  
+  msx_vfill(MODE2_ATTR,0xF4,256);
+  msx_vfill(MODE2_ATTR+0x0100,0x1F,2048);
+  msx_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
 {
   smartkeys_set_mode();
   eos_start_read_keyboard();
-  gotoxy(0,0);  cprintf("%32s","HOST SLOTS");
-  gotoxy(0,11); cprintf("%32s","DISK SLOTS");
-  
-  for (char i=0;i<8;i++)
-    {
-      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(h[i])); 
-    }
 
+  screen_hosts_and_devices_host_slots(h);
   screen_hosts_and_devices_device_slots(12,d);
   
-  msx_vfill(MODE2_ATTR,0xF4,256);
-  msx_vfill(MODE2_ATTR+0x0B00,0xF4,256);
-  msx_vfill(MODE2_ATTR+0x0100,0x1F,2048);
-  msx_vfill(MODE2_ATTR+0x0C00,0x1F,1024);
-  msx_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
-  msx_vfill_v(MODE2_ATTR+0x0C00,0xF4,32);
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 

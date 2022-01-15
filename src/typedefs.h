@@ -47,6 +47,15 @@ typedef enum _ss_subState
    SS_ABORT
   } SSSubState;
 
+typedef enum _dh_subState
+  {
+   DH_INIT,
+   DH_DISPLAY,
+   DH_CHOOSE,
+   DH_DONE,
+   DH_ABORT
+  } DHSubState;
+
 typedef enum _si_subState
   {
    SI_SHOWINFO,
@@ -61,6 +70,7 @@ typedef enum _state
    HOSTS_AND_DEVICES,
    SELECT_FILE,
    SELECT_SLOT,
+   DESTINATION_HOST_SLOT,
    PERFORM_COPY,
    SHOW_INFO,
    DONE

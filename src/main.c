@@ -13,6 +13,7 @@
 #include "select_slot.h"
 #include "perform_copy.h"
 #include "show_info.h"
+#include "destination_host_slot.h"
 
 #ifdef BUILD_ADAM
 #include "adam/io.h"
@@ -65,6 +66,9 @@ void run(void)
 	  break;
 	case SELECT_SLOT:
 	  select_slot();
+	  break;
+	case DESTINATION_HOST_SLOT:
+	  destination_host_slot();
 	  break;
 	case PERFORM_COPY:
 	  perform_copy();

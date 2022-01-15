@@ -47,6 +47,7 @@ unsigned long selected_size=0;
 unsigned char entry_size[ENTRIES_PER_PAGE];
 unsigned short entry_timer=ENTRY_TIMER_DUR;
 bool long_entry_displayed=false;
+bool copy_mode=false;
 
 void select_file_init(void)
 {
