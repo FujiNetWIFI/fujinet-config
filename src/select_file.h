@@ -11,5 +11,6 @@
 
 void select_file(void);
 void select_display_long_filename(void);
+void select_file_set_source_filename(void);
 
 #endif /* SELECT_FILE */

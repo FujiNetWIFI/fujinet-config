@@ -34,24 +34,54 @@
 #include "c64/bar.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_PC8801
+#include "pc8801/screen.h"
+#include "pc8801/input.h"
+#include "pc8801/globals.h"
+#include "pc8801/io.h"
+#include "pc8801/bar.h"
+#endif /* BUILD_PC8801 */
+
+#ifdef BUILD_PC6001
+#include "pc6001/screen.h"
+#include "pc6001/input.h"
+#include "pc6001/globals.h"
+#include "pc6001/io.h"
+#include "pc6001/bar.h"
+#endif /* BUILD_PC6001 */
+
 #include "destination_host_slot.h"
 
 DHSubState dh_subState;
 
+extern HostSlot hostSlots[8];
+extern char copy_destination_path[128];
+extern unsigned char copy_host_slot;
+extern bool copy_mode;
+
 void destination_host_slot_init()
 {
+  screen_destination_host_slot(hostSlots[selected_host_slot],path);
+  dh_subState=DH_DISPLAY;
 }
 
 void destination_host_slot_display()
 {
+  io_get_host_slots(&hostSlots[0]);
+  screen_hosts_and_devices_host_slots(&hostSlots[0]);
+  dh_subState=DH_CHOOSE;
 }
 
 void destination_host_slot_choose()
 {
+  screen_destination_host_slot_choose();
+  while (dh_subState==DH_CHOOSE)
+    dh_subState=input_destination_host_slot_choose();
 }
 
 void destination_host_slot_done()
 {
+  strncpy(copy_host_name,hostSlots[copy_host_slot],32);
 }
 
 void destination_host_slot(void)

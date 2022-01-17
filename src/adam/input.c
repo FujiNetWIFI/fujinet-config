@@ -31,6 +31,8 @@ static unsigned char repeat=0;
 
 extern unsigned short entry_timer;
 extern bool long_entry_displayed;
+extern unsigned char copy_host_slot;
+extern bool copy_mode;
 
 /**
  * ADAM keyboard mapping
@@ -57,13 +59,13 @@ extern bool long_entry_displayed;
 #define KEY_SMART_VI     0x86
 #define KEY_WILD_CARD    0x90
 #define KEY_UNDO         0x91
-#define KEY_MOVE         0x92
+#define KEY_MOVE         0x9A
 #define KEY_GET          0x93
 #define KEY_INSERT       0x94
 #define KEY_PRINT        0x95
 #define KEY_CLEAR        0x96
 #define KEY_DELETE       0x97
-#define KEY_COPY         0x9A
+#define KEY_COPY         0x92
 #define KEY_STORE        0x9B
 #define KEY_S_INSERT     0x9C
 #define KEY_S_PRINT      0x9D
@@ -390,6 +392,7 @@ SFSubState input_select_file_choose(void)
       pos+=bar_get();
       return SF_DONE;
     case KEY_ESCAPE:
+      copy_mode=false;
       state=HOSTS_AND_DEVICES;
       return SF_DONE;
     case KEY_HOME:
@@ -401,13 +404,21 @@ SFSubState input_select_file_choose(void)
     case KEY_SMART_V:
       return SF_FILTER;
     case KEY_SMART_VI:
-      quick_boot=true;
-      pos+=bar_get();
-      state=SELECT_SLOT;
+      if (copy_mode == false)
+	{
+	  quick_boot=true;
+	  pos+=bar_get();
+	  state=SELECT_SLOT;
+	}
       smartkeys_sound_play(SOUND_CONFIRM);
       return SF_DONE;
     case KEY_INSERT:
       return SF_NEW;
+    case KEY_COPY:
+      pos += bar_get();
+      select_file_set_source_filename();
+      smartkeys_sound_play(SOUND_CONFIRM);
+      return SF_COPY;
     case KEY_UP_ARROW:
       if ((bar_get() == 0) && (pos > 0))
 	return SF_PREV_PAGE;
@@ -535,6 +546,46 @@ SSSubState input_select_slot_choose(void)
       return SS_CHOOSE;
     default:
       return SS_CHOOSE;
+    }
+}
+
+DHSubState input_destination_host_slot_choose(void)
+{
+  unsigned char k=input();
+
+  switch(k)
+    {
+    case KEY_RETURN:
+      if (hostSlots[bar_get()][0] != 0x00)
+	{
+	  copy_host_slot=bar_get();
+	  copy_mode=true;
+	  state=SELECT_FILE;
+	  return DH_DONE;
+	}
+      else
+	return DH_CHOOSE;
+    case KEY_ESCAPE:
+      state=HOSTS_AND_DEVICES;
+      return DH_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-0x31);
+      return DH_CHOOSE;
+    case KEY_UP_ARROW:
+      bar_up();
+      return DH_CHOOSE;
+    case KEY_DOWN_ARROW:
+      bar_down();
+      return DH_CHOOSE;
+    default:
+      return DH_CHOOSE;
     }
 }
 

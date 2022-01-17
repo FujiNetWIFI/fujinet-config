@@ -30,7 +30,17 @@
 #include "c64/screen.h"
 #endif /* BUILD_C64 */
 
-State state=CHECK_WIFI;
+#ifdef BUILD_PC8801
+#include "pc8801/io.h"
+#include "pc8801/screen.h"
+#endif /* BUILD_PC8801 */
+
+#ifdef BUILD_PC6001
+#include "pc6001/io.h"
+#include "pc6001/screen.h"
+#endif /* BUILD_PC6001 */
+
+State state=HOSTS_AND_DEVICES;
 extern DeviceSlot deviceSlots[8];
 
 void setup(void)

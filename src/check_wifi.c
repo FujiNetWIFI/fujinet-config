@@ -19,6 +19,16 @@
 #include "c64/globals.h"
 #endif /* BUILD_C64 */
 
+#ifdef BUILD_PC8801
+#include "pc8801/io.h"
+#include "pc8801/globals.h"
+#endif /* BUILD_PC8801 */
+
+#ifdef BUILD_PC6001
+#include "pc6001/io.h"
+#include "pc6001/globals.h"
+#endif /* BUILD_PC6001 */
+
 #include "check_wifi.h"
 
 void check_wifi(void)

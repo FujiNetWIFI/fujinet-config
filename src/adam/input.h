@@ -48,6 +48,7 @@ HDSubState input_hosts_and_devices_devices(void);
 SFSubState input_select_file_choose(void);
 SSSubState input_select_slot_choose(void);
 SISubState input_show_info(void);
+DHSubState input_destination_host_slot_choose(void);
 
 #endif /* INPUT_H */
 #endif /* BUILD_ADAM */

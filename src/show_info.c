@@ -27,6 +27,20 @@
 #include "c64/io.h"
 #endif /* BUILD_C64 */
 
+#ifdef BUILD_PC8801
+#include "pc8801/screen.h"
+#include "pc8801/input.h"
+#include "pc8801/globals.h"
+#include "pc8801/io.h"
+#endif /* BUILD_PC8801 */
+
+#ifdef BUILD_PC6001
+#include "pc6001/screen.h"
+#include "pc6001/input.h"
+#include "pc6001/globals.h"
+#include "pc6001/io.h"
+#endif /* BUILD_PC6001 */
+
 SISubState si_subState;
 
 void show_info(void)

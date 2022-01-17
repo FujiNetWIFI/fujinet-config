@@ -15,6 +15,8 @@
 #include <eos.h>
 #include <string.h>
 
+extern bool copy_mode;
+
 static char udg[] =
   {
    0,0,0,0,0,0,3,51,                               // WIFI 1
@@ -280,7 +282,7 @@ void screen_select_file_display(char *p, char *f)
 
   // Update content area
   msx_color(15,4,7);
-  gotoxy(0,0); cprintf("%32s",selected_host_name);
+  gotoxy(0,0); cprintf("%32s",copy_mode == true ? copy_host_name : selected_host_name);
 
   if (f[0]==0x00)
     cprintf("%32s",p);
@@ -330,8 +332,17 @@ void screen_select_file_choose(char visibleEntries)
 
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
 
-  smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", slot_1_occupied ? " SLOT 1\n BOOT" : "  QUICK\n  BOOT");
-  smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
+  if (copy_mode==true)
+    {
+      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", " PERFORM\n  COPY");
+      smartkeys_status("  SELECT DESTINATION\n  [ESC] ABORT");
+    }
+  else
+    {
+      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", slot_1_occupied ? " SLOT 1\n BOOT" : "  QUICK\n  BOOT");
+      smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
+    }
+  
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
@@ -461,6 +472,38 @@ void screen_select_slot_build_eos_directory_creating(void)
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  CREATING THE DIRECTORY.\n  PLEASE WAIT.");
   smartkeys_sound_play(SOUND_CONFIRM);
+}
+
+void screen_destination_host_slot(char *h, char *p)
+{
+  clrscr();
+  msx_color(15,4,7);
+  gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
+  gotoxy(0,11); cprintf("%32s",h);
+  msx_color(1,15,7);
+  gotoxy(0,12); cprintf("%-128s",p);
+}
+
+void screen_destination_host_slot_choose(void)
+{
+  msx_color(15,4,7); gotoxy(0,0); cprintf("%32s","COPY TO HOST SLOT");
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status(" [1-8] CHOOSE SLOT\n [RETURN] SELECT SLOT\n [ESC] TO ABORT.");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+  bar_set(0,1,8,selected_host_slot);
+}
+
+void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
+{
+  clrscr();
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  COPYING FILE...PLEASE WAIT.");
+  gotoxy(0,0); msx_color(15,4,7); cprintf("%32s","COPYING FILE FROM:");
+  gotoxy(0,1); cprintf("%32s",sh);
+  gotoxy(0,2); msx_color(1,15,7); cprintf("%-128s",p);
+  gotoxy(0,6); msx_color(15,4,7); cprintf("%32s",dh);
+  gotoxy(0,7); msx_color(1,15,7); cprintf("%-128s",dp);
+  while(1);
 }
 
 #endif /* BUILD_ADAM */

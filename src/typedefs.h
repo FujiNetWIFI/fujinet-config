@@ -35,6 +35,7 @@ typedef enum _sf_subState
    SF_ADVANCE_FOLDER,
    SF_DEVANCE_FOLDER,
    SF_NEW,
+   SF_COPY,
    SF_DONE
   } SFSubState;
 
