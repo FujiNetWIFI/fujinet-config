@@ -6,10 +6,12 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include "globals.h"
+
 /**
  * Clear the currently displayed bar from screen
  */
-void bar_clear(void);
+void bar_clear(bool oldRow);
 
 /**
  * Set up bar and start display on row
