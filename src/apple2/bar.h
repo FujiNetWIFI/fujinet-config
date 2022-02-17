@@ -11,7 +11,7 @@
 /**
  * Clear the currently displayed bar from screen
  */
-void bar_clear(unsigned char /* bool */ oldRow);
+void bar_clear(bool oldRow);
 
 /**
  * Set up bar and start display on row
