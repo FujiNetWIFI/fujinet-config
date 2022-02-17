@@ -61,6 +61,7 @@ HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_device_slot;
 char selected_host_name[32];
+char temp_filename[256];
 
 extern bool quick_boot;
 
@@ -137,12 +138,10 @@ void hosts_and_devices_devices(void)
 
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
-  char temp_filename[256];
-
   memset(temp_filename,0,sizeof(temp_filename));
   
   // Stow device slot temporarily
-  memcpy(temp_deviceSlot,&deviceSlots[selected_device_slot],sizeof(DeviceSlot));
+  memcpy(&temp_deviceSlot,&deviceSlots[selected_device_slot],sizeof(DeviceSlot));
   temp_deviceSlot.mode=m;
   memcpy(temp_filename,io_get_device_filename(selected_device_slot),sizeof(temp_filename));
 
@@ -150,7 +149,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   io_umount_disk_image(selected_device_slot);
 
   // copy device slot back in.
-  memcpy(&deviceSlots[selected_device_slot],temp_deviceSlot,sizeof(DeviceSlot));
+  memcpy(&deviceSlots[selected_device_slot],&temp_deviceSlot,sizeof(DeviceSlot));
   io_set_device_filename(selected_device_slot,temp_filename);
 
   io_put_device_slots(&deviceSlots[0]);

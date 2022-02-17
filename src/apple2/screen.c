@@ -81,6 +81,14 @@ void screen_connect_wifi(NetConfig *nc)
   gotoxy(0,STATUS_BAR); cprintf("CONNECTING TO NETWORK: %s",nc->ssid);
 }
 
+void screen_destination_host_slot(char *h, char *p) {
+  // TODO: implement
+}
+
+void screen_destination_host_slot_choose(void) {
+  // TODO: implement
+}
+
 char* screen_hosts_and_devices_slot(char *c)
 {
   return c[0]==0x00 ? "Empty" : c;
@@ -121,6 +129,10 @@ void screen_hosts_and_devices_hosts(void)
   gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
 }
 
+void screen_hosts_and_devices_host_slots(HostSlot *h) {
+  // TODO: Implement
+}
+
 void screen_hosts_and_devices_devices(void)
 {
   cclearxy(0,STATUS_BAR,120);
@@ -136,6 +148,10 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.");
+}
+
+void screen_perform_copy(char *sh, char *p, char *dh, char *dp) {
+  // TODO: Implement
 }
 
 void screen_show_info(AdapterConfig* ac)
@@ -181,6 +197,11 @@ void screen_select_file_prev(void)
   gotoxy(0,2); cprintf("%40s","[...]");
 }
 
+void screen_select_file_display_long_filename(char *e) 
+{
+  // TODO: Implement
+}
+
 void screen_select_file_next(void)
 {
   gotoxy(0,18); cprintf("%40s","[...]");
@@ -191,6 +212,26 @@ void screen_select_file_display_entry(unsigned char y, char* e)
   gotoxy(0,y+3);
   cprintf("%c%c",*e++,*e++);
   cprintf("%-30s",e);
+}
+
+void screen_select_file_clear_long_filename(void) 
+{
+  // TODO: Implement
+}
+
+void screen_select_file_new_type(void) 
+{
+  // TODO: Implement
+}
+
+void screen_select_file_new_size(unsigned char k) 
+{
+  // TODO: implement
+}
+
+void screen_select_file_new_custom(void) 
+{
+  // TODO: Implement
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -232,6 +273,26 @@ void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
+}
+
+void screen_select_file_new_name(void)
+{
+  // TODO: implement
+}
+
+void screen_hosts_and_devices_long_filename(char *f)
+{
+  // TODO: implement
+}
+
+void screen_hosts_and_devices_devices_clear_all(void)
+{
+  // TODO: implement
+}
+
+void screen_select_file_new_creating(void)
+{
+  // TODO: implement
 }
 
 void screen_select_slot_mode(void)
