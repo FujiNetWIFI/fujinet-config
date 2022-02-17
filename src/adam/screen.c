@@ -16,6 +16,7 @@
 #include <string.h>
 
 extern bool copy_mode;
+extern char copy_host_name;
 
 static char udg[] =
   {
@@ -282,7 +283,7 @@ void screen_select_file_display(char *p, char *f)
 
   // Update content area
   msx_color(15,4,7);
-  gotoxy(0,0); cprintf("%32s",copy_mode == true ? copy_host_name : selected_host_name);
+  gotoxy(0,0); cprintf("%32s",copy_mode == true ? hostSlots[copy_host_slot] : hostSlots[selected_host_slot]);
 
   if (f[0]==0x00)
     cprintf("%32s",p);

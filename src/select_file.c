@@ -79,7 +79,6 @@ void select_file_init(void)
     {
       strncpy(source_path,path,224);
       strncpy(source_filter,filter,32);
-      while(1);
     }
   
   pos=0;
@@ -158,7 +157,7 @@ unsigned char select_file_display(void)
 
 void select_file_set_source_filename(void)
 {
-  io_open_directory(copy_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
   io_set_directory_position(pos);
   strcat(path,io_read_directory(128,0));
 }
