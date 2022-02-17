@@ -69,6 +69,16 @@ void io_set_ssid(NetConfig *nc)
 {
 }
 
+char *io_get_device_filename(unsigned char ds)
+{
+  // TODO: implement
+}
+
+void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
+{
+  // TODO: implement
+}
+
 void io_get_device_slots(DeviceSlot *d)
 {
   d=_ds;
