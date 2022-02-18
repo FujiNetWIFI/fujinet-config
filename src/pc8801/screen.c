@@ -10,7 +10,6 @@
 #include "bar.h"
 #include <conio.h>
 #include <sys/ioctl.h>
-#include <eos.h>
 #include <string.h>
 
 extern bool copy_mode;
