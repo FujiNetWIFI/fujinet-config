@@ -3,6 +3,8 @@
     "stdlib.h": "c",
     "string.h": "c",
     "fuji_typedefs.h": "c",
-    "conio.h": "c"
-  }
+    "conio.h": "c",
+    "sp.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }

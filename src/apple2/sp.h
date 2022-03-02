@@ -11,6 +11,9 @@
 #define SP_CMD_STATUS 0
 #define SP_CMD_CONTROL 4
 
+extern unsigned char sp_payload[1024];
+extern unsigned int sp_count;
+
 unsigned char sp_status(unsigned char statcode);
 
 #endif /* SP_H */

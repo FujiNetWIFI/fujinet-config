@@ -8,9 +8,10 @@
 #include "sp.h"
 
 static unsigned char sp_payload[1024];
+static unsigned int sp_count;
+
 static unsigned char sp_cmdlist[10];
 static unsigned char sp_cmdlist_low, sp_cmdlist_high;
-static unsigned int sp_count;
 static unsigned char sp_dest, sp_err, sp_rtn_low, sp_rtn_high;
 
 unsigned char sp_status(unsigned char statcode)
@@ -28,12 +29,11 @@ unsigned char sp_status(unsigned char statcode)
   // store cmd list
   __asm__ volatile ("lda #$00");
   __asm__ volatile ("sta %g", spCmd); // store status command #
-  __asm__ volatile ("lda %b", sp_cmdlist_low);
+  __asm__ volatile ("lda %v", sp_cmdlist_low);
   __asm__ volatile ("sta %g", spCmdListLow); // store status command #
-  __asm__ volatile ("lda %b", sp_cmdlist_high);
+  __asm__ volatile ("lda %v", sp_cmdlist_high);
   __asm__ volatile ("sta %g", spCmdListHigh); // store status command #
-  
-spCall:  
+    
   __asm__ volatile ("jsr $C50D");
 spCmd:
   __asm__ volatile ("nop");
@@ -46,6 +46,7 @@ spCmdListHigh:
   __asm__ volatile ("sta %v", sp_err);
   
   sp_count = ((unsigned)sp_rtn_high << 8) | (unsigned)sp_rtn_low;
+
   return sp_err;
 }
 
