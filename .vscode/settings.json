@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "stdlib.h": "c",
+    "string.h": "c",
+    "fuji_typedefs.h": "c",
+    "conio.h": "c"
+  }
+}

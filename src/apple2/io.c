@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "io.h"
+#include "sp.h"
 
 /* Test Fixtures, remove when actual I/O present */
 static NetConfig nc;
@@ -42,6 +43,8 @@ bool io_error(void)
 
 unsigned char io_get_wifi_status(void)
 {
+  // call the SP status command and get the returned byte
+  
   return 3;
 }
 
