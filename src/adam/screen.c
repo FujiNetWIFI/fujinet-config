@@ -15,6 +15,9 @@
 #include <eos.h>
 #include <string.h>
 
+#define MAX_DISK_SLOTS (4)
+#define STR_MAX_DISK_SLOTS "4"
+
 extern bool copy_mode;
 
 static char udg[] =
@@ -145,7 +148,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 {
   gotoxy(0,11); cprintf("%32s","DISK SLOTS");
 
-  for (char i=0;i<4;i++)
+  for (char i=0;i<MAX_DISK_SLOTS;i++)
     {
       gotoxy(0,i+y); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
     }
@@ -179,12 +182,22 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
+bool any_slot_occupied()
+{
+  bool occupied = false;
+
+  for (char i = 0; (i < MAX_DISK_SLOTS) && (!occupied); i++)
+    occupied = deviceSlots[i].file[0] != 0x00;
+
+  return occupied;
+}
+
 // shown on initial screen
 void screen_hosts_and_devices_hosts(void)
 {
-  bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
+  bool occupied = any_slot_occupied();
 
-  smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT",slot_1_occupied ? " SLOT 1\n   BOOT" : NULL);
+  smartkeys_display(NULL, NULL, NULL, "  SHOW\n CONFIG", "  EDIT\n  SLOT", occupied ? " BOOT" : NULL);
   smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
   bar_clear(false);
   bar_set(0,1,8,selected_host_slot);
@@ -328,7 +341,7 @@ void screen_select_file_display_entry(unsigned char y, char* e)
 // Shown on directory screen
 void screen_select_file_choose(char visibleEntries)
 {
-  bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
+  bool occupied = any_slot_occupied();
 
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
 
@@ -339,7 +352,7 @@ void screen_select_file_choose(char visibleEntries)
     }
   else
     {
-      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", slot_1_occupied ? " SLOT 1\n BOOT" : "  QUICK\n  BOOT");
+      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? " BOOT" : "  QUICK\n  BOOT");
       smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
     }
   
@@ -428,7 +441,7 @@ void screen_select_slot(char *e)
 void screen_select_slot_choose(void)
 {
   smartkeys_display(NULL,NULL,NULL," EJECT",create == false ? " READ\n ONLY" : NULL,create == false ? "  READ\n  WRITE" : NULL);
-  smartkeys_status(" [1-4] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
+  smartkeys_status(" [1-" STR_MAX_DISK_SLOTS "] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
