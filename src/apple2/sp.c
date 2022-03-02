@@ -7,8 +7,8 @@
 
 #include "sp.h"
 
-static unsigned char sp_payload[1024];
-static unsigned int sp_count;
+unsigned char sp_payload[1024];
+unsigned int sp_count;
 
 static unsigned char sp_cmdlist[10];
 static unsigned char sp_cmdlist_low, sp_cmdlist_high;
