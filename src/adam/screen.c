@@ -183,9 +183,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
 // shown on initial screen
 void screen_hosts_and_devices_hosts(void)
 {
-  bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
-
-  smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT",slot_1_occupied ? " SLOT 1\n   BOOT" : NULL);
+  smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT","  BOOT");
   smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
   bar_clear(false);
   bar_set(0,1,8,selected_host_slot);
