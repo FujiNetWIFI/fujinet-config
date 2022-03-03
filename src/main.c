@@ -23,6 +23,9 @@
 #ifdef BUILD_APPLE2
 #include "apple2/io.h"
 #include "apple2/screen.h"
+#include "apple2/sp.h"
+#include <conio.h> // for dev
+#include <stdint.h>
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -93,8 +96,35 @@ void run(void)
     }
 }
 
+void test()
+{
+	uint8_t i, j;
+	uint8_t err, num;
+
+	clrscr();
+	cputs("FujiNet Getting Started\n\r");
+
+	err = sp_status(0x00, 0x00); // get number of devices
+	num = sp_payload[0];
+	num++;
+	for (i = 1; i < num; i++)
+	{
+		cprintf("UNIT #%d NAME: ", i);
+		err = sp_status(i, 0x03);
+		for (j = 0; j < sp_payload[4]; j++)
+			cputc(sp_payload[5 + j]);
+		cputs("\r\n");
+	}
+}
+
 void main(void)
 {
-  setup();
-  run();
+	setup();
+#ifdef BUILD_APPLE2
+	test();
+	cgetc();
+#else
+	run();
+#endif
+
 }

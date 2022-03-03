@@ -89,7 +89,8 @@ unsigned char io_get_wifi_status(void)
 
 NetConfig* io_get_ssid(void)
 {
-  char err = sp_status(FUJICMD_GET_SSID);
+  char err;
+  err = sp_status(0x05, FUJICMD_GET_SSID); // to do - replace 0x05 with a stored value of "THE_FUJI"
   memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
   memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
   return &nc;

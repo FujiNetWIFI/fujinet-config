@@ -8,13 +8,15 @@
 #ifndef SP_H
 #define SP_H
 
+#include <stdint.h>
+
 #define SP_CMD_STATUS 0
 #define SP_CMD_CONTROL 4
 
-extern unsigned char sp_payload[1024];
-extern unsigned int sp_count;
+extern uint8_t sp_payload[1024];
+extern uint16_t sp_count;
 
-unsigned char sp_status(unsigned char statcode);
+uint8_t sp_status(uint8_t dest, uint8_t statcode);
 
 #endif /* SP_H */
 #endif /* BUILD_APPLE2 */

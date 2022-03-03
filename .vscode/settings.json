@@ -4,7 +4,9 @@
     "string.h": "c",
     "fuji_typedefs.h": "c",
     "conio.h": "c",
-    "sp.h": "c"
+    "sp.h": "c",
+    "screen.h": "c",
+    "stdint.h": "c"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }
