@@ -5,6 +5,8 @@
  * I/O Routines
  */
 #include "io.h"
+#include <stdint.h>
+#include <conio.h>
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -70,7 +72,7 @@ void io_init(void)
 {
 }
 
-unsigned char io_status(void)
+uint8_t io_status(void)
 {
   return 0;
 }
@@ -80,28 +82,37 @@ bool io_error(void)
   return false;
 }
 
-unsigned char io_get_wifi_status(void)
+uint8_t io_get_wifi_status(void)
 {
   // call the SP status command and get the returned byte
-  
-  return 3;
+  uint8_t s;
+  int8_t err;
+  do
+  {
+    err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
+    cputs("error");
+  } while (err);
+  return sp_payload[0];
 }
 
 NetConfig* io_get_ssid(void)
 {
   char err;
-  err = sp_status(0x05, FUJICMD_GET_SSID); // to do - replace 0x05 with a stored value of "THE_FUJI"
-  memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
-  memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
+  err = sp_status(sp_dest, FUJICMD_GET_SSID); 
+  if (!err)
+  {
+    memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
+    memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
+  }
   return &nc;
 }
 
-unsigned char io_scan_for_networks(void)
+uint8_t io_scan_for_networks(void)
 {
   return 1;
 }
 
-SSIDInfo *io_get_scan_result(unsigned char n)
+SSIDInfo *io_get_scan_result(uint8_t n)
 {
   return &ssid_response;
 }
@@ -115,12 +126,12 @@ void io_set_ssid(NetConfig *nc)
 {
 }
 
-char *io_get_device_filename(unsigned char ds)
+char *io_get_device_filename(uint8_t ds)
 {
   // TODO: implement
 }
 
-void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
+void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsigned long selected_size,char *path)
 {
   // TODO: implement
 }
@@ -143,16 +154,16 @@ void io_put_device_slots(DeviceSlot *d)
 {
 }
 
-void io_mount_host_slot(unsigned char hs)
+void io_mount_host_slot(uint8_t hs)
 {
 }
 
-void io_open_directory(unsigned char hs, char *p, char *f)
+void io_open_directory(uint8_t hs, char *p, char *f)
 {
   dc=0;
 }
 
-char *io_read_directory(unsigned char l, unsigned char a)
+char *io_read_directory(uint8_t l, uint8_t a)
 {
   return de[dc++];
 }
@@ -167,19 +178,19 @@ void io_set_directory_position(DirectoryPosition pos)
   dc=(char)pos;
 }
 
-void io_set_device_filename(unsigned char ds, char* e)
+void io_set_device_filename(uint8_t ds, char* e)
 {
 }
 
-void io_mount_disk_image(unsigned char ds, unsigned char mode)
+void io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
 }
 
-void io_set_boot_config(unsigned char toggle)
+void io_set_boot_config(uint8_t toggle)
 {
 }
 
-void io_umount_disk_image(unsigned char ds)
+void io_umount_disk_image(uint8_t ds)
 {
 }
 

@@ -126,24 +126,24 @@ void set_wifi_done(void)
 void set_wifi(void)
 {
   while (state == SET_WIFI)
+  {
+    switch (ws_subState)
     {
-      switch(ws_subState)
-	{
-	case WS_SCAN:
-	  set_wifi_scan();
-	  break;
-	case WS_SELECT:
-	  set_wifi_select();
-	  break;
-	case WS_CUSTOM:
-	  set_wifi_custom();
-	  break;
-	case WS_PASSWORD:
-	  set_wifi_password();
-	  break;
-	case WS_DONE:
-	  set_wifi_done();
-	  break;
-	}
+    case WS_SCAN:
+      set_wifi_scan();
+      break;
+    case WS_SELECT:
+      set_wifi_select();
+      break;
+    case WS_CUSTOM:
+      set_wifi_custom();
+      break;
+    case WS_PASSWORD:
+      set_wifi_password();
+      break;
+    case WS_DONE:
+      set_wifi_done();
+      break;
     }
+  }
 }

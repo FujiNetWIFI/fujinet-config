@@ -10,13 +10,18 @@
 
 #include <stdint.h>
 
-#define SP_CMD_STATUS 0
-#define SP_CMD_CONTROL 4
-
 extern uint8_t sp_payload[1024];
-extern uint16_t sp_count;
+extern uint16_t sp_count, sp_dispatch;
+extern uint8_t sp_dest;
 
-uint8_t sp_status(uint8_t dest, uint8_t statcode);
+int8_t sp_status(uint8_t dest, uint8_t statcode);
+int8_t sp_control(uint8_t dest, uint8_t ctrlcode);
+int8_t sp_find_fuji(void);
+uint8_t sp_find_slot(void);
+uint16_t sp_dispatch_address(uint8_t slot);
+void sp_init(void);
+
+void sp_list_devs();
 
 #endif /* SP_H */
 #endif /* BUILD_APPLE2 */

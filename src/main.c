@@ -50,6 +50,7 @@ void setup(void)
 {
   io_init();
   screen_init();
+	sp_init();
 }
 
 void done(void)
@@ -58,73 +59,68 @@ void done(void)
 
 void run(void)
 {
-  while (state != DONE)
-    {
-      switch(state)
+	while (state != DONE)
 	{
-	case CHECK_WIFI:
-	  check_wifi();
-	  break;
-	case CONNECT_WIFI:
-	  connect_wifi();
-	  break;
-	case SET_WIFI:
-	  set_wifi();
-	  break;
-	case HOSTS_AND_DEVICES:
-	  hosts_and_devices();
-	  break;
-	case SELECT_FILE:
-	  select_file();
-	  break;
-	case SELECT_SLOT:
-	  select_slot();
-	  break;
-	case DESTINATION_HOST_SLOT:
-	  destination_host_slot();
-	  break;
-	case PERFORM_COPY:
-	  perform_copy();
-	  break;
-	case SHOW_INFO:
-	  show_info();
-	  break;
-	case DONE:
-	  done();
-	  break;
-	}
-    }
+		switch (state)
+		{
+		case CHECK_WIFI:
+			check_wifi();
+			break;
+		case CONNECT_WIFI:
+			connect_wifi();
+			break;
+		case SET_WIFI:
+			set_wifi();
+			break;
+		case HOSTS_AND_DEVICES:
+			hosts_and_devices();
+			break;
+		case SELECT_FILE:
+			select_file();
+			break;
+		case SELECT_SLOT:
+			select_slot();
+			break;
+		case DESTINATION_HOST_SLOT:
+			destination_host_slot();
+			break;
+		case PERFORM_COPY:
+			perform_copy();
+			break;
+		case SHOW_INFO:
+			show_info();
+			break;
+		case DONE:
+			done();
+			break;
+		}
+  }
 }
 
 void test()
 {
-	uint8_t i, j;
-	uint8_t err, num;
+	int8_t fuji_unit;
 
 	clrscr();
 	cputs("FujiNet Getting Started\n\r");
 
-	err = sp_status(0x00, 0x00); // get number of devices
-	num = sp_payload[0];
-	num++;
-	for (i = 1; i < num; i++)
-	{
-		cprintf("UNIT #%d NAME: ", i);
-		err = sp_status(i, 0x03);
-		for (j = 0; j < sp_payload[4]; j++)
-			cputc(sp_payload[5 + j]);
-		cputs("\r\n");
-	}
+	sp_list_devs();
+
+	fuji_unit = sp_find_fuji();
+	if (fuji_unit == -1)
+		cputs("SmartPort Error\n\r");
+	else
+		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
 }
 
 void main(void)
 {
 	setup();
-#ifdef BUILD_APPLE2
-	test();
-	cgetc();
-#else
+	// test();
+	// cgetc();
+	// er = sp_control(sp_dest, 0x55);
+	// cprintf("error code %d", er);
+	// cgetc();
+	state = CHECK_WIFI;
 	run();
-#endif
-
 }
