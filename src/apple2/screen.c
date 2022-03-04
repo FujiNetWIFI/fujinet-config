@@ -20,13 +20,15 @@ void screen_init(void)
 
 void screen_error(const char *c)
 {
-  gotoxy(0,24); cprintf("%40s",c);
+  gotoxy(0,STATUS_BAR); cprintf("%40s",c);
 }
 
 void screen_set_wifi(AdapterConfig *ac)
 {
-  gotoxy(0,0); cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  gotoxy(0,24); cprintf("%40s","SCANNING FOR NETWORKS...");
+  clrscr();
+  gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
+  gotoxy(4,2); cprintf("MAC ADDRESS: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  gotoxy(7,STATUS_BAR); cprintf("SCANNING FOR NETWORKS...");
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -53,14 +55,15 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
       meter[0] = '*';
     }
   
-  gotoxy(0,n+1); cprintf("%s",meter);
-  cprintf("%s",ds);
+  gotoxy(2,n+4); cprintf("%s",ds);
+  gotoxy(36,n+4); cprintf("%s",meter);
+  
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("WELCOME TO #FUJINET. FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
+  gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
 }
 
 void screen_set_wifi_custom(void)

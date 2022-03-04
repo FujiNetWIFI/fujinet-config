@@ -50,10 +50,11 @@
 #include <string.h>
 #include "sp.h"
 
-/* Test Fixtures, remove when actual I/O present */
 static NetConfig nc;
 static SSIDInfo ssid_response;
 static AdapterConfig ac;
+
+/* Test Fixtures, remove when actual I/O present */
 static DeviceSlot _ds[8];
 static HostSlot _hs[8];
 static char de[36][8]={
@@ -79,7 +80,7 @@ uint8_t io_status(void)
 
 bool io_error(void)
 {
-  return false;
+  return false; // TO DO: set to true if last smartport call had an error, probably reset error code upon calling
 }
 
 uint8_t io_get_wifi_status(void)

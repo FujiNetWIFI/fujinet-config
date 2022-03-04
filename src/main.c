@@ -122,6 +122,6 @@ void main(void)
 	// cprintf("error code %d", er);
 	// cgetc();
 	// state = CHECK_WIFI;
-	state = SHOW_INFO;
+	state = SET_WIFI;
 	run();
 }

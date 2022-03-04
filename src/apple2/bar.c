@@ -26,7 +26,10 @@ unsigned short bar_coord(unsigned char x, unsigned char y)
 
 void bar_clear(bool oldRow)
 {
-  // TODO: Implement from ADAM
+  char i;
+
+  for (i=0;i<40;i++)
+    ram[bar_coord(i,bar_y+bar_oldi)] |= 0x80;
 }
 
 /**
@@ -36,9 +39,9 @@ void bar_update(void)
 {
   char i;
   
-  bar_clear(false);
+  bar_clear(true);
   
-  // Fill bar color in new row
+  // Clear bar color 
   for (i=0;i<40;i++)
     ram[bar_coord(i,bar_y+bar_i)] &= 0x3f;
 }

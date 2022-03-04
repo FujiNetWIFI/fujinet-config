@@ -71,7 +71,7 @@ void set_wifi_select(void)
   
   screen_set_wifi_select_network(numNetworks);
 
-  bar_set(0,3,numNetworks,0);
+  bar_set(4,0,numNetworks,0);
 
   while(ws_subState==WS_SELECT)
     ws_subState=input_set_wifi_select();
@@ -105,7 +105,7 @@ void set_wifi_scan(void)
   if (io_error())
     {
       screen_error("COULD NOT WS_SCAN NETWORKS");
-      die();
+      die(); // to do retry or something instead
     }
 
   for (i=0;i<numNetworks;i++)
