@@ -6,7 +6,9 @@
     "conio.h": "c",
     "sp.h": "c",
     "screen.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "io.h": "c",
+    "set_wifi.h": "c"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }

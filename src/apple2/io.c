@@ -166,7 +166,9 @@ AdapterConfig *io_get_adapter_config(void)
 void io_set_ssid(NetConfig *nc)
 {
   char err;
-  
+  memcpy(sp_payload, nc->ssid, sizeof(nc->ssid)); // TO DO : SWAP ORDER
+  memcpy(&sp_payload[sizeof(nc->ssid)], nc->password, sizeof(nc->password));
+  err = sp_status(sp_dest, FUJICMD_SET_SSID); 
 }
 
 char *io_get_device_filename(uint8_t ds)
