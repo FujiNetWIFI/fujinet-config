@@ -158,19 +158,21 @@ void screen_show_info(AdapterConfig* ac)
 {
   clrscr();
   
-  gotoxy(0,7);
-  
-  cprintf("%40s","SSID");
-  cprintf("%40s",ac->ssid);
-  cprintf("%10s%s\r\n","HOSTNAME:",ac->hostname);
-  cprintf("%10s%u.%u.%u.%u\r\n","IP:",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
-  cprintf("%10s%u.%u.%u.%u\r\n","NETMASK:",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
-  cprintf("%10s%u.%u.%u.%u\r\n","DNS:",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","MAC:",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","BSSID:",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
-  cprintf("%10s%s\r\n","FNVER:",ac->fn_version);
+  gotoxy(4,5);
+  cprintf("F U J I N E T      C O N F I G");
+  gotoxy(0,8);
+  cprintf("%10s%s\r\n","SSID: ",ac->ssid);
+  cprintf("%10s%s\r\n","HOSTNAME: ",ac->hostname);
+  cprintf("%10s%u.%u.%u.%u\r\n","IP: ",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
+  cprintf("%10s%u.%u.%u.%u\r\n","NETMASK: ",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
+  cprintf("%10s%u.%u.%u.%u\r\n","DNS: ",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
+  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  cprintf("%10s%s\r\n","FNVER: ",ac->fn_version);
 
-  gotoxy(0,STATUS_BAR); cprintf("[C]HANGE SSID  [R]ECONNECT\r\nPRESS ANY KEY TO RETURN TO HOSTS");
+  gotoxy(6,STATUS_BAR); 
+  cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
+  cprintf("   PRESS ANY KEY TO RETURN TO HOSTS");
 }
 
 void screen_select_file(void)

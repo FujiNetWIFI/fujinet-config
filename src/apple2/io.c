@@ -165,6 +165,8 @@ AdapterConfig *io_get_adapter_config(void)
 
 void io_set_ssid(NetConfig *nc)
 {
+  char err;
+  
 }
 
 char *io_get_device_filename(uint8_t ds)
