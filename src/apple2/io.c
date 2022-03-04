@@ -109,16 +109,57 @@ NetConfig* io_get_ssid(void)
 
 uint8_t io_scan_for_networks(void)
 {
-  return 1;
+  char err;
+  err = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
+  if (!err)
+    return sp_payload[0];
+  return 0;
 }
 
 SSIDInfo *io_get_scan_result(uint8_t n)
 {
+  char err;
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = n;
+  err = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
+  if (!err)
+  {
+    err = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
+    if (!err)
+    {
+      memcpy(ssid_response.ssid,sp_payload,32);
+      ssid_response.rssi = sp_payload[32];
+    }
+  }
   return &ssid_response;
 }
 
 AdapterConfig *io_get_adapter_config(void)
 {
+  char err;
+  uint16_t idx = 0;
+  err = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
+  if (!err)
+  {
+    memcpy(ac.ssid, sp_payload, 32);
+    idx += 32;
+    memcpy(ac.hostname, &sp_payload[idx], 64);
+    idx += 64;
+    memcpy(ac.localIP, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(ac.gateway, &sp_payload[idx],4);
+    idx += 4;
+    memcpy(ac.netmask, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(ac.dnsIP, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(ac.macAddress, &sp_payload[idx], 6);
+    idx += 6;
+    memcpy(ac.bssid, &sp_payload[idx], 6);
+    idx += 6;
+    memcpy(ac.fn_version, &sp_payload[idx], 15);
+  }
   return &ac;
 }
 
