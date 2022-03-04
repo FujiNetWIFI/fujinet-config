@@ -60,10 +60,16 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   
 }
 
-void screen_set_wifi_select_network(unsigned char nn)
+//void screen_set_wifi_select_network(unsigned char nn)
+void screen_set_wifi_select_network()
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
+  //gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
+  //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
+  gotoxy(4, STATUS_BAR + 1);
+  cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\n");
+  gotoxy(10, STATUS_BAR + 2);
+  cprintf("[RETURN] TO SELECT");
 }
 
 void screen_set_wifi_custom(void)
