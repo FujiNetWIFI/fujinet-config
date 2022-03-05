@@ -91,7 +91,8 @@ uint8_t io_get_wifi_status(void)
   do
   {
     err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
-    cputs("error");
+    if (err)
+      cputs("error");
   } while (err);
   return sp_payload[0];
 }

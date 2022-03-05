@@ -81,7 +81,8 @@ void screen_set_wifi_custom(void)
 void screen_set_wifi_password(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("ENTER NETWORK PASSWORD AND PRESS [RETURN]");  
+  gotoxy(0,STATUS_BAR); cprintf("ENTER NETWORK PASSWORD AND PRESS [RETURN]");
+  gotoxy(0, STATUS_BAR + 1); cputc(']');
 }
 
 void screen_connect_wifi(NetConfig *nc)

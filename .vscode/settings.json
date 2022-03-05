@@ -10,6 +10,5 @@
     "io.h": "c",
     "set_wifi.h": "c",
     "input.h": "c"
-  },
-  "C_Cpp.errorSquiggles": "Disabled"
+  }
 }

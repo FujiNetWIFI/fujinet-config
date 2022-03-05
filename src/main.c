@@ -121,7 +121,7 @@ void main(void)
 	// er = sp_control(sp_dest, 0x55);
 	// cprintf("error code %d", er);
 	// cgetc();
-	// state = CHECK_WIFI;
+	//state = CHECK_WIFI;
 	state = SET_WIFI;
 	run();
 }
