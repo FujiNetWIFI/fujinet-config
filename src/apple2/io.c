@@ -88,12 +88,11 @@ uint8_t io_get_wifi_status(void)
   // call the SP status command and get the returned byte
   uint8_t s;
   int8_t err;
-  do
-  {
-    err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
-    if (err)
-      cputs("error");
-  } while (err);
+
+  err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
+  if (err)
+    return 0;
+    
   return sp_payload[0];
 }
 
@@ -124,6 +123,7 @@ SSIDInfo *io_get_scan_result(uint8_t n)
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = n;
+  memset(ssid_response.ssid, 0, 32);
   err = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
   if (!err)
   {
@@ -167,10 +167,13 @@ AdapterConfig *io_get_adapter_config(void)
 
 void io_set_ssid(NetConfig *nc)
 {
-  char err;
-  memcpy(sp_payload, nc->ssid, sizeof(nc->ssid)); // TO DO : SWAP ORDER
-  memcpy(&sp_payload[sizeof(nc->ssid)], nc->password, sizeof(nc->password));
-  err = sp_status(sp_dest, FUJICMD_SET_SSID); 
+  char idx = 0;
+  sp_payload[idx++] = sizeof(*nc);
+  sp_payload[idx++] = 0;
+  memcpy(&sp_payload[idx], nc->ssid, sizeof(nc->ssid));
+  idx += sizeof(nc->ssid);
+  memcpy(&sp_payload[idx], nc->password, sizeof(nc->password));
+  sp_control(sp_dest, FUJICMD_SET_SSID);
 }
 
 char *io_get_device_filename(uint8_t ds)

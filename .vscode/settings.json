@@ -9,6 +9,7 @@
     "stdint.h": "c",
     "io.h": "c",
     "set_wifi.h": "c",
-    "input.h": "c"
+    "input.h": "c",
+    "random": "c"
   }
 }

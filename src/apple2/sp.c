@@ -15,6 +15,7 @@
 #define SP_STATUS_PARAM_COUNT 3
 #define SP_CONTROL_PARAM_COUNT 3
 
+// extern globals:
 uint8_t sp_payload[1024];
 uint16_t sp_count;
 uint8_t sp_dest;

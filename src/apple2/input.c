@@ -25,6 +25,7 @@
 #define KEY_UP_ARROW     11
 #define KEY_DOWN_ARROW   10
 #define KEY_LEFT_ARROW   8
+#define KEY_RIGHT_ARROW  21
 
 #define STATUS_BAR 21 // defined in screen.c
 
@@ -205,14 +206,18 @@ WSSubState input_set_wifi_select(void)
     case 0x84:
       return WS_CUSTOM;
     case 'R':
+    case 'r':
       return WS_SCAN;
     case 'S':
+    case 's':
       state=HOSTS_AND_DEVICES;
       return WS_DONE;
     case KEY_UP_ARROW: // up arrow
+    case KEY_LEFT_ARROW:
       bar_up();
       return WS_SELECT;
     case KEY_DOWN_ARROW: // down arrow
+    case KEY_RIGHT_ARROW:
       bar_down();
       return WS_SELECT;
     default:

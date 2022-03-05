@@ -20,7 +20,7 @@ void screen_init(void)
 
 void screen_error(const char *c)
 {
-  gotoxy(0,STATUS_BAR); cprintf("%40s",c);
+  gotoxy(0,STATUS_BAR); cprintf("ERROR: %s",c);
 }
 
 void screen_set_wifi(AdapterConfig *ac)
