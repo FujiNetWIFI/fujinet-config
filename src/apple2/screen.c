@@ -42,7 +42,6 @@ void screen_putlcc(const char *c)
       modifier = 64;
     break;
   case APPLE_IIGS: /* Apple IIgs                  */
-    modifier = 0;
     break;
   default:
     if ((c > 63) && (c < 96))
