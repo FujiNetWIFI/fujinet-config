@@ -5,6 +5,12 @@
  * SmartPort MLI Routines
  */
 
+#ifdef __INTELLISENSE__
+// 18, expect closing parenthses - needed to use cc65 inline asm command with agruments.
+  #pragma diag_suppress 18 
+#endif
+
+
 #include "sp.h"
 #include <conio.h>
 #include <apple2.h>
@@ -36,6 +42,7 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
 
   sp_cmdlist_low = (uint8_t)((uint16_t)&sp_cmdlist & 0x00FF);
   sp_cmdlist_high = (uint8_t)((uint16_t)&sp_cmdlist >> 8) & 0xFF;
+
 
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_STATUS);

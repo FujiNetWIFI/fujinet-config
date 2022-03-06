@@ -8,6 +8,7 @@
 #include "input.h"
 #include "../set_wifi.h"
 #include "bar.h"
+#include "screen.h"
 
 
 #define KEY_RETURN       0x0D
@@ -66,7 +67,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   char i = 0; // index into array and y-coordinate
   char a;
   gotoxy(x,y);
-  cursor(1); // turn on cursor
+  cursor(1); // turn on cursor - does not have effect on Apple IIc
   while(1)
   {
     a = cgetc();
@@ -91,7 +92,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       if (i < len)
       {
         gotox(x + i);
-        cputc(a);
+        screen_putlcc(a);
         c[o + i++] = a;
       }
     break;

@@ -10,8 +10,11 @@
 #include "bar.h"
 #include <conio.h>
 #include <string.h>
+#include <apple2.h>
 
 #define STATUS_BAR 21
+
+unsigned char *mousetext = (unsigned char *)0xC00F;
 
 void screen_init(void)
 {
@@ -21,6 +24,36 @@ void screen_init(void)
 void screen_error(const char *c)
 {
   gotoxy(0,STATUS_BAR); cprintf("ERROR: %s",c);
+}
+
+void screen_putlcc(const char *c)
+{
+  char modifier = 128;
+
+  switch (get_ostype() & 0xF0)
+  {
+  case APPLE_IIE: /* Apple //e                   */
+    modifier = 0;
+    break;
+  case APPLE_IIC:  /* Apple //c                   */
+    mousetext[0] = 1; // turn on mouse text
+    if ((c > 63) && (c < 96))
+      // upper case
+      modifier = 64;
+    break;
+  case APPLE_IIGS: /* Apple IIgs                  */
+    modifier = 0;
+    break;
+  default:
+    if ((c > 63) && (c < 96))
+      // upper case
+      modifier = 64;
+    else if (c > 95)
+      // lower case
+      modifier = -96;
+    break;
+  }
+  ram[bar_coord(wherex(),wherey())] = c + modifier;
 }
 
 void screen_set_wifi(AdapterConfig *ac)

@@ -10,6 +10,9 @@
     "io.h": "c",
     "set_wifi.h": "c",
     "input.h": "c",
-    "random": "c"
+    "random": "c",
+    "bar.h": "c",
+    "globals.h": "c",
+    "apple2.h": "c"
   }
 }
