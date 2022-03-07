@@ -121,7 +121,7 @@ void set_wifi_scan(void)
 void set_wifi_done(void)
 {
   io_set_ssid(&nc);
-  state=CONNECT_WIFI;
+  state = CONNECT_WIFI;
   ws_subState = WS_SCAN;
 }
 

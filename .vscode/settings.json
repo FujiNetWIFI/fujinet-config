@@ -13,6 +13,7 @@
     "random": "c",
     "bar.h": "c",
     "globals.h": "c",
-    "apple2.h": "c"
+    "apple2.h": "c",
+    "show_info.h": "c"
   }
 }

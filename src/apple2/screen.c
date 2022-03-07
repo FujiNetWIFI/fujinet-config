@@ -14,7 +14,7 @@
 
 #define STATUS_BAR 21
 
-unsigned char *mousetext = (unsigned char *)0xC00F;
+unsigned char *mousetext = (unsigned char *)0xC00E;
 
 void screen_init(void)
 {
@@ -23,26 +23,29 @@ void screen_init(void)
 
 void screen_error(const char *c)
 {
-  gotoxy(0,STATUS_BAR); cprintf("ERROR: %s",c);
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR + 1); cprintf("%s",c);
 }
 
 void screen_putlcc(const char *c)
 {
   char modifier = 128;
+  char ostype;
+  ostype = get_ostype() & 0xF0;
 
-  switch (get_ostype() & 0xF0)
+  switch (ostype)
   {
   case APPLE_IIE: /* Apple //e                   */
     modifier = 0;
     break;
   case APPLE_IIC:  /* Apple //c                   */
-    mousetext[0] = 1; // turn on mouse text
     if ((c > 63) && (c < 96))
       // upper case
       modifier = 64;
     break;
   case APPLE_IIGS: /* Apple IIgs                  */
     break;
+  case APPLE_II:
   default:
     if ((c > 63) && (c < 96))
       // upper case
@@ -52,14 +55,21 @@ void screen_putlcc(const char *c)
       modifier = -96;
     break;
   }
-  ram[bar_coord(wherex(),wherey())] = c + modifier;
+
+  if (ostype == APPLE_IIC)
+    mousetext[1] = 1; // turn on mouse text
+  
+  ram[bar_coord(wherex(), wherey())] = c + modifier;
+  
+  if (ostype == APPLE_IIC)
+    mousetext[0] = 1; // turn off mouse text
 }
 
 void screen_set_wifi(AdapterConfig *ac)
 {
   clrscr();
   gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
-  gotoxy(4,2); cprintf("MAC ADDRESS: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   gotoxy(7,STATUS_BAR); cprintf("SCANNING FOR NETWORKS...");
 }
 

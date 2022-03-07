@@ -56,17 +56,20 @@ void connect_wifi(void)
 		switch (s)
 		{
 		case 1:
-			screen_error("NO SSID AVAILABLE.");
+			screen_error("NO SSID AVAILABLE. PRESS ANYKEY.");
+			cgetc();
 			return;
 		case 3:
-			screen_error("CONNECTION SUCCESSFUL.");
+			screen_error("CONNECTION SUCCESSFUL!");
 			state = HOSTS_AND_DEVICES;
 			return;
 		case 4:
-			screen_error("CONNECT FAILED.");
+			screen_error("CONNECT FAILED. PRESS ANYKEY.");
+			cgetc();
 			return;
 		case 5:
-			screen_error("CONNECTION LOST.");
+			screen_error("CONNECTION LOST. PRESS ANYKEY.");
+			cgetc();
 			return;
 		default:
 			retries--;
@@ -74,7 +77,7 @@ void connect_wifi(void)
 		}
   }
 
-  screen_error("UNABLE TO CONNECT.");
+  screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
   state=SET_WIFI;
 	cgetc();
 }

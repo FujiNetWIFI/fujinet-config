@@ -12,6 +12,7 @@
 
 
 #include "sp.h"
+#include "screen.h"
 #include <conio.h>
 #include <apple2.h>
 #include <peekpoke.h>
@@ -196,11 +197,11 @@ void sp_init(void)
   if (slot)
     sp_dispatch = sp_dispatch_address(slot);
   else
-    cputs("No SmartPort Firmware Found!");
+    screen_error("No SmartPort Firmware Found!");
 
   f = sp_find_fuji();
   if (f < 1)
-    cputs("FujiNet Not Found!");
+    screen_error("FujiNet Not Found!");
 }
 
 #endif /* BUILD_APPLE2 */

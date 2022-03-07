@@ -99,6 +99,8 @@ uint8_t io_get_wifi_status(void)
 NetConfig* io_get_ssid(void)
 {
   char err;
+  
+  memset(&nc, 0, sizeof(nc));
   err = sp_status(sp_dest, FUJICMD_GET_SSID); 
   if (!err)
   {

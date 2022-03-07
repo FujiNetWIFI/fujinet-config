@@ -172,7 +172,22 @@ SSSubState input_select_slot_choose(void)
 
 SISubState input_show_info(void)
 {
-  // TODO: implement
+  char c;
+  c =cgetc();
+  switch (c)
+  {
+  case 'c':
+  case 'C':
+    state = SET_WIFI;
+    return SI_DONE;
+  case 'r':
+  case 'R':
+    state = CONNECT_WIFI;
+    return SI_DONE;
+  default:
+    break;
+  }
+  return SI_SHOWINFO;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
