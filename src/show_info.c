@@ -11,6 +11,7 @@
 #include "adam/input.h"
 #include "adam/globals.h"
 #include "adam/io.h"
+#define PRINTER 2
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
@@ -18,6 +19,7 @@
 #include "apple2/input.h"
 #include "apple2/globals.h"
 #include "apple2/io.h"
+#define PRINTER 0 // TBD
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -45,7 +47,9 @@ SISubState si_subState;
 
 void show_info(void)
 {
-  screen_show_info(io_get_adapter_config());
+  si_subState=SI_SHOWINFO;
+  
+  screen_show_info(io_get_adapter_config(),io_get_device_enabled_status(PRINTER));
 
   while (si_subState==SI_SHOWINFO)
     si_subState=input_show_info();

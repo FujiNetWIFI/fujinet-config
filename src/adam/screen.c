@@ -242,7 +242,7 @@ void screen_hosts_and_devices_long_filename(char *f)
     msx_vfill(0x1100,0x00,1024);
 }
 
-void screen_show_info(AdapterConfig* ac)
+void screen_show_info(AdapterConfig* ac, bool printerEnabled)
 {
   smartkeys_set_mode();
 
@@ -266,7 +266,8 @@ void screen_show_info(AdapterConfig* ac)
       msx_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
       msx_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
     }
-  smartkeys_display(NULL,NULL," KEYBD?\n  YES","PRINTER?\n  YES"," CHANGE\n  SSID","RECONNECT");    
+  
+  smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");    
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 

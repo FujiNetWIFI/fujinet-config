@@ -18,6 +18,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
+#include "io.h"
 
 static GameControllerData cont;
 static unsigned char key=0;
@@ -595,6 +596,14 @@ SISubState input_show_info(void)
     case KEY_ESCAPE:
     case KEY_SPACE:
       state=HOSTS_AND_DEVICES;
+      return SI_DONE;
+    case KEY_SMART_IV:
+      k=io_get_device_enabled_status(2);
+      if (k==true)
+	io_disable_device(2);
+      else
+	io_enable_device(2);
+      k=0;
       return SI_DONE;
     case KEY_SMART_V:
       state=SET_WIFI;
