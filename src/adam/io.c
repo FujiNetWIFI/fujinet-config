@@ -285,4 +285,50 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
   eos_initialize_directory(ds, 1, nb, v);
 }
 
+bool io_get_device_enabled_status(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } ds;
+
+  ds.cmd = 0xD1; // Get Device status
+  ds.dev = d;
+
+  eos_write_character_device(FUJI_DEV,ds,sizeof(ds));
+  eos_read_character_device(FUJI_DEV,response,sizeof(response));
+
+  return response[0];
+}
+
+void io_enable_device(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } ed;
+
+  ed.cmd = 0xD5;
+  ed.dev = d;
+
+  eos_write_character_device(FUJI_DEV,ed,sizeof(ed));
+}
+
+void io_disable_device(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } dd;
+
+  dd.cmd = 0xD4;
+  dd.dev = d;
+
+  eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
+}
+
+
 #endif /* BUILD_ADAM */
