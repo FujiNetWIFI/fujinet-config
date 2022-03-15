@@ -147,15 +147,18 @@ char* screen_hosts_and_devices_slot(char *c)
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 {
-  gotoxy(0,11); cprintf("%32s","DISK SLOTS");
+  unsigned short y2 = y << 8;
+  
+  gotoxy(0,y); cprintf("%32s","DISK SLOTS");
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
     {
-      gotoxy(0,i+y); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
+      gotoxy(0,i+y+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
     }
-  msx_vfill(MODE2_ATTR+0x0B00,0xF4,256);
-  msx_vfill(MODE2_ATTR+0x0C00,0x1F,1024);
-  msx_vfill_v(MODE2_ATTR+0x0C00,0xF4,32);
+  
+  msx_vfill(MODE2_ATTR+y2,0xF4,256);
+  msx_vfill(MODE2_ATTR+y2+256,0x1F,1024);
+  msx_vfill_v(MODE2_ATTR+y2+256,0xF4,32);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -423,7 +426,7 @@ void screen_select_slot(char *e)
   gotoxy(0,0);
   cprintf("%32s",e);
 
-  screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
+  screen_hosts_and_devices_device_slots(0,&deviceSlots[0]);
   
   msx_vfill(MODE2_ATTR,0xF4,256);
   msx_vfill(MODE2_ATTR+0x100,0x1F,0x400);
