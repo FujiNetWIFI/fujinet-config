@@ -181,7 +181,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
   eos_start_read_keyboard();
 
   screen_hosts_and_devices_host_slots(h);
-  screen_hosts_and_devices_device_slots(12,d);
+  screen_hosts_and_devices_device_slots(11,d);
   
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
