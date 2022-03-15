@@ -20,6 +20,7 @@
 
 extern bool copy_mode;
 extern char copy_host_name;
+extern unsigned char copy_host_slot;
 
 static char udg[] =
   {
@@ -295,7 +296,7 @@ void screen_select_file_display(char *p, char *f)
   msx_vfill(MODE2_ATTR+0x1200,0xF5,256);
   msx_vfill_v(MODE2_ATTR+0x0200,0xF5,136);
   msx_vfill_v(MODE2_ATTR+0x0200+8,0xF5,136);
-
+  
   // Update content area
   msx_color(15,4,7);
   gotoxy(0,0); cprintf("%32s",copy_mode == true ? hostSlots[copy_host_slot] : hostSlots[selected_host_slot]);
