@@ -97,7 +97,7 @@ unsigned char select_file_display(void)
   char i;
   char *e;
   
-  io_mount_host_slot(copy_mode == true ? copy_host_slot : selected_host_slot);
+  io_mount_host_slot(selected_host_slot);
 
   if (io_error())
     {
@@ -109,7 +109,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path,filter);
   
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
   
   if (io_error())
     {
@@ -170,7 +170,7 @@ void select_display_long_filename(void)
     {
       if (long_entry_displayed==false)
 	{
-	  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+	  io_open_directory(selected_host_slot,path,filter);
 	  io_set_directory_position(pos+bar_get());
 	  e = io_read_directory(64,0);
 	  screen_select_file_display_long_filename(e);
@@ -230,7 +230,7 @@ void select_file_advance(void)
 
   bar_clear(false);
   
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
   
@@ -268,7 +268,7 @@ bool select_file_is_folder(void)
 {
   char *e;
 
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
 
