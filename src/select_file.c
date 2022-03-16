@@ -79,6 +79,7 @@ void select_file_init(void)
     {
       strncpy(source_path,path,224);
       strncpy(source_filter,filter,32);
+      cprintf("SHS: %d %d",selected_host_slot,copy_host_slot);
     }
   
   pos=0;

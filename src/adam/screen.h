@@ -37,7 +37,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
 
 void screen_hosts_and_devices_long_filename(char *f);
 
-void screen_show_info(AdapterConfig* ac, bool printerEnabled);
+void screen_show_info(bool printerEnabled,AdapterConfig* ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);

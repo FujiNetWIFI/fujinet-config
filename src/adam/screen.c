@@ -246,7 +246,7 @@ void screen_hosts_and_devices_long_filename(char *f)
     msx_vfill(0x1100,0x00,1024);
 }
 
-void screen_show_info(AdapterConfig* ac, bool printerEnabled)
+void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 {
   smartkeys_set_mode();
 
