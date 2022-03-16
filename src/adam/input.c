@@ -419,6 +419,7 @@ SFSubState input_select_file_choose(void)
       pos += bar_get();
       select_file_set_source_filename();
       smartkeys_sound_play(SOUND_CONFIRM);
+      copy_host_slot=selected_host_slot;
       return SF_COPY;
     case KEY_UP_ARROW:
       if ((bar_get() == 0) && (pos > 0))
@@ -557,7 +558,7 @@ DHSubState input_destination_host_slot_choose(void)
   switch(k)
     {
     case KEY_RETURN:
-      copy_host_slot=bar_get();
+      selected_host_slot=bar_get();
       copy_mode=true;
       return DH_DONE;
     case KEY_ESCAPE:
