@@ -55,6 +55,9 @@ void setup(void)
 
 void done(void)
 {
+	// reboot here
+	io_set_boot_config(0); // disable config
+	io_boot();             // and reboot.
 }
 
 void run(void)

@@ -161,18 +161,15 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 void hosts_and_devices_done(void)
 {
   char i;
-  
-    for (i=0;i<4;i++)
+
+  for (i = 0; i < 4; i++)
+  {
+    if (deviceSlots[i].hostSlot != 0xFF)
     {
-      if (deviceSlots[i].hostSlot != 0xFF)
-	{
-	  io_mount_host_slot(deviceSlots[i].hostSlot);
-	  io_mount_disk_image(i,deviceSlots[i].mode);
-	}
+      io_mount_host_slot(deviceSlots[i].hostSlot);
+      io_mount_disk_image(i, deviceSlots[i].mode);
     }
-    
-    io_set_boot_config(0); // disable config
-    io_boot(); // and reboot.
+  }
 }
 
 void hosts_and_devices(void)

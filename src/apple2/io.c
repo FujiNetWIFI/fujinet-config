@@ -190,12 +190,14 @@ void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsig
 
 void io_get_device_slots(DeviceSlot *d)
 {
-  d=_ds;
+  sp_status(sp_dest, FUJICMD_READ_DEVICE_SLOTS);
+  memcpy(d,sp_payload,sp_count); // 304 bytes?
 }
 
 void io_get_host_slots(HostSlot *h)
 {
-  h=_hs;
+  sp_status(sp_dest, FUJICMD_READ_HOST_SLOTS);
+  memcpy(h, sp_payload, sp_count); // 256 bytes?
 }
 
 void io_put_host_slots(HostSlot *h)

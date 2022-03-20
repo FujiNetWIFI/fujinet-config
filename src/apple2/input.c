@@ -4,11 +4,15 @@
  */
 
 #include <conio.h>
+#include <string.h>
 #include <stdbool.h>
+#include "globals.h"
 #include "input.h"
-#include "../set_wifi.h"
 #include "bar.h"
 #include "screen.h"
+#include "../set_wifi.h"
+#include "../die.h"
+#include "../hosts_and_devices.h"
 
 
 #define KEY_RETURN       0x0D
@@ -22,6 +26,7 @@
 #define KEY_6            0x36
 #define KEY_7            0x37
 #define KEY_8            0x38
+#define KEY_TAB          9
 #define KEY_DELETE       127
 #define KEY_UP_ARROW     11
 #define KEY_DOWN_ARROW   10
@@ -185,19 +190,121 @@ SISubState input_show_info(void)
     state = CONNECT_WIFI;
     return SI_DONE;
   default:
-    break;
+    state = HOSTS_AND_DEVICES;
+    return SI_DONE;
   }
   return SI_SHOWINFO;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  // TODO: implement
+  unsigned char k=cgetc();
+
+  switch (k)
+  {
+  case KEY_1:
+  case KEY_2:
+  case KEY_3:
+  case KEY_4:
+  case KEY_5:
+  case KEY_6:
+  case KEY_7:
+  case KEY_8:
+    bar_jump(k - KEY_1);
+    return HD_HOSTS;
+  case KEY_TAB:
+    bar_clear(false);
+    return HD_DEVICES;
+  case KEY_RETURN:
+    selected_host_slot = bar_get();
+    if (hostSlots[selected_host_slot][0] != 0)
+    {
+      strcpy(selected_host_name, hostSlots[selected_host_slot]);
+      state = SELECT_FILE;
+      // smartkeys_sound_play(SOUND_CONFIRM);
+      return HD_DONE;
+    }
+    else
+      return HD_HOSTS;
+  case KEY_ESCAPE: // ESC
+    state = DONE;
+    return HD_DONE;
+  case 'C':
+  case 'c':
+    state = SHOW_INFO;
+    return HD_DONE;
+  case 'E':
+  case 'e':
+    // smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+    hosts_and_devices_edit_host_slot(bar_get());
+    bar_clear(false);
+    bar_jump(selected_host_slot);
+    k = 0;
+    return HD_HOSTS;
+  case KEY_UP_ARROW:
+  case KEY_LEFT_ARROW:
+    bar_up();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  case KEY_DOWN_ARROW:
+  case KEY_RIGHT_ARROW:
+    bar_down();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  default:
+    return HD_HOSTS;
+  }
 }
 
 HDSubState input_hosts_and_devices_devices(void)
 {
-  // TODO: Implement
+   unsigned char k=input();
+  switch(k)
+    {
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+      bar_jump(k-KEY_1);
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_TAB:
+      bar_clear(false);
+      return HD_HOSTS;
+    case 'E':
+    case 'e':
+      hosts_and_devices_eject(bar_get());
+      return HD_DEVICES;
+    case 'R':
+    case 'r':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(0);
+      return HD_DEVICES;
+      break;
+    case 'W':
+    case 'w':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(2);
+      return HD_DEVICES;
+      break;
+    // case KEY_CLEAR:
+    //   return HD_CLEAR_ALL_DEVICES;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    default:
+      return HD_DEVICES;
+    }
 }
 
 void input_line_set_wifi_custom(char *c)

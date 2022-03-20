@@ -159,8 +159,10 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
 {
   char i;
-  gotoxy(0,0);  cprintf("%40s","HOST SLOTS");
-  gotoxy(0,11); cprintf("%40s","DISK SLOTS");
+  clrscr();
+  gotoxy(0,0);  cputs("HOST LIST");
+  gotoxy(0,11); cputs("DRIVE SLOTS");
+  // gotoxy(0,18); cputs("DISK II SLOTS");
 
   chlinexy(0,1,40);
   chlinexy(0,12,40);
@@ -178,7 +180,8 @@ void screen_hosts_and_devices_hosts(void)
 {
   bar_set(2,1,8,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
+  // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
+  gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h) {
@@ -187,8 +190,9 @@ void screen_hosts_and_devices_host_slots(HostSlot *h) {
 
 void screen_hosts_and_devices_devices(void)
 {
+  bar_set(13,1,4,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE  [TAB] HOST SLOTS");
+  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE\r\n[TAB] HOST SLOTS");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
