@@ -1,0 +1,27 @@
+{
+  "files.associations": {
+    "stdlib.h": "c",
+    "string.h": "c",
+    "fuji_typedefs.h": "c",
+    "conio.h": "c",
+    "sp.h": "c",
+    "screen.h": "c",
+    "stdint.h": "c",
+    "io.h": "c",
+    "set_wifi.h": "c",
+    "input.h": "c",
+    "random": "c",
+    "bar.h": "c",
+    "globals.h": "c",
+    "apple2.h": "c",
+    "show_info.h": "c",
+    "*.tcc": "c",
+    "optional": "c",
+    "functional": "c",
+    "fstream": "c",
+    "istream": "c",
+    "ostream": "c",
+    "sstream": "c",
+    "streambuf": "c"
+  }
+}

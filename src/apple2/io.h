@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "fuji_typedefs.h"
 
+
 bool io_error(void);
 unsigned char io_status(void);
 void io_init(void);

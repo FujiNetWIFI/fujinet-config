@@ -23,6 +23,9 @@
 #ifdef BUILD_APPLE2
 #include "apple2/io.h"
 #include "apple2/screen.h"
+#include "apple2/sp.h"
+#include <conio.h> // for dev
+#include <stdint.h>
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -47,54 +50,81 @@ void setup(void)
 {
   io_init();
   screen_init();
+	sp_init();
 }
 
 void done(void)
 {
+	// reboot here
+	io_set_boot_config(0); // disable config
+	io_boot();             // and reboot.
 }
 
 void run(void)
 {
-  while (state != DONE)
-    {
-      switch(state)
+	while (state != DONE)
 	{
-	case CHECK_WIFI:
-	  check_wifi();
-	  break;
-	case CONNECT_WIFI:
-	  connect_wifi();
-	  break;
-	case SET_WIFI:
-	  set_wifi();
-	  break;
-	case HOSTS_AND_DEVICES:
-	  hosts_and_devices();
-	  break;
-	case SELECT_FILE:
-	  select_file();
-	  break;
-	case SELECT_SLOT:
-	  select_slot();
-	  break;
-	case DESTINATION_HOST_SLOT:
-	  destination_host_slot();
-	  break;
-	case PERFORM_COPY:
-	  perform_copy();
-	  break;
-	case SHOW_INFO:
-	  show_info();
-	  break;
-	case DONE:
-	  done();
-	  break;
-	}
-    }
+		switch (state)
+		{
+		case CHECK_WIFI:
+			check_wifi();
+			break;
+		case CONNECT_WIFI:
+			connect_wifi();
+			break;
+		case SET_WIFI:
+			set_wifi();
+			break;
+		case HOSTS_AND_DEVICES:
+			hosts_and_devices();
+			break;
+		case SELECT_FILE:
+			select_file();
+			break;
+		case SELECT_SLOT:
+			select_slot();
+			break;
+		case DESTINATION_HOST_SLOT:
+			destination_host_slot();
+			break;
+		case PERFORM_COPY:
+			perform_copy();
+			break;
+		case SHOW_INFO:
+			show_info();
+			break;
+		case DONE:
+			done();
+			break;
+		}
+  }
+}
+
+void test()
+{
+	int8_t fuji_unit;
+
+	clrscr();
+	cputs("FujiNet Getting Started\n\r");
+
+	sp_list_devs();
+
+	fuji_unit = sp_find_fuji();
+	if (fuji_unit == -1)
+		cputs("SmartPort Error\n\r");
+	else
+		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
 }
 
 void main(void)
 {
-  setup();
-  run();
+	setup();
+	// test();
+	// cgetc();
+	// er = sp_control(sp_dest, 0x55);
+	// cprintf("error code %d", er);
+	// cgetc();
+	//state = CHECK_WIFI;
+	state = SHOW_INFO;
+	run();
 }

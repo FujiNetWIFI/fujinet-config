@@ -4,8 +4,9 @@
  * Connect to existing WiFi connection
  */
 
-#include <string.h>
 #include "connect_wifi.h"
+#include <string.h>
+#include <conio.h>
 
 #ifdef BUILD_ADAM
 #include "adam/io.h"
@@ -49,30 +50,34 @@ void connect_wifi(void)
   
   screen_connect_wifi(&nc);
 
-  while (retries>0)
-    {
-      s=io_get_wifi_status();
-      switch (s)
+	while (retries > 0)
 	{
-	case 1:
-	  screen_error("  NO SSID AVAILABLE.");
-	  return;
-	case 3:
-	  screen_error("  CONNECTION SUCCESSFUL.");
-	  state=HOSTS_AND_DEVICES;
-	  return;
-	case 4:
-	  screen_error("  CONNECT FAILED.");
-	  return;
-	case 5:
-	  screen_error("  CONNECTION LOST.");
-	  return;
-	default:
-	  retries--;
-	  break;
-	}
-    }
+		s = io_get_wifi_status();
+		switch (s)
+		{
+		case 1:
+			screen_error("NO SSID AVAILABLE. PRESS ANYKEY.");
+			cgetc();
+			return;
+		case 3:
+			screen_error("CONNECTION SUCCESSFUL!");
+			state = HOSTS_AND_DEVICES;
+			return;
+		case 4:
+			screen_error("CONNECT FAILED. PRESS ANYKEY.");
+			cgetc();
+			return;
+		case 5:
+			screen_error("CONNECTION LOST. PRESS ANYKEY.");
+			cgetc();
+			return;
+		default:
+			retries--;
+			break;
+		}
+  }
 
-  screen_error("  UNABLE TO CONNECT.");
+  screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
   state=SET_WIFI;
+	cgetc();
 }

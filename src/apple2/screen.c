@@ -10,8 +10,11 @@
 #include "bar.h"
 #include <conio.h>
 #include <string.h>
+#include <apple2.h>
 
 #define STATUS_BAR 21
+
+unsigned char *mousetext = (unsigned char *)0xC00E;
 
 void screen_init(void)
 {
@@ -20,13 +23,54 @@ void screen_init(void)
 
 void screen_error(const char *c)
 {
-  gotoxy(0,24); cprintf("%40s",c);
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR + 1); cprintf("%s",c);
+}
+
+void screen_putlcc(const char *c)
+{
+  char modifier = 128;
+  char ostype;
+  ostype = get_ostype() & 0xF0;
+
+  switch (ostype)
+  {
+  case APPLE_IIE: /* Apple //e                   */
+    modifier = 0;
+    break;
+  case APPLE_IIC:  /* Apple //c                   */
+    if ((c > 63) && (c < 96))
+      // upper case
+      modifier = 64;
+    break;
+  case APPLE_IIGS: /* Apple IIgs                  */
+    break;
+  case APPLE_II:
+  default:
+    if ((c > 63) && (c < 96))
+      // upper case
+      modifier = 64;
+    else if (c > 95)
+      // lower case
+      modifier = -96;
+    break;
+  }
+
+  if (ostype == APPLE_IIC)
+    mousetext[1] = 1; // turn on mouse text
+  
+  ram[bar_coord(wherex(), wherey())] = c + modifier;
+  
+  if (ostype == APPLE_IIC)
+    mousetext[0] = 1; // turn off mouse text
 }
 
 void screen_set_wifi(AdapterConfig *ac)
 {
-  gotoxy(0,0); cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  gotoxy(0,24); cprintf("%40s","SCANNING FOR NETWORKS...");
+  clrscr();
+  gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
+  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  gotoxy(7,STATUS_BAR); cprintf("SCANNING FOR NETWORKS...");
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -53,14 +97,21 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
       meter[0] = '*';
     }
   
-  gotoxy(0,n+1); cprintf("%s",meter);
-  cprintf("%s",ds);
+  gotoxy(2,n+4); cprintf("%s",ds);
+  gotoxy(36,n+4); cprintf("%s",meter);
+  
 }
 
-void screen_set_wifi_select_network(unsigned char nn)
+//void screen_set_wifi_select_network(unsigned char nn)
+void screen_set_wifi_select_network()
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("WELCOME TO #FUJINET. FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
+  //gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
+  //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
+  gotoxy(4, STATUS_BAR + 1);
+  cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\n");
+  gotoxy(10, STATUS_BAR + 2);
+  cprintf("[RETURN] TO SELECT");
 }
 
 void screen_set_wifi_custom(void)
@@ -72,7 +123,8 @@ void screen_set_wifi_custom(void)
 void screen_set_wifi_password(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("ENTER NETWORK PASSWORD AND PRESS [RETURN]");  
+  gotoxy(0,STATUS_BAR); cprintf("ENTER NETWORK PASSWORD AND PRESS [RETURN]");
+  gotoxy(0, STATUS_BAR + 1); cputc(']');
 }
 
 void screen_connect_wifi(NetConfig *nc)
@@ -107,8 +159,10 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
 {
   char i;
-  gotoxy(0,0);  cprintf("%40s","HOST SLOTS");
-  gotoxy(0,11); cprintf("%40s","DISK SLOTS");
+  clrscr();
+  gotoxy(0,0);  cputs("HOST LIST");
+  gotoxy(0,11); cputs("DRIVE SLOTS");
+  // gotoxy(0,18); cputs("DISK II SLOTS");
 
   chlinexy(0,1,40);
   chlinexy(0,12,40);
@@ -126,7 +180,8 @@ void screen_hosts_and_devices_hosts(void)
 {
   bar_set(2,1,8,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
+  // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
+  gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h) {
@@ -135,8 +190,9 @@ void screen_hosts_and_devices_host_slots(HostSlot *h) {
 
 void screen_hosts_and_devices_devices(void)
 {
+  bar_set(13,1,4,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE  [TAB] HOST SLOTS");
+  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE\r\n[TAB] HOST SLOTS");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -158,19 +214,21 @@ void screen_show_info(AdapterConfig* ac)
 {
   clrscr();
   
-  gotoxy(0,7);
-  
-  cprintf("%40s","SSID");
-  cprintf("%40s",ac->ssid);
-  cprintf("%10s%s\r\n","HOSTNAME:",ac->hostname);
-  cprintf("%10s%u.%u.%u.%u\r\n","IP:",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
-  cprintf("%10s%u.%u.%u.%u\r\n","NETMASK:",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
-  cprintf("%10s%u.%u.%u.%u\r\n","DNS:",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","MAC:",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","BSSID:",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
-  cprintf("%10s%s\r\n","FNVER:",ac->fn_version);
+  gotoxy(4,5);
+  cprintf("F U J I N E T      C O N F I G");
+  gotoxy(0,8);
+  cprintf("%10s%s\r\n","SSID: ",ac->ssid);
+  cprintf("%10s%s\r\n","HOSTNAME: ",ac->hostname);
+  cprintf("%10s%u.%u.%u.%u\r\n","IP: ",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
+  cprintf("%10s%u.%u.%u.%u\r\n","NETMASK: ",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
+  cprintf("%10s%u.%u.%u.%u\r\n","DNS: ",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
+  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  cprintf("%10s%s\r\n","FNVER: ",ac->fn_version);
 
-  gotoxy(0,STATUS_BAR); cprintf("[C]HANGE SSID  [R]ECONNECT\r\nPRESS ANY KEY TO RETURN TO HOSTS");
+  gotoxy(6,STATUS_BAR); 
+  cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
+  cprintf("   PRESS ANY KEY TO RETURN TO HOSTS");
 }
 
 void screen_select_file(void)

@@ -8,6 +8,10 @@
 
 #include "globals.h"
 
+extern unsigned char *ram;
+
+unsigned short bar_coord(unsigned char x, unsigned char y);
+
 /**
  * Clear the currently displayed bar from screen
  */

@@ -4,3 +4,4 @@ autorun
 *.bin
 *.cas
 *.d88
+dist.apple2/prepimg.sh
