@@ -27,6 +27,7 @@ uint8_t sp_payload[1024];
 uint16_t sp_count;
 uint8_t sp_dest;
 uint16_t sp_dispatch;
+uint8_t sp_error;
 
 static uint8_t sp_cmdlist[10];
 static uint8_t sp_cmdlist_low, sp_cmdlist_high;
@@ -34,6 +35,7 @@ static uint8_t sp_err, sp_rtn_low, sp_rtn_high;
 
 int8_t sp_status(uint8_t dest, uint8_t statcode)
 {
+  sp_error = 0;
   // build the command list
   sp_cmdlist[0] = SP_STATUS_PARAM_COUNT; 
   sp_cmdlist[1] = dest; // set before calling sp_status();
@@ -65,12 +67,13 @@ spCmdListHigh:
   __asm__ volatile ("sta %v", sp_err);
   
   sp_count = ((uint16_t)sp_rtn_high << 8) | (uint16_t)sp_rtn_low;
-
+  sp_error = sp_err;
   return sp_err;
 }
 
 int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
 {
+  sp_error = 0;
   // sp_dest = 5; // need to search
   // build the command list
   sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT; 
@@ -98,7 +101,7 @@ spCmdListLow:
 spCmdListHigh:
   __asm__ volatile ("nop");
   __asm__ volatile ("sta %v", sp_err);
-  
+  sp_error = sp_err;
   return sp_err;
 }
 

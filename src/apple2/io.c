@@ -55,19 +55,19 @@ static SSIDInfo ssid_response;
 static AdapterConfig ac;
 
 /* Test Fixtures, remove when actual I/O present */
-static DeviceSlot _ds[8];
-static HostSlot _hs[8];
-static char de[36][8]={
-  {"Entry 1"},
-  {"Entry 2"},
-  {"Entry 3"},
-  {"Entry 4"},
-  {"Entry 5"},
-  {"Entry 6"},
-  {"Entry 7"},
-  {"\x7F"}
-};
-static char dc=0;
+// static DeviceSlot _ds[8];
+// static HostSlot _hs[8];
+// static char de[36][8]={
+//   {"Entry 1"},
+//   {"Entry 2"},
+//   {"Entry 3"},
+//   {"Entry 4"},
+//   {"Entry 5"},
+//   {"Entry 6"},
+//   {"Entry 7"},
+//   {"\x7F"}
+// };
+// static char dc=0;
 
 void io_init(void)
 {
@@ -80,57 +80,53 @@ uint8_t io_status(void)
 
 bool io_error(void)
 {
-  return false; // TO DO: set to true if last smartport call had an error, probably reset error code upon calling
+  return sp_error; 
 }
 
 uint8_t io_get_wifi_status(void)
 {
   // call the SP status command and get the returned byte
   uint8_t s;
-  int8_t err;
 
-  err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
-  if (err)
-    return 0;
-    
+  sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
+  if (sp_error)
+      return 0;
+ 
   return sp_payload[0];
 }
 
 NetConfig* io_get_ssid(void)
-{
-  char err;
-  
+{  
   memset(&nc, 0, sizeof(nc));
-  err = sp_status(sp_dest, FUJICMD_GET_SSID); 
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID); 
+  if (!sp_error)
   {
     memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
     memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
   }
+  sp_error = sp_error;
   return &nc;
 }
 
 uint8_t io_scan_for_networks(void)
 {
-  char err;
-  err = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
+  if (!sp_error)
     return sp_payload[0];
   return 0;
 }
 
 SSIDInfo *io_get_scan_result(uint8_t n)
 {
-  char err;
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = n;
   memset(ssid_response.ssid, 0, 32);
-  err = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
-  if (!err)
+  sp_error = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
+  if (!sp_error)
   {
-    err = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
-    if (!err)
+    sp_error = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
+    if (!sp_error)
     {
       memcpy(ssid_response.ssid,sp_payload,32);
       ssid_response.rssi = sp_payload[32];
@@ -141,10 +137,9 @@ SSIDInfo *io_get_scan_result(uint8_t n)
 
 AdapterConfig *io_get_adapter_config(void)
 {
-  char err;
   uint16_t idx = 0;
-  err = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
+  if (!sp_error)
   {
     memcpy(ac.ssid, sp_payload, 32);
     idx += 32;
@@ -175,7 +170,7 @@ void io_set_ssid(NetConfig *nc)
   memcpy(&sp_payload[idx], nc->ssid, sizeof(nc->ssid));
   idx += sizeof(nc->ssid);
   memcpy(&sp_payload[idx], nc->password, sizeof(nc->password));
-  sp_control(sp_dest, FUJICMD_SET_SSID);
+  sp_error = sp_control(sp_dest, FUJICMD_SET_SSID);
 }
 
 char *io_get_device_filename(uint8_t ds)
@@ -210,26 +205,57 @@ void io_put_device_slots(DeviceSlot *d)
 
 void io_mount_host_slot(uint8_t hs)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = hs;
+  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_HOST);
 }
 
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
-  dc=0;
+  char *e;
+  char idx = 0;
+  uint16_t s;
+
+  // to do - copy strings into payload and figure out length
+  s = 1 + strlen(p) + 1 + strlen(f) +1;
+  sp_payload[idx++] = (uint8_t)(s & 0xFF);
+  sp_payload[idx++] = (uint8_t)(s >> 8);
+  sp_payload[idx++] = hs;
+
+  strcpy(&sp_payload[idx++], p);
+  idx += strlen(p);
+  strcpy(&sp_payload[idx], f);
+
+  sp_error = sp_control(sp_dest, FUJICMD_OPEN_DIRECTORY);
 }
 
 char *io_read_directory(uint8_t l, uint8_t a)
 {
-  return de[dc++];
+  sp_payload[0] = 2;
+  sp_payload[1] = 0;
+  sp_payload[2] = l;
+  sp_payload[3] = a;
+  sp_error = sp_control(sp_dest, FUJICMD_READ_DIR_ENTRY);
+  sp_payload[0] = 0; // null string
+  if (!sp_error)
+    sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
+  return sp_payload;
 }
 
 void io_close_directory(void)
 {
-  dc=0;
+  sp_payload[0] = 0;
+  sp_payload[1] = 0;
+  sp_error = sp_control(sp_dest, FUJICMD_CLOSE_DIRECTORY);
 }
 
 void io_set_directory_position(DirectoryPosition pos)
 {
-  dc=(char)pos;
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = (uint8_t)pos;
+  sp_error = sp_control(sp_dest, FUJICMD_SET_DIRECTORY_POSITION);
 }
 
 void io_set_device_filename(uint8_t ds, char* e)

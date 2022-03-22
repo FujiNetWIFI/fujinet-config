@@ -24,7 +24,7 @@ void screen_init(void)
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR + 1); cprintf("%s",c);
+  gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
 }
 
 void screen_putlcc(const char *c)
@@ -233,26 +233,27 @@ void screen_show_info(AdapterConfig* ac)
 
 void screen_select_file(void)
 {
+  cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); cprintf("OPENING...");
 }
 
 void screen_select_file_display(char *p, char *f)
 {
   // Clear content area
-  cclearxy(0,0,560);
+  cclearxy(0,0,5*120);
 
   // Update content area
-  gotoxy(0,0); cprintf("%40s",selected_host_name);
-
+  gotoxy(0,0); cprintf("%-40s",selected_host_name);
+  gotoxy(0,1);
   if (f[0]==0x00)
-    cprintf("%40s",p);
+    cprintf("%-40s",p);
   else
-    cprintf("%STATUS_BARs%8s",p,f);
+    cprintf("%-32s%8s",p,f);
 }
 
 void screen_select_file_prev(void)
 {
-  gotoxy(0,2); cprintf("%40s","[...]");
+  gotoxy(0,2); cprintf("%-40s","[...]");
 }
 
 void screen_select_file_display_long_filename(char *e) 
@@ -262,7 +263,7 @@ void screen_select_file_display_long_filename(char *e)
 
 void screen_select_file_next(void)
 {
-  gotoxy(0,18); cprintf("%40s","[...]");
+  gotoxy(0,18); cprintf("%-40s","[...]");
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e)
@@ -296,7 +297,7 @@ void screen_select_file_choose(char visibleEntries)
 {
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("SELECT FILE TO MOUNT  [A] UP  [Z] DOWN\r\n[ESC] PARENT  [F]ILTER  [ESC]BOOT");  
+  gotoxy(0,STATUS_BAR); cprintf("SELECT FILE TO MOUNT\r\n[ESC] PARENT  [F]ILTER  [ESC]BOOT");  
 }
 
 void screen_select_file_filter(void)
@@ -310,7 +311,7 @@ void screen_select_slot(char *e)
   unsigned long *s;
   
   gotoxy(0,7);
-  cprintf("%40s","FILE DETAILS");
+  cprintf("%-40s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
   
   s=(unsigned long *)e; // Cast the next four bytes as a long integer.
@@ -320,7 +321,7 @@ void screen_select_slot(char *e)
   e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
   
   gotoxy(0,0);
-  cprintf("%40s",e);
+  cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
     
