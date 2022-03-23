@@ -156,9 +156,9 @@ SFSubState input_select_file_choose(void)
 
   switch (k)
   {
-  case KEY_RETURN:
-    pos += bar_get();
-    return SF_DONE;
+  // case KEY_RETURN:
+  //   pos += bar_get();
+  //   return SF_DONE;
   case KEY_ESCAPE:
     copy_mode = false;
     state = HOSTS_AND_DEVICES;
@@ -172,21 +172,21 @@ SFSubState input_select_file_choose(void)
   case 'F':
   case 'f':
     return SF_FILTER;
-  // case KEY_SMART_VI:
-  //   if (copy_mode == false)
-  //   {
-  //     quick_boot = true;
-  //     pos += bar_get();
-  //     state = SELECT_SLOT;
-  //   }
-  //   return SF_DONE;
+  case KEY_RETURN: // KEY_SMART_VI:
+    if (copy_mode == false)
+    {
+      quick_boot = true;
+      pos += bar_get();
+      state = SELECT_SLOT;
+    }
+    return SF_DONE;
   // case KEY_INSERT:
   //   return SF_NEW;
-  // case 'C':
-  // case 'c':
-  //   pos += bar_get();
-  //   select_file_set_source_filename();
-  //   return SF_COPY;
+  case 'C':
+  case 'c':
+    pos += bar_get();
+    select_file_set_source_filename();
+    return SF_COPY;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
     if ((bar_get() == 0) && (pos > 0))
