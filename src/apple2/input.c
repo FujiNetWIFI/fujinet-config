@@ -13,7 +13,8 @@
 #include "../set_wifi.h"
 #include "../die.h"
 #include "../hosts_and_devices.h"
-
+#include "../select_file.h"
+#include "../select_slot.h"
 
 #define KEY_RETURN       0x0D
 #define KEY_ESCAPE       0x1B
@@ -37,7 +38,7 @@
 
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
-
+extern bool long_entry_displayed;
 /**
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
@@ -69,8 +70,12 @@ static void input_clear_bottom(void)
  */
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
 {
-  char i = 0; // index into array and y-coordinate
+  char i;
   char a;
+
+  i = o; // index into array and y-coordinate
+  x += o;
+  
   gotoxy(x,y);
   cursor(1); // turn on cursor - does not have effect on Apple IIc
   while(1)
@@ -82,14 +87,14 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     case KEY_DELETE:
       if (i>0)
       {
-        c[--i + o] = 0;
+        c[--i] = 0;
         gotox(x + i);
         cputc(' ');
         gotox(x + i);
       }
       break;
     case KEY_RETURN:
-      c[o + i] = 0;
+      c[i] = 0;
       cursor(0); // turn off cursor
       return; // done
       break;
@@ -98,7 +103,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       {
         gotox(x + i);
         screen_putlcc(a);
-        c[o + i++] = a;
+        c[i++] = a;
       }
     break;
     }
@@ -145,9 +150,77 @@ DHSubState input_destination_host_slot_choose(void)
     }
 }
 
-SFSubState input_select_file_choose(void) 
+SFSubState input_select_file_choose(void)
 {
-  // TODO: implement
+  unsigned char k = cgetc();
+
+  switch (k)
+  {
+  case KEY_RETURN:
+    pos += bar_get();
+    return SF_DONE;
+  case KEY_ESCAPE:
+    copy_mode = false;
+    state = HOSTS_AND_DEVICES;
+    return SF_DONE;
+  // case KEY_DELETE:
+  //   pos = 0;
+  //   dir_eof = quick_boot = false;
+  //   return SF_DISPLAY;
+  case KEY_DELETE:
+    return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
+  case 'F':
+  case 'f':
+    return SF_FILTER;
+  // case KEY_SMART_VI:
+  //   if (copy_mode == false)
+  //   {
+  //     quick_boot = true;
+  //     pos += bar_get();
+  //     state = SELECT_SLOT;
+  //   }
+  //   return SF_DONE;
+  // case KEY_INSERT:
+  //   return SF_NEW;
+  // case 'C':
+  // case 'c':
+  //   pos += bar_get();
+  //   select_file_set_source_filename();
+  //   return SF_COPY;
+  case KEY_UP_ARROW:
+  case KEY_LEFT_ARROW:
+    if ((bar_get() == 0) && (pos > 0))
+      return SF_PREV_PAGE;
+    else
+    {
+      long_entry_displayed = false;
+      bar_up();
+      select_display_long_filename();
+      return SF_CHOOSE;
+    }
+  case KEY_DOWN_ARROW:
+  case KEY_RIGHT_ARROW:
+    if ((bar_get() == 14) && (dir_eof == false))
+      return SF_NEXT_PAGE;
+    else
+    {
+      long_entry_displayed = false;
+      bar_down();
+      select_display_long_filename();
+      return SF_CHOOSE;
+    }
+    break;
+  case ',':
+  case '<': 
+    if (pos > 0)
+      return SF_PREV_PAGE;
+  case '.':
+  case '>': 
+    if (dir_eof == false)
+      return SF_NEXT_PAGE;
+  default:
+    return SF_CHOOSE;
+  }
 }
 
 unsigned char input_select_file_new_type(void) 
@@ -350,6 +423,7 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
+    input_line(2,i+2,o,c,32,false);
 }
 
 void input_line_filter(char *c)

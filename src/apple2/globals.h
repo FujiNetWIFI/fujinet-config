@@ -26,6 +26,9 @@ extern DirectoryPosition pos;
 extern char path[224];
 extern bool create;
 extern char filter[32];
+extern bool dir_eof;
+extern bool quick_boot;
+
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_APPLE2 */

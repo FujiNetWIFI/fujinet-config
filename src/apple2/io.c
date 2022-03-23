@@ -197,6 +197,10 @@ void io_get_host_slots(HostSlot *h)
 
 void io_put_host_slots(HostSlot *h)
 {
+  sp_payload[0] = 0;
+  sp_payload[1] = 1; // 256 bytes
+  memcpy(&sp_payload[2], h, 256); 
+  sp_error = sp_control(sp_dest, FUJICMD_WRITE_HOST_SLOTS);
 }
 
 void io_put_device_slots(DeviceSlot *d)

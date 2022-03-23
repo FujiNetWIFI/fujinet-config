@@ -81,13 +81,13 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   memset(ds,0x20,32);
   strncpy(ds,s->ssid,32);
   
-  if (s->rssi > -40)
+  if (s->rssi > -50)
     {
       meter[0] = '*';
       meter[1] = '*';
       meter[2] = '*';
     }
-  else if (s->rssi > -60)
+  else if (s->rssi > -70)
     {
       meter[0] = '*';
       meter[1] = '*';
@@ -197,13 +197,13 @@ void screen_hosts_and_devices_devices(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  cclearxy(1,i+1,39);
+  cclearxy(1,i+2,39);
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.");
+  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.",i);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp) {
@@ -240,7 +240,9 @@ void screen_select_file(void)
 void screen_select_file_display(char *p, char *f)
 {
   // Clear content area
-  cclearxy(0,0,5*120);
+  //cclearxy(0,0,20*40); // 20*40 is > 255 so won't work in cclearxy
+  // void __fastcall__ cclearxy (unsigned char x, unsigned char y, unsigned char length);
+  clrscr();
 
   // Update content area
   gotoxy(0,0); cprintf("%-40s",selected_host_name);
@@ -297,7 +299,7 @@ void screen_select_file_choose(char visibleEntries)
 {
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("SELECT FILE TO MOUNT\r\n[ESC] PARENT  [F]ILTER  [ESC]BOOT");  
+  gotoxy(0,STATUS_BAR); cprintf("SELECT FILE TO MOUNT\r\n[ESC]PARENT  [F]ILTER  [TBD]BOOT");  
 }
 
 void screen_select_file_filter(void)
@@ -376,6 +378,6 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(1,1+hs); cprintf("Empty");
+  gotoxy(1,2+hs); cprintf("Empty");
 }  
 #endif /* BUILD_APPLE2 */

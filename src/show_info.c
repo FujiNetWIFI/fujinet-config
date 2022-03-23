@@ -49,4 +49,6 @@ void show_info(void)
 
   while (si_subState==SI_SHOWINFO)
     si_subState=input_show_info();
+  
+  si_subState = SI_SHOWINFO;
 }
