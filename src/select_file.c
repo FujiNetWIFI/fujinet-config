@@ -84,9 +84,9 @@ void select_file_init(void)
   
   pos=0;
   memset(entry_size,0,ENTRIES_PER_PAGE);
-  memset(path,0,256);
+  memset(path,0,sizeof(path));
   path[0]='/';
-  memset(filter,0,32);
+  memset(filter,0,sizeof(filter));
   screen_select_file();
   sf_subState=SF_DISPLAY;
   quick_boot=dir_eof=false;
@@ -353,10 +353,10 @@ void select_file(void)
       switch(sf_subState)
 	{
 	case SF_INIT:
-	  select_file_init();
+	  select_file_init(); // get things ready, clear screen, status area
 	  break;
 	case SF_DISPLAY:
-	  visibleEntries=select_file_display();
+	  visibleEntries=select_file_display(); // put the list of files on the screen
 	  break;
 	case SF_NEXT_PAGE:
 	  select_next_page();
@@ -365,7 +365,7 @@ void select_file(void)
 	  select_prev_page();
 	  break;
 	case SF_CHOOSE:
-	  select_file_choose(visibleEntries);
+	  select_file_choose(visibleEntries); // allow user to pick a file
 	  break;
 	case SF_FILTER:
 	  select_file_filter();
