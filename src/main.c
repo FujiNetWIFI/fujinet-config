@@ -50,7 +50,7 @@ void setup(void)
 {
   io_init();
   screen_init();
-	sp_init();
+	// sp_init(); // now called in io_init();
 }
 
 void done(void)

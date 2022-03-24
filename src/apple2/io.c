@@ -71,11 +71,12 @@ static AdapterConfig ac;
 
 void io_init(void)
 {
+   sp_init();
 }
 
 uint8_t io_status(void)
 {
-  return 0;
+  return io_error();
 }
 
 bool io_error(void)
@@ -264,22 +265,46 @@ void io_set_directory_position(DirectoryPosition pos)
 
 void io_set_device_filename(uint8_t ds, char* e)
 {
+  sp_payload[0] = strlen(e) + 1 + 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+
+  strcpy(&sp_payload[3],e);
+
+  sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
 }
 
 void io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
+  sp_payload[0] = 2;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+  sp_payload[3] = mode;
+
+  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
 }
 
 void io_set_boot_config(uint8_t toggle)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = toggle;
+
+  sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
 }
 
 void io_umount_disk_image(uint8_t ds)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+  sp_error = sp_control(sp_dest, FUJICMD_UNMOUNT_IMAGE);
 }
 
 void io_boot(void)
 {
+   // eos_init();
+  // jump to $c500?
 }
 
 #endif /* BUILD_APPLE2 */

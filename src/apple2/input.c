@@ -156,9 +156,9 @@ SFSubState input_select_file_choose(void)
 
   switch (k)
   {
-  // case KEY_RETURN:
-  //   pos += bar_get();
-  //   return SF_DONE;
+  case KEY_RETURN:
+    pos += bar_get();
+    return SF_DONE;
   case KEY_ESCAPE:
     copy_mode = false;
     state = HOSTS_AND_DEVICES;
@@ -172,14 +172,14 @@ SFSubState input_select_file_choose(void)
   case 'F':
   case 'f':
     return SF_FILTER;
-  case KEY_RETURN: // KEY_SMART_VI:
-    if (copy_mode == false)
-    {
-      quick_boot = true;
-      pos += bar_get();
-      state = SELECT_SLOT;
-    }
-    return SF_DONE;
+  // case KEY_RETURN: // KEY_SMART_VI:
+  //   if (copy_mode == false)
+  //   {
+  //     quick_boot = true;
+  //     pos += bar_get();
+  //     state = SELECT_SLOT; // should not change here? ... gets picked in SF_DONE state
+  //   }
+  //   return SF_DONE;
   // case KEY_INSERT:
   //   return SF_NEW;
   case 'C':
@@ -245,7 +245,47 @@ void input_select_file_new_name(char *c)
 
 SSSubState input_select_slot_choose(void)
 {
-  // TODO: implement
+  // cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
+   unsigned char k;
+   
+   k=cgetc();
+
+  switch(k)
+    {
+    case KEY_ESCAPE:
+      state=HOSTS_AND_DEVICES;
+      return SS_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+      bar_jump(k-0x31);
+      return SS_CHOOSE;
+    // case KEY_SMART_IV:
+    case 'E':
+    case 'e':
+      select_slot_eject(bar_get());
+      return SS_CHOOSE;
+    case KEY_RETURN:
+    // case KEY_SMART_V:
+      selected_device_slot=bar_get();
+      mode=0; // ?? read/write mode?
+      return SS_DONE;
+    // case KEY_SMART_VI:
+    //   selected_device_slot=bar_get();
+    //   mode=2;
+    //   return SS_DONE;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return SS_CHOOSE;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return SS_CHOOSE;
+    default:
+      return SS_CHOOSE;
+    }
 }
 
 SISubState input_show_info(void)

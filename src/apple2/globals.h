@@ -21,6 +21,7 @@ extern unsigned long selected_size;
 
 extern DeviceSlot deviceSlots[8];
 extern HostSlot hostSlots[8];
+extern char mode;
 
 extern DirectoryPosition pos;
 extern char path[224];
