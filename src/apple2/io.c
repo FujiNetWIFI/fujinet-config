@@ -223,7 +223,7 @@ void io_open_directory(uint8_t hs, char *p, char *f)
   uint16_t s;
 
   // to do - copy strings into payload and figure out length
-  s = 1 + strlen(p) + 1 + strlen(f) +1;
+  s = 1 + strlen(p) + 1 + strlen(f) + 1;
   sp_payload[idx++] = (uint8_t)(s & 0xFF);
   sp_payload[idx++] = (uint8_t)(s >> 8);
   sp_payload[idx++] = hs;
@@ -241,10 +241,13 @@ char *io_read_directory(uint8_t l, uint8_t a)
   sp_payload[1] = 0;
   sp_payload[2] = l;
   sp_payload[3] = a;
+
   sp_error = sp_control(sp_dest, FUJICMD_READ_DIR_ENTRY);
+
   sp_payload[0] = 0; // null string
   if (!sp_error)
     sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
+    
   return sp_payload;
 }
 

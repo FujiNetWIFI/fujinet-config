@@ -182,11 +182,11 @@ SFSubState input_select_file_choose(void)
   //   return SF_DONE;
   // case KEY_INSERT:
   //   return SF_NEW;
-  case 'C':
-  case 'c':
-    pos += bar_get();
-    select_file_set_source_filename();
-    return SF_COPY;
+  // case 'C':
+  // case 'c':
+  //   pos += bar_get();
+  //   select_file_set_source_filename();
+  //   return SF_COPY;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
     if ((bar_get() == 0) && (pos > 0))
@@ -247,7 +247,7 @@ SSSubState input_select_slot_choose(void)
 {
   // cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
    unsigned char k;
-   
+
    k=cgetc();
 
   switch(k)

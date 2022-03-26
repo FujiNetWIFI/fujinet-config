@@ -54,6 +54,7 @@
 #endif /* BUILD_PC6001 */
 
 #define ENTRIES_PER_PAGE 15
+#define DIR_MAX_LEN 40
 
 SFSubState sf_subState;
 char path[224];
@@ -125,8 +126,8 @@ unsigned char select_file_display(void)
   
   for (i=0;i<ENTRIES_PER_PAGE;i++)
     {
-      e = io_read_directory(31,0);
-      if (e[2]==0x7F)
+      e = io_read_directory(DIR_MAX_LEN,0);
+      if (e[0]==0x7F)
 	{
 	  dir_eof=true;
 	  break;
@@ -140,7 +141,7 @@ unsigned char select_file_display(void)
     }
 
   // Do one more read to check EOF
-  e = io_read_directory(31,0);
+  e = io_read_directory(DIR_MAX_LEN,0);
   if (e[2]==0x7F)
     dir_eof=true;
   

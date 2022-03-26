@@ -87,7 +87,7 @@ void select_slot_display()
       
       io_get_device_slots(&deviceSlots[0]);
       
-      screen_select_slot(io_read_directory(42,0x80));
+      screen_select_slot(io_read_directory(49,0x80));
       
       io_close_directory();
     }

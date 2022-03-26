@@ -271,8 +271,9 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, char* e)
 {
   gotoxy(0,y+3);
-  cprintf("%c%c",*e++,*e++);
-  cprintf("%-30s",e);
+  // cprintf("%c%c",*e++,*e++);
+  // cprintf("%-30s",e);
+  cprintf("%-40s",e);
 }
 
 void screen_select_file_clear_long_filename(void) 
