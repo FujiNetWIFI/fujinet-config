@@ -15,6 +15,7 @@
 #include "adam/globals.h"
 #include "adam/input.h"
 #include "adam/bar.h"
+#define DIR_MAX_LEN 31
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
@@ -24,6 +25,7 @@
 #include "apple2/globals.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
+#define DIR_MAX_LEN 40
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -54,7 +56,7 @@
 #endif /* BUILD_PC6001 */
 
 #define ENTRIES_PER_PAGE 15
-#define DIR_MAX_LEN 40
+
 
 SFSubState sf_subState;
 char path[224];
@@ -95,65 +97,65 @@ void select_file_init(void)
 
 unsigned char select_file_display(void)
 {
-  char visibleEntries=0;
+  char visibleEntries = 0;
   char i;
   char *e;
-  
+
   io_mount_host_slot(copy_mode == true ? copy_host_slot : selected_host_slot);
 
   if (io_error())
-    {
-      screen_error("  COULD NOT MOUNT HOST SLOT.");
-      sf_subState=SF_DONE;
-      state=SET_WIFI;
-      return 0;
-    }
+  {
+    screen_error("  COULD NOT MOUNT HOST SLOT.");
+    sf_subState = SF_DONE;
+    state = SHOW_INFO;
+    return 0;
+  }
 
-  screen_select_file_display(path,filter);
-  
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
-  
+  screen_select_file_display(path, filter);
+
+  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot, path, filter);
+
   if (io_error())
-    {
-      screen_error("  COULD NOT OPEN DIRECTORY.");
-      sf_subState=SF_DONE;
-      state=SET_WIFI;
-      return 0;
-    }
-  
-  if (pos>0)
+  {
+    screen_error("  COULD NOT OPEN DIRECTORY.");
+    sf_subState = SF_DONE;
+    state = SHOW_INFO;
+    return 0;
+  }
+
+  if (pos > 0)
     io_set_directory_position(pos);
-  
-  for (i=0;i<ENTRIES_PER_PAGE;i++)
+
+  for (i = 0; i < ENTRIES_PER_PAGE; i++)
+  {
+    e = io_read_directory(DIR_MAX_LEN, 0);
+    if (e[2] == 0x7F)
     {
-      e = io_read_directory(DIR_MAX_LEN,0);
-      if (e[0]==0x7F)
-	{
-	  dir_eof=true;
-	  break;
-	}
-      else
-	{
-	  entry_size[i]=strlen(e);
-	  visibleEntries++;
-	  screen_select_file_display_entry(i,e);
-	}
+      dir_eof = true;
+      break;
     }
+    else
+    {
+      entry_size[i] = strlen(e);
+      visibleEntries++;
+      screen_select_file_display_entry(i, e);
+    }
+  }
 
   // Do one more read to check EOF
-  e = io_read_directory(DIR_MAX_LEN,0);
-  if (e[2]==0x7F)
-    dir_eof=true;
-  
+  e = io_read_directory(DIR_MAX_LEN, 0);
+  if (e[2] == 0x7F)
+    dir_eof = true;
+
   io_close_directory();
 
   if (pos > 0)
     screen_select_file_prev();
-  
+
   if (dir_eof != true)
     screen_select_file_next();
-  
-  sf_subState=SF_CHOOSE;
+
+  sf_subState = SF_CHOOSE;
   return visibleEntries;
 }
 

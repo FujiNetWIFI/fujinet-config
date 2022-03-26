@@ -273,7 +273,7 @@ void screen_select_file_display_entry(unsigned char y, char* e)
   gotoxy(0,y+3);
   // cprintf("%c%c",*e++,*e++);
   // cprintf("%-30s",e);
-  cprintf("%-40s",e);
+  cprintf("%-40s",&e[2]);
 }
 
 void screen_select_file_clear_long_filename(void) 
