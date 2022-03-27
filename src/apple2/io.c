@@ -7,6 +7,7 @@
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
+#include <stdlib.h>
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -206,6 +207,12 @@ void io_put_host_slots(HostSlot *h)
 
 void io_put_device_slots(DeviceSlot *d)
 {
+  sp_payload[0] = 304 & 0xFF;
+  sp_payload[1] = 304 >> 8;
+  memcpy(&sp_payload[2],d,304);
+  
+  sp_error = sp_control(sp_dest, FUJICMD_WRITE_DEVICE_SLOTS);
+  // sleep(1);
 }
 
 void io_mount_host_slot(uint8_t hs)
@@ -218,7 +225,7 @@ void io_mount_host_slot(uint8_t hs)
 
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
-  char *e;
+  // char *e;
   char idx = 0;
   uint16_t s;
 
@@ -260,9 +267,9 @@ void io_close_directory(void)
 
 void io_set_directory_position(DirectoryPosition pos)
 {
-  sp_payload[0] = 1;
+  sp_payload[0] = 2;
   sp_payload[1] = 0;
-  sp_payload[2] = (uint8_t)pos;
+  memcpy((uint8_t *)&sp_payload[2], (uint8_t *)&pos, sizeof(uint16_t));
   sp_error = sp_control(sp_dest, FUJICMD_SET_DIRECTORY_POSITION);
 }
 
@@ -308,6 +315,7 @@ void io_boot(void)
 {
    // eos_init();
   // jump to $c500?
+  __asm__ volatile ("jmp $C500");
 }
 
 #endif /* BUILD_APPLE2 */

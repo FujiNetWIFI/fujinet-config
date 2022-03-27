@@ -74,12 +74,15 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   char a;
 
   i = o; // index into array and y-coordinate
-  x += o;
+  // x += o;
   
-  gotoxy(x,y);
-  cursor(1); // turn on cursor - does not have effect on Apple IIc
+  gotoy(y);
+    
   while(1)
   {
+    gotox(x + i);
+    cputc('_'); // turn on cursor - does not have effect on Apple IIc
+    gotox(x + i);
     a = cgetc();
     switch (a)
     {
@@ -88,12 +91,16 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       if (i>0)
       {
         c[--i] = 0;
+        cputc(' ');
         gotox(x + i);
         cputc(' ');
         gotox(x + i);
       }
       break;
+    case KEY_RIGHT_ARROW:
+      break;
     case KEY_RETURN:
+      cputc(' ');
       c[i] = 0;
       cursor(0); // turn off cursor
       return; // done
@@ -463,6 +470,7 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
+    bar_clear(false);
     input_line(2,i+2,o,c,32,false);
 }
 
