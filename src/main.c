@@ -50,7 +50,9 @@ void setup(void)
 {
   io_init();
   screen_init();
-	sp_init();
+#ifdef BUILD_APPLE2
+  sp_init();
+#endif
 }
 
 void done(void)
@@ -100,6 +102,7 @@ void run(void)
   }
 }
 
+#ifdef BUILD_APPLE2
 void test()
 {
 	int8_t fuji_unit;
@@ -115,6 +118,7 @@ void test()
 	else
 		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
 }
+#endif
 
 void main(void)
 {
@@ -124,7 +128,7 @@ void main(void)
 	// er = sp_control(sp_dest, 0x55);
 	// cprintf("error code %d", er);
 	// cgetc();
-	//state = CHECK_WIFI;
-	state = SHOW_INFO;
+	state = CHECK_WIFI;
+	//state = SHOW_INFO;
 	run();
 }
