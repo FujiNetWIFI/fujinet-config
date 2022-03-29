@@ -299,7 +299,7 @@ void screen_select_file_display(char *p, char *f)
   
   // Update content area
   msx_color(15,4,7);
-  gotoxy(0,0); cprintf("%32s",copy_mode == true ? hostSlots[copy_host_slot] : hostSlots[selected_host_slot]);
+  gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
 
   if (f[0]==0x00)
     cprintf("%32s",p);
@@ -520,7 +520,6 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   gotoxy(0,2); msx_color(1,15,7); cprintf("%-128s",p);
   gotoxy(0,6); msx_color(15,4,7); cprintf("%32s",dh);
   gotoxy(0,7); msx_color(1,15,7); cprintf("%-128s",dp);
-  while(1);
 }
 
 #endif /* BUILD_ADAM */

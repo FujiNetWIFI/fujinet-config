@@ -79,9 +79,11 @@ void select_file_init(void)
     {
       strncpy(source_path,path,224);
       strncpy(source_filter,filter,32);
-      cprintf("SHS: %d %d",selected_host_slot,copy_host_slot);
+      //cprintf("DEST, SRC: %d %d",selected_host_slot,copy_host_slot);
+      //sleep(2);
     }
   
+  io_close_directory();
   pos=0;
   memset(entry_size,0,ENTRIES_PER_PAGE);
   memset(path,0,256);
@@ -334,10 +336,10 @@ void select_file_copy(void)
 
 void select_file_done(void)
 {
-  if (copy_mode == true)
-    state=PERFORM_COPY;
-  else if (select_file_is_folder())
+  if (select_file_is_folder())
     sf_subState=SF_ADVANCE_FOLDER;
+  else if (copy_mode == true)
+    state=PERFORM_COPY;
   else
     state=SELECT_SLOT;
 }

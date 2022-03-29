@@ -40,6 +40,7 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v);
 bool io_get_device_enabled_status(unsigned char d);
 void io_enable_device(unsigned char d);
 void io_disable_device(unsigned char d);
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot, unsigned char copySpec);
 
 #endif /* IO_H */
 #endif /* BUILD_ADAM */

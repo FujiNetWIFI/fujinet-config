@@ -330,5 +330,22 @@ void io_disable_device(unsigned char d)
   eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
 }
 
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot, unsigned char copySpec)
+{
+  struct
+  {
+	unsigned char cmd;
+    unsigned char ss;
+    unsigned char ds;
+	unsigned char cs;
+  } cf;
+
+  cf.cmd = 0xD8;
+  cf.ss = source_slot;
+  cf.ds = destination_slot;
+  cf.cs = copySpec;
+  
+  eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
+}
 
 #endif /* BUILD_ADAM */
