@@ -162,7 +162,7 @@ void hosts_and_devices_done(void)
 {
   char i;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++) // change to 8?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
