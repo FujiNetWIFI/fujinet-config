@@ -56,16 +56,16 @@
 char copy_destination_path[128];
 char copy_host_name[32];
 unsigned char copy_host_slot;
-
-char copySpec[448];
+char copySpec[449];
 
 void perform_copy(void)
 {
-  clrscr();
-  screen_perform_copy(hostSlots[copy_host_slot],source_path,hostSlots[selected_host_slot],path);
   strcpy(copySpec, path);
   strcat(copySpec, "|");
   strcat(copySpec, source_path);
-  io_copy_file(copy_host_slot, selected_host_slot, copySpec);
+
+  clrscr();
+  screen_perform_copy(hostSlots[copy_host_slot],source_path,hostSlots[selected_host_slot],path);
+  io_copy_file(copy_host_slot, selected_host_slot);
   state = HOSTS_AND_DEVICES;
 }

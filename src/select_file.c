@@ -336,10 +336,10 @@ void select_file_copy(void)
 
 void select_file_done(void)
 {
-  if (select_file_is_folder())
-    sf_subState=SF_ADVANCE_FOLDER;
-  else if (copy_mode == true)
+  if (copy_mode == true)
     state=PERFORM_COPY;
+//  else if (select_file_is_folder())
+//    sf_subState=SF_ADVANCE_FOLDER;
   else
     state=SELECT_SLOT;
 }

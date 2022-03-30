@@ -392,7 +392,10 @@ SFSubState input_select_file_choose(void)
     {
     case KEY_RETURN:
       pos+=bar_get();
-      return SF_DONE;
+	  if (select_file_is_folder())
+	    return SF_ADVANCE_FOLDER;
+      else
+        return SF_DONE;
     case KEY_ESCAPE:
       copy_mode=false;
       state=HOSTS_AND_DEVICES;

@@ -10,11 +10,15 @@
 #include <eos.h>
 #include <string.h>
 #include "io.h"
+#include "globals.h"
 
 #define FUJI_DEV 0x0F
 
 char response[1024];
 static DCB *dcb;
+
+extern unsigned char source_path;
+extern unsigned char path;
 
 static void io_command_and_response(void* buf, unsigned short len)
 {
@@ -330,20 +334,18 @@ void io_disable_device(unsigned char d)
   eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
 }
 
-void io_copy_file(unsigned char source_slot, unsigned char destination_slot, unsigned char copySpec)
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
-  struct
-  {
-	unsigned char cmd;
-    unsigned char ss;
-    unsigned char ds;
-	unsigned char cs;
-  } cf;
 
-  cf.cmd = 0xD8;
-  cf.ss = source_slot;
-  cf.ds = destination_slot;
-  cf.cs = copySpec;
+  sleep(2);
+  cprintf("S:%d,D:%d,%s",source_slot,destination_slot,copySpec);
+  sleep(2);
+
+  char cf[451]={0xD8,0x00,0x00};
+  
+  cf[1]=source_slot;
+  cf[2]=destination_slot;
+  strcpy(&cf[3],copySpec);
   
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
 }
