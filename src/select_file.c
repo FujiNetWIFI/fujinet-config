@@ -240,9 +240,9 @@ void select_file_advance(void)
   
   e = io_read_directory(128,1);
   
-  io_close_directory();
-
   strcat(path,e); // append directory entry to end of current path
+
+  io_close_directory(); // have to use "e" before calling another io command, otherwise e gets wiped out
 
   pos=0;
   dir_eof=quick_boot=false;
@@ -271,6 +271,7 @@ void select_file_devance(void)
 bool select_file_is_folder(void)
 {
   char *e;
+  bool result;
 
   io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
 
@@ -278,9 +279,11 @@ bool select_file_is_folder(void)
 
   e = io_read_directory(128,0);
 
+  result = (strrchr(e,'/') != NULL);
+
   io_close_directory();
  
-  return strrchr(e,'/') != NULL; // Offset 10 = directory flag.
+  return result; // Offset 10 = directory flag.
 }
 
 void select_file_new(void)
@@ -339,7 +342,7 @@ void select_file_done(void)
 {
   if (copy_mode == true)
     state=PERFORM_COPY;
-  else if (select_file_is_folder())
+  else if (select_file_is_folder() == true)
     sf_subState=SF_ADVANCE_FOLDER;
   else
     state=SELECT_SLOT;

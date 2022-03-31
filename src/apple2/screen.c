@@ -366,19 +366,19 @@ void screen_select_slot_mode(void)
 void screen_select_slot_eject(unsigned char ds)
 {
   cclearxy(1,1+ds,39);
-  gotoxy(1,1+ds); cprintf("Empty");
+  gotoxy(2,1+ds); cprintf("Empty");
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  cclearxy(1,12,39);
-  gotoxy(1,12+ds); cprintf("Empty");
+  cclearxy(1,13+ds,39);
+  gotoxy(2,13+ds); cprintf("Empty");
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(1,2+hs); cprintf("Empty");
+  gotoxy(2,2+hs); cprintf("Empty");
 }  
 #endif /* BUILD_APPLE2 */
