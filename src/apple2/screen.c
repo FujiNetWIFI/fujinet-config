@@ -206,8 +206,14 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.",i);
 }
 
-void screen_perform_copy(char *sh, char *p, char *dh, char *dp) {
-  // TODO: Implement
+void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
+{
+  clrscr();
+  gotoxy(0,0); cprintf("%32s","COPYING FILE FROM:");
+  gotoxy(0,1); cprintf("%32s",sh);
+  gotoxy(0,2); cprintf("%-128s",p);
+  gotoxy(0,6); cprintf("%32s",dh);
+  gotoxy(0,7); cprintf("%-128s",dp);
 }
 
 void screen_show_info(AdapterConfig* ac)

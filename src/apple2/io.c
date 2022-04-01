@@ -88,7 +88,6 @@ bool io_error(void)
 uint8_t io_get_wifi_status(void)
 {
   // call the SP status command and get the returned byte
-  uint8_t s;
 
   sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
   if (sp_error)
@@ -226,7 +225,7 @@ void io_mount_host_slot(uint8_t hs)
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
   // char *e;
-  char idx = 0;
+  unsigned char idx = 0;
   uint16_t s;
 
   // to do - copy strings into payload and figure out length
@@ -292,6 +291,25 @@ void io_mount_disk_image(uint8_t ds, uint8_t mode)
   sp_payload[3] = mode;
 
   sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
+}
+
+void io_copy_file(unsigned char shs, unsigned char chs, char* sp, char* dp)
+{
+  unsigned short idx;
+  idx = 2;
+  sp_payload[idx++] = shs;
+  sp_payload[idx++] = chs;
+  memcpy(&sp_payload[idx], sp, strlen(sp));
+  idx += strlen(sp);
+  sp_payload[idx++] = '|';
+  strcpy(&sp_payload[idx], dp);
+  idx += strlen(dp);
+  idx++;
+
+  sp_payload[0] = idx & 0xff;
+  sp_payload[1] = idx >> 8;
+
+  sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
 void io_set_boot_config(uint8_t toggle)

@@ -62,5 +62,6 @@ void perform_copy(void)
 {
   clrscr();
   screen_perform_copy(hostSlots[selected_host_slot],source_path,hostSlots[copy_host_slot],path);
-  while(1);
+  io_copy_file(selected_host_slot, copy_host_slot, source_path, path);
+  // build copyspec: sourcePath|destPath
 }
