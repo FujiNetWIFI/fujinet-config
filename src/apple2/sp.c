@@ -118,9 +118,9 @@ int8_t sp_find_fuji()
 	num++;
 	for (i = 1; i < num; i++)
 	{
-    do
+    //do
       err = sp_status(i, 0x03); // get DIB
-    while (err);
+    //while (err);
     if (sp_payload[4] == fuji_len)
     {
       for (j = 0; j < fuji_len; j++)
@@ -201,7 +201,7 @@ void sp_init(void)
     sp_dispatch = sp_dispatch_address(slot);
   else
     screen_error("No SmartPort Firmware Found!");
-
+sp_list_devs();
   f = sp_find_fuji();
   if (f < 1)
     screen_error("FujiNet Not Found!");

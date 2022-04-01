@@ -74,12 +74,15 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   char a;
 
   i = o; // index into array and y-coordinate
-  x += o;
+  // x += o;
   
-  gotoxy(x,y);
-  cursor(1); // turn on cursor - does not have effect on Apple IIc
+  gotoy(y);
+    
   while(1)
   {
+    gotox(x + i);
+    cputc('_'); // turn on cursor - does not have effect on Apple IIc
+    gotox(x + i);
     a = cgetc();
     switch (a)
     {
@@ -88,12 +91,16 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       if (i>0)
       {
         c[--i] = 0;
+        cputc(' ');
         gotox(x + i);
         cputc(' ');
         gotox(x + i);
       }
       break;
+    case KEY_RIGHT_ARROW:
+      break;
     case KEY_RETURN:
+      cputc(' ');
       c[i] = 0;
       cursor(0); // turn off cursor
       return; // done
@@ -156,9 +163,9 @@ SFSubState input_select_file_choose(void)
 
   switch (k)
   {
-  // case KEY_RETURN:
-  //   pos += bar_get();
-  //   return SF_DONE;
+  case KEY_RETURN:
+    pos += bar_get();
+    return SF_DONE;
   case KEY_ESCAPE:
     copy_mode = false;
     state = HOSTS_AND_DEVICES;
@@ -172,21 +179,21 @@ SFSubState input_select_file_choose(void)
   case 'F':
   case 'f':
     return SF_FILTER;
-  case KEY_RETURN: // KEY_SMART_VI:
-    if (copy_mode == false)
-    {
-      quick_boot = true;
-      pos += bar_get();
-      state = SELECT_SLOT;
-    }
-    return SF_DONE;
+  // case KEY_RETURN: // KEY_SMART_VI:
+  //   if (copy_mode == false)
+  //   {
+  //     quick_boot = true;
+  //     pos += bar_get();
+  //     state = SELECT_SLOT; // should not change here? ... gets picked in SF_DONE state
+  //   }
+  //   return SF_DONE;
   // case KEY_INSERT:
   //   return SF_NEW;
-  case 'C':
-  case 'c':
-    pos += bar_get();
-    select_file_set_source_filename();
-    return SF_COPY;
+  // case 'C':
+  // case 'c':
+  //   pos += bar_get();
+  //   select_file_set_source_filename();
+  //   return SF_COPY;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
     if ((bar_get() == 0) && (pos > 0))
@@ -245,7 +252,47 @@ void input_select_file_new_name(char *c)
 
 SSSubState input_select_slot_choose(void)
 {
-  // TODO: implement
+  // cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
+   unsigned char k;
+
+   k=cgetc();
+
+  switch(k)
+    {
+    case KEY_ESCAPE:
+      state=HOSTS_AND_DEVICES;
+      return SS_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+      bar_jump(k-0x31);
+      return SS_CHOOSE;
+    // case KEY_SMART_IV:
+    case 'E':
+    case 'e':
+      select_slot_eject(bar_get());
+      return SS_CHOOSE;
+    case KEY_RETURN:
+    // case KEY_SMART_V:
+      selected_device_slot=bar_get();
+      mode=0; // ?? read/write mode?
+      return SS_DONE;
+    // case KEY_SMART_VI:
+    //   selected_device_slot=bar_get();
+    //   mode=2;
+    //   return SS_DONE;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return SS_CHOOSE;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return SS_CHOOSE;
+    default:
+      return SS_CHOOSE;
+    }
 }
 
 SISubState input_show_info(void)
@@ -423,6 +470,7 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
+    bar_clear(false);
     input_line(2,i+2,o,c,32,false);
 }
 

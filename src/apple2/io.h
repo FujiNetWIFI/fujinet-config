@@ -34,6 +34,7 @@ void io_close_directory(void);
 void io_set_directory_position(DirectoryPosition pos);
 void io_set_device_filename(unsigned char ds, char* e);
 void io_mount_disk_image(unsigned char ds, unsigned char mode);
+void io_copy_file(unsigned char shs, unsigned char chs, char* sp, char* dp);
 void io_set_boot_config(unsigned char toggle);
 void io_umount_disk_image(unsigned char ds);
 void io_boot(void);

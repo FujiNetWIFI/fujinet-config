@@ -162,7 +162,7 @@ void hosts_and_devices_done(void)
 {
   char i;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++) // change to 8?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
@@ -197,8 +197,12 @@ void hosts_and_devices(void)
 	  hosts_and_devices_devices_clear_all();
 	  break;
 	case HD_DONE:
-	  hosts_and_devices_done();
+	  hosts_and_devices_done(); // this never gets called because HD_DONE is always paired with state != HOSTS_AND_DEVICES
 	  break;
 	}
     }
+  if (state == DONE)
+  	  hosts_and_devices_done();
+
+
 }

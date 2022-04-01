@@ -50,9 +50,6 @@ void setup(void)
 {
   io_init();
   screen_init();
-#ifdef BUILD_APPLE2
-  sp_init();
-#endif /* BUILD_APPLE2 */
 }
 
 void done(void)
