@@ -15,7 +15,7 @@ void screen_error(const char *c);
 
 void screen_set_wifi(AdapterConfig* ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
-void screen_set_wifi_select_network(unsigned char nn);
+void screen_set_wifi_select_network(void);
 void screen_set_wifi_custom(void);
 void screen_set_wifi_password(void);
 

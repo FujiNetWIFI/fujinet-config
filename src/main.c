@@ -50,7 +50,9 @@ void setup(void)
 {
   io_init();
   screen_init();
-	sp_init();
+#ifdef BUILD_APPLE2
+  sp_init();
+#endif /* BUILD_APPLE2 */
 }
 
 void done(void)
@@ -102,6 +104,7 @@ void run(void)
 
 void test()
 {
+#ifdef BUILD_APPLE2
 	int8_t fuji_unit;
 
 	clrscr();
@@ -114,6 +117,7 @@ void test()
 		cputs("SmartPort Error\n\r");
 	else
 		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
+#endif 
 }
 
 void main(void)
@@ -124,7 +128,9 @@ void main(void)
 	// er = sp_control(sp_dest, 0x55);
 	// cprintf("error code %d", er);
 	// cgetc();
-	//state = CHECK_WIFI;
-	state = SHOW_INFO;
+	state = CHECK_WIFI;
+#ifdef BUILD_APPLE2
+        state = SHOW_INFO;
+#endif /* BUILD_APPLE2 */
 	run();
 }
