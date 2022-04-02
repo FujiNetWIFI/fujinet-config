@@ -170,6 +170,8 @@ void hosts_and_devices_done(void)
       io_mount_disk_image(i, deviceSlots[i].mode);
     }
   }
+
+  state=DONE;
 }
 
 void hosts_and_devices(void)

@@ -92,7 +92,7 @@ AdapterConfig *io_get_adapter_config(void)
 
 void io_set_ssid(NetConfig *nc)
 {
-  unsigned char c[97]={0xFB};
+  unsigned char c[98]={0xFB};
 
   memcpy(&c[1],nc,sizeof(NetConfig));
 

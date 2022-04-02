@@ -57,14 +57,14 @@ void setup(void)
 
 void done(void)
 {
-	// reboot here
-	io_set_boot_config(0); // disable config
-	io_boot();             // and reboot.
+  // reboot here
+  io_set_boot_config(0); // disable config
+  io_boot();             // and reboot.
 }
 
 void run(void)
 {
-	while (state != DONE)
+	while (true)
 	{
 		switch (state)
 		{
@@ -102,33 +102,9 @@ void run(void)
   }
 }
 
-#ifdef BUILD_APPLE2
-void test()
-{
-	int8_t fuji_unit;
-
-	clrscr();
-	cputs("FujiNet Getting Started\n\r");
-
-	sp_list_devs();
-
-	fuji_unit = sp_find_fuji();
-	if (fuji_unit == -1)
-		cputs("SmartPort Error\n\r");
-	else
-		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
-}
-#endif
-
 void main(void)
 {
 	setup();
-	// test();
-	// cgetc();
-	// er = sp_control(sp_dest, 0x55);
-	// cprintf("error code %d", er);
-	// cgetc();
 	state = CHECK_WIFI;
-	//state = SHOW_INFO;
 	run();
 }

@@ -7,6 +7,7 @@
 #define FUJI_TYPEDEFS_H
 
 #define FILE_MAXLEN 36
+#define SSID_MAXLEN 33 /* 32 + NULL */
 
 #define MODE_READ 1
 #define MODE_WRITE 2
@@ -18,7 +19,7 @@ typedef unsigned short DirectoryPosition;
  * from a WiFi scan
  */
 typedef struct {
-  char ssid[32];
+  char ssid[SSID_MAXLEN];
   signed char rssi;
 } SSIDInfo;
 
@@ -27,7 +28,7 @@ typedef struct {
  */
 typedef struct
 {
-  char ssid[32];
+  char ssid[SSID_MAXLEN];
   char password[64];
 } NetConfig;
 
@@ -36,7 +37,7 @@ typedef struct
  */
 typedef struct
 {
-  char ssid[32];
+  char ssid[SSID_MAXLEN];
   char hostname[64];
   unsigned char localIP[4];
   unsigned char gateway[4];

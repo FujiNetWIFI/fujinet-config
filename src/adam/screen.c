@@ -113,6 +113,8 @@ void screen_set_wifi_select_network(unsigned char nn)
 {
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
   sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);
+  bar_set(0,3,nn,0);
+
   smartkeys_status(response);
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }

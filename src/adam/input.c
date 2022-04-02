@@ -35,6 +35,8 @@ extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
 
+bool select_file_is_folder(void);
+
 /**
  * ADAM keyboard mapping
  */
@@ -310,7 +312,6 @@ HDSubState input_hosts_and_devices_hosts(void)
       return HD_HOSTS;
     case KEY_SMART_VI:
       smartkeys_sound_play(SOUND_CONFIRM);
-      state=DONE;
       return HD_DONE;
     case KEY_UP_ARROW:
       bar_up();
