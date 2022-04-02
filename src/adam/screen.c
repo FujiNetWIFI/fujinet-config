@@ -39,6 +39,7 @@ static char udg[] =
   };
 
 static const char *empty="Empty";
+static const char *off="OFF";
 
 void screen_init(void)
 {
@@ -143,9 +144,17 @@ void screen_connect_wifi(NetConfig *nc)
   smartkeys_sound_play(SOUND_CONFIRM);
 }
 
-char* screen_hosts_and_devices_slot(char *c)
+char* screen_hosts_and_devices_device_slot(char hs, char *fn)
 {
-  return c[0]==0x00 ? &empty[0] : c;
+  if (hs == 0xFF)
+    return &off[0];
+  else
+    return fn[0]==0x00 ? &empty[0] : fn;
+}
+
+char* screen_hosts_and_devices_host_slot(char *hs)
+{
+  return hs[0]==0x00 ? &empty[0] : hs;
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
@@ -156,7 +165,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
     {
-      gotoxy(0,i+y+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
+      gotoxy(0,i+y+1); cprintf("%d%s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,d[i].file));
     }
   
   msx_vfill(MODE2_ATTR+y2,0xF4,256);
@@ -170,7 +179,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
   for (char i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_host_slot(h[i])); 
     }
   
   msx_vfill(MODE2_ATTR,0xF4,256);
