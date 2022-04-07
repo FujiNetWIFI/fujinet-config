@@ -74,22 +74,23 @@ bool copy_mode=false;
 
 extern unsigned char copy_host_slot;
 
-
-
 void select_file_init(void)
 {
   if (copy_mode == true)
-    {
-      strncpy(source_path,path,224);
-      strncpy(source_filter,filter,32);
-      while(1);
-    }
-  
-  pos=0;
-  memset(entry_size,0,ENTRIES_PER_PAGE);
-  memset(path,0,sizeof(path));
-  path[0]='/';
-  memset(filter,0,sizeof(filter));
+  {
+    strncpy(source_path, path, 224);
+    strncpy(source_filter, filter, 32);
+    // while(1);
+  }
+  else
+  {
+    memset(entry_size, 0, ENTRIES_PER_PAGE);
+    memset(path, 0, sizeof(path));
+    path[0] = '/';
+    memset(filter, 0, sizeof(filter));
+  }
+
+  pos = 0;
   screen_select_file();
   sf_subState=SF_DISPLAY;
   quick_boot=dir_eof=false;

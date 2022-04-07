@@ -189,11 +189,11 @@ SFSubState input_select_file_choose(void)
   //   return SF_DONE;
   // case KEY_INSERT:
   //   return SF_NEW;
-  // case 'C':
-  // case 'c':
-  //   pos += bar_get();
-  //   select_file_set_source_filename();
-  //   return SF_COPY;
+  case 'C':
+  case 'c':
+    pos += bar_get();
+    select_file_set_source_filename();
+    return SF_COPY;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
     if ((bar_get() == 0) && (pos > 0))
@@ -476,5 +476,6 @@ void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, ch
 
 void input_line_filter(char *c)
 {
+  input_line(0,23,0,c,32,false);
 }
 #endif /* BUILD_APPLE2 */

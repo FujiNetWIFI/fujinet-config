@@ -133,12 +133,26 @@ void screen_connect_wifi(NetConfig *nc)
   gotoxy(0,STATUS_BAR); cprintf("CONNECTING TO NETWORK: %s",nc->ssid);
 }
 
-void screen_destination_host_slot(char *h, char *p) {
-  // TODO: implement
+void screen_destination_host_slot(char *h, char *p)
+{
+  clrscr();
+  gotoxy(0, 12); cprintf("COPY FROM HOST SLOT");
+  chlinexy(0,13,40);
+  gotoxy(0, 14); cprintf("%-32s", h);
+  gotoxy(0, 15); cprintf("%-128s", p);
 }
 
-void screen_destination_host_slot_choose(void) {
-  // TODO: implement
+void screen_destination_host_slot_choose(void)
+{
+  gotoxy(0, 0);
+  cprintf("COPY TO HOST SLOT");
+  chlinexy(0,1,40);
+
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR); 
+  cprintf("[1-8] CHOOSE SLOT\r\n[RETURN] SELECT SLOT\r\n[ESC] TO ABORT");
+  
+  bar_set(2, 1, 8, selected_host_slot);
 }
 
 char* screen_hosts_and_devices_slot(char *c)
@@ -184,8 +198,14 @@ void screen_hosts_and_devices_hosts(void)
   gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
-void screen_hosts_and_devices_host_slots(HostSlot *h) {
-  // TODO: Implement
+void screen_hosts_and_devices_host_slots(HostSlot *h)
+{
+  char i;
+
+  for (i=0;i<8;i++)
+    {
+      gotoxy(0,i+2); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot(h[i])); 
+    }
 }
 
 void screen_hosts_and_devices_devices(void)
