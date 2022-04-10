@@ -107,8 +107,9 @@ spCmdListHigh:
 
 int8_t sp_find_fuji()
 {
-  const char fuji[9] = "THE_FUJI";
-  const uint8_t fuji_len = 8;
+  // const char fuji[9] = "THE_FUJI";
+  const char fuji[14] = "FUJINET_DISK_0";
+  const uint8_t fuji_len = sizeof(fuji);
   int8_t err, num, i, j;
 
   err = sp_status(0x00, 0x00); // get number of devices
@@ -201,7 +202,7 @@ void sp_init(void)
     sp_dispatch = sp_dispatch_address(slot);
   else
     screen_error("No SmartPort Firmware Found!");
-sp_list_devs();
+  sp_list_devs();
   f = sp_find_fuji();
   if (f < 1)
     screen_error("FujiNet Not Found!");
