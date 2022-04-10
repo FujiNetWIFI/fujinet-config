@@ -331,10 +331,7 @@ void io_umount_disk_image(uint8_t ds)
 
 void io_boot(void)
 {
-   // eos_init();
-  // jump to $c500?
-  // __asm__ volatile ("jmp $C500");
-  __asm__ volatile ("jmp ($FFFE)");
+  __asm__ volatile ("jmp $FAA6");
 }
 
 #endif /* BUILD_APPLE2 */
