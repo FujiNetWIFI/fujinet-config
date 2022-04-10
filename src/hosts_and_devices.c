@@ -25,7 +25,7 @@
 #include "apple2/screen.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
-#include <stdio.h> // for debugging using sprintf
+// #include <stdio.h> // for debugging using sprintf
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -162,19 +162,19 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 void hosts_and_devices_done(void)
 {
   char i;
-  char *msg[40];
+  // char *msg[40];
 
   for (i = 0; i < 4; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
-    sprintf(msg, "host slot: %d", deviceSlots[i].hostSlot); // debug
-    screen_error(msg);
-    input_ucase();
+    // sprintf(msg, "host slot: %d", deviceSlots[i].hostSlot); // debug
+    // screen_error(msg);
+    // input_ucase();
     if (deviceSlots[i].hostSlot != 0xFF)
     {
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);
     }
-    screen_error(" ");
+    // screen_error(" ");
   }
 }
 

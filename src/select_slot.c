@@ -25,7 +25,7 @@
 #include "apple2/globals.h"
 #include "apple2/io.h"
 #include "apple2/bar.h"
-#define DIR_MAX_LEN 40
+#define DIR_MAX_LEN 31
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
