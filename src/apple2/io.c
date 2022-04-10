@@ -331,7 +331,9 @@ void io_umount_disk_image(uint8_t ds)
 
 void io_boot(void)
 {
-  __asm__ volatile ("jmp $FAA6");
+  __asm__ volatile ("lda #$00");
+  __asm__ volatile ("sta $03F4");
+  __asm__ volatile ("jmp ($FFFC)");
 }
 
 #endif /* BUILD_APPLE2 */
