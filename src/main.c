@@ -24,7 +24,7 @@
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/sp.h"
-#include <conio.h> // for dev
+// #include <conio.h> // for dev
 #include <stdint.h>
 #endif /* BUILD_APPLE2 */
 
@@ -99,35 +99,30 @@ void run(void)
   }
 }
 
-void test()
-{
-#ifdef BUILD_APPLE2
-	int8_t fuji_unit;
+// void test()
+// {
+// #ifdef BUILD_APPLE2
+// 	int8_t fuji_unit;
 
-	clrscr();
-	cputs("FujiNet Getting Started\n\r");
+// 	clrscr();
+// 	cputs("FujiNet Getting Started\n\r");
 
-	sp_list_devs();
+// 	sp_list_devs();
 
-	fuji_unit = sp_find_fuji();
-	if (fuji_unit == -1)
-		cputs("SmartPort Error\n\r");
-	else
-		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
-#endif 
-}
+// 	fuji_unit = sp_find_fuji();
+// 	if (fuji_unit == -1)
+// 		cputs("SmartPort Error\n\r");
+// 	else
+// 		cprintf("TEH_FUJI is Unit #%d", fuji_unit);
+// #endif 
+// }
 
 void main(void)
 {
 	setup();
-	// test();
-	// cgetc();
-	// er = sp_control(sp_dest, 0x55);
-	// cprintf("error code %d", er);
-	// cgetc();
 	state = CHECK_WIFI;
-#ifdef BUILD_APPLE2
-        state = SHOW_INFO;
-#endif /* BUILD_APPLE2 */
+// #ifdef BUILD_APPLE2
+//         state = SHOW_INFO;
+// #endif /* BUILD_APPLE2 */
 	run();
 }
