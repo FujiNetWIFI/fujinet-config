@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <conio.h>
 #include <stdlib.h>
+#include <peekpoke.h> // For the insanity in io_boot()
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -331,9 +332,26 @@ void io_umount_disk_image(uint8_t ds)
 
 void io_boot(void)
 {
-  __asm__ volatile ("lda #$00");
-  __asm__ volatile ("sta $03F4");
-  __asm__ volatile ("jmp ($FFFC)");
+  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
+
+  int i;
+  
+  clrscr();
+  cprintf("BOOTING...");
+
+  POKE(0x100,0xEE);
+  POKE(0x101,0xF4);
+  POKE(0x102,0x03);
+  POKE(0x103,0x78);
+  POKE(0x104,0xAD);
+  POKE(0x105,0x82);
+  POKE(0x106,0xC0);
+  POKE(0x107,0x6C);
+  POKE(0x108,0xFC);
+  POKE(0x109,0xFF);
+
+  asm("JMP $0100");
+  
 }
 
 #endif /* BUILD_APPLE2 */

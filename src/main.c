@@ -61,7 +61,7 @@ void done(void)
 
 void run(void)
 {
-	while (state != DONE)
+	while (1)
 	{
 		switch (state)
 		{

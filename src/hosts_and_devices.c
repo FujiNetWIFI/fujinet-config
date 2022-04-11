@@ -166,16 +166,13 @@ void hosts_and_devices_done(void)
 
   for (i = 0; i < 4; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
-    // sprintf(msg, "host slot: %d", deviceSlots[i].hostSlot); // debug
-    // screen_error(msg);
-    // input_ucase();
     if (deviceSlots[i].hostSlot != 0xFF)
     {
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);
     }
-    // screen_error(" ");
   }
+  state = DONE;
 }
 
 void hosts_and_devices(void)

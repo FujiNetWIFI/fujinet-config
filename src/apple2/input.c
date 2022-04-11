@@ -341,13 +341,11 @@ HDSubState input_hosts_and_devices_hosts(void)
     {
       strcpy(selected_host_name, hostSlots[selected_host_slot]);
       state = SELECT_FILE;
-      // smartkeys_sound_play(SOUND_CONFIRM);
       return HD_DONE;
     }
     else
       return HD_HOSTS;
   case KEY_ESCAPE: // ESC
-    state = DONE;
     return HD_DONE;
   case 'C':
   case 'c':
