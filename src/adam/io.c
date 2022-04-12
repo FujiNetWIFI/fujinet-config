@@ -334,20 +334,30 @@ void io_disable_device(unsigned char d)
   eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
 }
 
+void io_update_devices_enabled(bool *e)
+{
+  char i;
+
+  for (i=0;i<4;i++)
+    {
+      e[i]=io_get_device_enabled_status(io_device_slot_to_device(i));
+    }
+}
+
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
-
-  sleep(2);
-  cprintf("S:%d,D:%d,%s",source_slot,destination_slot,copySpec);
-  sleep(2);
-
-  char cf[451]={0xD8,0x00,0x00};
+  char cf[259]={0xD8,0x00,0x00};
   
   cf[1]=source_slot;
   cf[2]=destination_slot;
   strcpy(&cf[3],copySpec);
   
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
+}
+
+unsigned char io_device_slot_to_device(unsigned char ds)
+{
+  return ds+4;
 }
 
 #endif /* BUILD_ADAM */

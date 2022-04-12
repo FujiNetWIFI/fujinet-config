@@ -57,6 +57,7 @@
 HDSubState hd_subState;
 DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
+bool deviceEnabled[8];
 HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_device_slot;
@@ -89,8 +90,10 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 
 void hosts_and_devices_hosts(void)
 {
+  io_update_devices_enabled(&deviceEnabled[0]);
+  
   screen_hosts_and_devices_hosts();
-
+  
   while (hd_subState==HD_HOSTS)
     hd_subState=input_hosts_and_devices_hosts();
 }
@@ -129,6 +132,7 @@ void hosts_and_devices_devices(void)
 {
   char k=0;
 
+  io_update_devices_enabled(&deviceEnabled[0]);
   screen_hosts_and_devices_devices();
   hosts_and_devices_long_filename();
   
@@ -158,6 +162,22 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   io_mount_disk_image(selected_device_slot,m);
 }
 
+void hosts_and_devices_devices_enable_toggle(unsigned char ds)
+{
+  bool s=io_get_device_enabled_status(io_device_slot_to_device(ds));
+
+  if (s==true)
+    io_disable_device(io_device_slot_to_device(ds));
+  else
+    io_enable_device(io_device_slot_to_device(ds));
+
+  deviceEnabled[ds]=io_get_device_enabled_status(io_device_slot_to_device(ds));
+  
+  io_update_devices_enabled(&deviceEnabled[0]);
+  screen_hosts_and_devices_device_slots(11,&deviceSlots[0],&deviceEnabled[0]);
+  bar_update();
+}
+
 void hosts_and_devices_done(void)
 {
   char i;
@@ -165,10 +185,11 @@ void hosts_and_devices_done(void)
   for (i = 0; i < 4; i++)
   {
     if (deviceSlots[i].hostSlot != 0xFF)
-    {
-      io_mount_host_slot(deviceSlots[i].hostSlot);
-      io_mount_disk_image(i, deviceSlots[i].mode);
-    }
+      {
+	io_mount_host_slot(deviceSlots[i].hostSlot);
+	io_mount_disk_image(i, deviceSlots[i].mode);
+      }
+
   }
 
   state=DONE;
@@ -183,7 +204,8 @@ void hosts_and_devices(void)
   
   io_get_host_slots(&hostSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
-  screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0]);
+  io_update_devices_enabled(&deviceEnabled[0]);
+  screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0],&deviceEnabled[0]);
 
   while (state == HOSTS_AND_DEVICES)
     {

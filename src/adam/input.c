@@ -347,13 +347,12 @@ HDSubState input_hosts_and_devices_devices(void)
       return HD_DEVICES;
     case KEY_SMART_V:
       selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(0);
+      hosts_and_devices_devices_enable_toggle(selected_device_slot);
       return HD_DEVICES;
       break;
     case KEY_SMART_VI:
-      selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(2);
-      return HD_DEVICES;
+      smartkeys_sound_play(SOUND_CONFIRM);
+      return HD_DONE;
       break;
     case KEY_CLEAR:
       return HD_CLEAR_ALL_DEVICES;

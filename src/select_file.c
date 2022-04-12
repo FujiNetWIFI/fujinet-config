@@ -60,6 +60,7 @@ char path[224];
 char filter[32];
 char source_path[224];
 char source_filter[32];
+char source_filename[128];
 DirectoryPosition pos=0;
 bool dir_eof=false;
 bool quick_boot=false;
@@ -79,8 +80,6 @@ void select_file_init(void)
     {
       strncpy(source_path,path,224);
       strncpy(source_filter,filter,32);
-      //cprintf("DEST, SRC: %d %d",selected_host_slot,copy_host_slot);
-      //sleep(2);
     }
   
   io_close_directory();
@@ -160,9 +159,13 @@ unsigned char select_file_display(void)
 
 void select_file_set_source_filename(void)
 {
+  char entry[128];
+
   io_open_directory(selected_host_slot,path,filter);
   io_set_directory_position(pos);
-  strcat(path,io_read_directory(128,0));
+  strcpy(entry,io_read_directory(128,0));
+  strcat(path,entry);
+  strcpy(source_filename,entry);
 }
 
 void select_display_long_filename(void)

@@ -21,6 +21,7 @@
 extern bool copy_mode;
 extern char copy_host_name;
 extern unsigned char copy_host_slot;
+extern bool deviceEnabled[8];
 
 static char udg[] =
   {
@@ -38,7 +39,7 @@ static char udg[] =
    0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55  // Password smudge 0x8b
   };
 
-static const char *empty="Empty";
+static const char *empty="EMPTY";
 static const char *off="OFF";
 
 void screen_init(void)
@@ -144,12 +145,14 @@ void screen_connect_wifi(NetConfig *nc)
   smartkeys_sound_play(SOUND_CONFIRM);
 }
 
-char* screen_hosts_and_devices_device_slot(char hs, char *fn)
+char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
 {
-  if (hs == 0xFF)
+  if (fn[0]!=0x00)
+    return fn;
+  else if (e==false)
     return &off[0];
   else
-    return fn[0]==0x00 ? &empty[0] : fn;
+    return &empty[0];
 }
 
 char* screen_hosts_and_devices_host_slot(char *hs)
@@ -157,7 +160,7 @@ char* screen_hosts_and_devices_host_slot(char *hs)
   return hs[0]==0x00 ? &empty[0] : hs;
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   unsigned short y2 = y << 8;
   
@@ -165,7 +168,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
     {
-      gotoxy(0,i+y+1); cprintf("%d%s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,d[i].file));
+      gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
   
   msx_vfill(MODE2_ATTR+y2,0xF4,256);
@@ -187,13 +190,13 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   msx_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
 }
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
   smartkeys_set_mode();
   eos_start_read_keyboard();
 
   screen_hosts_and_devices_host_slots(h);
-  screen_hosts_and_devices_device_slots(11,d);
+  screen_hosts_and_devices_device_slots(11,d,e);
   
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
@@ -219,7 +222,7 @@ void screen_hosts_and_devices_hosts(void)
 
 void screen_hosts_and_devices_devices(void)
 {
-  smartkeys_display(NULL,NULL,NULL," EJECT","  READ\n  ONLY","  READ\n WRITE");
+  smartkeys_display(NULL,NULL,NULL," EJECT"," ON/OFF\n TOGGLE","  BOOT");
   smartkeys_status("  [TAB] GO TO HOST SLOTS\n  [CLEAR] EJECT ALL SLOTS");
   bar_clear(false);
   bar_set(11,1,4,selected_device_slot);
@@ -438,7 +441,7 @@ void screen_select_slot(char *e)
   gotoxy(0,0);
   cprintf("%32s",e);
 
-  screen_hosts_and_devices_device_slots(0,&deviceSlots[0]);
+  screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
   
   msx_vfill(MODE2_ATTR,0xF4,256);
   msx_vfill(MODE2_ATTR+0x100,0x1F,0x400);

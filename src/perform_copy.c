@@ -53,19 +53,27 @@
 #endif /* BUILD_Pc6001 */
 
 #include "perform_copy.h"
-char copy_destination_path[128];
-char copy_host_name[32];
+
+extern char source_filename[128];
+
 unsigned char copy_host_slot;
-char copySpec[449];
+char copySpec[256];
+
+extern bool copy_mode;
 
 void perform_copy(void)
 {
-  strcpy(copySpec, path);
+  strcpy(copySpec, source_path);
   strcat(copySpec, "|");
-  strcat(copySpec, source_path);
-
+  strcat(copySpec, path);
+  strcat(copySpec,source_filename);
+  
   clrscr();
   screen_perform_copy(hostSlots[copy_host_slot],source_path,hostSlots[selected_host_slot],path);
+
   io_copy_file(copy_host_slot, selected_host_slot);
+
+  copy_mode = false;
+  
   state = HOSTS_AND_DEVICES;
 }
