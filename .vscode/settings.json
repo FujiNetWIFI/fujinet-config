@@ -22,6 +22,7 @@
     "istream": "c",
     "ostream": "c",
     "sstream": "c",
-    "streambuf": "c"
+    "streambuf": "c",
+    "select_file.h": "c"
   }
 }

@@ -24,7 +24,7 @@
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/sp.h"
-#include <conio.h> // for dev
+// #include <conio.h> // for dev
 #include <stdint.h>
 #endif /* BUILD_APPLE2 */
 
@@ -50,9 +50,6 @@ void setup(void)
 {
   io_init();
   screen_init();
-#ifdef BUILD_APPLE2
-  sp_init();
-#endif
 }
 
 void done(void)

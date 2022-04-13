@@ -111,7 +111,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   smartkeys_sound_play(SOUND_TYPEWRITER_CLACK);
 }
 
-void screen_set_wifi_select_network(unsigned char nn)
+void screen_set_wifi_select_network(void)
 {
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
   sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);

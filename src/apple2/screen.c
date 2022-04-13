@@ -24,7 +24,7 @@ void screen_init(void)
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR + 1); cprintf("%s",c);
+  gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
 }
 
 void screen_putlcc(const char *c)
@@ -81,13 +81,13 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   memset(ds,0x20,32);
   strncpy(ds,s->ssid,32);
   
-  if (s->rssi > -40)
+  if (s->rssi > -50)
     {
       meter[0] = '*';
       meter[1] = '*';
       meter[2] = '*';
     }
-  else if (s->rssi > -60)
+  else if (s->rssi > -70)
     {
       meter[0] = '*';
       meter[1] = '*';
@@ -133,12 +133,26 @@ void screen_connect_wifi(NetConfig *nc)
   gotoxy(0,STATUS_BAR); cprintf("CONNECTING TO NETWORK: %s",nc->ssid);
 }
 
-void screen_destination_host_slot(char *h, char *p) {
-  // TODO: implement
+void screen_destination_host_slot(char *h, char *p)
+{
+  clrscr();
+  gotoxy(0, 12); cprintf("COPY FROM HOST SLOT");
+  chlinexy(0,13,40);
+  gotoxy(0, 14); cprintf("%-32s", h);
+  gotoxy(0, 15); cprintf("%-128s", p);
 }
 
-void screen_destination_host_slot_choose(void) {
-  // TODO: implement
+void screen_destination_host_slot_choose(void)
+{
+  gotoxy(0, 0);
+  cprintf("COPY TO HOST SLOT");
+  chlinexy(0,1,40);
+
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR); 
+  cprintf("[1-8] CHOOSE SLOT\r\n[RETURN] SELECT SLOT\r\n[ESC] TO ABORT");
+  
+  bar_set(2, 1, 8, selected_host_slot);
 }
 
 char* screen_hosts_and_devices_slot(char *c)
@@ -184,8 +198,14 @@ void screen_hosts_and_devices_hosts(void)
   gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
-void screen_hosts_and_devices_host_slots(HostSlot *h) {
-  // TODO: Implement
+void screen_hosts_and_devices_host_slots(HostSlot *h)
+{
+  char i;
+
+  for (i=0;i<8;i++)
+    {
+      gotoxy(0,i+2); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot(h[i])); 
+    }
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -197,17 +217,23 @@ void screen_hosts_and_devices_devices(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  cclearxy(1,i+1,39);
+  cclearxy(1,i+2,39);
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.");
+  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.",i);
 }
 
-void screen_perform_copy(char *sh, char *p, char *dh, char *dp) {
-  // TODO: Implement
+void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
+{
+  clrscr();
+  gotoxy(0,0); cprintf("%32s","COPYING FILE FROM:");
+  gotoxy(0,1); cprintf("%32s",sh);
+  gotoxy(0,2); cprintf("%-128s",p);
+  gotoxy(0,6); cprintf("%32s",dh);
+  gotoxy(0,7); cprintf("%-128s",dp);
 }
 
 void screen_show_info(AdapterConfig* ac)
@@ -233,43 +259,48 @@ void screen_show_info(AdapterConfig* ac)
 
 void screen_select_file(void)
 {
+  cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); cprintf("OPENING...");
 }
 
 void screen_select_file_display(char *p, char *f)
 {
   // Clear content area
-  cclearxy(0,0,560);
+  //cclearxy(0,0,20*40); // 20*40 is > 255 so won't work in cclearxy
+  // void __fastcall__ cclearxy (unsigned char x, unsigned char y, unsigned char length);
+  clrscr();
 
   // Update content area
-  gotoxy(0,0); cprintf("%40s",selected_host_name);
-
+  gotoxy(0,0); cprintf("%-40s",selected_host_name);
+  gotoxy(0,1);
   if (f[0]==0x00)
-    cprintf("%40s",p);
+    cprintf("%-40s",p);
   else
-    cprintf("%STATUS_BARs%8s",p,f);
+    cprintf("%-32s%8s",p,f);
 }
 
 void screen_select_file_prev(void)
 {
-  gotoxy(0,2); cprintf("%40s","[...]");
+  gotoxy(0,2); cprintf("%-40s","[...]");
 }
 
 void screen_select_file_display_long_filename(char *e) 
 {
-  // TODO: Implement
+  gotoxy(0,19);
+  cprintf("%-64s",e);
 }
 
 void screen_select_file_next(void)
 {
-  gotoxy(0,18); cprintf("%40s","[...]");
+  gotoxy(0,18); cprintf("%-40s","[...]");
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e)
 {
   gotoxy(0,y+3);
-  cprintf("%c%c",*e++,*e++);
-  cprintf("%-30s",e);
+  // cprintf("%c%c",*e++,*e++);
+  // cprintf("%-30s",e);
+  cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
 }
 
 void screen_select_file_clear_long_filename(void) 
@@ -294,37 +325,36 @@ void screen_select_file_new_custom(void)
 
 void screen_select_file_choose(char visibleEntries)
 {
-  bar_set(2,2,visibleEntries,0); // TODO: Handle previous
+  bar_set(3,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("SELECT FILE TO MOUNT  [A] UP  [Z] DOWN\r\n[ESC] PARENT  [F]ILTER  [ESC]BOOT");  
+  gotoxy(0,STATUS_BAR); cprintf("[RETURN] SELECT FILE TO MOUNT\r\n[ESC]PARENT  [F]ILTER  [TBD]BOOT");  
 }
 
 void screen_select_file_filter(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("ENTER A WILDCRD FILTER.\r\n E.G. *Apple*");
+  gotoxy(0,STATUS_BAR); cprintf("ENTER A WILDCARD FILTER.\r\n E.G. *Apple*");
 }
 
 void screen_select_slot(char *e)
 {
   unsigned long *s;
-  
+
+  clrscr();
+
   gotoxy(0,7);
-  cprintf("%40s","FILE DETAILS");
+  cprintf("%-40s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
   
   s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  
-  cprintf("%8s %lu K\r\n","SIZE:",*s >> 10); // Quickly divide by 1024
+  cprintf("%8s %lu K\r\n\r\n","SIZE:",*s >> 10); // Quickly divide by 1024
 
-  e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
-  
-  gotoxy(0,0);
-  cprintf("%40s",e);
+  e += sizeof(unsigned long) + 2; // I do not need the next two bytes.
+  cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
     
-  bar_set(0,1,4,0);
+  bar_set(1,1,4,0);
 }
 
 void screen_select_slot_choose(void)
@@ -362,19 +392,19 @@ void screen_select_slot_mode(void)
 void screen_select_slot_eject(unsigned char ds)
 {
   cclearxy(1,1+ds,39);
-  gotoxy(1,1+ds); cprintf("Empty");
+  gotoxy(2,1+ds); cprintf("Empty");
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  cclearxy(1,12,39);
-  gotoxy(1,12+ds); cprintf("Empty");
+  cclearxy(1,13+ds,39);
+  gotoxy(2,13+ds); cprintf("Empty");
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(1,1+hs); cprintf("Empty");
+  gotoxy(2,2+hs); cprintf("Empty");
 }  
 #endif /* BUILD_APPLE2 */

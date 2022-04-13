@@ -25,6 +25,7 @@
 #include "apple2/screen.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
+// #include <stdio.h> // for debugging using sprintf
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -181,8 +182,9 @@ void hosts_and_devices_devices_enable_toggle(unsigned char ds)
 void hosts_and_devices_done(void)
 {
   char i;
+  // char *msg[40];
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
       {
@@ -221,8 +223,12 @@ void hosts_and_devices(void)
 	  hosts_and_devices_devices_clear_all();
 	  break;
 	case HD_DONE:
-	  hosts_and_devices_done();
+	  hosts_and_devices_done(); // this never gets called because HD_DONE is always paired with state != HOSTS_AND_DEVICES
 	  break;
 	}
     }
+  if (state == DONE)
+  	  hosts_and_devices_done();
+
+
 }

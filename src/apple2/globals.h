@@ -21,11 +21,15 @@ extern unsigned long selected_size;
 
 extern DeviceSlot deviceSlots[8];
 extern HostSlot hostSlots[8];
+extern char mode;
 
 extern DirectoryPosition pos;
 extern char path[224];
 extern bool create;
 extern char filter[32];
+extern bool dir_eof;
+extern bool quick_boot;
+
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_APPLE2 */

@@ -15,6 +15,7 @@
 #include "adam/globals.h"
 #include "adam/input.h"
 #include "adam/bar.h"
+#define DIR_MAX_LEN 31
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
@@ -24,6 +25,7 @@
 #include "apple2/globals.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
+#define DIR_MAX_LEN 40
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -55,6 +57,7 @@
 
 #define ENTRIES_PER_PAGE 15
 
+
 SFSubState sf_subState;
 char path[224];
 char filter[32];
@@ -71,8 +74,6 @@ bool long_entry_displayed=false;
 bool copy_mode=false;
 
 extern unsigned char copy_host_slot;
-
-
 
 void select_file_init(void)
 {
@@ -95,65 +96,69 @@ void select_file_init(void)
 
 unsigned char select_file_display(void)
 {
-  char visibleEntries=0;
+  char visibleEntries = 0;
   char i;
   char *e;
   
   io_mount_host_slot(selected_host_slot);
 
   if (io_error())
-    {
-      screen_error("  COULD NOT MOUNT HOST SLOT.");
-      sf_subState=SF_DONE;
-      state=SET_WIFI;
-      return 0;
-    }
+  {
+    screen_error("  COULD NOT MOUNT HOST SLOT.");
+    sf_subState = SF_DONE;
+    state = SHOW_INFO;
+    return 0;
+  }
+
+  screen_select_file_display(path, filter);
+
+  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot, path, filter);
 
   screen_select_file_display(path,filter);
   
   io_open_directory(selected_host_slot,path,filter);
   
   if (io_error())
-    {
-      screen_error("  COULD NOT OPEN DIRECTORY.");
-      sf_subState=SF_DONE;
-      state=SET_WIFI;
-      return 0;
-    }
-  
-  if (pos>0)
+  {
+    screen_error("  COULD NOT OPEN DIRECTORY.");
+    sf_subState = SF_DONE;
+    state = SHOW_INFO;
+    return 0;
+  }
+
+  if (pos > 0)
     io_set_directory_position(pos);
-  
-  for (i=0;i<ENTRIES_PER_PAGE;i++)
+
+  for (i = 0; i < ENTRIES_PER_PAGE; i++)
+  {
+    e = io_read_directory(DIR_MAX_LEN, 0);
+    if (e[2] == 0x7F)
     {
-      e = io_read_directory(31,0);
-      if (e[2]==0x7F)
-	{
-	  dir_eof=true;
-	  break;
-	}
-      else
-	{
-	  entry_size[i]=strlen(e);
-	  visibleEntries++;
-	  screen_select_file_display_entry(i,e);
-	}
+      dir_eof = true;
+      break;
     }
+    else
+    {
+      entry_size[i] = strlen(e);
+      visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
+      screen_select_file_display_entry(i, e);
+    }
+  }
 
   // Do one more read to check EOF
-  e = io_read_directory(31,0);
-  if (e[2]==0x7F)
-    dir_eof=true;
-  
+  e = io_read_directory(DIR_MAX_LEN, 0);
+  if (e[2] == 0x7F)
+    dir_eof = true;
+
   io_close_directory();
 
   if (pos > 0)
     screen_select_file_prev();
-  
+
   if (dir_eof != true)
     screen_select_file_next();
-  
-  sf_subState=SF_CHOOSE;
+
+  sf_subState = SF_CHOOSE;
   return visibleEntries;
 }
 
@@ -242,9 +247,9 @@ void select_file_advance(void)
   
   e = io_read_directory(128,1);
   
-  io_close_directory();
-
   strcat(path,e); // append directory entry to end of current path
+
+  io_close_directory(); // have to use "e" before calling another io command, otherwise e gets wiped out
 
   pos=0;
   dir_eof=quick_boot=false;
@@ -273,6 +278,7 @@ void select_file_devance(void)
 bool select_file_is_folder(void)
 {
   char *e;
+  bool result;
 
   io_open_directory(selected_host_slot,path,filter);
 
@@ -280,9 +286,11 @@ bool select_file_is_folder(void)
 
   e = io_read_directory(128,0);
 
+  result = (strrchr(e,'/') != NULL);
+
   io_close_directory();
  
-  return strrchr(e,'/') != NULL; // Offset 10 = directory flag.
+  return result; // Offset 10 = directory flag.
 }
 
 void select_file_new(void)
@@ -358,10 +366,10 @@ void select_file(void)
       switch(sf_subState)
 	{
 	case SF_INIT:
-	  select_file_init();
+	  select_file_init(); // get things ready, clear screen, status area
 	  break;
 	case SF_DISPLAY:
-	  visibleEntries=select_file_display();
+	  visibleEntries=select_file_display(); // put the list of files on the screen
 	  break;
 	case SF_NEXT_PAGE:
 	  select_next_page();
@@ -370,7 +378,7 @@ void select_file(void)
 	  select_prev_page();
 	  break;
 	case SF_CHOOSE:
-	  select_file_choose(visibleEntries);
+	  select_file_choose(visibleEntries); // allow user to pick a file
 	  break;
 	case SF_FILTER:
 	  select_file_filter();

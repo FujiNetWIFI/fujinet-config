@@ -27,6 +27,7 @@ uint8_t sp_payload[1024];
 uint16_t sp_count;
 uint8_t sp_dest;
 uint16_t sp_dispatch;
+uint8_t sp_error;
 
 static uint8_t sp_cmdlist[10];
 static uint8_t sp_cmdlist_low, sp_cmdlist_high;
@@ -34,6 +35,7 @@ static uint8_t sp_err, sp_rtn_low, sp_rtn_high;
 
 int8_t sp_status(uint8_t dest, uint8_t statcode)
 {
+  sp_error = 0;
   // build the command list
   sp_cmdlist[0] = SP_STATUS_PARAM_COUNT; 
   sp_cmdlist[1] = dest; // set before calling sp_status();
@@ -65,12 +67,13 @@ spCmdListHigh:
   __asm__ volatile ("sta %v", sp_err);
   
   sp_count = ((uint16_t)sp_rtn_high << 8) | (uint16_t)sp_rtn_low;
-
+  sp_error = sp_err;
   return sp_err;
 }
 
 int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
 {
+  sp_error = 0;
   // sp_dest = 5; // need to search
   // build the command list
   sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT; 
@@ -98,14 +101,15 @@ spCmdListLow:
 spCmdListHigh:
   __asm__ volatile ("nop");
   __asm__ volatile ("sta %v", sp_err);
-  
+  sp_error = sp_err;
   return sp_err;
 }
 
 int8_t sp_find_fuji()
 {
-  const char fuji[9] = "THE_FUJI";
-  const uint8_t fuji_len = 8;
+  // const char fuji[9] = "THE_FUJI";
+  const char fuji[14] = "FUJINET_DISK_0";
+  const uint8_t fuji_len = sizeof(fuji);
   int8_t err, num, i, j;
 
   err = sp_status(0x00, 0x00); // get number of devices
@@ -115,9 +119,9 @@ int8_t sp_find_fuji()
 	num++;
 	for (i = 1; i < num; i++)
 	{
-    do
+    //do
       err = sp_status(i, 0x03); // get DIB
-    while (err);
+    //while (err);
     if (sp_payload[4] == fuji_len)
     {
       for (j = 0; j < fuji_len; j++)
@@ -198,7 +202,7 @@ void sp_init(void)
     sp_dispatch = sp_dispatch_address(slot);
   else
     screen_error("No SmartPort Firmware Found!");
-
+  sp_list_devs();
   f = sp_find_fuji();
   if (f < 1)
     screen_error("FujiNet Not Found!");

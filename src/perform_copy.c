@@ -69,6 +69,7 @@ void perform_copy(void)
   strcat(copySpec,source_filename);
   
   clrscr();
+
   screen_perform_copy(hostSlots[copy_host_slot],source_path,hostSlots[selected_host_slot],path);
 
   io_copy_file(copy_host_slot, selected_host_slot);
@@ -76,4 +77,5 @@ void perform_copy(void)
   copy_mode = false;
   
   state = HOSTS_AND_DEVICES;
+
 }

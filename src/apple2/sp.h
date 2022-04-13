@@ -13,6 +13,7 @@
 extern uint8_t sp_payload[1024];
 extern uint16_t sp_count, sp_dispatch;
 extern uint8_t sp_dest;
+extern uint8_t sp_error;
 
 int8_t sp_status(uint8_t dest, uint8_t statcode);
 int8_t sp_control(uint8_t dest, uint8_t ctrlcode);

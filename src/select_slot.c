@@ -16,6 +16,7 @@
 #include "adam/globals.h"
 #include "adam/io.h"
 #include "adam/bar.h"
+#define DIR_MAX_LEN 31
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
@@ -24,6 +25,7 @@
 #include "apple2/globals.h"
 #include "apple2/io.h"
 #include "apple2/bar.h"
+#define DIR_MAX_LEN 31
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
@@ -76,7 +78,7 @@ void select_slot_display()
     {
       char dispPath[42];
       memset(dispPath,0,42);
-      strncpy(&dispPath[11],path,31);
+      strncpy(&dispPath[11],path,DIR_MAX_LEN);
       screen_select_slot(dispPath);
     }
   else
@@ -87,7 +89,7 @@ void select_slot_display()
       
       io_get_device_slots(&deviceSlots[0]);
       
-      screen_select_slot(io_read_directory(42,0x80));
+      screen_select_slot(io_read_directory(49,0x80));
       
       io_close_directory();
     }
@@ -125,7 +127,7 @@ void select_slot_done()
       create=false; // we're done with this until next time.
       screen_select_file_new_creating();
       io_create_new(selected_host_slot,selected_device_slot,selected_size,path);
-      memcpy(deviceSlots[selected_device_slot].file,path,31);
+      memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
       deviceSlots[selected_device_slot].mode=2;
       deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
      
@@ -157,7 +159,7 @@ void select_slot_done()
      
       io_set_directory_position(pos);
       
-      memcpy(deviceSlots[selected_device_slot].file,io_read_directory(31,0),31);
+      memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
       deviceSlots[selected_device_slot].mode=mode;
       deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
       

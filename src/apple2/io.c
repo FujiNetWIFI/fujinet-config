@@ -7,6 +7,8 @@
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
+#include <stdlib.h>
+#include <peekpoke.h> // For the insanity in io_boot()
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -55,82 +57,78 @@ static SSIDInfo ssid_response;
 static AdapterConfig ac;
 
 /* Test Fixtures, remove when actual I/O present */
-static DeviceSlot _ds[8];
-static HostSlot _hs[8];
-static char de[36][8]={
-  {"Entry 1"},
-  {"Entry 2"},
-  {"Entry 3"},
-  {"Entry 4"},
-  {"Entry 5"},
-  {"Entry 6"},
-  {"Entry 7"},
-  {"\x7F"}
-};
-static char dc=0;
+// static DeviceSlot _ds[8];
+// static HostSlot _hs[8];
+// static char de[36][8]={
+//   {"Entry 1"},
+//   {"Entry 2"},
+//   {"Entry 3"},
+//   {"Entry 4"},
+//   {"Entry 5"},
+//   {"Entry 6"},
+//   {"Entry 7"},
+//   {"\x7F"}
+// };
+// static char dc=0;
 
 void io_init(void)
 {
+   sp_init();
 }
 
 uint8_t io_status(void)
 {
-  return 0;
+  return io_error();
 }
 
 bool io_error(void)
 {
-  return false; // TO DO: set to true if last smartport call had an error, probably reset error code upon calling
+  return sp_error; 
 }
 
 uint8_t io_get_wifi_status(void)
 {
   // call the SP status command and get the returned byte
-  uint8_t s;
-  int8_t err;
 
-  err = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
-  if (err)
-    return 0;
-    
+  sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
+  if (sp_error)
+      return 0;
+ 
   return sp_payload[0];
 }
 
 NetConfig* io_get_ssid(void)
-{
-  char err;
-  
+{  
   memset(&nc, 0, sizeof(nc));
-  err = sp_status(sp_dest, FUJICMD_GET_SSID); 
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID); 
+  if (!sp_error)
   {
     memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
     memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
   }
+  sp_error = sp_error;
   return &nc;
 }
 
 uint8_t io_scan_for_networks(void)
 {
-  char err;
-  err = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
+  if (!sp_error)
     return sp_payload[0];
   return 0;
 }
 
 SSIDInfo *io_get_scan_result(uint8_t n)
 {
-  char err;
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = n;
   memset(ssid_response.ssid, 0, 32);
-  err = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
-  if (!err)
+  sp_error = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
+  if (!sp_error)
   {
-    err = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
-    if (!err)
+    sp_error = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
+    if (!sp_error)
     {
       memcpy(ssid_response.ssid,sp_payload,32);
       ssid_response.rssi = sp_payload[32];
@@ -141,10 +139,9 @@ SSIDInfo *io_get_scan_result(uint8_t n)
 
 AdapterConfig *io_get_adapter_config(void)
 {
-  char err;
   uint16_t idx = 0;
-  err = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
-  if (!err)
+  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
+  if (!sp_error)
   {
     memcpy(ac.ssid, sp_payload, 32);
     idx += 32;
@@ -175,7 +172,7 @@ void io_set_ssid(NetConfig *nc)
   memcpy(&sp_payload[idx], nc->ssid, sizeof(nc->ssid));
   idx += sizeof(nc->ssid);
   memcpy(&sp_payload[idx], nc->password, sizeof(nc->password));
-  sp_control(sp_dest, FUJICMD_SET_SSID);
+  sp_error = sp_control(sp_dest, FUJICMD_SET_SSID);
 }
 
 char *io_get_device_filename(uint8_t ds)
@@ -191,65 +188,170 @@ void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsig
 void io_get_device_slots(DeviceSlot *d)
 {
   sp_status(sp_dest, FUJICMD_READ_DEVICE_SLOTS);
-  memcpy(d,sp_payload,sp_count); // 304 bytes?
+  memcpy(d,sp_payload,sp_count); // 38x8 = 304 bytes
 }
 
 void io_get_host_slots(HostSlot *h)
 {
   sp_status(sp_dest, FUJICMD_READ_HOST_SLOTS);
-  memcpy(h, sp_payload, sp_count); // 256 bytes?
+  memcpy(h, sp_payload, sp_count); // 32x8 = 256 bytes
 }
 
 void io_put_host_slots(HostSlot *h)
 {
+  sp_payload[0] = 0;
+  sp_payload[1] = 1; // 256 bytes
+  memcpy(&sp_payload[2], h, 256); 
+  sp_error = sp_control(sp_dest, FUJICMD_WRITE_HOST_SLOTS);
 }
 
 void io_put_device_slots(DeviceSlot *d)
 {
+  sp_payload[0] = 304 & 0xFF;
+  sp_payload[1] = 304 >> 8;
+  memcpy(&sp_payload[2],d,304);
+  
+  sp_error = sp_control(sp_dest, FUJICMD_WRITE_DEVICE_SLOTS);
+  // sleep(1);
 }
 
 void io_mount_host_slot(uint8_t hs)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = hs;
+  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_HOST);
 }
 
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
-  dc=0;
+  // char *e;
+  unsigned char idx = 0;
+  uint16_t s;
+
+  // to do - copy strings into payload and figure out length
+  s = 1 + strlen(p) + 1 + strlen(f) + 1;
+  sp_payload[idx++] = (uint8_t)(s & 0xFF);
+  sp_payload[idx++] = (uint8_t)(s >> 8);
+  sp_payload[idx++] = hs;
+
+  strcpy(&sp_payload[idx++], p);
+  idx += strlen(p);
+  strcpy(&sp_payload[idx], f);
+
+  sp_error = sp_control(sp_dest, FUJICMD_OPEN_DIRECTORY);
 }
 
 char *io_read_directory(uint8_t l, uint8_t a)
 {
-  return de[dc++];
+  sp_payload[0] = 2;
+  sp_payload[1] = 0;
+  sp_payload[2] = l;
+  sp_payload[3] = a;
+
+  sp_error = sp_control(sp_dest, FUJICMD_READ_DIR_ENTRY);
+
+  sp_payload[0] = 0; // null string
+  if (!sp_error)
+    sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
+    
+  return sp_payload;
 }
 
 void io_close_directory(void)
 {
-  dc=0;
+  sp_payload[0] = 0;
+  sp_payload[1] = 0;
+  sp_error = sp_control(sp_dest, FUJICMD_CLOSE_DIRECTORY);
 }
 
 void io_set_directory_position(DirectoryPosition pos)
 {
-  dc=(char)pos;
+  sp_payload[0] = 2;
+  sp_payload[1] = 0;
+  memcpy((uint8_t *)&sp_payload[2], (uint8_t *)&pos, sizeof(uint16_t));
+  sp_error = sp_control(sp_dest, FUJICMD_SET_DIRECTORY_POSITION);
 }
 
 void io_set_device_filename(uint8_t ds, char* e)
 {
+  sp_payload[0] = strlen(e) + 1 + 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+
+  strcpy(&sp_payload[3],e);
+
+  sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
 }
 
 void io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
+  sp_payload[0] = 2;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+  sp_payload[3] = mode;
+
+  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
+}
+
+void io_copy_file(unsigned char shs, unsigned char chs, char* sp, char* dp)
+{
+  unsigned short idx;
+  idx = 2;
+  sp_payload[idx++] = shs;
+  sp_payload[idx++] = chs;
+  memcpy(&sp_payload[idx], sp, strlen(sp));
+  idx += strlen(sp);
+  sp_payload[idx++] = '|';
+  strcpy(&sp_payload[idx], dp);
+  idx += strlen(dp);
+  idx++;
+
+  sp_payload[0] = idx & 0xff;
+  sp_payload[1] = idx >> 8;
+
+  sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
 void io_set_boot_config(uint8_t toggle)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = toggle;
+
+  sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
 }
 
 void io_umount_disk_image(uint8_t ds)
 {
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = ds;
+  sp_error = sp_control(sp_dest, FUJICMD_UNMOUNT_IMAGE);
 }
 
 void io_boot(void)
 {
+  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
+
+  int i;
+  
+  clrscr();
+  cprintf("BOOTING...");
+
+  POKE(0x100,0xEE);
+  POKE(0x101,0xF4);
+  POKE(0x102,0x03);
+  POKE(0x103,0x78);
+  POKE(0x104,0xAD);
+  POKE(0x105,0x82);
+  POKE(0x106,0xC0);
+  POKE(0x107,0x6C);
+  POKE(0x108,0xFC);
+  POKE(0x109,0xFF);
+
+  asm("JMP $0100");
+  
 }
 
 #endif /* BUILD_APPLE2 */
