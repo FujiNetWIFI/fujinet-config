@@ -5,6 +5,7 @@
  */
 
 #include <string.h>
+#include <conio.h>
 #include "set_wifi.h"
 #include "die.h"
 
@@ -70,9 +71,7 @@ void set_wifi_select(void)
   unsigned char k=0;
   
   screen_set_wifi_select_network(numNetworks);
-
-  bar_set(0,3,numNetworks,0);
-
+  
   while(ws_subState==WS_SELECT)
     ws_subState=input_set_wifi_select();
 }
@@ -105,7 +104,7 @@ void set_wifi_scan(void)
   if (io_error())
     {
       screen_error("COULD NOT WS_SCAN NETWORKS");
-      die();
+      die(); // to do retry or something instead
     }
 
   for (i=0;i<numNetworks;i++)
@@ -120,30 +119,31 @@ void set_wifi_scan(void)
 void set_wifi_done(void)
 {
   io_set_ssid(&nc);
-  state=CONNECT_WIFI;
+  ws_subState=WS_SCAN;
+  state = CONNECT_WIFI;
 }
 
 void set_wifi(void)
 {
   while (state == SET_WIFI)
+  {
+    switch (ws_subState)
     {
-      switch(ws_subState)
-	{
-	case WS_SCAN:
-	  set_wifi_scan();
-	  break;
-	case WS_SELECT:
-	  set_wifi_select();
-	  break;
-	case WS_CUSTOM:
-	  set_wifi_custom();
-	  break;
-	case WS_PASSWORD:
-	  set_wifi_password();
-	  break;
-	case WS_DONE:
-	  set_wifi_done();
-	  break;
-	}
+    case WS_SCAN:
+      set_wifi_scan();
+      break;
+    case WS_SELECT:
+      set_wifi_select();
+      break;
+    case WS_CUSTOM:
+      set_wifi_custom();
+      break;
+    case WS_PASSWORD:
+      set_wifi_password();
+      break;
+    case WS_DONE:
+      set_wifi_done();
+      return;
     }
+  }
 }

@@ -4,8 +4,39 @@
  */
 
 #include <conio.h>
+#include <string.h>
 #include <stdbool.h>
+#include "globals.h"
 #include "input.h"
+#include "bar.h"
+#include "screen.h"
+#include "../set_wifi.h"
+#include "../die.h"
+#include "../hosts_and_devices.h"
+
+
+#define KEY_RETURN       0x0D
+#define KEY_ESCAPE       0x1B
+#define KEY_SPACE        0x20
+#define KEY_1            0x31
+#define KEY_2            0x32
+#define KEY_3            0x33
+#define KEY_4            0x34
+#define KEY_5            0x35
+#define KEY_6            0x36
+#define KEY_7            0x37
+#define KEY_8            0x38
+#define KEY_TAB          9
+#define KEY_DELETE       127
+#define KEY_UP_ARROW     11
+#define KEY_DOWN_ARROW   10
+#define KEY_LEFT_ARROW   8
+#define KEY_RIGHT_ARROW  21
+
+#define STATUS_BAR 21 // defined in screen.c
+
+extern unsigned char copy_host_slot;
+extern bool copy_mode;
 
 /**
  * Get input from keyboard/joystick
@@ -13,7 +44,7 @@
  */
 unsigned char input()
 {
-  return 0;
+  return cgetc();
 }
 
 unsigned char input_ucase(void)
@@ -27,13 +58,91 @@ static void input_clear_bottom(void)
 {
 }
 
+/**
+ * Get line of input into c
+ * @param x X position
+ * @param y Y position
+ * @param o start at character offset
+ * @param c target buffer
+ * @param l Length
+ * @param password echoes characters.
+ */
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
 {
+  char i = 0; // index into array and y-coordinate
+  char a;
+  gotoxy(x,y);
+  cursor(1); // turn on cursor - does not have effect on Apple IIc
+  while(1)
+  {
+    a = cgetc();
+    switch (a)
+    {
+    case KEY_LEFT_ARROW:
+    case KEY_DELETE:
+      if (i>0)
+      {
+        c[--i + o] = 0;
+        gotox(x + i);
+        cputc(' ');
+        gotox(x + i);
+      }
+      break;
+    case KEY_RETURN:
+      c[o + i] = 0;
+      cursor(0); // turn off cursor
+      return; // done
+      break;
+    default:
+      if (i < len)
+      {
+        gotox(x + i);
+        screen_putlcc(a);
+        c[o + i++] = a;
+      }
+    break;
+    }
+  }
 }
 
 DHSubState input_destination_host_slot_choose(void) 
 {
-  // TODO: Implement
+    unsigned char k=input();
+
+  switch(k)
+    {
+    case KEY_RETURN:
+      if (hostSlots[bar_get()][0] != 0x00)
+	{
+	  copy_host_slot=bar_get();
+	  copy_mode=true;
+	  state=SELECT_FILE;
+	  return DH_DONE;
+	}
+      else
+	return DH_CHOOSE;
+    case KEY_ESCAPE:
+      state=HOSTS_AND_DEVICES;
+      return DH_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-0x31);
+      return DH_CHOOSE;
+    case KEY_UP_ARROW:
+      bar_up();
+      return DH_CHOOSE;
+    case KEY_DOWN_ARROW:
+      bar_down();
+      return DH_CHOOSE;
+    default:
+      return DH_CHOOSE;
+    }
 }
 
 SFSubState input_select_file_choose(void) 
@@ -68,30 +177,175 @@ SSSubState input_select_slot_choose(void)
 
 SISubState input_show_info(void)
 {
-  // TODO: implement
+  char c;
+  c =cgetc();
+  switch (c)
+  {
+  case 'c':
+  case 'C':
+    state = SET_WIFI;
+    return SI_DONE;
+  case 'r':
+  case 'R':
+    state = CONNECT_WIFI;
+    return SI_DONE;
+  default:
+    state = HOSTS_AND_DEVICES;
+    return SI_DONE;
+  }
+  return SI_SHOWINFO;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  // TODO: implement
+  unsigned char k=cgetc();
+
+  switch (k)
+  {
+  case KEY_1:
+  case KEY_2:
+  case KEY_3:
+  case KEY_4:
+  case KEY_5:
+  case KEY_6:
+  case KEY_7:
+  case KEY_8:
+    bar_jump(k - KEY_1);
+    return HD_HOSTS;
+  case KEY_TAB:
+    bar_clear(false);
+    return HD_DEVICES;
+  case KEY_RETURN:
+    selected_host_slot = bar_get();
+    if (hostSlots[selected_host_slot][0] != 0)
+    {
+      strcpy(selected_host_name, hostSlots[selected_host_slot]);
+      state = SELECT_FILE;
+      // smartkeys_sound_play(SOUND_CONFIRM);
+      return HD_DONE;
+    }
+    else
+      return HD_HOSTS;
+  case KEY_ESCAPE: // ESC
+    state = DONE;
+    return HD_DONE;
+  case 'C':
+  case 'c':
+    state = SHOW_INFO;
+    return HD_DONE;
+  case 'E':
+  case 'e':
+    // smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+    hosts_and_devices_edit_host_slot(bar_get());
+    bar_clear(false);
+    bar_jump(selected_host_slot);
+    k = 0;
+    return HD_HOSTS;
+  case KEY_UP_ARROW:
+  case KEY_LEFT_ARROW:
+    bar_up();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  case KEY_DOWN_ARROW:
+  case KEY_RIGHT_ARROW:
+    bar_down();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  default:
+    return HD_HOSTS;
+  }
 }
 
 HDSubState input_hosts_and_devices_devices(void)
 {
-  // TODO: Implement
+   unsigned char k=input();
+  switch(k)
+    {
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+      bar_jump(k-KEY_1);
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_TAB:
+      bar_clear(false);
+      return HD_HOSTS;
+    case 'E':
+    case 'e':
+      hosts_and_devices_eject(bar_get());
+      return HD_DEVICES;
+    case 'R':
+    case 'r':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(0);
+      return HD_DEVICES;
+      break;
+    case 'W':
+    case 'w':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(2);
+      return HD_DEVICES;
+      break;
+    // case KEY_CLEAR:
+    //   return HD_CLEAR_ALL_DEVICES;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      selected_device_slot=bar_get();
+      hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    default:
+      return HD_DEVICES;
+    }
 }
 
 void input_line_set_wifi_custom(char *c)
 {
+  input_line(2, STATUS_BAR + 1, 0, c, 32, false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
+  input_line(2, STATUS_BAR + 1, 0, c, 64, false);
 }
 
 WSSubState input_set_wifi_select(void)
 {
-  // TODO: implement
+  // from adam
+  unsigned char k = input();
+  switch(k)
+    {
+    case KEY_RETURN:
+      set_wifi_set_ssid(bar_get());
+      return WS_PASSWORD;
+    case 0x84:
+      return WS_CUSTOM;
+    case 'R':
+    case 'r':
+      return WS_SCAN;
+    case 'S':
+    case 's':
+      state=HOSTS_AND_DEVICES;
+      return WS_DONE;
+    case KEY_UP_ARROW: // up arrow
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return WS_SELECT;
+    case KEY_DOWN_ARROW: // down arrow
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return WS_SELECT;
+    default:
+      return WS_SELECT;
+    }
 }
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)

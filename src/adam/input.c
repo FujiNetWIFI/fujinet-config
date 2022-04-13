@@ -18,6 +18,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
+#include "io.h"
 
 static GameControllerData cont;
 static unsigned char key=0;
@@ -33,6 +34,8 @@ extern unsigned short entry_timer;
 extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
+
+bool select_file_is_folder(void);
 
 /**
  * ADAM keyboard mapping
@@ -344,13 +347,12 @@ HDSubState input_hosts_and_devices_devices(void)
       return HD_DEVICES;
     case KEY_SMART_V:
       selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(0);
+      hosts_and_devices_devices_enable_toggle(selected_device_slot);
       return HD_DEVICES;
       break;
     case KEY_SMART_VI:
-      selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(2);
-      return HD_DEVICES;
+      smartkeys_sound_play(SOUND_CONFIRM);
+      return HD_DONE;
       break;
     case KEY_CLEAR:
       return HD_CLEAR_ALL_DEVICES;
@@ -390,7 +392,10 @@ SFSubState input_select_file_choose(void)
     {
     case KEY_RETURN:
       pos+=bar_get();
-      return SF_DONE;
+	  if (select_file_is_folder())
+	    return SF_ADVANCE_FOLDER;
+      else
+        return SF_DONE;
     case KEY_ESCAPE:
       copy_mode=false;
       state=HOSTS_AND_DEVICES;
@@ -418,6 +423,7 @@ SFSubState input_select_file_choose(void)
       pos += bar_get();
       select_file_set_source_filename();
       smartkeys_sound_play(SOUND_CONFIRM);
+      copy_host_slot=selected_host_slot;
       return SF_COPY;
     case KEY_UP_ARROW:
       if ((bar_get() == 0) && (pos > 0))
@@ -556,15 +562,9 @@ DHSubState input_destination_host_slot_choose(void)
   switch(k)
     {
     case KEY_RETURN:
-      if (hostSlots[bar_get()][0] != 0x00)
-	{
-	  copy_host_slot=bar_get();
-	  copy_mode=true;
-	  state=SELECT_FILE;
-	  return DH_DONE;
-	}
-      else
-	return DH_CHOOSE;
+      selected_host_slot=bar_get();
+      copy_mode=true;
+      return DH_DONE;
     case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
       return DH_ABORT;
@@ -601,6 +601,14 @@ SISubState input_show_info(void)
     case KEY_ESCAPE:
     case KEY_SPACE:
       state=HOSTS_AND_DEVICES;
+      return SI_DONE;
+    case KEY_SMART_IV:
+      k=io_get_device_enabled_status(2);
+      if (k==true)
+	io_disable_device(2);
+      else
+	io_enable_device(2);
+      k=0;
       return SI_DONE;
     case KEY_SMART_V:
       state=SET_WIFI;

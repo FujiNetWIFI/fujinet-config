@@ -60,6 +60,7 @@ char path[224];
 char filter[32];
 char source_path[224];
 char source_filter[32];
+char source_filename[128];
 DirectoryPosition pos=0;
 bool dir_eof=false;
 bool quick_boot=false;
@@ -79,9 +80,9 @@ void select_file_init(void)
     {
       strncpy(source_path,path,224);
       strncpy(source_filter,filter,32);
-      while(1);
     }
   
+  io_close_directory();
   pos=0;
   memset(entry_size,0,ENTRIES_PER_PAGE);
   memset(path,0,256);
@@ -98,7 +99,7 @@ unsigned char select_file_display(void)
   char i;
   char *e;
   
-  io_mount_host_slot(copy_mode == true ? copy_host_slot : selected_host_slot);
+  io_mount_host_slot(selected_host_slot);
 
   if (io_error())
     {
@@ -110,7 +111,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path,filter);
   
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
   
   if (io_error())
     {
@@ -158,9 +159,13 @@ unsigned char select_file_display(void)
 
 void select_file_set_source_filename(void)
 {
-  io_open_directory(copy_host_slot,path,filter);
+  char entry[128];
+
+  io_open_directory(selected_host_slot,path,filter);
   io_set_directory_position(pos);
-  strcat(path,io_read_directory(128,0));
+  strcpy(entry,io_read_directory(128,0));
+  strcat(path,entry);
+  strcpy(source_filename,entry);
 }
 
 void select_display_long_filename(void)
@@ -171,7 +176,7 @@ void select_display_long_filename(void)
     {
       if (long_entry_displayed==false)
 	{
-	  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+	  io_open_directory(selected_host_slot,path,filter);
 	  io_set_directory_position(pos+bar_get());
 	  e = io_read_directory(64,0);
 	  screen_select_file_display_long_filename(e);
@@ -231,7 +236,7 @@ void select_file_advance(void)
 
   bar_clear(false);
   
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
   
@@ -269,7 +274,7 @@ bool select_file_is_folder(void)
 {
   char *e;
 
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot,path,filter);
+  io_open_directory(selected_host_slot,path,filter);
 
   io_set_directory_position(pos);
 
@@ -336,8 +341,8 @@ void select_file_done(void)
 {
   if (copy_mode == true)
     state=PERFORM_COPY;
-  else if (select_file_is_folder())
-    sf_subState=SF_ADVANCE_FOLDER;
+//  else if (select_file_is_folder())
+//    sf_subState=SF_ADVANCE_FOLDER;
   else
     state=SELECT_SLOT;
 }

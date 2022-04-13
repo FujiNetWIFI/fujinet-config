@@ -58,6 +58,7 @@ extern HostSlot hostSlots[8];
 extern char copy_destination_path[128];
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
+extern SFSubState sf_subState;
 
 void destination_host_slot_init()
 {
@@ -81,7 +82,9 @@ void destination_host_slot_choose()
 
 void destination_host_slot_done()
 {
-  strncpy(copy_host_name,hostSlots[copy_host_slot],32);
+  state=SELECT_FILE;
+  sf_subState=SF_INIT;
+  copy_mode=true;
 }
 
 void destination_host_slot(void)
