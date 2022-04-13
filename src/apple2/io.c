@@ -9,6 +9,7 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <peekpoke.h> // For the insanity in io_boot()
+#include "globals.h"
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -294,17 +295,15 @@ void io_mount_disk_image(uint8_t ds, uint8_t mode)
   sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
 }
 
-void io_copy_file(unsigned char shs, unsigned char chs, char* sp, char* dp)
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
   unsigned short idx;
   idx = 2;
-  sp_payload[idx++] = shs;
-  sp_payload[idx++] = chs;
-  memcpy(&sp_payload[idx], sp, strlen(sp));
-  idx += strlen(sp);
-  sp_payload[idx++] = '|';
-  strcpy(&sp_payload[idx], dp);
-  idx += strlen(dp);
+  sp_payload[idx++] = source_slot;
+  sp_payload[idx++] = destination_slot;
+  strcpy(&sp_payload[idx], copySpec);
+
+  idx += strlen(copySpec);
   idx++;
 
   sp_payload[0] = idx & 0xff;
@@ -328,6 +327,31 @@ void io_umount_disk_image(uint8_t ds)
   sp_payload[1] = 0;
   sp_payload[2] = ds;
   sp_error = sp_control(sp_dest, FUJICMD_UNMOUNT_IMAGE);
+}
+
+void io_update_devices_enabled(bool *e)
+{
+
+}
+
+void io_enable_device(unsigned char d)
+{
+
+}
+
+void io_disable_device(unsigned char d)
+{
+
+}
+
+bool io_get_device_enabled_status(unsigned char d)
+{
+  return false;
+}
+
+unsigned char io_device_slot_to_device(unsigned char ds)
+{
+  return ds;
 }
 
 void io_boot(void)
