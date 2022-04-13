@@ -1,4 +1,7 @@
 obj
+*.swp
+*.c~
+*.h~
 build
 autorun
 *.bin
