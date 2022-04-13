@@ -37,6 +37,12 @@ void io_umount_disk_image(unsigned char ds);
 void io_boot(void);
 void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path);
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v);
+bool io_get_device_enabled_status(unsigned char d);
+void io_update_devices_enabled(bool *e);
+void io_enable_device(unsigned char d);
+void io_disable_device(unsigned char d);
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot);
+unsigned char io_device_slot_to_device(unsigned char ds);
 
 #endif /* IO_H */
 #endif /* BUILD_ADAM */
