@@ -69,7 +69,13 @@ void screen_set_wifi(AdapterConfig *ac)
 {
   clrscr();
   gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
-  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
+    ac->macAddress[0],
+    ac->macAddress[1],
+    ac->macAddress[2],
+    ac->macAddress[3],
+    ac->macAddress[4],
+    ac->macAddress[5]);
   gotoxy(7,STATUS_BAR); cprintf("SCANNING FOR NETWORKS...");
 }
 
@@ -102,11 +108,11 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   
 }
 
-//void screen_set_wifi_select_network(unsigned char nn)
-void screen_set_wifi_select_network()
+void screen_set_wifi_select_network(unsigned char nn)
 {
   cclearxy(0,STATUS_BAR,120);
-  //gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
+  bar_set(4,1,nn,0);
+  gotoxy(10,STATUS_BAR); cprintf("FOUND %d NETWORKS.\r\n", nn);
   //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
   gotoxy(4, STATUS_BAR + 1);
   cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\n");
@@ -174,7 +180,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
 {
   char i;
   clrscr();
-  gotoxy(0,0);  cputs("HOST LIST");
+  gotoxy(0,0);  cputs("HOST LIST"); // ram[bar_coord(i,bar_y+bar_i)] &= 0x3f - make inverse
   gotoxy(0,11); cputs("DRIVE SLOTS");
   // gotoxy(0,18); cputs("DISK II SLOTS");
 

@@ -18,7 +18,7 @@ typedef unsigned short DirectoryPosition;
  * from a WiFi scan
  */
 typedef struct {
-  char ssid[32];
+  char ssid[33];
   signed char rssi;
 } SSIDInfo;
 
@@ -27,7 +27,7 @@ typedef struct {
  */
 typedef struct
 {
-  char ssid[32];
+  char ssid[33];
   char password[64];
 } NetConfig;
 
@@ -36,7 +36,7 @@ typedef struct
  */
 typedef struct
 {
-  char ssid[32];
+  char ssid[33];
   char hostname[64];
   unsigned char localIP[4];
   unsigned char gateway[4];
