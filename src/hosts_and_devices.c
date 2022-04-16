@@ -58,11 +58,13 @@
 HDSubState hd_subState;
 DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
+bool deviceEnabled[8];
 HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_device_slot;
 char selected_host_name[32];
 char temp_filename[256];
+
 
 extern bool quick_boot;
 
@@ -184,7 +186,7 @@ void hosts_and_devices(void)
   
   io_get_host_slots(&hostSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
-  screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0]);
+  screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0],&deviceEnabled[0]);
 
   while (state == HOSTS_AND_DEVICES)
     {
