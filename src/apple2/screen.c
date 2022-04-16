@@ -14,7 +14,14 @@
 
 #define STATUS_BAR 21
 
+static const char *empty="EMPTY";
+static const char *off="OFF";
+
 unsigned char *mousetext = (unsigned char *)0xC00E;
+
+extern bool copy_mode;
+extern unsigned char copy_host_slot;
+extern bool deviceEnabled[8];
 
 void screen_init(void)
 {
@@ -161,22 +168,32 @@ void screen_destination_host_slot_choose(void)
   bar_set(2, 1, 8, selected_host_slot);
 }
 
+char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
+{
+  if (fn[0]!=0x00)
+    return fn;
+  else if (e==false)
+    return &off[0];
+  else
+    return &empty[0];
+}
+
 char* screen_hosts_and_devices_slot(char *c)
 {
   return c[0]==0x00 ? "Empty" : c;
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   char i;
   
   for (i=0;i<4;i++)
     {
-      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(d[i].file));
+      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     } 
 }
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
   char i;
   clrscr();
@@ -193,7 +210,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
       gotoxy(0,i+2); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
     }
 
-  screen_hosts_and_devices_device_slots(13,d);  
+  screen_hosts_and_devices_device_slots(13,d,e);  
 }
 
 void screen_hosts_and_devices_hosts(void)
@@ -242,7 +259,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   gotoxy(0,7); cprintf("%-128s",dp);
 }
 
-void screen_show_info(AdapterConfig* ac)
+void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 {
   clrscr();
   
@@ -260,7 +277,8 @@ void screen_show_info(AdapterConfig* ac)
 
   gotoxy(6,STATUS_BAR); 
   cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
-  cprintf("   PRESS ANY KEY TO RETURN TO HOSTS");
+  cprintf("   PRESS ANY KEY TO RETURN TO HOSTS\r\n");
+  cprintf("placeholder for printer status");
 }
 
 void screen_select_file(void)
@@ -358,7 +376,7 @@ void screen_select_slot(char *e)
   e += sizeof(unsigned long) + 2; // I do not need the next two bytes.
   cprintf("%-40s",e);
 
-  screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
+  screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
     
   bar_set(1,1,4,0);
 }

@@ -57,11 +57,14 @@
 char copy_destination_path[128];
 char copy_host_name[32];
 unsigned char copy_host_slot;
+char copySpec[449];
+
+extern bool copy_mode;
 
 void perform_copy(void)
 {
   clrscr();
   screen_perform_copy(hostSlots[selected_host_slot],source_path,hostSlots[copy_host_slot],path);
-  io_copy_file(selected_host_slot, copy_host_slot, source_path, path);
+  io_copy_file(selected_host_slot, copy_host_slot);
   // build copyspec: sourcePath|destPath
 }
