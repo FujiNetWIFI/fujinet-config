@@ -45,7 +45,7 @@ SISubState si_subState;
 
 void show_info(void)
 {
-  screen_show_info(io_get_adapter_config());
+  screen_show_info(false, io_get_adapter_config()); // "false" is place holder for printer enable
 
   while (si_subState==SI_SHOWINFO)
     si_subState=input_show_info();
