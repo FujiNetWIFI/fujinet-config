@@ -28,13 +28,43 @@ void screen_init(void)
   clrscr();
 }
 
+void screen_inverse_line(unsigned char y)
+{
+  char i;
+  
+  for (i=0;i<40;i++)
+    ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
+}
+
+void screen_put_inverse(const char c)
+{
+  cputc(c);
+  ram[bar_coord(wherex() - 1, wherey())] &= 0x3f;
+}
+
+void screen_print_inverse(const char *s)
+{
+  char i;
+  for (i=0;i< strlen(s);i++)
+  {
+    screen_put_inverse(s[i]);
+  }
+}
+
+void screen_print_menu(const char *si, const char *sc)
+{
+  screen_print_inverse(si);
+  cprintf(sc);
+}
+
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
+  screen_inverse_line(STATUS_BAR + 1);
 }
 
-void screen_putlcc(const char *c)
+void screen_putlcc(char c)
 {
   char modifier = 128;
   char ostype;
@@ -168,7 +198,7 @@ void screen_destination_host_slot_choose(void)
   bar_set(2, 1, 8, selected_host_slot);
 }
 
-char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
   if (fn[0]!=0x00)
     return fn;
@@ -189,36 +219,45 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   
   for (i=0;i<4;i++)
     {
-      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      gotoxy(0,i+y); 
+      cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     } 
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
+  const char hl[] = "HOST LIST";
+  const char ds[] = "DRIVE SLOTS";
   char i;
+  
   clrscr();
-  gotoxy(0,0);  cputs("HOST LIST"); // ram[bar_coord(i,bar_y+bar_i)] &= 0x3f - make inverse
-  gotoxy(0,11); cputs("DRIVE SLOTS");
-  // gotoxy(0,18); cputs("DISK II SLOTS");
+  gotoxy(0,0);  cprintf("%40s",hl); // screen_inverse(0);
+  chlinexy(0,0,40 - sizeof(hl));
 
-  chlinexy(0,1,40);
-  chlinexy(0,12,40);
-  chlinexy(0,20,40);
-
+  gotoxy(0,10); cprintf("%40s",ds); // screen_inverse(10);
+  chlinexy(0,10,40 - sizeof(ds));
+  
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+2); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
     }
 
-  screen_hosts_and_devices_device_slots(13,d,e);  
+  screen_hosts_and_devices_device_slots(11,d,e);  
 }
 
 void screen_hosts_and_devices_hosts(void)
 {
-  bar_set(2,1,8,0);
+  bar_set(1,1,8,0);
   cclearxy(0,STATUS_BAR,120);
   // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
-  gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("1-8:", "SLOT  ");
+  screen_print_menu("E","DIT  ");
+  screen_print_menu("RETURN:","SELECT FILES\r\n ");
+  screen_print_menu("C","ONFIG  ");
+  screen_print_menu("TAB:","DRIVE SLOTS  ");
+  screen_print_menu("ESC:","BOOT");
+  //cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -233,7 +272,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-  bar_set(13,1,4,0);
+  bar_set(11,1,4,0);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE\r\n[TAB] HOST SLOTS");
 }
@@ -278,8 +317,8 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   gotoxy(6,STATUS_BAR); 
   cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
   cprintf("   PRESS ANY KEY TO RETURN TO HOSTS\r\n");
-  cprintf("placeholder for printer status");
-}
+  cprintf("      FUJINET PRINTER %s",(printerEnabled) ? "ENABLED" : "DISABLED");
+  }
 
 void screen_select_file(void)
 {
@@ -289,9 +328,6 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
-  // Clear content area
-  //cclearxy(0,0,20*40); // 20*40 is > 255 so won't work in cclearxy
-  // void __fastcall__ cclearxy (unsigned char x, unsigned char y, unsigned char length);
   clrscr();
 
   // Update content area

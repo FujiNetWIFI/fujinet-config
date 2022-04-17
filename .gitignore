@@ -5,3 +5,7 @@ autorun
 *.cas
 *.d88
 dist.apple2/prepimg.sh
+.vscode/
+dist.apple2/dist.po
+.vscode/c_cpp_properties.json
+.vscode/settings.json
