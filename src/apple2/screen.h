@@ -8,6 +8,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <stdbool.h>
 #include "fuji_typedefs.h"
 
 void screen_init(void);
@@ -27,12 +28,12 @@ void screen_connect_wifi(NetConfig *nc);
 void screen_destination_host_slot(char *h, char *p);
 void screen_destination_host_slot_choose(void);
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d);
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_devices(void);
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d);
-
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e);
+ 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
 void screen_hosts_and_devices_edit_host_slot(unsigned char i);
 
@@ -41,7 +42,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
-void screen_show_info(AdapterConfig* ac);
+void screen_show_info(bool printerEnabled, AdapterConfig* ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);

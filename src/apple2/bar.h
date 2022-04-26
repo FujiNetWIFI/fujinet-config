@@ -42,6 +42,8 @@ void bar_down();
  */
 void bar_jump(unsigned char i);
 
+void bar_update();
+
 /**
  * Get current bar position
  * @return bar index
