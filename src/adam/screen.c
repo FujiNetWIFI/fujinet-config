@@ -23,6 +23,8 @@ extern char copy_host_name;
 extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
 
+unsigned char nn;
+
 static char udg[] =
   {
    0,0,0,0,0,0,3,51,                               // WIFI 1
