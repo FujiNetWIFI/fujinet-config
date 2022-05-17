@@ -110,10 +110,6 @@ unsigned char select_file_display(void)
     return 0;
   }
 
-  screen_select_file_display(path, filter);
-
-  io_open_directory(copy_mode == true ? copy_host_slot : selected_host_slot, path, filter);
-
   screen_select_file_display(path,filter);
   
   io_open_directory(selected_host_slot,path,filter);

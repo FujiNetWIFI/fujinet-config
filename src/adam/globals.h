@@ -17,7 +17,7 @@ extern char selected_device_slot;
 extern char selected_host_name[32];
 extern char source_path[224];
 extern char copy_host_name[32];
-extern char copySpec[449];
+extern char copySpec[256];
 extern unsigned long selected_size;
 
 extern DeviceSlot deviceSlots[8];

@@ -57,7 +57,7 @@
 extern char source_filename[128];
 
 unsigned char copy_host_slot;
-char copySpec[449];
+char copySpec[256];
 
 extern bool copy_mode;
 
