@@ -152,9 +152,11 @@ void screen_set_wifi_select_network(unsigned char nn)
   gotoxy(10,STATUS_BAR); cprintf("FOUND %d NETWORKS.\r\n", nn);
   //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
   gotoxy(4, STATUS_BAR + 1);
-  cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\n");
+  screen_print_menu("H","IDDEN SSID  ");
+  screen_print_menu("R","ESCAN  ");
+  screen_print_menu("S","KIP\r\n");
   gotoxy(10, STATUS_BAR + 2);
-  cprintf("[RETURN] TO SELECT");
+  screen_print_menu("RETURN"," TO SELECT");
 }
 
 void screen_set_wifi_custom(void)
@@ -193,7 +195,9 @@ void screen_destination_host_slot_choose(void)
 
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); 
-  cprintf("[1-8] CHOOSE SLOT\r\n[RETURN] SELECT SLOT\r\n[ESC] TO ABORT");
+  screen_print_menu("1-8",":CHOOSE SLOT\r\n");
+  screen_print_menu("RETURN",":SELECT SLOT\r\n");
+  screen_print_menu("ESC"," TO ABORT");
   
   bar_set(2, 1, 8, selected_host_slot);
 }
@@ -210,7 +214,7 @@ const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char 
 
 char* screen_hosts_and_devices_slot(char *c)
 {
-  return c[0]==0x00 ? "Empty" : c;
+  return c[0]==0x00 ? "EMPTY" : c;
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -251,12 +255,12 @@ void screen_hosts_and_devices_hosts(void)
   cclearxy(0,STATUS_BAR,120);
   // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
   gotoxy(0,STATUS_BAR); 
-  screen_print_menu("1-8:", "SLOT  ");
+  screen_print_menu("1-8", ":SLOT  ");
   screen_print_menu("E","DIT  ");
-  screen_print_menu("RETURN:","SELECT FILES\r\n ");
+  screen_print_menu("RETURN",":SELECT FILES\r\n ");
   screen_print_menu("C","ONFIG  ");
-  screen_print_menu("TAB:","DRIVE SLOTS  ");
-  screen_print_menu("ESC:","BOOT");
+  screen_print_menu("TAB",":DRIVE SLOTS  ");
+  screen_print_menu("ESC",":BOOT");
   //cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
@@ -274,7 +278,11 @@ void screen_hosts_and_devices_devices(void)
 {
   bar_set(11,1,4,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE\r\n[TAB] HOST SLOTS");
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("E","JECT  ");
+  screen_print_menu("R","EAD ONLY  ");
+  screen_print_menu("W","RITE\r\n");
+  screen_print_menu("TAB",":HOST SLOTS");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -315,7 +323,8 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   cprintf("%10s%s\r\n","FNVER: ",ac->fn_version);
 
   gotoxy(6,STATUS_BAR); 
-  cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
+  screen_print_menu("C","HANGE SSID  ");
+  screen_print_menu("R","ECONNECT\r\n");
   cprintf("   PRESS ANY KEY TO RETURN TO HOSTS\r\n");
   cprintf("      FUJINET PRINTER %s",(printerEnabled) ? "ENABLED" : "DISABLED");
   }
@@ -387,7 +396,11 @@ void screen_select_file_choose(char visibleEntries)
 {
   bar_set(3,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[RETURN] SELECT FILE TO MOUNT\r\n[ESC]PARENT  [F]ILTER  [TBD]BOOT");  
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
+  screen_print_menu("ESC",":PARENT  ");
+  screen_print_menu("F","ILTER  ");
+  screen_print_menu("ESC",":BOOT");  
 }
 
 void screen_select_file_filter(void)
@@ -420,7 +433,10 @@ void screen_select_slot(char *e)
 void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
+  gotoxy(3,STATUS_BAR); 
+  screen_print_menu("1-4"," SELECT SLOT\r\n ");
+  screen_print_menu("RETURN",":INSERT INTO SLOT\r\n ");
+  screen_print_menu("ESC"," TO ABORT.");
 }
 
 void screen_select_file_new_name(void)
@@ -446,7 +462,9 @@ void screen_select_file_new_creating(void)
 void screen_select_slot_mode(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf(" [R]EAD ONLY  [W] READ/WRITE");
+  gotoxy(1,STATUS_BAR); 
+  screen_print_menu("R","EAD ONLY  ");
+  screen_print_menu("W",": READ/WRITE");
 }
 
 void screen_select_slot_eject(unsigned char ds)
