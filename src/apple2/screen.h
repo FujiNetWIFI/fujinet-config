@@ -12,14 +12,17 @@
 #include "fuji_typedefs.h"
 
 void screen_init(void);
+void screen_inverse_line(unsigned char y);
 void screen_error(const char *c);
 
-void screen_putlcc(const char *c);
+void screen_putlcc(char c);
+void screen_put_inverse(const char c);
+void screen_print_inverse(const char *s);
+void screen_print_menu(const char *si, const char *sc);
 
 void screen_set_wifi(AdapterConfig* ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
-//void screen_set_wifi_select_network(unsigned char nn);
-void screen_set_wifi_select_network();
+void screen_set_wifi_select_network(unsigned char nn);
 void screen_set_wifi_custom(void);
 void screen_set_wifi_password(void);
 
@@ -28,6 +31,7 @@ void screen_connect_wifi(NetConfig *nc);
 void screen_destination_host_slot(char *h, char *p);
 void screen_destination_host_slot_choose(void);
 
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn);
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);

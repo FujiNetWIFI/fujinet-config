@@ -23,8 +23,6 @@
 #ifdef BUILD_APPLE2
 #include "apple2/io.h"
 #include "apple2/screen.h"
-#include "apple2/sp.h"
-// #include <conio.h> // for dev
 #include <stdint.h>
 #endif /* BUILD_APPLE2 */
 

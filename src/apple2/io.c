@@ -124,15 +124,15 @@ SSIDInfo *io_get_scan_result(uint8_t n)
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = n;
-  memset(ssid_response.ssid, 0, 32);
+  memset(ssid_response.ssid, 0, sizeof(ssid_response.ssid));
   sp_error = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
   if (!sp_error)
   {
     sp_error = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
     if (!sp_error)
     {
-      memcpy(ssid_response.ssid,sp_payload,32);
-      ssid_response.rssi = sp_payload[32];
+      memcpy(ssid_response.ssid,sp_payload,sizeof(ssid_response.ssid));
+      ssid_response.rssi = sp_payload[sizeof(ssid_response.ssid)];
     }
   }
   return &ssid_response;
@@ -144,10 +144,11 @@ AdapterConfig *io_get_adapter_config(void)
   sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
   if (!sp_error)
   {
-    memcpy(ac.ssid, sp_payload, 32);
-    idx += 32;
-    memcpy(ac.hostname, &sp_payload[idx], 64);
-    idx += 64;
+    memset(&ac,0,sizeof(ac));
+    memcpy(ac.ssid, sp_payload, sizeof(ac.ssid));
+    idx += sizeof(ac.ssid);
+    memcpy(ac.hostname, &sp_payload[idx], sizeof(ac.hostname));
+    idx += sizeof(ac.hostname);
     memcpy(ac.localIP, &sp_payload[idx], 4);
     idx += 4;
     memcpy(ac.gateway, &sp_payload[idx],4);

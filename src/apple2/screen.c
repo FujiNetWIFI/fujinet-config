@@ -28,13 +28,43 @@ void screen_init(void)
   clrscr();
 }
 
+void screen_inverse_line(unsigned char y)
+{
+  char i;
+  
+  for (i=0;i<40;i++)
+    ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
+}
+
+void screen_put_inverse(const char c)
+{
+  cputc(c);
+  ram[bar_coord(wherex() - 1, wherey())] &= 0x3f;
+}
+
+void screen_print_inverse(const char *s)
+{
+  char i;
+  for (i=0;i< strlen(s);i++)
+  {
+    screen_put_inverse(s[i]);
+  }
+}
+
+void screen_print_menu(const char *si, const char *sc)
+{
+  screen_print_inverse(si);
+  cprintf(sc);
+}
+
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
+  screen_inverse_line(STATUS_BAR + 1);
 }
 
-void screen_putlcc(const char *c)
+void screen_putlcc(char c)
 {
   char modifier = 128;
   char ostype;
@@ -76,7 +106,13 @@ void screen_set_wifi(AdapterConfig *ac)
 {
   clrscr();
   gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
-  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
+    ac->macAddress[0],
+    ac->macAddress[1],
+    ac->macAddress[2],
+    ac->macAddress[3],
+    ac->macAddress[4],
+    ac->macAddress[5]);
   gotoxy(7,STATUS_BAR); cprintf("SCANNING FOR NETWORKS...");
 }
 
@@ -109,16 +145,18 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   
 }
 
-//void screen_set_wifi_select_network(unsigned char nn)
-void screen_set_wifi_select_network()
+void screen_set_wifi_select_network(unsigned char nn)
 {
   cclearxy(0,STATUS_BAR,120);
-  //gotoxy(0,STATUS_BAR); cprintf("FOUND %d NETWORKS\r\n[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.", nn);
+  bar_set(4,1,nn,0);
+  gotoxy(10,STATUS_BAR); cprintf("FOUND %d NETWORKS.\r\n", nn);
   //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
   gotoxy(4, STATUS_BAR + 1);
-  cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\n");
+  screen_print_menu("H","IDDEN SSID  ");
+  screen_print_menu("R","ESCAN  ");
+  screen_print_menu("S","KIP\r\n");
   gotoxy(10, STATUS_BAR + 2);
-  cprintf("[RETURN] TO SELECT");
+  screen_print_menu("RETURN"," TO SELECT");
 }
 
 void screen_set_wifi_custom(void)
@@ -157,12 +195,14 @@ void screen_destination_host_slot_choose(void)
 
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR); 
-  cprintf("[1-8] CHOOSE SLOT\r\n[RETURN] SELECT SLOT\r\n[ESC] TO ABORT");
+  screen_print_menu("1-8",":CHOOSE SLOT\r\n");
+  screen_print_menu("RETURN",":SELECT SLOT\r\n");
+  screen_print_menu("ESC"," TO ABORT");
   
   bar_set(2, 1, 8, selected_host_slot);
 }
 
-char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
   if (fn[0]!=0x00)
     return fn;
@@ -174,7 +214,7 @@ char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
 
 char* screen_hosts_and_devices_slot(char *c)
 {
-  return c[0]==0x00 ? "Empty" : c;
+  return c[0]==0x00 ? "EMPTY" : c;
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -189,30 +229,38 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
+  const char hl[] = "HOST LIST";
+  const char ds[] = "DRIVE SLOTS";
   char i;
+  
   clrscr();
-  gotoxy(0,0);  cputs("HOST LIST");
-  gotoxy(0,11); cputs("DRIVE SLOTS");
-  // gotoxy(0,18); cputs("DISK II SLOTS");
+  gotoxy(0,0);  cprintf("%40s",hl); // screen_inverse(0);
+  chlinexy(0,0,40 - sizeof(hl));
 
-  chlinexy(0,1,40);
-  chlinexy(0,12,40);
-  chlinexy(0,20,40);
-
+  gotoxy(0,10); cprintf("%40s",ds); // screen_inverse(10);
+  chlinexy(0,10,40 - sizeof(ds));
+  
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+2); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
     }
 
-  screen_hosts_and_devices_device_slots(13,d,e);  
+  screen_hosts_and_devices_device_slots(11,d,e);  
 }
 
 void screen_hosts_and_devices_hosts(void)
 {
-  bar_set(2,1,8,0);
+  bar_set(1,1,8,0);
   cclearxy(0,STATUS_BAR,120);
   // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
-  gotoxy(0,STATUS_BAR); cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("1-8", ":SLOT  ");
+  screen_print_menu("E","DIT  ");
+  screen_print_menu("RETURN",":SELECT FILES\r\n ");
+  screen_print_menu("C","ONFIG  ");
+  screen_print_menu("TAB",":DRIVE SLOTS  ");
+  screen_print_menu("ESC",":BOOT");
+  //cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -227,9 +275,13 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-  bar_set(13,1,4,0);
+  bar_set(11,1,4,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[E]JECT  [R]EAD ONLY  [W]RITE\r\n[TAB] HOST SLOTS");
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("E","JECT  ");
+  screen_print_menu("R","EAD ONLY  ");
+  screen_print_menu("W","RITE\r\n");
+  screen_print_menu("TAB",":HOST SLOTS");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -270,10 +322,11 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   cprintf("%10s%s\r\n","FNVER: ",ac->fn_version);
 
   gotoxy(6,STATUS_BAR); 
-  cprintf("[C]HANGE SSID  [R]ECONNECT\r\n");
+  screen_print_menu("C","HANGE SSID  ");
+  screen_print_menu("R","ECONNECT\r\n");
   cprintf("   PRESS ANY KEY TO RETURN TO HOSTS\r\n");
-  cprintf("placeholder for printer status");
-}
+  cprintf("      FUJINET PRINTER %s",(printerEnabled) ? "ENABLED" : "DISABLED");
+  }
 
 void screen_select_file(void)
 {
@@ -283,9 +336,6 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
-  // Clear content area
-  //cclearxy(0,0,20*40); // 20*40 is > 255 so won't work in cclearxy
-  // void __fastcall__ cclearxy (unsigned char x, unsigned char y, unsigned char length);
   clrscr();
 
   // Update content area
@@ -345,7 +395,11 @@ void screen_select_file_choose(char visibleEntries)
 {
   bar_set(3,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("[RETURN] SELECT FILE TO MOUNT\r\n[ESC]PARENT  [F]ILTER  [TBD]BOOT");  
+  gotoxy(0,STATUS_BAR); 
+  screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
+  screen_print_menu("ESC",":PARENT  ");
+  screen_print_menu("F","ILTER  ");
+  screen_print_menu("ESC",":BOOT");  
 }
 
 void screen_select_file_filter(void)
@@ -378,7 +432,10 @@ void screen_select_slot(char *e)
 void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
+  gotoxy(3,STATUS_BAR); 
+  screen_print_menu("1-4"," SELECT SLOT\r\n ");
+  screen_print_menu("RETURN",":INSERT INTO SLOT\r\n ");
+  screen_print_menu("ESC"," TO ABORT.");
 }
 
 void screen_select_file_new_name(void)
@@ -404,7 +461,9 @@ void screen_select_file_new_creating(void)
 void screen_select_slot_mode(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf(" [R]EAD ONLY  [W] READ/WRITE");
+  gotoxy(1,STATUS_BAR); 
+  screen_print_menu("R","EAD ONLY  ");
+  screen_print_menu("W",": READ/WRITE");
 }
 
 void screen_select_slot_eject(unsigned char ds)

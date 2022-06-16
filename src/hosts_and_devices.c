@@ -65,6 +65,7 @@ char selected_device_slot;
 char selected_host_name[32];
 char temp_filename[256];
 
+
 extern bool quick_boot;
 
 void hosts_and_devices_edit_host_slot(unsigned char i)
