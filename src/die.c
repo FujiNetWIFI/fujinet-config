@@ -15,7 +15,4 @@ void die(void)
 
 void quit(void)
 {
-#ifdef BUILD_ADAM
-  eos_exit_to_smartwriter();
-#endif
 }

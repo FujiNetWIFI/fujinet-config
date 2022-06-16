@@ -15,7 +15,15 @@
 #include <eos.h>
 #include <string.h>
 
+#define MAX_DISK_SLOTS (4)
+#define STR_MAX_DISK_SLOTS "4"
+
 extern bool copy_mode;
+extern char copy_host_name;
+extern unsigned char copy_host_slot;
+extern bool deviceEnabled[8];
+
+unsigned char nn;
 
 static char udg[] =
   {
@@ -33,7 +41,8 @@ static char udg[] =
    0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55  // Password smudge 0x8b
   };
 
-static const char *empty="Empty";
+static const char *empty="EMPTY";
+static const char *off="OFF";
 
 void screen_init(void)
 {
@@ -107,7 +116,9 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 void screen_set_wifi_select_network(void)
 {
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
-  sprintf(response,"  WELCOME TO #FUJINET!\n  SELECT A NETWORK.");
+  sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);
+  bar_set(0,3,nn,0);
+
   smartkeys_status(response);
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
@@ -136,22 +147,35 @@ void screen_connect_wifi(NetConfig *nc)
   smartkeys_sound_play(SOUND_CONFIRM);
 }
 
-char* screen_hosts_and_devices_slot(char *c)
+char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
 {
-  return c[0]==0x00 ? &empty[0] : c;
+  if (fn[0]!=0x00)
+    return fn;
+  else if (e==false)
+    return &off[0];
+  else
+    return &empty[0];
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d)
+char* screen_hosts_and_devices_host_slot(char *hs)
 {
-  gotoxy(0,11); cprintf("%32s","DISK SLOTS");
+  return hs[0]==0x00 ? &empty[0] : hs;
+}
 
-  for (char i=0;i<4;i++)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+{
+  unsigned short y2 = y << 8;
+  
+  gotoxy(0,y); cprintf("%32s","DISK SLOTS");
+
+  for (char i=0;i<MAX_DISK_SLOTS;i++)
     {
-      gotoxy(0,i+y); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(d[i].file));
+      gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
-  msx_vfill(MODE2_ATTR+0x0B00,0xF4,256);
-  msx_vfill(MODE2_ATTR+0x0C00,0x1F,1024);
-  msx_vfill_v(MODE2_ATTR+0x0C00,0xF4,32);
+  
+  msx_vfill(MODE2_ATTR+y2,0xF4,256);
+  msx_vfill(MODE2_ATTR+y2+256,0x1F,1024);
+  msx_vfill_v(MODE2_ATTR+y2+256,0xF4,32);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -160,7 +184,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
   for (char i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_host_slot(h[i])); 
     }
   
   msx_vfill(MODE2_ATTR,0xF4,256);
@@ -168,23 +192,31 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   msx_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
 }
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d)
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
   smartkeys_set_mode();
   eos_start_read_keyboard();
 
   screen_hosts_and_devices_host_slots(h);
-  screen_hosts_and_devices_device_slots(12,d);
+  screen_hosts_and_devices_device_slots(11,d,e);
   
   smartkeys_sound_play(SOUND_MODE_CHANGE);
+}
+
+bool any_slot_occupied()
+{
+  bool occupied = false;
+
+  for (char i = 0; (i < MAX_DISK_SLOTS) && (!occupied); i++)
+    occupied = deviceSlots[i].file[0] != 0x00;
+
+  return occupied;
 }
 
 // shown on initial screen
 void screen_hosts_and_devices_hosts(void)
 {
-  bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
-
-  smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT",slot_1_occupied ? " SLOT 1\n   BOOT" : NULL);
+  smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT","  BOOT");
   smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
   bar_clear(false);
   bar_set(0,1,8,selected_host_slot);
@@ -192,7 +224,7 @@ void screen_hosts_and_devices_hosts(void)
 
 void screen_hosts_and_devices_devices(void)
 {
-  smartkeys_display(NULL,NULL,NULL," EJECT","  READ\n  ONLY","  READ\n WRITE");
+  smartkeys_display(NULL,NULL,NULL," EJECT"," ON/OFF\n TOGGLE","  BOOT");
   smartkeys_status("  [TAB] GO TO HOST SLOTS\n  [CLEAR] EJECT ALL SLOTS");
   bar_clear(false);
   bar_set(11,1,4,selected_device_slot);
@@ -230,7 +262,7 @@ void screen_hosts_and_devices_long_filename(char *f)
     msx_vfill(0x1100,0x00,1024);
 }
 
-void screen_show_info(AdapterConfig* ac)
+void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 {
   smartkeys_set_mode();
 
@@ -254,7 +286,8 @@ void screen_show_info(AdapterConfig* ac)
       msx_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
       msx_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
     }
-  smartkeys_display(NULL,NULL," KEYBD?\n  YES","PRINTER?\n  YES"," CHANGE\n  SSID","RECONNECT");    
+  
+  smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");    
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
@@ -279,10 +312,10 @@ void screen_select_file_display(char *p, char *f)
   msx_vfill(MODE2_ATTR+0x1200,0xF5,256);
   msx_vfill_v(MODE2_ATTR+0x0200,0xF5,136);
   msx_vfill_v(MODE2_ATTR+0x0200+8,0xF5,136);
-
+  
   // Update content area
   msx_color(15,4,7);
-  gotoxy(0,0); cprintf("%32s",copy_mode == true ? copy_host_name : selected_host_name);
+  gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
 
   if (f[0]==0x00)
     cprintf("%32s",p);
@@ -328,7 +361,7 @@ void screen_select_file_display_entry(unsigned char y, char* e)
 // Shown on directory screen
 void screen_select_file_choose(char visibleEntries)
 {
-  bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
+  bool occupied = any_slot_occupied();
 
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
 
@@ -339,7 +372,7 @@ void screen_select_file_choose(char visibleEntries)
     }
   else
     {
-      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", slot_1_occupied ? " SLOT 1\n BOOT" : "  QUICK\n  BOOT");
+      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? " BOOT" : "  QUICK\n  BOOT");
       smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
     }
   
@@ -410,7 +443,7 @@ void screen_select_slot(char *e)
   gotoxy(0,0);
   cprintf("%32s",e);
 
-  screen_hosts_and_devices_device_slots(1,&deviceSlots[0]);
+  screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
   
   msx_vfill(MODE2_ATTR,0xF4,256);
   msx_vfill(MODE2_ATTR+0x100,0x1F,0x400);
@@ -428,7 +461,7 @@ void screen_select_slot(char *e)
 void screen_select_slot_choose(void)
 {
   smartkeys_display(NULL,NULL,NULL," EJECT",create == false ? " READ\n ONLY" : NULL,create == false ? "  READ\n  WRITE" : NULL);
-  smartkeys_status(" [1-4] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
+  smartkeys_status(" [1-" STR_MAX_DISK_SLOTS "] SELECT SLOT\n [RETURN] INSERT INTO SLOT\n [ESC] TO ABORT.");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
@@ -503,7 +536,6 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   gotoxy(0,2); msx_color(1,15,7); cprintf("%-128s",p);
   gotoxy(0,6); msx_color(15,4,7); cprintf("%32s",dh);
   gotoxy(0,7); msx_color(1,15,7); cprintf("%-128s",dp);
-  while(1);
 }
 
 #endif /* BUILD_ADAM */

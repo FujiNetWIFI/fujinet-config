@@ -140,7 +140,7 @@ void sp_list_devs()
 
   err = sp_status(0x00, 0x00); // get number of devices
   num = sp_payload[0];
-  num++;
+  num += 2;
   for (i = 1; i < num; i++)
   {
     cprintf("UNIT #%d NAME: ", i);
@@ -149,6 +149,7 @@ void sp_list_devs()
       cputc(sp_payload[5 + j]);
     cputs("\r\n");
   }
+  cgetc();
 }
 
 /**

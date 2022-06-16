@@ -202,7 +202,7 @@ void screen_destination_host_slot_choose(void)
   bar_set(2, 1, 8, selected_host_slot);
 }
 
-const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
+char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
 {
   if (fn[0]!=0x00)
     return fn;
@@ -223,8 +223,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   
   for (i=0;i<4;i++)
     {
-      gotoxy(0,i+y); 
-      cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     } 
 }
 

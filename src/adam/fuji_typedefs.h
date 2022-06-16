@@ -7,7 +7,7 @@
 #define FUJI_TYPEDEFS_H
 
 #define FILE_MAXLEN 36
-#define SSID_MAXLEN 33
+#define SSID_MAXLEN 33 /* 32 + NULL */
 
 #define MODE_READ 1
 #define MODE_WRITE 2

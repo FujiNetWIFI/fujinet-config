@@ -10,11 +10,15 @@
 #include <eos.h>
 #include <string.h>
 #include "io.h"
+#include "globals.h"
 
 #define FUJI_DEV 0x0F
 
 char response[1024];
 static DCB *dcb;
+
+extern unsigned char source_path;
+extern unsigned char path;
 
 static void io_command_and_response(void* buf, unsigned short len)
 {
@@ -88,7 +92,7 @@ AdapterConfig *io_get_adapter_config(void)
 
 void io_set_ssid(NetConfig *nc)
 {
-  unsigned char c[97]={0xFB};
+  unsigned char c[98]={0xFB};
 
   memcpy(&c[1],nc,sizeof(NetConfig));
 
@@ -283,6 +287,77 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
   // Write directory
   eos_initialize_directory(ds, 1, nb, v);
   eos_initialize_directory(ds, 1, nb, v);
+}
+
+bool io_get_device_enabled_status(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } ds;
+
+  ds.cmd = 0xD1; // Get Device status
+  ds.dev = d;
+
+  eos_write_character_device(FUJI_DEV,ds,sizeof(ds));
+  eos_read_character_device(FUJI_DEV,response,sizeof(response));
+
+  return response[0];
+}
+
+void io_enable_device(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } ed;
+
+  ed.cmd = 0xD5;
+  ed.dev = d;
+
+  eos_write_character_device(FUJI_DEV,ed,sizeof(ed));
+}
+
+void io_disable_device(unsigned char d)
+{
+  struct
+  {
+    unsigned char cmd;
+    unsigned char dev;
+  } dd;
+
+  dd.cmd = 0xD4;
+  dd.dev = d;
+
+  eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
+}
+
+void io_update_devices_enabled(bool *e)
+{
+  char i;
+
+  for (i=0;i<4;i++)
+    {
+      e[i]=io_get_device_enabled_status(io_device_slot_to_device(i));
+    }
+}
+
+void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
+{
+  char cf[259]={0xD8,0x00,0x00};
+  
+  cf[1]=source_slot;
+  cf[2]=destination_slot;
+  strcpy(&cf[3],copySpec);
+  
+  eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
+}
+
+unsigned char io_device_slot_to_device(unsigned char ds)
+{
+  return ds+4;
 }
 
 #endif /* BUILD_ADAM */

@@ -6,7 +6,6 @@
 
 #include "connect_wifi.h"
 #include <string.h>
-#include <conio.h>
 
 #ifdef BUILD_ADAM
 #include "adam/io.h"
@@ -43,7 +42,7 @@ void connect_wifi(void)
   unsigned char retries=20;
   NetConfig nc;
   unsigned char s;
-    
+  
   memcpy(&nc,io_get_ssid(),sizeof(NetConfig));
 
   state = SET_WIFI;
@@ -57,7 +56,6 @@ void connect_wifi(void)
 		{
 		case 1:
 			screen_error("NO SSID AVAILABLE. PRESS ANYKEY.");
-			cgetc();
 			return;
 		case 3:
 			screen_error("CONNECTION SUCCESSFUL!");
@@ -65,11 +63,9 @@ void connect_wifi(void)
 			return;
 		case 4:
 			screen_error("CONNECT FAILED. PRESS ANYKEY.");
-			cgetc();
 			return;
 		case 5:
 			screen_error("CONNECTION LOST. PRESS ANYKEY.");
-			cgetc();
 			return;
 		default:
 			retries--;
@@ -77,7 +73,6 @@ void connect_wifi(void)
 		}
   }
 
-  screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
-  state=SET_WIFI;
-	cgetc();
+	screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
+	state=SET_WIFI;
 }

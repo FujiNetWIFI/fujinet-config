@@ -5,6 +5,7 @@
  */
 
 #include <string.h>
+#include <conio.h>
 #include "set_wifi.h"
 #include "die.h"
 
@@ -69,10 +70,8 @@ void set_wifi_select(void)
 {
   unsigned char k=0;
   
-  screen_set_wifi_select_network(numNetworks);
-
-  bar_set(4,0,numNetworks,0);
-
+  screen_set_wifi_select_network();
+  
   while(ws_subState==WS_SELECT)
     ws_subState=input_set_wifi_select();
 }
@@ -120,8 +119,8 @@ void set_wifi_scan(void)
 void set_wifi_done(void)
 {
   io_set_ssid(&nc);
+  ws_subState=WS_SCAN;
   state = CONNECT_WIFI;
-  ws_subState = WS_SCAN;
 }
 
 void set_wifi(void)
@@ -144,7 +143,7 @@ void set_wifi(void)
       break;
     case WS_DONE:
       set_wifi_done();
-      break;
+      return;
     }
   }
 }
