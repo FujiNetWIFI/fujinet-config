@@ -1,5 +1,5 @@
 /**
- * FujiNet for #Adam configuration program
+ * FujiNet configuration program
  *
  * Type Definitions
  */

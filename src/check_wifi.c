@@ -14,6 +14,11 @@
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/io.h"
+#include "atari/globals.h"
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_C64
 #include "c64/io.h"
 #include "c64/globals.h"
@@ -28,6 +33,7 @@
 #include "pc6001/io.h"
 #include "pc6001/globals.h"
 #endif /* BUILD_PC6001 */
+
 
 #include "check_wifi.h"
 

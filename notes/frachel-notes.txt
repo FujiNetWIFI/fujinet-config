@@ -1,0 +1,51 @@
+States
+
+CHECK_WIFI
+
+CONNECT_WIFI
+    Status: Done
+
+SET_WIFI
+    Substates
+      case WS_SCAN:
+      set_wifi_scan();
+      break;
+    case WS_SELECT:
+      set_wifi_select();
+      break;
+    case WS_CUSTOM:
+      set_wifi_custom();
+      break;
+    case WS_PASSWORD:
+      set_wifi_password();
+      break;
+    case WS_DONE:
+      set_wifi_done();
+
+HOSTS_AND_DEVICES
+SELECT_FILE
+SELECT_SLOT
+DESTINATION_HOST_SLOT
+PERFORM_COPY
+
+SHOW_INFO
+    Status: Done
+
+
+
+
+
+When jumping between hosts and devices with tab key, it remembers where you were and puts you there. check if that was the same in other config.
+
+maybe have common .h files at the top-level? For example, everyone has to have the same func defs in screen.h (its like an interface), so why not make that common. 
+then at the systemfolder level, each screen.c would include "../screen.h", and then their own, say "screen_atari.h" with functions just for them.
+
+nc->ssid and ac->ssid are out of sync. why do we have both?
+
+disk image screen
+0 DISK images
+1 blank
+2 host
+3 path
+4 blank
+5.. files

@@ -25,6 +25,15 @@
 #include "apple2/bar.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/fuji_typedefs.h"
+#include "atari/screen.h"
+#include "atari/io.h"
+#include "atari/globals.h"
+#include "atari/input.h"
+#include "atari/bar.h"
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_C64
 #include "c64/fuji_typedefs.h"
 #include "c64/screen.h"
