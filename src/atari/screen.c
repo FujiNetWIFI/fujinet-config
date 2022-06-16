@@ -336,7 +336,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   screen_set_wifi_print_rssi(s, n);
 }
 
-void screen_set_wifi_select_network(void)
+void screen_set_wifi_select_network(unsigned char nn)
 {
   screen_clear_line(numNetworks + NETWORKS_START_Y);
   screen_puts(2, NETWORKS_START_Y + numNetworks, "<Enter a specific SSID>");
