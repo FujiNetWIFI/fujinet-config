@@ -23,7 +23,7 @@ extern char copy_host_name;
 extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
 
-unsigned char nn;
+// unsigned char nn;
 
 static char udg[] =
   {
@@ -113,7 +113,8 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   smartkeys_sound_play(SOUND_TYPEWRITER_CLACK);
 }
 
-void screen_set_wifi_select_network(void)
+//void screen_set_wifi_select_network(void)
+void screen_set_wifi_select_network(unsigned char nn);
 {
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
   sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);

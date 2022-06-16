@@ -202,7 +202,7 @@ void screen_destination_host_slot_choose(void)
   bar_set(2, 1, 8, selected_host_slot);
 }
 
-char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
   if (fn[0]!=0x00)
     return fn;
