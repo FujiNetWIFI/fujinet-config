@@ -269,7 +269,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+2); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot(h[i])); 
     }
 }
 
@@ -286,7 +286,7 @@ void screen_hosts_and_devices_devices(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  cclearxy(1,i+2,39);
+  cclearxy(1,i+1,39);
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
