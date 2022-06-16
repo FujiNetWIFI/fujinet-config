@@ -1,8 +1,6 @@
 #ifdef BUILD_ATARI
 
 /**
- * FujiNet Configurator
- *
  * Functions to display a selection bar
  */
 
@@ -12,7 +10,7 @@
 
 #define BAR_PMBASE	0x7c00
 unsigned char* bar_pmbase=(unsigned char *)BAR_PMBASE;
-static unsigned char bar_y=1, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0, bar_co=0x13;
+static unsigned char bar_y=1;
 
 /**
  * Clear bar from screen
