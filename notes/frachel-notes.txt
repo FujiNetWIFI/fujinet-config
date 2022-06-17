@@ -6,3 +6,15 @@ and then their own (if necessary), such as "screen_atari.h" with functions only 
 
 nc->ssid and ac->ssid are out of sync.. look into which is right to use.
 
+Questions:
+    io_get_device_enabled_status() - Don't see this for SIO, should it return true or false?
+    entering new ssid - should the input lines for the ssid and password be defaulted to the current ones (they are the input params to the input func)
+        or should they be blanked out first?
+
+
+SHOW_INFO (Config)
+    Main screen:        Done.
+    'C' - Reconnect:    Done.
+    'S' - Change ssid
+        Choose Existing:    Done.
+        Custom:             Done, with question

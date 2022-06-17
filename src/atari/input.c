@@ -103,25 +103,25 @@ unsigned char input_select_file_new_type(void)
 unsigned long input_select_file_new_size(unsigned char t)
 {
   char temp[2];
-  memset (temp, 0, 2);
+  memset(temp, 0, 2);
   _screen_input(34, 21, &temp, 2);
 
   switch (temp[0])
   {
-    case '1':
-      return 90;
-    case '2':
-      return 130;
-    case '3': 
-      return 180;
-    case '4':
-      return 360;
-    case '5':
-      return 720;
-    case '6':
-      return 1440;
-    case 'C':
-      return 1;
+  case '1':
+    return 90;
+  case '2':
+    return 130;
+  case '3':
+    return 180;
+  case '4':
+    return 360;
+  case '5':
+    return 720;
+  case '6':
+    return 1440;
+  case 'C':
+    return 1;
   }
 }
 
@@ -132,7 +132,7 @@ unsigned long input_select_file_new_custom(void)
 void input_select_file_new_name(char *c)
 {
   // TODO: Find out actual max length we shoud allow here. Input variable is [128] but do we allow filenames that large?
-  _screen_input(0, 21, c, 128);  
+  _screen_input(0, 21, c, 128);
 }
 
 bool input_select_slot_build_eos_directory(void)
@@ -172,6 +172,11 @@ WSSubState input_set_wifi_select(void)
     }
     selected_network = bar_get() - NETWORKS_START_Y;
     return WS_SELECT;
+  case KCODE_ESCAPE:
+    return WS_SCAN;
+  case 'S':
+    state = HOSTS_AND_DEVICES;
+    return WS_DONE;
   case KCODE_RETURN:
     selected_network = bar_get() - NETWORKS_START_Y;
     if (selected_network < numNetworks)
@@ -274,7 +279,7 @@ HDSubState input_hosts_and_devices_devices(void)
 {
   // Down in the devices section.
   unsigned char k;
-  unsigned char y;
+  unsigned char i;
   char temp[20];
 
   if (input_handle_console_keys() == 0x03)
@@ -300,8 +305,11 @@ HDSubState input_hosts_and_devices_devices(void)
     bar_show(DEVICES_START_Y + (k - '1'));
     selected_device_slot = bar_get() - DEVICES_START_Y;
     return HD_DEVICES;
-  case 0x7D:
-    // Eject all.
+  case CH_CLR: // Clear
+    for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+    {
+      hosts_and_devices_eject(i);
+    }
     return HD_DEVICES;
   case 0x1C:
   case '-':
@@ -325,6 +333,7 @@ HDSubState input_hosts_and_devices_devices(void)
     // Eject
     hosts_and_devices_eject(bar_get() - DEVICES_START_Y);
     return HD_DEVICES;
+
   case 0x7F:
     return HD_HOSTS;
   case 'R':
@@ -381,7 +390,7 @@ SFSubState input_select_file_choose(void)
     }
     return SF_CHOOSE;
   case KCODE_RETURN:
-    pos = bar_get() - FILES_START_Y; 
+    pos = bar_get() - FILES_START_Y;
     if (select_file_is_folder())
       return SF_ADVANCE_FOLDER;
     else
@@ -422,14 +431,14 @@ SSSubState input_select_slot_choose(void)
 
   sprintf(temp, "y=%d,pos=%d,shs=%d", bar_get(), pos, selected_host_slot);
   screen_debug(temp);
-
 }
 
 /*
  *  Handle inupt for the "show info" screen.
  *
  *  'C' - Reconnect Wifi
- *  'S' - Chance SSID 
+ *  'S' - Change SSID
+ *  Any other key - return to main hosts and devices screen
  *
  */
 SISubState input_show_info(void)
