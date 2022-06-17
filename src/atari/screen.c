@@ -623,6 +623,8 @@ void screen_error(const char *msg)
   screen_puts(0, 24, msg);
 }
 
+
+
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
   unsigned char retry = 5;
@@ -883,8 +885,8 @@ void screen_connect_wifi(NetConfig *nc)
   bar_clear(false);
 
   screen_puts(0, 0, "WELCOME TO #FUJINET! CONNECTING TO NET");
-  screen_puts(2, 2, nc->ssid);
-  // bar_show(3);
+  screen_puts(2, 3, nc->ssid);
+  bar_show(3);
 }
 
 void screen_dlist_hosts_and_devices(void)
