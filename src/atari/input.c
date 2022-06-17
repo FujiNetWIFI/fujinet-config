@@ -323,6 +323,7 @@ HDSubState input_hosts_and_devices_devices(void)
     return HD_DEVICES;
   case 'E':
     // Eject
+    hosts_and_devices_eject(bar_get() - DEVICES_START_Y);
     return HD_DEVICES;
   case 0x7F:
     return HD_HOSTS;

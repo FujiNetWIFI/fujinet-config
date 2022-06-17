@@ -62,15 +62,15 @@ unsigned char io_get_wifi_status(void)
   siov();
 
   // Shouldn't do this here, but for now its temporary
-  if ( status != 3 )
+  if (status != 3)
   {
     bar_set_color(COLOR_SETTING_FAILED);
   }
-  else 
+  else
   {
     bar_set_color(COLOR_SETTING_SUCCESSFUL);
   }
-  
+
   return status;
 }
 
@@ -132,14 +132,13 @@ AdapterConfig *io_get_adapter_config(void)
 
 void io_set_ssid(NetConfig *nc)
 {
-    set_sio_defaults();
-    OS.dcb.dcomnd = 0xFB; // Set SSID
-    OS.dcb.dstats = 0x80; // Computer->Peripheral
-    OS.dcb.dbuf = nc;
-    OS.dcb.dbyt = 97; //sizeof(nc);
-    OS.dcb.daux = 1;
-    siov();
-
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xFB; // Set SSID
+  OS.dcb.dstats = 0x80; // Computer->Peripheral
+  OS.dcb.dbuf = nc;
+  OS.dcb.dbyt = 97; // sizeof(nc);
+  OS.dcb.daux = 1;
+  siov();
 }
 
 void io_get_device_slots(DeviceSlot *d)
@@ -284,6 +283,13 @@ void io_set_boot_config(unsigned char toggle)
 
 void io_umount_disk_image(unsigned char ds)
 {
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xE9;
+  OS.dcb.dstats = 0x00;
+  OS.dcb.dbuf = NULL;
+  OS.dcb.dbyt = 0;
+  OS.dcb.daux = ds;
+  siov();
 }
 
 void io_boot(void)

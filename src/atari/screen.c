@@ -38,33 +38,33 @@ void config_dlist =
         DL_BLK8,              // 0x02 (8 Blank Scanlines)
         DL_LMS(DL_CHR20x8x2), // 0x03 Line 0 (first line of displayable text, will start at coordinates 0,0)
         DISPLAY_MEMORY,       // 0x04 and 0x05 This is the high order bit location of the display list.  Defined in screen.h
-        DL_CHR20x8x2, // 0x06  Line 1
-        DL_CHR40x8x1, // 0x07  Line 2
-        DL_CHR40x8x1, // 0x08  Line 3
-        DL_CHR40x8x1, // 0x09  Line 4
-        DL_CHR40x8x1, // 0x0a  Line 5
-        DL_CHR40x8x1, // 0x0b  Line 6
-        DL_CHR40x8x1, // 0x0c  Line 7
-        DL_CHR40x8x1, // 0x0d  Line 8
-        DL_CHR40x8x1, // 0x0e  Line 9
-        DL_CHR40x8x1, // 0x0f  Line 10
-        DL_CHR40x8x1, // 0x10  Line 11
-        DL_CHR40x8x1, // 0x11  Line 12
-        DL_CHR40x8x1, // 0x12  Line 13
-        DL_CHR40x8x1, // 0x13  Line 14
-        DL_CHR40x8x1, // 0x14  Line 15
-        DL_CHR40x8x1, // 0x15  Line 16
-        DL_CHR40x8x1, // 0x16  Line 17
-        DL_CHR40x8x1, // 0x17  Line 18
-        DL_CHR40x8x1, // 0x18  Line 19
-        DL_CHR40x8x1, // 0x19  Line 20
-        DL_CHR40x8x1, // 0x1a  Line 21
-        DL_CHR20x8x2, // 0x1b  Line 22
-        DL_CHR20x8x2, // 0x1c  Line 23
-        DL_CHR40x8x1, // 0x1d  Line 24
-        DL_CHR40x8x1, // 0x1e  Line 25
-        DL_JVB,       // Signal to ANTIC end of DISPLAY_LIST has been reached and loop back to the beginning.  The jump to the begining is located at the next two bits defined below.
-        DISPLAY_LIST  // 0x1f, 0x20  Memory address containing the entire display list.
+        DL_CHR20x8x2,         // 0x06  Line 1
+        DL_CHR40x8x1,         // 0x07  Line 2
+        DL_CHR40x8x1,         // 0x08  Line 3
+        DL_CHR40x8x1,         // 0x09  Line 4
+        DL_CHR40x8x1,         // 0x0a  Line 5
+        DL_CHR40x8x1,         // 0x0b  Line 6
+        DL_CHR40x8x1,         // 0x0c  Line 7
+        DL_CHR40x8x1,         // 0x0d  Line 8
+        DL_CHR40x8x1,         // 0x0e  Line 9
+        DL_CHR40x8x1,         // 0x0f  Line 10
+        DL_CHR40x8x1,         // 0x10  Line 11
+        DL_CHR40x8x1,         // 0x11  Line 12
+        DL_CHR40x8x1,         // 0x12  Line 13
+        DL_CHR40x8x1,         // 0x13  Line 14
+        DL_CHR40x8x1,         // 0x14  Line 15
+        DL_CHR40x8x1,         // 0x15  Line 16
+        DL_CHR40x8x1,         // 0x16  Line 17
+        DL_CHR40x8x1,         // 0x17  Line 18
+        DL_CHR40x8x1,         // 0x18  Line 19
+        DL_CHR40x8x1,         // 0x19  Line 20
+        DL_CHR40x8x1,         // 0x1a  Line 21
+        DL_CHR20x8x2,         // 0x1b  Line 22
+        DL_CHR20x8x2,         // 0x1c  Line 23
+        DL_CHR40x8x1,         // 0x1d  Line 24
+        DL_CHR40x8x1,         // 0x1e  Line 25
+        DL_JVB,               // Signal to ANTIC end of DISPLAY_LIST has been reached and loop back to the beginning.  The jump to the begining is located at the next two bits defined below.
+        DISPLAY_LIST          // 0x1f, 0x20  Memory address containing the entire display list.
 };
 
 unsigned char fontPatch[48] = {
@@ -118,9 +118,6 @@ void set_active_screen(unsigned char screen)
 
 void set_cursor(unsigned char x, unsigned char y)
 {
-  unsigned char offset = 0;
-  unsigned char i;
-
   // Each screen uses a different displaylist, so we need to know how many columns each row is to we can calculate
   // how many bytes to add to the base video memory pointer. Previously it assumed 40 columns, which resulted in the Y
   // coordinate not always being what you thought it was.
@@ -182,7 +179,7 @@ void set_cursor(unsigned char x, unsigned char y)
     }
   }
   // Right now these two are the same, decide whether to break apart or not..
-  else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT) 
+  else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT)
   {
     // 1x20
     // rest 40
@@ -195,7 +192,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 20 + x + ((y - 1) * 40);
     }
   }
-  else if ( active_screen == SCREEN_CONNECT_WIFI )
+  else if (active_screen == SCREEN_CONNECT_WIFI)
   {
     // 2x20
     // 20x40
@@ -207,7 +204,7 @@ void set_cursor(unsigned char x, unsigned char y)
     {
       cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
     }
-    else if ( y<24)
+    else if (y < 24)
     {
       cursor_ptr = video_ptr + 40 + 800 + ((y - 22) * 20);
     }
@@ -215,7 +212,6 @@ void set_cursor(unsigned char x, unsigned char y)
     {
       cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
     }
-
   }
   else
   {
@@ -295,7 +291,7 @@ void screen_set_wifi(AdapterConfig *ac)
   screen_puts(24, 2, ":");
   screen_puts(27, 2, ":");
 
-  //screen_set_wifi_display_mac_address(ac);
+  // screen_set_wifi_display_mac_address(ac);
   for (i = 0; i < 6; i++)
   {
     itoa(ac->macAddress[i], mactmp, 16);
@@ -303,9 +299,8 @@ void screen_set_wifi(AdapterConfig *ac)
     x += 3;
   }
 
-  //show_line_nums();
+  // show_line_nums();
 }
-
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
 {
@@ -332,7 +327,7 @@ void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
-  screen_puts(2, n + 4, (char *)s->ssid);
+  screen_puts(2, n + NETWORKS_START_Y, (char *)s->ssid);
   screen_set_wifi_print_rssi(s, n);
 }
 
@@ -356,7 +351,7 @@ void screen_set_wifi_custom(void)
 void screen_set_wifi_password(void)
 {
   screen_clear_line(21);
-  screen_puts(3,21,"ENTER PASSWORD");
+  screen_puts(3, 21, "ENTER PASSWORD");
 }
 
 void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
@@ -453,27 +448,24 @@ void screen_select_slot(char *e)
 
   screen_clear();
 
-  screen_puts(0,22,
-      CH_KEY_1TO8 "Slot"
-      CH_KEY_RETURN "Select"
-      CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject"
-      CH_KEY_ESC "Abort");
+  screen_puts(0, 22,
+              CH_KEY_1TO8 "Slot" CH_KEY_RETURN "Select" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_ESC "Abort");
 
-  screen_puts(0,0,"MOUNT TO DRIVE SLOT");
-  
-  //sprintf("%32s","FILE DETAILS");
-  sprintf(d, "%8s 20%02u-%02u-%02u %02u:%02u:%02u","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
-  screen_puts(0,1,"FILE DETAILS");
-  screen_puts(0,2,d);
-  //s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  //sprintf(d, "%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+  screen_puts(0, 0, "MOUNT TO DRIVE SLOT");
 
-  //e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
-  
-  //gotoxy(0,0);
-  //cprintf("%32s",e);
+  // sprintf("%32s","FILE DETAILS");
+  sprintf(d, "%8s 20%02u-%02u-%02u %02u:%02u:%02u", "MTIME:", *e++, *e++, *e++, *e++, *e++, *e++);
+  screen_puts(0, 1, "FILE DETAILS");
+  screen_puts(0, 2, d);
+  // s=(unsigned long *)e; // Cast the next four bytes as a long integer.
+  // sprintf(d, "%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
 
-  screen_hosts_and_devices_device_slots(3,&deviceSlots,&deviceEnabled);
+  // e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
+
+  // gotoxy(0,0);
+  // cprintf("%32s",e);
+
+  screen_hosts_and_devices_device_slots(3, &deviceSlots, &deviceEnabled);
 
   bar_show(3);
 }
@@ -529,7 +521,7 @@ void screen_select_file_display(char *p, char *f)
   screen_puts(5, 3, p);
 
   // Clear out the file area
-  for (i = FILES_START_Y; i < FILES_START_Y + ENTRIES_PER_PAGE; i++) // ENTRIES_PER_PAGE shoudl be here.
+  for (i = FILES_START_Y; i < FILES_START_Y + ENTRIES_PER_PAGE; i++)
   {
     screen_clear_line(i);
   }
@@ -541,11 +533,13 @@ void screen_select_file_display_long_filename(char *e)
   screen_puts(4, 24, e);
 }
 
-void screen_select_file_clear_long_filename(void) {}
+void screen_select_file_clear_long_filename(void)
+{
+}
 
 void screen_select_file_filter(void)
 {
-  // This may not need to do anything. We're already showing the filter on the screen.
+  // No need to display anything additional, we're already showing the filter on the screen.
 }
 
 void screen_select_file_next(void)
@@ -556,6 +550,7 @@ void screen_select_file_next(void)
   }
   if (pos == 0)
   {
+    // We're on the first page, clear the line with the "Previous Page" text.
     screen_clear_line(FILES_START_Y - 1);
   }
 }
@@ -569,6 +564,7 @@ void screen_select_file_prev(void)
 
   if (dir_eof == true)
   {
+    // We're on the last page, clear the line with the "Next Page" text.
     screen_clear_line(FILES_START_Y + ENTRIES_PER_PAGE);
   }
 }
@@ -585,12 +581,12 @@ void screen_select_file_choose(char visibleEntries)
   _visibleEntries = visibleEntries;
 }
 
-void screen_select_file_new_type(void) 
+void screen_select_file_new_type(void)
 {
   // Not used on Atari
 }
 
-void screen_select_file_new_size(unsigned char k) 
+void screen_select_file_new_size(unsigned char k)
 {
   screen_clear_line(20);
   screen_clear_line(21);
@@ -599,14 +595,21 @@ void screen_select_file_new_size(unsigned char k)
   screen_puts(5, 21,
               CH_KEY_LABEL_L CH_INV_5 CH_KEY_LABEL_R "720K " CH_KEY_LABEL_L CH_INV_6 CH_KEY_LABEL_R "1440K " CH_KEY_LABEL_L CH_INV_7 CH_KEY_LABEL_R "Custom ?");
 }
-void screen_select_file_new_custom(void) {}
-void screen_select_file_new_name(void) 
+
+void screen_select_file_new_custom(void)
+{
+}
+
+void screen_select_file_new_name(void)
 {
   screen_clear_line(20);
   screen_clear_line(21);
   screen_puts(0, 20, "Enter name of new disk image file");
 }
-void screen_select_file_new_creating(void) {}
+
+void screen_select_file_new_creating(void)
+{
+}
 
 void screen_clear_line(unsigned char y)
 {
@@ -616,8 +619,8 @@ void screen_clear_line(unsigned char y)
 
 void screen_error(const char *msg)
 {
-  screen_clear_line(21);
-  screen_puts(0, 21, msg);
+  screen_clear_line(24);
+  screen_puts(0, 24, msg);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
@@ -678,7 +681,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
   }
 
   // FER
-  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], ""); // what is last parameter?
+  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
 }
 
 void screen_clear()
@@ -729,7 +732,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 }
 
 // Since 'deviceSlots' is a global, do we need to access the input parameter at all?
-// Maybe globals.h wasn't supposed in be part of screen? I needed it for something.. have to remember why.
+// Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
 {
   unsigned char slotNum;
@@ -764,17 +767,18 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
   }
 }
 
-void screen_hosts_and_devices_devices_clear_all(void) {}
+void screen_hosts_and_devices_devices_clear_all(void)
+{
+}
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  // i comes in as the place in the array for this host slow. To get the corresponding position on the screen, add HOSTS_START_Y-1
+  // i comes in as the place in the array for this host slot. To get the corresponding position on the screen, add HOSTS_START_Y
   screen_clear_line(i + HOSTS_START_Y);
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
-
   char tmp[2] = {0, 0};
   int newloc = i + HOSTS_START_Y;
 
@@ -783,7 +787,15 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   screen_puts(2, newloc, tmp);
 }
 
-void screen_hosts_and_devices_eject(unsigned char ds) {}
+void screen_hosts_and_devices_eject(unsigned char ds)
+{
+  char tmp[2] = {0, 0};
+  tmp[0] = ds + '1';
+
+  screen_clear_line(DEVICES_START_Y + ds);
+  screen_puts(2, DEVICES_START_Y + ds, tmp);
+  screen_puts(5, DEVICES_START_Y + ds, text_empty);
+}
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
@@ -792,7 +804,9 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
   screen_append(text_empty);
 }
 
-void screen_hosts_and_devices_long_filename(char *f) {}
+void screen_hosts_and_devices_long_filename(char *f)
+{
+}
 
 void screen_init(void)
 {
