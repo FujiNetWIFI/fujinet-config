@@ -469,16 +469,44 @@ SSSubState input_select_slot_choose(void)
     hosts_and_devices_eject(selected_device_slot);
     return SS_CHOOSE;
   case KCODE_ESCAPE:
-    state = HOSTS_AND_DEVICES;
+    state = SELECT_FILE;
     return SS_DONE;
-  case KCODE_RETURN:  // For Atari I think we need to ask for file mode after this, it's not in the main select_slot.c code.
+  case KCODE_RETURN: // For Atari I think we need to ask for file mode after this, it's not in the main select_slot.c code.
     selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    // Ask for mode.
+    screen_select_slot_mode();
+    k = input_select_slot_mode(&mode);
+    if (!k)
+    {
+      state = SELECT_FILE;
+    }
     return SS_DONE;
   default:
     return SS_CHOOSE;
   }
 }
 
+unsigned char input_select_slot_mode(char *mode)
+{
+  unsigned char k = 0;
+
+  while (k == 0)
+  {
+    k = input_ucase();
+
+    if (k == KCODE_ESCAPE)
+    {
+      return 0;
+    }
+
+    if ( k == 'W')
+    {
+      mode[0] = 2;
+    }
+    else
+      mode[0] = 1;
+  }
+}
 /*
  *  Handle inupt for the "show info" screen.
  *

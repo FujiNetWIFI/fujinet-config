@@ -470,6 +470,15 @@ void screen_select_slot(char *e)
   bar_show(DEVICES_START_MOUNT_Y);
 }
 
+void screen_select_slot_mode(void)
+{
+  screen_clear_line(21);
+  screen_puts(0,22,
+    CH_KEY_RETURN "Read Only"
+    CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "Read/Write"
+    CH_KEY_ESC "Abort");
+}
+
 void screen_select_slot_choose(void)
 {
 }
