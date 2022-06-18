@@ -33,6 +33,10 @@
 // Y position on screen where the device slots end.
 #define DEVICES_END_Y   (DEVICES_START_Y + NUM_DEVICE_SLOTS - 1)
 
+// When mounting an image the device list/drive slots are on the screen by themselves at a different location than when the hosts are also shown.
+#define DEVICES_START_MOUNT_Y   4
+#define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + NUM_DEVICE_SLOTS-1)
+
 // Y position on screen where the list of available wireless networks start.
 #define NETWORKS_START_Y    4
 

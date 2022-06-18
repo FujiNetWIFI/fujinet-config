@@ -355,6 +355,7 @@ SFSubState input_select_file_choose(void)
   unsigned char k;
   unsigned char y;
   unsigned char temp[30];
+
   if (input_handle_console_keys() == 0x03)
   {
     // Do we need a new substate here MOUNT_AND_BOOT for Atari?
@@ -429,8 +430,53 @@ SSSubState input_select_slot_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d,pos=%d,shs=%d", bar_get(), pos, selected_host_slot);
+  sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
   screen_debug(temp);
+
+  switch (k)
+  {
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+    bar_show(DEVICES_START_MOUNT_Y + (k - '1'));
+    selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    return SS_CHOOSE;
+  case 0x1C:
+  case '-':
+    // up
+    if (bar_get() > DEVICES_START_MOUNT_Y)
+    {
+      bar_up();
+    }
+    selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    return SS_CHOOSE;
+  case 0x1D:
+  case '=':
+    // down
+    if (bar_get() < DEVICES_END_MOUNT_Y)
+    {
+      bar_down();
+    }
+    selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    return SS_CHOOSE;
+  case 'E':
+    // Eject
+    hosts_and_devices_eject(selected_device_slot);
+    return SS_CHOOSE;
+  case KCODE_ESCAPE:
+    state = HOSTS_AND_DEVICES;
+    return SS_DONE;
+  case KCODE_RETURN:  // For Atari I think we need to ask for file mode after this, it's not in the main select_slot.c code.
+    selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    return SS_DONE;
+  default:
+    return SS_CHOOSE;
+  }
 }
 
 /*

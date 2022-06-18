@@ -465,9 +465,9 @@ void screen_select_slot(char *e)
   // gotoxy(0,0);
   // cprintf("%32s",e);
 
-  screen_hosts_and_devices_device_slots(3, &deviceSlots, &deviceEnabled);
+  screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
 
-  bar_show(3);
+  bar_show(DEVICES_START_MOUNT_Y);
 }
 
 void screen_select_slot_choose(void)
