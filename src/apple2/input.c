@@ -273,15 +273,17 @@ SSSubState input_select_slot_choose(void)
     case 'e':
       select_slot_eject(bar_get());
       return SS_CHOOSE;
+    case 'R':
+    case 'r':
     case KEY_RETURN:
-    // case KEY_SMART_V:
       selected_device_slot=bar_get();
       mode=0; // ?? read/write mode?
       return SS_DONE;
-    // case KEY_SMART_VI:
-    //   selected_device_slot=bar_get();
-    //   mode=2;
-    //   return SS_DONE;
+    case 'W':
+    case 'w':
+      selected_device_slot=bar_get();
+      mode=2;
+      return SS_DONE;
     case KEY_UP_ARROW:
     case KEY_LEFT_ARROW:
       bar_up();

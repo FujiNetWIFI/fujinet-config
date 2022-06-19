@@ -433,8 +433,9 @@ void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(3,STATUS_BAR); 
-  screen_print_menu("1-4"," SELECT SLOT\r\n ");
-  screen_print_menu("RETURN",":INSERT INTO SLOT\r\n ");
+  screen_print_menu("1-4"," SELECT SLOT OR USE ARROW KEYS\r\n ");
+  screen_print_menu("RETURN/R",":INSERT READ ONLY\r\n ");
+  screen_print_menu("W",":INSERT READ/WRITE\r\n ");
   screen_print_menu("ESC"," TO ABORT.");
 }
 
