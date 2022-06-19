@@ -306,10 +306,21 @@ HDSubState input_hosts_and_devices_devices(void)
     selected_device_slot = bar_get() - DEVICES_START_Y;
     return HD_DEVICES;
   case CH_CLR: // Clear
+    screen_clear_line(11);
     for (i = 0; i < NUM_DEVICE_SLOTS; i++)
     {
+      if ( i%2 )
+      {
+        screen_puts(4, 11, "EJECTING ALL");
+      }
+      else
+      {
+        screen_clear_line(11);
+      }
       hosts_and_devices_eject(i);
     }
+    screen_clear_line(11);
+    screen_puts(4, 11, "DRIVE SLOTS");
     return HD_DEVICES;
   case 0x1C:
   case '-':
