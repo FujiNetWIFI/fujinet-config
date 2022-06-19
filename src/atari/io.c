@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdio.h>
 #include <conio.h> // Used for interacting with the standard Atari 'console'
 #include "io.h"
 #include "globals.h"
@@ -16,6 +17,7 @@
 static NetConfig nc;
 static AdapterConfig adapterConfig;
 static SSIDInfo ssidInfo;
+NewDisk newDisk;
 
 // variable to hold various responses that we just need to return a char*.
 char response[512];
@@ -323,8 +325,44 @@ void io_boot(void)
 {
 }
 
+/*
+  case '1':
+    context->newDisk_ns = 720;
+    context->newDisk_sz = 128;
+  case '2':
+    context->newDisk_ns = 1040;
+    context->newDisk_sz = 128;
+  case '3':
+    context->newDisk_ns = 720;
+    context->newDisk_sz = 256;
+  case '4':
+    context->newDisk_ns = 1440;
+    context->newDisk_sz = 256;
+  case '5':
+    context->newDisk_ns = 2880;
+    context->newDisk_sz = 256;
+  case '6':
+    context->newDisk_ns = 5760;
+    context->newDisk_sz = 256;
+*/
+
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)
 {
+  newDisk.numSectors = 720;
+  newDisk.sectorSize = 128;
+  newDisk.hostSlot = selected_host_slot;
+  newDisk.deviceSlot = selected_device_slot;
+  deviceSlots[selected_device_slot].mode = mode;
+  strcpy(newDisk.filename, path);
+
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xE7; 
+  OS.dcb.dstats = 0x80;
+  OS.dcb.dbuf = &newDisk;
+  OS.dcb.dtimlo = 0xFE;
+  OS.dcb.dbyt = sizeof(newDisk);
+  OS.dcb.daux = 0;
+  siov();
 }
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)

@@ -12,9 +12,5 @@ Questions:
         or should they be blanked out first?
 
 
-SHOW_INFO (Config)
-    Main screen:        Done.
-    'C' - Reconnect:    Done.
-    'S' - Change ssid
-        Choose Existing:    Done.
-        Custom:             Done, with question
+
+Selectibg mode (r/w) on a new disk creation isn't working.

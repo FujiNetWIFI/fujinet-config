@@ -487,6 +487,7 @@ SSSubState input_select_slot_choose(void)
     // Ask for mode.
     screen_select_slot_mode();
     k = input_select_slot_mode(&mode);
+
     if (!k)
     {
       state = SELECT_FILE;
@@ -517,6 +518,7 @@ unsigned char input_select_slot_mode(char *mode)
     else
       mode[0] = 1;
   }
+  return 1;
 }
 /*
  *  Handle inupt for the "show info" screen.

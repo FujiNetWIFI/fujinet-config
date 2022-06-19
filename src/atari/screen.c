@@ -299,7 +299,6 @@ void screen_set_wifi(AdapterConfig *ac)
     x += 3;
   }
 
-  // show_line_nums();
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -455,7 +454,8 @@ void screen_select_slot(char *e)
 
   // sprintf("%32s","FILE DETAILS");
   sprintf(d, "%8s 20%02u-%02u-%02u %02u:%02u:%02u", "MTIME:", *e++, *e++, *e++, *e++, *e++, *e++);
-  screen_puts(0, 1, "FILE DETAILS");
+  screen_puts(0, 1, "FILE:");
+  screen_puts(0, 7, e);
   screen_puts(0, 2, d);
   // s=(unsigned long *)e; // Cast the next four bytes as a long integer.
   // sprintf(d, "%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
@@ -581,7 +581,6 @@ void screen_select_file_prev(void)
 void screen_select_file_display_entry(unsigned char y, char *e)
 {
   screen_puts(3, FILES_START_Y + y, e);
-  // show_line_nums();
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -618,6 +617,8 @@ void screen_select_file_new_name(void)
 
 void screen_select_file_new_creating(void)
 {
+  screen_clear();
+  screen_puts(3,0,"Creating File");
 }
 
 void screen_clear_line(unsigned char y)
