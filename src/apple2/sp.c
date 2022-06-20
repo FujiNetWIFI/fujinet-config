@@ -192,7 +192,7 @@ uint8_t sp_find_slot(void)
 {
   uint8_t s=0;
 
-  for (s=7; s-- > 0;)
+  for (s=7; s > 0; s--)
     {
       uint16_t a = 0xc000 + (s * 0x100);
       if ((PEEK(a+1) == 0x20) &&
