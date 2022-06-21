@@ -3,6 +3,12 @@
 #include "mount_and_boot.h"
 #include "io.h"
 #include "globals.h"
+#include "screen.h"
+#include "die.h"
+
+char text_mounting_host_slot_X[] = "MOUNTING HOST SLOT X";
+char text_mounting_device_slot_X[] = "MOUNTING DEV SLOT X ";
+char text_booting[] = "SUCCESSFUL! BOOTING ";
 
 void mount_and_boot_all_hosts(void)
 {
@@ -15,8 +21,8 @@ void mount_and_boot_all_hosts(void)
     {
         if (deviceSlots[i].hostSlot != 0xFF)
         {
-            // text_mounting_host_slot_X[19] = i + 0x31; // update status msg.
-            // screen_puts(0, 21, text_mounting_host_slot_X);
+            text_mounting_host_slot_X[19] = i + 0x31; // update status msg.
+            screen_puts(0, 21, text_mounting_host_slot_X);
             while (retry > 0)
             {
                 io_mount_host_slot(i);
@@ -26,15 +32,15 @@ void mount_and_boot_all_hosts(void)
                     break;
             }
 
-            /*
-            if (fuji_sio_error())
+            if (io_error())
             {
-              error(ERROR_MOUNTING_HOST_SLOT);
+              //error(ERROR_MOUNTING_HOST_SLOT);
+              screen_clear_line(21);
+              screen_puts(0,21,"ERROR MOUNTING HOST SLOT");
               wait_a_moment();
-              context->state = DISKULATOR_HOSTS;
+              state = HOSTS_AND_DEVICES;
               return;
             }
-            */
         }
     }
 }
@@ -51,8 +57,8 @@ void mount_and_boot_all_devices(void)
     {
         if (deviceSlots[i].hostSlot != 0xFF)
         {
-            // text_mounting_device_slot_X[18] = i + 0x31; // update status msg
-            // screen_puts(0, 21, text_mounting_device_slot_X);
+            text_mounting_device_slot_X[18] = i + 0x31; // update status msg
+            screen_puts(0, 21, text_mounting_device_slot_X);
 
             while (retry > 0)
             {
@@ -64,15 +70,16 @@ void mount_and_boot_all_devices(void)
                     break;
             }
 
-            /*
-            if (fuji_sio_error())
+            if (io_error())
             {
-              error(ERROR_MOUNTING_DEVICE_SLOT);
+              //error(ERROR_MOUNTING_DEVICE_SLOT);
+              screen_clear_line(21);
+              screen_puts(0,21,"ERROR MOUNTING DEVICE SLOT");
+
               wait_a_moment();
-              context->state = DISKULATOR_HOSTS;
+              state = HOSTS_AND_DEVICES;
               return;
             }
-            */
         }
     }
 
@@ -81,10 +88,26 @@ void mount_and_boot_all_devices(void)
 
 void mount_and_boot(void)
 {
+    screen_mount_and_boot();
+    
     io_get_device_slots(&deviceSlots[0]);
+    if ( io_error() )
+    {
+        // error_fatal
+    }
+
     io_get_host_slots(&hostSlots[0]);
+    if ( io_error() )
+    {
+        // error_fatal
+    }
+
+    screen_clear();
+    screen_puts(0, 3, "MOUNT AND BOOT");
+
     mount_and_boot_all_hosts();
     mount_and_boot_all_devices();
+
     io_set_boot_config(0);
     cold_start();
 }

@@ -273,6 +273,11 @@ void font_init()
   OS.chbas = FONT_MEMORY >> 8; // use the charset
 }
 
+void screen_mount_and_boot()
+{
+  screen_dlist_mount_and_boot();
+}
+
 void screen_set_wifi(AdapterConfig *ac)
 {
   char mactmp[3];
@@ -880,6 +885,12 @@ void screen_dlist_wifi(void)
   POKE(DISPLAY_LIST + 0x0b, 2);
   POKE(DISPLAY_LIST + 0x1b, 6);
   POKE(DISPLAY_LIST + 0x1c, 6);
+}
+
+void screen_dlist_mount_and_boot(void)
+{
+  // Same as wifi layout
+  screen_dlist_wifi();
 }
 
 void screen_connect_wifi(NetConfig *nc)
