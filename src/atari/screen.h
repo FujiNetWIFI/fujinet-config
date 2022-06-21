@@ -34,7 +34,7 @@ void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf);
 void itoa_hex(unsigned char val, char *buf);
 void screen_clear(void);
 void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
-//void screen_set_wifi_display_mac_address(AdapterConfig *adapterConfig);
+// void screen_set_wifi_display_mac_address(AdapterConfig *adapterConfig);
 
 void screen_select_slot_mode(void);
 void font_init();

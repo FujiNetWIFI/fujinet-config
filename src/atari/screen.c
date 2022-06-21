@@ -1,4 +1,5 @@
 #ifdef BUILD_ATARI
+
 /**
  * FujiNet Configuration Program: screen functions
  * The screen functions are a common set of graphics and text string functions to display information to the video output device.
@@ -298,7 +299,6 @@ void screen_set_wifi(AdapterConfig *ac)
     screen_puts(x, 2, mactmp);
     x += 3;
   }
-
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -473,10 +473,8 @@ void screen_select_slot(char *e)
 void screen_select_slot_mode(void)
 {
   screen_clear_line(21);
-  screen_puts(0,22,
-    CH_KEY_RETURN "Read Only"
-    CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "Read/Write"
-    CH_KEY_ESC "Abort");
+  screen_puts(0, 22,
+              CH_KEY_RETURN "Read Only" CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "Read/Write" CH_KEY_ESC "Abort");
 }
 
 void screen_select_slot_choose(void)
@@ -618,7 +616,7 @@ void screen_select_file_new_name(void)
 void screen_select_file_new_creating(void)
 {
   screen_clear();
-  screen_puts(3,0,"Creating File");
+  screen_puts(3, 0, "Creating File");
 }
 
 void screen_clear_line(unsigned char y)
@@ -632,8 +630,6 @@ void screen_error(const char *msg)
   screen_clear_line(24);
   screen_puts(0, 24, msg);
 }
-
-
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {

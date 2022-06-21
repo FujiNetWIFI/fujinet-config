@@ -53,5 +53,6 @@ DHSubState input_destination_host_slot_choose(void);
 unsigned char input_handle_joystick(void);
 
 unsigned char input_select_slot_mode(char *mode);
+
 #endif /* INPUT_H */
 #endif /* BUILD_ATARI */

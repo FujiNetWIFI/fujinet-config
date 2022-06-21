@@ -1,4 +1,5 @@
 #ifdef BUILD_ATARI
+
 /**
  * Input routines
  */
@@ -14,6 +15,7 @@
 #include "bar.h"
 #include "screen.h"
 #include "globals.h"
+#include "mount_and_boot.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../set_wifi.h"
@@ -209,9 +211,9 @@ HDSubState input_hosts_and_devices_hosts(void)
   unsigned char y;
   char temp[20];
 
-  if (input_handle_console_keys() == 0x03)
+  if (input_handle_console_keys() == 0x03) // "Option" key
   {
-    // Do we need a new substate here MOUNT_AND_BOOT for Atari?
+    mount_and_boot();
   }
 
   k = input_ucase();
@@ -309,7 +311,7 @@ HDSubState input_hosts_and_devices_devices(void)
     screen_clear_line(11);
     for (i = 0; i < NUM_DEVICE_SLOTS; i++)
     {
-      if ( i%2 )
+      if (i % 2)
       {
         screen_puts(4, 11, "EJECTING ALL");
       }
@@ -511,7 +513,7 @@ unsigned char input_select_slot_mode(char *mode)
       return 0;
     }
 
-    if ( k == 'W')
+    if (k == 'W')
     {
       mode[0] = 2;
     }

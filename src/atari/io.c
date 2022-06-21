@@ -179,13 +179,13 @@ void io_put_host_slots(HostSlot *h)
 
 void io_put_device_slots(DeviceSlot *d)
 {
-    set_sio_defaults();
-    OS.dcb.dcomnd = 0xF1;
-    OS.dcb.dstats = 0x80;
-    OS.dcb.dbuf = &deviceSlots;
-    OS.dcb.dbyt = sizeof(deviceSlots);
-    OS.dcb.daux = 0;
-    siov();
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xF1;
+  OS.dcb.dstats = 0x80;
+  OS.dcb.dbuf = &deviceSlots;
+  OS.dcb.dbyt = sizeof(deviceSlots);
+  OS.dcb.daux = 0;
+  siov();
 }
 
 void io_mount_host_slot(unsigned char hs)
@@ -264,15 +264,15 @@ void io_set_directory_position(DirectoryPosition pos)
 
 void io_set_device_filename(unsigned char ds, char *e)
 {
-  OS.dcb.ddevic=0x70;
-  OS.dcb.dunit=1;
-  OS.dcb.dcomnd=0xE2;
-  OS.dcb.dstats=0x80;
-  OS.dcb.dbuf=e;
-  OS.dcb.dtimlo=0x0F;
-  OS.dcb.dbyt=256;
-  OS.dcb.daux1=ds;
-  OS.dcb.daux2=0;
+  OS.dcb.ddevic = 0x70;
+  OS.dcb.dunit = 1;
+  OS.dcb.dcomnd = 0xE2;
+  OS.dcb.dstats = 0x80;
+  OS.dcb.dbuf = e;
+  OS.dcb.dtimlo = 0x0F;
+  OS.dcb.dbyt = 256;
+  OS.dcb.daux1 = ds;
+  OS.dcb.daux2 = 0;
   siov();
 }
 
@@ -294,21 +294,27 @@ char *io_get_device_filename(unsigned char slot)
 
 void io_set_boot_config(unsigned char toggle)
 {
+  OS.dcb.dcomnd = 0xD9;
+  OS.dcb.dstats = 0x00;
+  OS.dcb.dbuf = NULL;
+  OS.dcb.dtimlo = 0x0f;
+  OS.dcb.dbyt = 0;
+  OS.dcb.daux1 = toggle;
+  siov();
 }
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
-    set_sio_defaults();
-    OS.dcb.dcomnd = 0xF8;
-    OS.dcb.dstats = 0x00;
-    OS.dcb.dbuf = NULL;
-    OS.dcb.dbyt = 0;
-    OS.dcb.dtimlo = 0xFE; // Due to ATX support.
-    OS.dcb.daux1 = ds;
-    OS.dcb.daux2 = mode;
-    siov();
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xF8;
+  OS.dcb.dstats = 0x00;
+  OS.dcb.dbuf = NULL;
+  OS.dcb.dbyt = 0;
+  OS.dcb.dtimlo = 0xFE; // Due to ATX support.
+  OS.dcb.daux1 = ds;
+  OS.dcb.daux2 = mode;
+  siov();
 }
-
 
 void io_umount_disk_image(unsigned char ds)
 {
@@ -356,7 +362,7 @@ void io_create_new(unsigned char selected_host_slot, unsigned char selected_devi
   strcpy(newDisk.filename, path);
 
   set_sio_defaults();
-  OS.dcb.dcomnd = 0xE7; 
+  OS.dcb.dcomnd = 0xE7;
   OS.dcb.dstats = 0x80;
   OS.dcb.dbuf = &newDisk;
   OS.dcb.dtimlo = 0xFE;
