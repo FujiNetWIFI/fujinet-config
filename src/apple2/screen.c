@@ -81,6 +81,7 @@ void screen_putlcc(char c)
       modifier = 64;
     break;
   case APPLE_IIGS: /* Apple IIgs                  */
+  case APPLE_IIIEM: /* Apple /// (emulation with lowercase) */
     break;
   case APPLE_II:
   default:
