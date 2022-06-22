@@ -357,26 +357,35 @@ unsigned char io_device_slot_to_device(unsigned char ds)
 
 void io_boot(void)
 {
-  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
-
   int i;
-  
+  char ostype;
+
+  ostype = get_ostype() & 0xF0;
   clrscr();
   cprintf("BOOTING...");
 
-  POKE(0x100,0xEE);
-  POKE(0x101,0xF4);
-  POKE(0x102,0x03);
-  POKE(0x103,0x78);
-  POKE(0x104,0xAD);
-  POKE(0x105,0x82);
-  POKE(0x106,0xC0);
-  POKE(0x107,0x6C);
-  POKE(0x108,0xFC);
-  POKE(0x109,0xFF);
+  if (ostype == APPLE_IIIEM)
+  {
+    asm("STA $C082");  // disable language card (Titan3+2)
+    asm("LDA #$77");   // enable A3 primary rom
+    asm("STA $FFDF");
+    asm("JMP $F4EE");  // jmp to A3 reset entry
+  }
+  else  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
+  {
+    POKE(0x100,0xEE);
+    POKE(0x101,0xF4);
+    POKE(0x102,0x03);
+    POKE(0x103,0x78);
+    POKE(0x104,0xAD);
+    POKE(0x105,0x82);
+    POKE(0x106,0xC0);
+    POKE(0x107,0x6C);
+    POKE(0x108,0xFC);
+    POKE(0x109,0xFF);
 
-  asm("JMP $0100");
-  
+    asm("JMP $0100");
+  }
 }
 
 #endif /* BUILD_APPLE2 */

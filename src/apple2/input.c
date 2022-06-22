@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <peekpoke.h>
 #include "globals.h"
 #include "input.h"
 #include "bar.h"
@@ -72,6 +73,9 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 {
   char i;
   char a;
+  char ostype;
+
+  ostype = get_ostype() & 0xF0;
 
   i = o; // index into array and y-coordinate
   // x += o;
@@ -84,6 +88,10 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cputc('_'); // turn on cursor - does not have effect on Apple IIc
     gotox(x + i);
     a = cgetc();
+    if (ostype == APPLE_IIIEM)   // check for Apple3 lowercase
+      if (!(PEEK(0xc008)&0x02) && (PEEK(0xc008)&0x08)) // test for shift or alpha lock key not pressed
+        if ((a > 63) && (a < 96))
+          a += 32;
     switch (a)
     {
     case KEY_LEFT_ARROW:
