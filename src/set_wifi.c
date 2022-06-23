@@ -103,7 +103,6 @@ void set_wifi_password(void)
 void set_wifi_scan(void)
 {
   char i;
-  
   screen_set_wifi(io_get_adapter_config());
 
 
@@ -120,8 +119,7 @@ void set_wifi_scan(void)
 
   for (i=0;i<numNetworks;i++)
     {
-      SSIDInfo *s = io_get_scan_result(i);
-      screen_set_wifi_display_ssid(i,s);
+      screen_set_wifi_display_ssid(i,io_get_scan_result(i));
     }
 
   ws_subState=WS_SELECT;

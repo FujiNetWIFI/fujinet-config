@@ -76,14 +76,14 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
 void input_line_set_wifi_custom(char *c)
 {
-  bar_show(18);
-  _screen_input(2, 18, c, 32);
+  bar_show(20);
+  _screen_input(2, 20, c, 32);
 }
 
 void input_line_set_wifi_password(char *c)
 {
-  bar_show(19);
-  _screen_input(2, 19, c, 32);
+  //bar_show(19);
+  _screen_input(0, 21, c, 32);
 }
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)

@@ -197,6 +197,8 @@ void set_cursor(unsigned char x, unsigned char y)
   {
     // 2x20
     // 20x40
+    // 2x20
+    // 2x40
     if (y < 2)
     {
       cursor_ptr = video_ptr + x + (y * 20);
@@ -250,6 +252,22 @@ void screen_append(char *s)
   }
 }
 
+void xx(void)
+{
+  unsigned char i;
+  screen_clear();
+  set_cursor(0, 0);
+
+  for (i = 0; i < 255; i++)
+  {
+    put_char(i);
+  }
+  while (!kbhit())
+  {
+  }
+  cgetc();
+}
+
 void screen_debug(char *message)
 {
   screen_clear_line(24);
@@ -288,8 +306,9 @@ void screen_set_wifi(AdapterConfig *ac)
   screen_clear();
   bar_clear(false);
   set_active_screen(SCREEN_CONNECT_WIFI);
+  show_line_nums();
   screen_puts(0, 0, "WELCOME TO #FUJINET!");
-  screen_puts(0, 21, "SCANNING NETWORKS...");
+  screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
   screen_puts(15, 2, ":");
   screen_puts(18, 2, ":");
@@ -340,7 +359,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   screen_clear_line(numNetworks + NETWORKS_START_Y);
   screen_puts(2, NETWORKS_START_Y + numNetworks, "<Enter a specific SSID>");
 
-  screen_puts(0, 21, " SELECT NET, S SKIP "
+  screen_puts(0, 22, " SELECT NET, S SKIP "
                      "   ESC TO RE-SCAN   ");
 
   bar_show(NETWORKS_START_Y);
@@ -348,14 +367,15 @@ void screen_set_wifi_select_network(unsigned char nn)
 
 void screen_set_wifi_custom(void)
 {
-  screen_puts(0, 21, " ENTER NETWORK NAME "
+  screen_clear_line(20);
+  screen_puts(0, 22, " ENTER NETWORK NAME "
                      "  AND PRESS return  ");
 }
 
 void screen_set_wifi_password(void)
 {
-  screen_clear_line(21);
-  screen_puts(3, 21, "ENTER PASSWORD");
+  screen_clear_line(22);
+  screen_puts(3, 22, "   ENTER PASSWORD");
 }
 
 void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
@@ -648,6 +668,13 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 
   set_active_screen(SCREEN_HOSTS_AND_DEVICES);
   screen_puts(3, 0, "TNFS HOST LIST");
+  // A = 41
+  // INV A = C1
+  // INV A = A1 in this
+  // screen_puts(0,2, "\x07" " xx" );
+  xx();
+  // POKE(cursor_ptr++, CSI_A+32);
+
   screen_puts(4, 11, "DRIVE SLOTS");
 
   while (retry > 0)
