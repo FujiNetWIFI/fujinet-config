@@ -22,7 +22,7 @@
 unsigned char *video_ptr;  // a pointer to the memory address containing the screen contents
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
 char _visibleEntries;
-
+extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
 
@@ -531,8 +531,17 @@ void screen_select_file(void)
 
   screen_puts(4, 0, "DISK IMAGES");
 
+  if ( copy_mode == false )
+  {
+
   screen_puts(0, 21,
-              CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter");
+              CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "opy");
+  }
+  else
+  {
+  screen_puts(0, 21,
+              CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "Do It!");
+  }
   screen_puts(0, 22,
               CH_KEY_RIGHT CH_KEY_RETURN "Choose" CH_KEY_OPTION "Boot" CH_KEY_ESC "Abort");
 }
@@ -672,7 +681,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
   // INV A = C1
   // INV A = A1 in this
   // screen_puts(0,2, "\x07" " xx" );
-  xx();
+  //xx();
   // POKE(cursor_ptr++, CSI_A+32);
 
   screen_puts(4, 11, "DRIVE SLOTS");
@@ -864,14 +873,28 @@ void screen_init(void)
 
 void screen_destination_host_slot(char *h, char *p)
 {
+  screen_clear();
+  screen_puts(0,22,
+	      CH_KEY_1TO8 "Slot"
+	      CH_KEY_RETURN "Select"
+	      CH_KEY_ESC "Abort");
+
+  screen_puts(0,18,h);
+  screen_puts(0,19,p);
+
+  screen_puts(0,0,"COPY TO HOST SLOT");
+  bar_show(HOSTS_START_Y);
+  
 }
 
 void screen_destination_host_slot_choose(void)
 {
+  //show_line_nums();
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+  show_line_nums();
 }
 
 void screen_dlist_select_file(void)

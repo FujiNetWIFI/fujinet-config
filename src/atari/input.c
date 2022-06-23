@@ -21,6 +21,8 @@
 #include "../set_wifi.h"
 
 unsigned char selected_network;
+extern bool copy_mode;
+extern unsigned char copy_host_slot;
 
 unsigned char input()
 {
@@ -82,7 +84,7 @@ void input_line_set_wifi_custom(char *c)
 
 void input_line_set_wifi_password(char *c)
 {
-  //bar_show(19);
+  // bar_show(19);
   _screen_input(0, 21, c, 32);
 }
 
@@ -409,7 +411,7 @@ SFSubState input_select_file_choose(void)
       return SF_ADVANCE_FOLDER;
     else
     {
-      state = SELECT_SLOT;
+      // state = SELECT_SLOT;
       return SF_DONE;
     }
   // Have to try these on real atari, see if they work.
@@ -426,6 +428,17 @@ SFSubState input_select_file_choose(void)
     return SF_FILTER;
   case 'N':
     return SF_NEW;
+  case 'C':
+    if ( copy_mode == true ) {
+      return SF_DONE;
+    }
+    else
+    {
+      pos = bar_get() - FILES_START_Y;
+      select_file_set_source_filename();
+      copy_host_slot=selected_host_slot;
+      return SF_COPY;
+    }
   default:
     return SF_CHOOSE;
   }
@@ -555,6 +568,56 @@ SISubState input_show_info(void)
 
 DHSubState input_destination_host_slot_choose(void)
 {
+  // Up in the hosts section.
+  unsigned char k;
+  char temp[20];
+
+  k = input_ucase();
+
+  sprintf(temp, "y=%d", bar_get());
+  screen_debug(temp);
+
+  switch (k)
+  {
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+    bar_show(HOSTS_START_Y + (k - '1'));
+    selected_host_slot = bar_get() - HOSTS_START_Y;
+    return DH_CHOOSE;
+  case 0x1C:
+  case '-':
+    // up
+    if (bar_get() > HOSTS_START_Y)
+    {
+      bar_up();
+    }
+    selected_host_slot = bar_get() - HOSTS_START_Y;
+    return DH_CHOOSE;
+  case 0x1D:
+  case '=':
+    // down
+    if (bar_get() < HOSTS_END_Y)
+    {
+      bar_down();
+    }
+    selected_host_slot = bar_get() - HOSTS_START_Y;
+    return DH_CHOOSE;
+  case KCODE_RETURN:
+    selected_host_slot = bar_get() - HOSTS_START_Y;
+    copy_mode = true;
+    return DH_DONE;
+  case KCODE_ESCAPE:
+    state = HOSTS_AND_DEVICES;
+    return DH_ABORT;
+  default:
+    return DH_CHOOSE;
+  }
 }
 
 #endif

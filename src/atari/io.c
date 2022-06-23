@@ -400,8 +400,36 @@ void io_disable_device(unsigned char d)
 {
 }
 
+/**
+ * NOTE: On the Fuji, command 0xD8 (copy file) expects the slots to be 1-8, not 0-7 like most things.
+ * That's why we add one, since config is tracking the slots as 0-7
+ */
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
+  char temp[20];
+  sprintf(temp, "ss=%d, ds=%d", source_slot, destination_slot);
+  screen_debug(temp);
+  while (!kbhit())
+  {
+  }
+  cgetc();
+  screen_debug(copySpec);
+  while (!kbhit())
+  {
+  }
+  cgetc();
+
+  OS.dcb.ddevic=0x70;
+  OS.dcb.dunit=1;
+  OS.dcb.dcomnd=0xD8;
+  OS.dcb.dstats=0x80;
+  OS.dcb.dbuf=&copySpec;
+  OS.dcb.dtimlo=0xFE; // Max timeout
+  OS.dcb.dbyt=256;
+  OS.dcb.daux1=source_slot+1;
+  OS.dcb.daux2=destination_slot+1;
+  siov();
+
 }
 
 unsigned char io_device_slot_to_device(unsigned char ds)
