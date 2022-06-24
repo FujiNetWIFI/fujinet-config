@@ -1,5 +1,3 @@
-When jumping between hosts and devices with tab key, it remembers where you were and puts you there. check if that was the same in other config.
-
 Maybe have common .h files at the top-level? For example, everyone has to have the same function definitions in screen.h (its like an interface), 
 so why not make that common.. then at the individual system folder level each screen.c would include "../screen.h", 
 and then their own (if necessary), such as "screen_atari.h" with functions only they need.
@@ -11,6 +9,7 @@ Questions:
     entering new ssid - should the input lines for the ssid and password be defaulted to the current ones (they are the input params to the input func)
         or should they be blanked out first?
 
+Selecting mode (r/w) on a new disk creation isn't working.
 
-
-Selectibg mode (r/w) on a new disk creation isn't working.
+Aborting a copy from the "COPY HOST TO HOST SLOT" screen - on original config you go back to the disk images for selected host. Check if 
+I'm just setting state wrong, or if this version just doesn't have a path back there.

@@ -13,11 +13,12 @@
 typedef enum
 {
    SCREEN_HOSTS_AND_DEVICES,
-   SCREEN_INFO,
-   SCREEN_CONNECT_WIFI,
+   SCREEN_SHOW_INFO,
+   SCREEN_SET_WIFI,
    SCREEN_SELECT_FILE,
    SCREEN_SELECT_SLOT,
-   SCREEN_MOUNT_AND_BOOT
+   SCREEN_MOUNT_AND_BOOT,
+   SCREEN_CONNECT_WIFI
 } _screen;
 
 #define screen_input(x, y, s) _screen_input((x), (y), (s), sizeof(s))
@@ -29,7 +30,7 @@ void screen_dlist_connect_wifi(void);
 void screen_dlist_hosts_and_devices(void);
 void screen_dlist_show_info(void);
 void screen_dlist_select_file(void);
-void screen_dlist_wifi(void);
+void screen_dlist_set_wifi(void);
 void screen_dlist_mount_and_boot(void);
 void screen_dlist_select_slot(void);
 void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf);

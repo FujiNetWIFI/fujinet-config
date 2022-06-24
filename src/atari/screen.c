@@ -68,6 +68,9 @@ void config_dlist =
         DISPLAY_LIST          // 0x1f, 0x20  Memory address containing the entire display list.
 };
 
+// Patch to the character set to add things like the folder icon and the wifi-signal-strength bars.
+// Each new character is 8-bytes.
+//
 unsigned char fontPatch[48] = {
     0, 0, 0, 0, 0, 0, 3, 51,
     0, 0, 3, 3, 51, 51, 51, 51,
@@ -151,7 +154,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 320 + 40 + x + ((y - 12) * 40); // * 20, rest of the the lines are 40 column, add 40 (1st 2), 320 (next 8 of 40), 40 (next 2 of 20)
     }
   }
-  else if (active_screen == SCREEN_INFO)
+  else if (active_screen == SCREEN_SHOW_INFO)
   {
     // 2x20
     // 3x40
@@ -193,7 +196,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 20 + x + ((y - 1) * 40);
     }
   }
-  else if (active_screen == SCREEN_CONNECT_WIFI)
+  else if (active_screen == SCREEN_SET_WIFI)
   {
     // 2x20
     // 20x40
@@ -216,8 +219,67 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
     }
   }
+  else if ( active_screen == SCREEN_CONNECT_WIFI )
+  {
+    // 2x20
+    // 20x40
+    // 2x20
+    if (y < 2)
+    {
+      cursor_ptr = video_ptr + x + (y * 20);
+    }
+    else if (y < 22)
+    {
+      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
+    }
+    else if (y < 24)
+    {
+      cursor_ptr = video_ptr + 40 + 800 + ((y - 22) * 20);
+    }
+    else
+    {
+      cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
+    }
+  }
+
+  else if ( active_screen == SCREEN_MOUNT_AND_BOOT )
+  {
+    // 2x20
+    // 8x40
+    // 2x20
+    // 10x40
+    // 2x20
+    // rest 40
+    if (y < 2)
+    {
+      cursor_ptr = video_ptr + x + (y * 20); 
+    }
+    else if (y < 10)
+    {
+      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40); 
+    }
+    else if (y < 12)
+    {
+      cursor_ptr = video_ptr + 40 + 320 + x + ((y - 10) * 20); 
+    }
+    else if ( y < 22)
+    {
+      cursor_ptr = video_ptr + 40 + 320 + 40 + ((y-12) * 40);
+    }
+    else if ( y < 24)
+    {
+      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + ((y - 22) * 20); 
+    }
+    else
+    {
+      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + 40 + ((y - 24) * 40); 
+    }
+
+
+  }
   else
   {
+    // Default to all 40 character lines.
     cursor_ptr = video_ptr + x + (y * 40);
   }
 }
@@ -294,6 +356,10 @@ void font_init()
 void screen_mount_and_boot()
 {
   screen_dlist_mount_and_boot();
+  set_active_screen(SCREEN_MOUNT_AND_BOOT);
+  screen_clear();
+  show_line_nums();
+
 }
 
 void screen_set_wifi(AdapterConfig *ac)
@@ -302,11 +368,10 @@ void screen_set_wifi(AdapterConfig *ac)
   unsigned char i = 0;
   unsigned char x = 13;
 
-  screen_dlist_wifi();
+  screen_dlist_set_wifi();
+  set_active_screen(SCREEN_SET_WIFI);
   screen_clear();
   bar_clear(false);
-  set_active_screen(SCREEN_CONNECT_WIFI);
-  show_line_nums();
   screen_puts(0, 0, "WELCOME TO #FUJINET!");
   screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
@@ -433,7 +498,7 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
   unsigned char i;
   screen_dlist_show_info();
-  set_active_screen(SCREEN_INFO);
+  set_active_screen(SCREEN_SHOW_INFO);
   screen_clear();
   bar_clear(false);
 
@@ -524,23 +589,22 @@ void screen_select_slot_build_eos_directory_creating(void)
 
 void screen_select_file(void)
 {
-  set_active_screen(SCREEN_SELECT_FILE);
   screen_dlist_select_file();
+  set_active_screen(SCREEN_SELECT_FILE);
   screen_clear();
   bar_clear(false);
 
   screen_puts(4, 0, "DISK IMAGES");
 
-  if ( copy_mode == false )
+  if (copy_mode == false)
   {
-
-  screen_puts(0, 21,
-              CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "opy");
+    screen_puts(0, 21,
+                CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "opy");
   }
   else
   {
-  screen_puts(0, 21,
-              CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "Do It!");
+    screen_puts(0, 21,
+                CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "Do It!");
   }
   screen_puts(0, 22,
               CH_KEY_RIGHT CH_KEY_RETURN "Choose" CH_KEY_OPTION "Boot" CH_KEY_ESC "Abort");
@@ -671,17 +735,17 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
   unsigned char i;
 
   screen_dlist_hosts_and_devices();
+  set_active_screen(SCREEN_HOSTS_AND_DEVICES);
 
   screen_clear();
   bar_clear(false);
 
-  set_active_screen(SCREEN_HOSTS_AND_DEVICES);
   screen_puts(3, 0, "TNFS HOST LIST");
   // A = 41
   // INV A = C1
   // INV A = A1 in this
   // screen_puts(0,2, "\x07" " xx" );
-  //xx();
+  // xx();
   // POKE(cursor_ptr++, CSI_A+32);
 
   screen_puts(4, 11, "DRIVE SLOTS");
@@ -874,22 +938,19 @@ void screen_init(void)
 void screen_destination_host_slot(char *h, char *p)
 {
   screen_clear();
-  screen_puts(0,22,
-	      CH_KEY_1TO8 "Slot"
-	      CH_KEY_RETURN "Select"
-	      CH_KEY_ESC "Abort");
+  screen_puts(0, 22,
+              CH_KEY_1TO8 "Slot" CH_KEY_RETURN "Select" CH_KEY_ESC "Abort");
 
-  screen_puts(0,18,h);
-  screen_puts(0,19,p);
+  screen_puts(0, 18, h);
+  screen_puts(0, 19, p);
 
-  screen_puts(0,0,"COPY TO HOST SLOT");
+  screen_puts(0, 0, "COPY TO HOST SLOT");
   bar_show(HOSTS_START_Y);
-  
 }
 
 void screen_destination_host_slot_choose(void)
 {
-  //show_line_nums();
+  // show_line_nums();
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
@@ -929,7 +990,7 @@ void screen_dlist_show_info(void)
   POKE(DISPLAY_LIST + 0x10, 2);
 }
 
-void screen_dlist_wifi(void)
+void screen_dlist_set_wifi(void)
 {
   POKE(DISPLAY_LIST + 0x0a, 2);
   POKE(DISPLAY_LIST + 0x0b, 2);
@@ -940,14 +1001,14 @@ void screen_dlist_wifi(void)
 void screen_dlist_mount_and_boot(void)
 {
   // Same as wifi layout
-  screen_dlist_wifi();
+  screen_dlist_set_wifi();
 }
 
 void screen_connect_wifi(NetConfig *nc)
 {
   screen_dlist_show_info();
-  screen_dlist_wifi();
-
+  screen_dlist_set_wifi();
+  set_active_screen(SCREEN_CONNECT_WIFI);
   screen_clear();
   bar_clear(false);
 
