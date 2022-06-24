@@ -51,3 +51,4 @@ dist/rsniff.com
 config
 config
 .vscode/settings.json
+.vscode/c_cpp_properties.json
