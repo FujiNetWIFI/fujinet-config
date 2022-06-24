@@ -9,7 +9,20 @@ Questions:
     entering new ssid - should the input lines for the ssid and password be defaulted to the current ones (they are the input params to the input func)
         or should they be blanked out first?
 
-Selecting mode (r/w) on a new disk creation isn't working.
 
-Aborting a copy from the "COPY HOST TO HOST SLOT" screen - on original config you go back to the disk images for selected host. Check if 
-I'm just setting state wrong, or if this version just doesn't have a path back there.
+TO DO:
+    Selecting mode (r/w) on a new disk creation isn't working.
+
+    Aborting a copy from the "COPY HOST TO HOST SLOT" screen - on original config you go back to the disk images for selected host. Check if 
+    I'm just setting state wrong, or if this version just doesn't have a path back there.
+
+    screen_select_slot - fix/finish the file details
+
+    implement screen_select_file_display_long_filename()
+    
+    implement screen_select_file_clear_long_filename()
+
+    custom new file screens/input/io
+
+    implement screen_hosts_and_devices_devices_clear_all()
+        Already did eject loop in input_hosts_and_devices_devices(), move it to the proper place.

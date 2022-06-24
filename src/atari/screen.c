@@ -182,7 +182,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 160 + x + ((y - 7) * 40);
     }
   }
-  // Right now these two are the same, decide whether to break apart or not..
+  // Right now these two are the same, break apart in future if they start to differ.
   else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT)
   {
     // 1x20
@@ -219,11 +219,12 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
     }
   }
-  else if ( active_screen == SCREEN_CONNECT_WIFI )
+  else if (active_screen == SCREEN_CONNECT_WIFI)
   {
     // 2x20
     // 20x40
     // 2x20
+    // rest 40
     if (y < 2)
     {
       cursor_ptr = video_ptr + x + (y * 20);
@@ -241,8 +242,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
     }
   }
-
-  else if ( active_screen == SCREEN_MOUNT_AND_BOOT )
+  else if (active_screen == SCREEN_MOUNT_AND_BOOT)
   {
     // 2x20
     // 8x40
@@ -252,30 +252,28 @@ void set_cursor(unsigned char x, unsigned char y)
     // rest 40
     if (y < 2)
     {
-      cursor_ptr = video_ptr + x + (y * 20); 
+      cursor_ptr = video_ptr + x + (y * 20);
     }
     else if (y < 10)
     {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40); 
+      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
     }
     else if (y < 12)
     {
-      cursor_ptr = video_ptr + 40 + 320 + x + ((y - 10) * 20); 
+      cursor_ptr = video_ptr + 40 + 320 + x + ((y - 10) * 20);
     }
-    else if ( y < 22)
+    else if (y < 22)
     {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + ((y-12) * 40);
+      cursor_ptr = video_ptr + 40 + 320 + 40 + ((y - 12) * 40);
     }
-    else if ( y < 24)
+    else if (y < 24)
     {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + ((y - 22) * 20); 
+      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + ((y - 22) * 20);
     }
     else
     {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + 40 + ((y - 24) * 40); 
+      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + 40 + ((y - 24) * 40);
     }
-
-
   }
   else
   {
@@ -359,7 +357,6 @@ void screen_mount_and_boot()
   set_active_screen(SCREEN_MOUNT_AND_BOOT);
   screen_clear();
   show_line_nums();
-
 }
 
 void screen_set_wifi(AdapterConfig *ac)
@@ -793,7 +790,6 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
     cold_start();
   }
 
-  // FER
   screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
 }
 
