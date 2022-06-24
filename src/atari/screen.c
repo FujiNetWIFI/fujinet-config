@@ -819,6 +819,9 @@ void screen_hosts_and_devices_devices(void)
   screen_clear_line(22);
   screen_clear_line(23);
 
+  screen_clear_line(11);
+  screen_puts(4, 11, "DRIVE SLOTS");
+
   screen_puts(3, 22,
               CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_LABEL_L CH_INV_C CH_INV_L CH_INV_E CH_INV_A CH_INV_R CH_KEY_LABEL_R "All Slots");
   screen_puts(3, 23,
@@ -878,6 +881,8 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
+    screen_clear_line(11);
+    screen_puts(0, 11, "EJECTING ALL.. WAIT");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -901,6 +906,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   char tmp[2] = {0, 0};
   tmp[0] = ds + '1';
 
+  bar_show(DEVICES_START_Y + ds);
   screen_clear_line(DEVICES_START_Y + ds);
   screen_puts(2, DEVICES_START_Y + ds, tmp);
   screen_puts(5, DEVICES_START_Y + ds, text_empty);

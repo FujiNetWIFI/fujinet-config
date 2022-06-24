@@ -24,5 +24,3 @@ TO DO:
 
     custom new file screens/input/io
 
-    implement screen_hosts_and_devices_devices_clear_all()
-        Already did eject loop in input_hosts_and_devices_devices(), move it to the proper place.

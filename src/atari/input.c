@@ -311,22 +311,7 @@ HDSubState input_hosts_and_devices_devices(void)
     return HD_DEVICES;
   case CH_CLR: // Clear
     // Theres an HD_CLEAR_ALL_DEVICES substate we can use here.
-    screen_clear_line(11);
-    for (i = 0; i < NUM_DEVICE_SLOTS; i++)
-    {
-      if (i % 2)
-      {
-        screen_puts(4, 11, "EJECTING ALL");
-      }
-      else
-      {
-        screen_clear_line(11);
-      }
-      hosts_and_devices_eject(i);
-    }
-    screen_clear_line(11);
-    screen_puts(4, 11, "DRIVE SLOTS");
-    return HD_DEVICES;
+    return HD_CLEAR_ALL_DEVICES;
   case 0x1C:
   case '-':
     // up
