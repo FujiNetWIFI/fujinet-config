@@ -11,10 +11,11 @@ Questions:
 
 
 TO DO:
+    Clean up navigation selecting files. Check against original config.
+    
     Selecting mode (r/w) on a new disk creation isn't working.
 
-    Aborting a copy from the "COPY HOST TO HOST SLOT" screen - on original config you go back to the disk images for selected host. Check if 
-    I'm just setting state wrong, or if this version just doesn't have a path back there.
+    implement changing disk mode while in input_hosts_and_devices_devices();
 
     screen_select_slot - fix/finish the file details
 

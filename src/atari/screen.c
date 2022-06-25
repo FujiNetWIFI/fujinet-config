@@ -615,10 +615,12 @@ void screen_select_file_display(char *p, char *f)
   screen_puts(5, 1, selected_host_name);
 
   // Filter
-  screen_puts(0, 2, "Filt:");
+  screen_puts(0, 2, "Fltr:");
   screen_puts(5, 2, f);
 
-  // Path
+  // Path - the path can wrap to line 4 (maybe 5?) so clear both to be safe.
+  screen_clear_line(3);
+  screen_clear_line(4);
   screen_puts(0, 3, "Path:");
   screen_puts(5, 3, p);
 
@@ -627,6 +629,10 @@ void screen_select_file_display(char *p, char *f)
   {
     screen_clear_line(i);
   }
+
+  // clear Prev/next page lines
+  screen_clear_line(FILES_START_Y + ENTRIES_PER_PAGE);
+  screen_clear_line(FILES_START_Y - 1);
 }
 
 void screen_select_file_display_long_filename(char *e)
@@ -921,6 +927,8 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 
 void screen_hosts_and_devices_long_filename(char *f)
 {
+  screen_debug("sh&dlf");
+  show_line_nums();
 }
 
 void screen_init(void)

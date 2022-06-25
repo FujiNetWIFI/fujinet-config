@@ -288,7 +288,7 @@ HDSubState input_hosts_and_devices_devices(void)
 
   if (input_handle_console_keys() == 0x03)
   {
-    // Do we need a new substate here MOUNT_AND_BOOT for Atari?
+    mount_and_boot();
   }
 
   k = input_ucase();
@@ -359,7 +359,7 @@ SFSubState input_select_file_choose(void)
 
   if (input_handle_console_keys() == 0x03)
   {
-    // Do we need a new substate here MOUNT_AND_BOOT for Atari?
+    mount_and_boot();
   }
 
   k = input_ucase();
@@ -392,6 +392,7 @@ SFSubState input_select_file_choose(void)
     }
     return SF_CHOOSE;
   case KCODE_RETURN:
+  case '*': // took from fujinet-config
     pos = bar_get() - FILES_START_Y;
     if (select_file_is_folder())
       return SF_ADVANCE_FOLDER;
@@ -400,6 +401,9 @@ SFSubState input_select_file_choose(void)
       // state = SELECT_SLOT;
       return SF_DONE;
     }
+  case KCODE_BACKSP:
+    return SF_DEVANCE_FOLDER;
+    
   // Have to try these on real atari, see if they work.
   case CH_CURS_LEFT:
     if ((bar_get() == FILES_START_Y) && (pos > 0))
