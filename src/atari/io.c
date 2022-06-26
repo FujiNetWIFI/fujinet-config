@@ -406,19 +406,6 @@ void io_disable_device(unsigned char d)
  */
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
-  char temp[20];
-  sprintf(temp, "ss=%d, ds=%d", source_slot, destination_slot);
-  screen_debug(temp);
-  while (!kbhit())
-  {
-  }
-  cgetc();
-  screen_debug(copySpec);
-  while (!kbhit())
-  {
-  }
-  cgetc();
-
   OS.dcb.ddevic=0x70;
   OS.dcb.dunit=1;
   OS.dcb.dcomnd=0xD8;

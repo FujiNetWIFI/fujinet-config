@@ -124,11 +124,11 @@ void set_active_screen(unsigned char screen)
 
 void set_cursor(unsigned char x, unsigned char y)
 {
-  // Each screen uses a different displaylist, so we need to know how many columns each row is to we can calculate
+  // Each screen uses a different displaylist, so we need to know how many columns each row is so we can calculate
   // how many bytes to add to the base video memory pointer. Previously it assumed 40 columns, which resulted in the Y
-  // coordinate not always being what you thought it was.
+  // coordinate not always use correctly in screen functions.
   //
-  // This is a hacky way to do it - basically we just see what screen we're on, and we "know" the layout so we do the math
+  // This is a hacky way to do it - basically we just see what screen we're on, and since we "know" the layout so we do the math
   // appopriately. This could be more elegant by doing somethihgn like "walking" through the displaylist, PEEKing the value,
   // determining how many colums in the returned mode, and doing the math accordingly, but this is good for now, just
   // verbose.
@@ -312,22 +312,6 @@ void screen_append(char *s)
     put_char(*s);
     ++s;
   }
-}
-
-void xx(void)
-{
-  unsigned char i;
-  screen_clear();
-  set_cursor(0, 0);
-
-  for (i = 0; i < 255; i++)
-  {
-    put_char(i);
-  }
-  while (!kbhit())
-  {
-  }
-  cgetc();
 }
 
 void screen_debug(char *message)
@@ -937,7 +921,6 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 
 void screen_hosts_and_devices_long_filename(char *f)
 {
-  screen_debug("sh&dlf");
   // show_line_nums();
 }
 

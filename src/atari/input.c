@@ -154,8 +154,8 @@ WSSubState input_set_wifi_select(void)
   unsigned char temp[29];
   k = input_ucase();
 
-  sprintf(temp, "y=%d, nn=%d, sn=%d", bar_get(), numNetworks, selected_network);
-  screen_debug(temp);
+  //sprintf(temp, "y=%d, nn=%d, sn=%d", bar_get(), numNetworks, selected_network);
+  //screen_debug(temp);
 
   switch (k)
   {
@@ -294,8 +294,8 @@ HDSubState input_hosts_and_devices_devices(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d", bar_get());
-  screen_debug(temp);
+  //sprintf(temp, "y=%d", bar_get());
+  //screen_debug(temp);
 
   switch (k)
   {
@@ -365,8 +365,8 @@ SFSubState input_select_file_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
-  screen_debug(temp);
+  //sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
+  //screen_debug(temp);
 
   switch (k)
   {
@@ -447,8 +447,8 @@ SSSubState input_select_slot_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
-  screen_debug(temp);
+  //sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
+  //screen_debug(temp);
 
   switch (k)
   {
@@ -565,8 +565,8 @@ DHSubState input_destination_host_slot_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d", bar_get());
-  screen_debug(temp);
+  //sprintf(temp, "y=%d", bar_get());
+  //screen_debug(temp);
 
   switch (k)
   {
