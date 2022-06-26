@@ -134,9 +134,6 @@ void set_wifi_done(void)
 
 void set_wifi(void)
 {
-  char temp[30];
-  sprintf(temp, "sub = %d", ws_subState);
-  screen_debug(temp);
 
   while (state == SET_WIFI)
   {
