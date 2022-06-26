@@ -79,6 +79,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 void input_line_set_wifi_custom(char *c)
 {
   bar_show(20);
+  memset(c, 0, 32);
   _screen_input(2, 20, c, 32);
 }
 
