@@ -17,8 +17,6 @@ TO DO:
 
     implement changing disk mode while in input_hosts_and_devices_devices();
 
-    screen_select_slot - fix/finish the file details
-
     implement screen_select_file_display_long_filename()
     
     implement screen_select_file_clear_long_filename()

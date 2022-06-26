@@ -220,8 +220,8 @@ HDSubState input_hosts_and_devices_hosts(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d", bar_get());
-  screen_debug(temp);
+  //sprintf(temp, "y=%d,k=%02x", bar_get(), k);
+  //screen_debug(temp);
 
   switch (k)
   {
@@ -403,7 +403,7 @@ SFSubState input_select_file_choose(void)
     }
   case KCODE_BACKSP:
     return SF_DEVANCE_FOLDER;
-    
+
   // Have to try these on real atari, see if they work.
   case CH_CURS_LEFT:
     if ((bar_get() == FILES_START_Y) && (pos > 0))

@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <conio.h>
+#include <stdint.h>
 #include <peekpoke.h>
 #include "screen.h"
 #include "io.h"
@@ -27,11 +28,12 @@ char text_empty[] = "Empty";
 char fn[256];
 
 // The currently active screen (basically each time a different displaylist is used that will be considered a screen)
-// Used by 'set_cursor' so it knows the layout of the screen and can properly figure out the memory offset needed given an (x, y) coordinate pair.
+// Used by 'set_cursor' so it knows the layout of the screen and can properly figure out the memory offset needed whengiven an (x, y) coordinate pair.
 //
 _screen active_screen = SCREEN_HOSTS_AND_DEVICES;
 
 // Set up the initial display list.
+// Note: Using 25 lines in this version vs 23 in the original config (2 additional at the bottom).
 void config_dlist =
     {
         DL_BLK8,              // 0x00 (8 Blank Scanlines)
@@ -356,7 +358,7 @@ void screen_mount_and_boot()
   screen_dlist_mount_and_boot();
   set_active_screen(SCREEN_MOUNT_AND_BOOT);
   screen_clear();
-  show_line_nums();
+  // show_line_nums();
 }
 
 void screen_set_wifi(AdapterConfig *ac)
@@ -526,7 +528,7 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 
 void screen_select_slot(char *e)
 {
-  unsigned long *s;
+  unsigned int *s;
   unsigned char d[40];
 
   screen_dlist_select_slot();
@@ -539,18 +541,25 @@ void screen_select_slot(char *e)
 
   screen_puts(0, 0, "MOUNT TO DRIVE SLOT");
 
-  // sprintf("%32s","FILE DETAILS");
-  sprintf(d, "%8s 20%02u-%02u-%02u %02u:%02u:%02u", "MTIME:", *e++, *e++, *e++, *e++, *e++, *e++);
-  screen_puts(0, 1, "FILE:");
-  screen_puts(0, 7, e);
-  screen_puts(0, 2, d);
-  // s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  // sprintf(d, "%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+  // Modified time (year needs to be fixed)
+  sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+  screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
 
-  // e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
+  // File size
+  // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
+  // Result is unreliable since if the file was < 65535 bytes it will be ok, but if it was more we don't
+  // know how to interpret the 2 bytes we have available to us.
+  //s = (unsigned int *)e;
+  //sprintf(d, "%8s %u bytes", "SIZE:", *s); 
+  //sprintf(d, "%8s %u K", "SIZE:", *s >> 10); 
+  //screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
-  // gotoxy(0,0);
-  // cprintf("%32s",e);
+  // Skip next 4 bytes to get to the filename (2 for the size, 2 for flags we don't care about)
+  e += 4;
+
+  // Filename
+  screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
+  screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
 
@@ -630,7 +639,7 @@ void screen_select_file_display(char *p, char *f)
     screen_clear_line(i);
   }
 
-  // clear Prev/next page lines
+  // clear Prev/next page lines. Sometimes they're left on the screen during directory devance.
   screen_clear_line(FILES_START_Y + ENTRIES_PER_PAGE);
   screen_clear_line(FILES_START_Y - 1);
 }
@@ -736,6 +745,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
   unsigned char retry = 5;
   unsigned char i;
+  char temp[10];
 
   screen_dlist_hosts_and_devices();
   set_active_screen(SCREEN_HOSTS_AND_DEVICES);
@@ -887,8 +897,8 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-    screen_clear_line(11);
-    screen_puts(0, 11, "EJECTING ALL.. WAIT");
+  screen_clear_line(11);
+  screen_puts(0, 11, "EJECTING ALL.. WAIT");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -928,7 +938,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 void screen_hosts_and_devices_long_filename(char *f)
 {
   screen_debug("sh&dlf");
-  show_line_nums();
+  // show_line_nums();
 }
 
 void screen_init(void)
@@ -965,7 +975,7 @@ void screen_destination_host_slot_choose(void)
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
-  show_line_nums();
+  // show_line_nums();
 }
 
 void screen_dlist_select_file(void)
