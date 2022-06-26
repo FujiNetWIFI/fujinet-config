@@ -9,15 +9,17 @@ Questions:
 
 
 TO DO:
-    Clean up navigation selecting files. Check against original config.
+    Clean up navigation selecting files. Check against original config to make sure same keys are all implemented.
     
     Selecting mode (r/w) on a new disk creation isn't working.
 
-    implement changing disk mode while in input_hosts_and_devices_devices();
+    implement changing disk mode (r/w) while in input_hosts_and_devices_devices();
 
     implement screen_select_file_display_long_filename()
     
     implement screen_select_file_clear_long_filename()
 
-    custom sized new file screens/input/io
+    implement screens/input/io functions for "custom disk size" when creating a new disk.
+
+    general cleanup, add comments, etc.
 
