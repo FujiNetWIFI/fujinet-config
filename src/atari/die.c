@@ -8,6 +8,7 @@
 #include <atari.h>
 #include <conio.h>
 #include "io.h"
+#include "../die.h"
 
 /**
  * Stop, wait for keypress, then coldstart
@@ -20,9 +21,15 @@ void die(void)
     cold_start();
 }
 
+void quit(void)
+{
+
+}
+
 /**
  * Wait a moment.
  */
+/*
 void wait_a_moment(void)
 {
     rtclr();
@@ -32,5 +39,5 @@ void wait_a_moment(void)
     if (kbhit())
         cgetc();
 }
-
+*/
 #endif

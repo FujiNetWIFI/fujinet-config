@@ -4,7 +4,7 @@
 #include "io.h"
 #include "globals.h"
 #include "screen.h"
-#include "die.h"
+#include "../die.h"
 
 char text_mounting_host_slot_X[] = "MOUNTING HOST SLOT X";
 char text_mounting_device_slot_X[] = "MOUNTING DEV SLOT X ";
@@ -37,7 +37,7 @@ void mount_and_boot_all_hosts(void)
               //error(ERROR_MOUNTING_HOST_SLOT);
               screen_clear_line(21);
               screen_puts(0,21,"ERROR MOUNTING HOST SLOT");
-              wait_a_moment();
+              //wait_a_moment();
               state = HOSTS_AND_DEVICES;
               return;
             }
@@ -76,7 +76,7 @@ void mount_and_boot_all_devices(void)
               screen_clear_line(21);
               screen_puts(0,21,"ERROR MOUNTING DEVICE SLOT");
 
-              wait_a_moment();
+              //wait_a_moment();
               state = HOSTS_AND_DEVICES;
               return;
             }

@@ -8,8 +8,12 @@ Questions:
     io_get_device_enabled_status() - Don't see this for SIO, should it return true or false?
 
 
-TO DO:
-    Clean up navigation selecting files. Check against original config to make sure same keys are all implemented.
+TO DO (estimate 90-95% done at this point):
+    Implement error enum from original config.
+
+    die() - in machine speficic folder or base code? 
+    
+    Clean up navigation while selecting files. Check against original config to make sure same keys are all implemented.
     
     Selecting mode (r/w) on a new disk creation isn't working.
 
