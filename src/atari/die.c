@@ -29,7 +29,6 @@ void quit(void)
 /**
  * Wait a moment.
  */
-/*
 void wait_a_moment(void)
 {
     rtclr();
@@ -39,5 +38,4 @@ void wait_a_moment(void)
     if (kbhit())
         cgetc();
 }
-*/
 #endif

@@ -23,6 +23,7 @@ typedef enum
 
 #define screen_input(x, y, s) _screen_input((x), (y), (s), sizeof(s))
 
+void set_active_screen(unsigned char screen);
 void screen_mount_and_boot();
 int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
 void show_line_nums(void);

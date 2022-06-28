@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "screen.h"
 #include "../die.h"
+#include "atari_die.h"
 
 char text_mounting_host_slot_X[] = "MOUNTING HOST SLOT X";
 char text_mounting_device_slot_X[] = "MOUNTING DEV SLOT X ";
@@ -34,10 +35,8 @@ void mount_and_boot_all_hosts(void)
 
             if (io_error())
             {
-              //error(ERROR_MOUNTING_HOST_SLOT);
-              screen_clear_line(21);
-              screen_puts(0,21,"ERROR MOUNTING HOST SLOT");
-              //wait_a_moment();
+              screen_error("ERROR MOUNTING HOST SLOT");
+              wait_a_moment();
               state = HOSTS_AND_DEVICES;
               return;
             }
@@ -73,37 +72,39 @@ void mount_and_boot_all_devices(void)
             if (io_error())
             {
               //error(ERROR_MOUNTING_DEVICE_SLOT);
-              screen_clear_line(21);
-              screen_puts(0,21,"ERROR MOUNTING DEVICE SLOT");
+              screen_error("ERROR MOUNTING DEVICE SLOT");
 
-              //wait_a_moment();
+              wait_a_moment();
               state = HOSTS_AND_DEVICES;
               return;
             }
         }
     }
 
-    // screen_puts(0, 21, text_booting);
+    screen_puts(0, 21, text_booting);
 }
 
 void mount_and_boot(void)
 {
     screen_mount_and_boot();
+    set_active_screen(SCREEN_MOUNT_AND_BOOT);
     
     io_get_device_slots(&deviceSlots[0]);
     if ( io_error() )
     {
-        // error_fatal
+        screen_error("ERROR READING DEVICE SLOTS");
+        die();
     }
 
     io_get_host_slots(&hostSlots[0]);
     if ( io_error() )
     {
-        // error_fatal
+        screen_error("ERROR READING HOST SLOTS");
+        die();
     }
 
     screen_clear();
-    screen_puts(0, 3, "MOUNT AND BOOT");
+    screen_puts(4, 1, "MOUNT AND BOOT");
 
     mount_and_boot_all_hosts();
     mount_and_boot_all_devices();

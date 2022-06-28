@@ -315,6 +315,9 @@ HDSubState input_hosts_and_devices_hosts(void)
     {
       return HD_HOSTS;
     }
+  case '!':
+  case 'B':// Taken from original config. What is that checking for?
+    mount_and_boot(); 
   default:
     return HD_HOSTS;
   }
@@ -387,6 +390,8 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'C':
     state = SHOW_INFO;
     return HD_DONE;
+  case '!':
+    mount_and_boot();
   default:
     return HD_DEVICES;
   }
@@ -470,6 +475,9 @@ SFSubState input_select_file_choose(void)
       copy_host_slot=selected_host_slot;
       return SF_COPY;
     }
+  case '!' :
+  case 'B' :
+    mount_and_boot();
   default:
     return SF_CHOOSE;
   }
@@ -482,7 +490,7 @@ SSSubState input_select_slot_choose(void)
   unsigned char temp[30];
   if (input_handle_console_keys() == 0x03)
   {
-    // Do we need a new substate here MOUNT_AND_BOOT for Atari?
+    mount_and_boot();
   }
 
   k = input_ucase();
