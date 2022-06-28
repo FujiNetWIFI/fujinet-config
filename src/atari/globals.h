@@ -68,5 +68,9 @@ extern bool deviceEnabled[8];
 
 extern char _visibleEntries;
 
+extern unsigned short custom_numSectors;
+extern unsigned short custom_sectorSize;
+
+
 #endif /* GLOBALS_H */
 #endif /* BUILD_ATARI */

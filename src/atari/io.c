@@ -331,31 +331,45 @@ void io_boot(void)
 {
 }
 
-/*
-  case '1':
-    context->newDisk_ns = 720;
-    context->newDisk_sz = 128;
-  case '2':
-    context->newDisk_ns = 1040;
-    context->newDisk_sz = 128;
-  case '3':
-    context->newDisk_ns = 720;
-    context->newDisk_sz = 256;
-  case '4':
-    context->newDisk_ns = 1440;
-    context->newDisk_sz = 256;
-  case '5':
-    context->newDisk_ns = 2880;
-    context->newDisk_sz = 256;
-  case '6':
-    context->newDisk_ns = 5760;
-    context->newDisk_sz = 256;
-*/
 
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)
 {
-  newDisk.numSectors = 720;
-  newDisk.sectorSize = 128;
+  if ( selected_size == 999 )
+  {
+    newDisk.numSectors = custom_numSectors;
+    newDisk.sectorSize = custom_sectorSize;
+  } 
+  else
+  {
+    switch ( selected_size )
+    {
+      case 90 :
+        newDisk.numSectors = 720;
+        newDisk.sectorSize = 128;
+        break;
+      case 130 :
+        newDisk.numSectors = 1040;
+        newDisk.sectorSize = 128;
+        break;
+      case 180 :
+        newDisk.numSectors = 720;
+        newDisk.sectorSize = 256;
+        break;
+      case 360 :
+        newDisk.numSectors = 1440;
+        newDisk.sectorSize = 256;
+        break;
+      case 720 :
+        newDisk.numSectors = 2880;
+        newDisk.sectorSize = 256;
+        break;
+      case 1440 :
+        newDisk.numSectors = 5760;
+        newDisk.sectorSize = 256;
+        break;
+    }
+  }
+
   newDisk.hostSlot = selected_host_slot;
   newDisk.deviceSlot = selected_device_slot;
   deviceSlots[selected_device_slot].mode = mode;

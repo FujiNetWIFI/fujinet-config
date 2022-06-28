@@ -4,15 +4,9 @@ and then their own (if necessary), such as "screen_atari.h" with functions only 
 
 nc->ssid and ac->ssid are out of sync.. look into which is right to use.
 
-Questions:
-    io_get_device_enabled_status() - Don't see this for SIO, should it return true or false?
-
 
 TO DO (estimate 90-95% done at this point):
-    Implement error enum from original config.
 
-    die() - in machine speficic folder or base code? 
-    
     Clean up navigation while selecting files. Check against original config to make sure same keys are all implemented.
     
     Selecting mode (r/w) on a new disk creation isn't working.
@@ -22,8 +16,6 @@ TO DO (estimate 90-95% done at this point):
     implement screen_select_file_display_long_filename()
     
     implement screen_select_file_clear_long_filename()
-
-    implement screens/input/io functions for "custom disk size" when creating a new disk.
 
     general cleanup, add comments, etc.
 

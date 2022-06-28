@@ -525,25 +525,29 @@ void screen_select_slot(char *e)
 
   screen_puts(0, 0, "MOUNT TO DRIVE SLOT");
 
-  // Modified time (year needs to be fixed)
-  sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
-  screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
+  // Show file details if it's an existing file only.
+  if ( create == false )
+  {
+    // Modified time 
+    sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+    screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
 
-  // File size
-  // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
-  // Result is unreliable since if the file was < 65535 bytes it will be ok, but if it was more we don't
-  // know how to interpret the 2 bytes we have available to us.
-  //s = (unsigned int *)e;
-  //sprintf(d, "%8s %u bytes", "SIZE:", *s); 
-  //sprintf(d, "%8s %u K", "SIZE:", *s >> 10); 
-  //screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
+    // File size
+    // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
+    // Result is unreliable since if the file was < 65535 bytes it will be ok, but if it was more we don't
+    // know how to interpret the 2 bytes we have available to us.
+    //s = (unsigned int *)e;
+    //sprintf(d, "%8s %u bytes", "SIZE:", *s); 
+    //sprintf(d, "%8s %u K", "SIZE:", *s >> 10); 
+    //screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
-  // Skip next 4 bytes to get to the filename (2 for the size, 2 for flags we don't care about)
-  e += 4;
+    // Skip next 4 bytes to get to the filename (2 for the size, 2 for flags we don't care about)
+    e += 4;
 
-  // Filename
-  screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
-  screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
+    // Filename
+    screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
+    screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
+  }
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
 
@@ -698,6 +702,11 @@ void screen_select_file_new_size(unsigned char k)
 
 void screen_select_file_new_custom(void)
 {
+  screen_clear_line(20);
+  screen_clear_line(21);
+
+  screen_puts(0, 20, "# Sectors?");
+  screen_puts(0, 21, "Sector Size (128/256/512)?");
 }
 
 void screen_select_file_new_name(void)

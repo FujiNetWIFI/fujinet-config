@@ -23,6 +23,8 @@
 unsigned char selected_network;
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
+unsigned short custom_numSectors;
+unsigned short custom_sectorSize;
 
 unsigned char input()
 {
@@ -107,10 +109,11 @@ unsigned char input_select_file_new_type(void)
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
-  char temp[2];
-  memset(temp, 0, 2);
-  _screen_input(34, 21, &temp, 2);
+  char temp[8];
+  memset(temp, 0, sizeof(temp));
+  _screen_input(34, 21, temp, sizeof(temp));
 
+  // TODO: make an enum so these are easier to understand
   switch (temp[0])
   {
   case '1':
@@ -125,13 +128,50 @@ unsigned long input_select_file_new_size(unsigned char t)
     return 720;
   case '6':
     return 1440;
-  case 'C':
-    return 1;
+  case '7':
+    return 1; // For a custom file size, the called expects 1 to be returned.
+  case KCODE_ESCAPE:
+    return 0;
   }
 }
 
 unsigned long input_select_file_new_custom(void)
 {
+  //screen_puts(0, 20, "# Sectors?");
+  //screen_puts(0, 21, "Sector Size (128/256/512)?");
+  // Code copied out of fujinet-config/diskulator_select.c/diskulator_select_new_disk()
+  //
+  char tmp_str[8];
+  custom_sectorSize = 0;
+  custom_numSectors = 0;
+
+  // Number of Sectors
+  memset (tmp_str, 0, sizeof(tmp_str));
+  _screen_input(11, 20, tmp_str, sizeof(tmp_str));
+  custom_numSectors = atoi(tmp_str);
+
+  // Sector Size
+  memset (tmp_str, 0, sizeof(tmp_str));
+  while (tmp_str[0] != '1' && tmp_str[0] != '2' && tmp_str[0] != '5')
+  {
+    _screen_input(27, 21, tmp_str, sizeof(tmp_str));
+  }
+  
+  switch (tmp_str[0])
+  {
+    case '1' :
+      custom_sectorSize = 128;
+      break;
+    case '2' :
+      custom_sectorSize = 256;
+      break;
+    case '5' :
+      custom_sectorSize = 512;
+      break;
+    default :
+      return 0;
+  }
+  return 999;
 }
 
 void input_select_file_new_name(char *c)
