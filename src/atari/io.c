@@ -305,7 +305,6 @@ void io_set_boot_config(unsigned char toggle)
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
-  show_line_nums();
   set_sio_defaults();
   OS.dcb.dcomnd = 0xF8;
   OS.dcb.dstats = 0x00;

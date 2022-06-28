@@ -23,7 +23,7 @@ void mount_and_boot_all_hosts(void)
         if (deviceSlots[i].hostSlot != 0xFF)
         {
             text_mounting_host_slot_X[19] = i + 0x31; // update status msg.
-            screen_puts(0, 21, text_mounting_host_slot_X);
+            screen_puts(0, 4+i, text_mounting_host_slot_X);
             while (retry > 0)
             {
                 io_mount_host_slot(i);
@@ -57,7 +57,7 @@ void mount_and_boot_all_devices(void)
         if (deviceSlots[i].hostSlot != 0xFF)
         {
             text_mounting_device_slot_X[18] = i + 0x31; // update status msg
-            screen_puts(0, 21, text_mounting_device_slot_X);
+            screen_puts(0,4+NUM_HOST_SLOTS+1, text_mounting_device_slot_X);
 
             while (retry > 0)
             {
@@ -71,7 +71,6 @@ void mount_and_boot_all_devices(void)
 
             if (io_error())
             {
-              //error(ERROR_MOUNTING_DEVICE_SLOT);
               screen_error("ERROR MOUNTING DEVICE SLOT");
 
               wait_a_moment();
