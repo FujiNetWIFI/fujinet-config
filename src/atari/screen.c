@@ -968,6 +968,9 @@ void screen_destination_host_slot_choose(void)
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
   // show_line_nums();
+  screen_clear();
+  bar_clear();
+  screen_puts(0, 0, "COPYING, PLEASE WAIT");
 }
 
 void screen_dlist_select_file(void)
