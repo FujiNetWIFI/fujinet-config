@@ -32,6 +32,7 @@ uint8_t sp_error;
 static uint8_t sp_cmdlist[10];
 static uint8_t sp_cmdlist_low, sp_cmdlist_high;
 static uint8_t sp_err, sp_rtn_low, sp_rtn_high;
+static uint8_t sp_dispatch_low, sp_dispatch_high;
 
 int8_t sp_status(uint8_t dest, uint8_t statcode)
 {
@@ -45,7 +46,8 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
 
   sp_cmdlist_low = (uint8_t)((uint16_t)&sp_cmdlist & 0x00FF);
   sp_cmdlist_high = (uint8_t)((uint16_t)&sp_cmdlist >> 8) & 0xFF;
-
+  sp_dispatch_low = (uint8_t)((uint16_t)sp_dispatch & 0x00FF);
+  sp_dispatch_high = (uint8_t)((uint16_t)sp_dispatch >> 8) & 0xFF;
 
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_STATUS);
@@ -54,8 +56,18 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
   __asm__ volatile ("sta %g", spCmdListLow); // store status command #
   __asm__ volatile ("lda %v", sp_cmdlist_high);
   __asm__ volatile ("sta %g", spCmdListHigh); // store status command #
-  
-  __asm__ volatile ("jsr $C50D"); // to do - find SP entry point using algorithm from firmware reference
+  __asm__ volatile ("lda #%b", 0x20); // jsr opcode
+  __asm__ volatile ("sta %g", spJmp);
+  __asm__ volatile ("lda %v", sp_dispatch_low); // sp entry lsb
+  __asm__ volatile ("sta %g", spDispatchLow);
+  __asm__ volatile ("lda %v", sp_dispatch_high); // sp entry msb
+  __asm__ volatile ("sta %g", spDispatchHigh);
+spJmp:
+  __asm__ volatile ("nop");
+spDispatchLow:
+  __asm__ volatile ("nop");
+spDispatchHigh:
+  __asm__ volatile ("nop");
 spCmd:
   __asm__ volatile ("nop");
 spCmdListLow:
@@ -84,6 +96,8 @@ int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
 
   sp_cmdlist_low = (uint8_t)((uint16_t)&sp_cmdlist & 0x00FF);
   sp_cmdlist_high = (uint8_t)((uint16_t)&sp_cmdlist >> 8) & 0xFF;
+  sp_dispatch_low = (uint8_t)((uint16_t)sp_dispatch & 0x00FF);
+  sp_dispatch_high = (uint8_t)((uint16_t)sp_dispatch >> 8) & 0xFF;
 
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_CONTROL);
@@ -92,8 +106,18 @@ int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
   __asm__ volatile ("sta %g", spCmdListLow); // store status command #
   __asm__ volatile ("lda %v", sp_cmdlist_high);
   __asm__ volatile ("sta %g", spCmdListHigh); // store status command #
-  
-  __asm__ volatile ("jsr $C50D"); // to do - find entry point and used it instead of hardcoded address
+  __asm__ volatile ("lda #%b", 0x20); // jsr opcode
+  __asm__ volatile ("sta %g", spJmp);
+  __asm__ volatile ("lda %v", sp_dispatch_low); // sp entry lsb
+  __asm__ volatile ("sta %g", spDispatchLow);
+  __asm__ volatile ("lda %v", sp_dispatch_high); // sp entry msb
+  __asm__ volatile ("sta %g", spDispatchHigh);
+spJmp:
+  __asm__ volatile ("nop");
+spDispatchLow:
+  __asm__ volatile ("nop");
+spDispatchHigh:
+  __asm__ volatile ("nop");
 spCmd:
   __asm__ volatile ("nop");
 spCmdListLow:
@@ -168,7 +192,7 @@ uint8_t sp_find_slot(void)
 {
   uint8_t s=0;
 
-  for (s=7; s-- > 0;)
+  for (s=7; s > 0; s--)
     {
       uint16_t a = 0xc000 + (s * 0x100);
       if ((PEEK(a+1) == 0x20) &&

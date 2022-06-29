@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <apple2.h>
+#include <peekpoke.h>
 #include "globals.h"
 #include "input.h"
 #include "bar.h"
@@ -76,7 +77,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   char uc;
   char ostype;
 
-
   uc = 0;
   ostype = get_ostype() & 0xF0;
 
@@ -91,7 +91,10 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cputc('_'); // turn on cursor - does not have effect on Apple IIc
     gotox(x + i);
     a = cgetc();
-    
+    if (ostype == APPLE_IIIEM)   // check for Apple3 lowercase
+      if (!(PEEK(0xc008)&0x02) && (PEEK(0xc008)&0x08)) // test for shift or alpha lock key not pressed
+        if ((a > 63) && (a < 96))
+          a += 32;
     switch (a)
     {
     case KEY_ESCAPE:
