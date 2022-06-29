@@ -167,8 +167,15 @@ void screen_set_wifi_custom(void)
 
 void screen_set_wifi_password(void)
 {
-  cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("ENTER NETWORK PASSWORD AND PRESS [RETURN]");
+  char ostype;
+  ostype = get_ostype() & 0xF0;
+
+  cclearxy(0, STATUS_BAR, 120);
+  gotoxy(0,STATUS_BAR); cprintf("ENTER NET PASSWORD AND PRESS [RETURN]");
+  if (ostype == APPLE_II)
+  {
+    gotoxy(0, STATUS_BAR - 1); cprintf("USE [ESC] TO SWITCH TO UPPER/LOWER CASE");
+  }
   gotoxy(0, STATUS_BAR + 1); cputc(']');
 }
 

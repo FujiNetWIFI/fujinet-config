@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <apple2.h>
 #include "globals.h"
 #include "input.h"
 #include "bar.h"
@@ -72,6 +73,12 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 {
   char i;
   char a;
+  char uc;
+  char ostype;
+
+
+  uc = 0;
+  ostype = get_ostype() & 0xF0;
 
   i = o; // index into array and y-coordinate
   // x += o;
@@ -84,8 +91,18 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cputc('_'); // turn on cursor - does not have effect on Apple IIc
     gotox(x + i);
     a = cgetc();
+    
     switch (a)
     {
+    case KEY_ESCAPE:
+      if (ostype == APPLE_II)
+      {
+        if (uc == 0)
+          uc = 32;
+        else
+          uc = 0;
+      }
+      break;
     case KEY_LEFT_ARROW:
     case KEY_DELETE:
       if (i>0)
@@ -108,6 +125,8 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     default:
       if (i < len)
       {
+        if (a>64 && a<91)
+          a += uc;
         gotox(x + i);
         screen_putlcc(a);
         c[i++] = a;
