@@ -185,7 +185,7 @@ void set_cursor(unsigned char x, unsigned char y)
     }
   }
   // Right now these two are the same, break apart in future if they start to differ.
-  else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT)
+  else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT || active_screen == SCREEN_MOUNT_AND_BOOT)
   {
     // 1x20
     // rest 40
@@ -244,6 +244,7 @@ void set_cursor(unsigned char x, unsigned char y)
       cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
     }
   }
+  /*
   else if (active_screen == SCREEN_MOUNT_AND_BOOT)
   {
     // 2x20
@@ -276,7 +277,7 @@ void set_cursor(unsigned char x, unsigned char y)
     {
       cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + 40 + ((y - 24) * 40);
     }
-  }
+  }*/
   else
   {
     // Default to all 40 character lines.
@@ -342,7 +343,7 @@ void screen_mount_and_boot()
   screen_dlist_mount_and_boot();
   set_active_screen(SCREEN_MOUNT_AND_BOOT);
   screen_clear();
-  // show_line_nums();
+  bar_clear(false);
 }
 
 void screen_set_wifi(AdapterConfig *ac)
@@ -969,7 +970,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
   // show_line_nums();
   screen_clear();
-  bar_clear();
+  bar_clear(false);
   screen_puts(0, 0, "COPYING, PLEASE WAIT");
 }
 
@@ -1016,7 +1017,8 @@ void screen_dlist_set_wifi(void)
 void screen_dlist_mount_and_boot(void)
 {
   // Same as wifi layout
-  screen_dlist_set_wifi();
+  //screen_dlist_set_wifi();
+  screen_dlist_select_file();
 }
 
 void screen_connect_wifi(NetConfig *nc)
