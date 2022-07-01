@@ -416,8 +416,8 @@ SFSubState input_select_file_choose(void)
 
   k = input_ucase();
 
-  // sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
-  // screen_debug(temp);
+  sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
+  screen_debug(temp);
 
   switch (k)
   {
@@ -445,7 +445,8 @@ SFSubState input_select_file_choose(void)
     return SF_CHOOSE;
   case KCODE_RETURN:
   case '*': // took from fujinet-config
-    pos = bar_get() - FILES_START_Y;
+    //pos = bar_get() - FILES_START_Y;
+    pos += bar_get() - FILES_START_Y;
     if (select_file_is_folder())
       return SF_ADVANCE_FOLDER;
     else
@@ -477,7 +478,8 @@ SFSubState input_select_file_choose(void)
     }
     else
     {
-      pos = bar_get() - FILES_START_Y;
+      //pos = bar_get() - FILES_START_Y;
+      pos += bar_get() - FILES_START_Y;
       select_file_set_source_filename();
       copy_host_slot = selected_host_slot;
       return SF_COPY;

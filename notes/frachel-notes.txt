@@ -8,12 +8,13 @@ nc->ssid and ac->ssid are out of sync.. look into which is right to use.
 TO DO (estimate 90-95% done at this point):
 
     From mozzwald testing:
+        FIXED: BIG: selecting images from anyting other than page 1 isn't working right (anymore, used to.. check commits to see where it broke).
         left from root dir in a host, go back to host/slots
         ok,  for joystick, up, down and fire work. left should go back/up a dir when browsing
         < (0x1C) and > (0x1D) shoudl go prev/next page
+        last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server.
+
   
-    Clean up navigation while selecting files. Check against original config to make sure same keys are all implemented.
-    
     Selecting mode (r/w) on a new disk creation isn't working.
 
     implement screen_select_file_display_long_filename()
