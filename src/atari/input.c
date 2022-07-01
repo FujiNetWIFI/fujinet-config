@@ -26,6 +26,7 @@ extern unsigned char copy_host_slot;
 unsigned short custom_numSectors;
 unsigned short custom_sectorSize;
 extern char fn[256];
+bool mounting = false;
 
 unsigned char input()
 {
@@ -537,7 +538,9 @@ SSSubState input_select_slot_choose(void)
     return SS_CHOOSE;
   case 'E':
     // Eject
+    mounting = true;
     hosts_and_devices_eject(selected_device_slot);
+    mounting = false;
     return SS_CHOOSE;
   case KCODE_ESCAPE:
     state = SELECT_FILE;

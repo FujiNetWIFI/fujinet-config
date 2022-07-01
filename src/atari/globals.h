@@ -71,6 +71,8 @@ extern char _visibleEntries;
 extern unsigned short custom_numSectors;
 extern unsigned short custom_sectorSize;
 
+extern bool mounting;
+
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_ATARI */

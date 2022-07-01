@@ -914,12 +914,22 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
   char tmp[2] = {0, 0};
+  unsigned char y;
+
   tmp[0] = ds + '1';
 
-  bar_show(DEVICES_START_Y + ds);
-  screen_clear_line(DEVICES_START_Y + ds);
-  screen_puts(2, DEVICES_START_Y + ds, tmp);
-  screen_puts(5, DEVICES_START_Y + ds, text_empty);
+  if ( mounting ) 
+  {
+    y = DEVICES_START_MOUNT_Y;
+  }
+  else
+  {
+    y = DEVICES_START_Y;
+  }
+  bar_show(y + ds);
+  screen_clear_line(y + ds);
+  screen_puts(2, y + ds, tmp);
+  screen_puts(5, y + ds, text_empty);
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
