@@ -7,8 +7,7 @@ nc->ssid and ac->ssid are out of sync.. look into which is right to use.
 
 TO DO (estimate 90-95% done at this point):
 
-    Replace mount_and_boot() code with single call to command $D7 : https://github.com/FujiNetWIFI/fujinet-platformio/wiki/SIO-Command-%24D7-Mount-All
-    
+  
     Clean up navigation while selecting files. Check against original config to make sure same keys are all implemented.
     
     Selecting mode (r/w) on a new disk creation isn't working.

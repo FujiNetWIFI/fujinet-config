@@ -25,6 +25,7 @@ extern bool copy_mode;
 extern unsigned char copy_host_slot;
 unsigned short custom_numSectors;
 unsigned short custom_sectorSize;
+extern char fn[256];
 
 unsigned char input()
 {
@@ -137,39 +138,39 @@ unsigned long input_select_file_new_size(unsigned char t)
 
 unsigned long input_select_file_new_custom(void)
 {
-  //screen_puts(0, 20, "# Sectors?");
-  //screen_puts(0, 21, "Sector Size (128/256/512)?");
-  // Code copied out of fujinet-config/diskulator_select.c/diskulator_select_new_disk()
+  // screen_puts(0, 20, "# Sectors?");
+  // screen_puts(0, 21, "Sector Size (128/256/512)?");
+  //  Code copied out of fujinet-config/diskulator_select.c/diskulator_select_new_disk()
   //
   char tmp_str[8];
   custom_sectorSize = 0;
   custom_numSectors = 0;
 
   // Number of Sectors
-  memset (tmp_str, 0, sizeof(tmp_str));
+  memset(tmp_str, 0, sizeof(tmp_str));
   _screen_input(11, 20, tmp_str, sizeof(tmp_str));
   custom_numSectors = atoi(tmp_str);
 
   // Sector Size
-  memset (tmp_str, 0, sizeof(tmp_str));
+  memset(tmp_str, 0, sizeof(tmp_str));
   while (tmp_str[0] != '1' && tmp_str[0] != '2' && tmp_str[0] != '5')
   {
     _screen_input(27, 21, tmp_str, sizeof(tmp_str));
   }
-  
+
   switch (tmp_str[0])
   {
-    case '1' :
-      custom_sectorSize = 128;
-      break;
-    case '2' :
-      custom_sectorSize = 256;
-      break;
-    case '5' :
-      custom_sectorSize = 512;
-      break;
-    default :
-      return 0;
+  case '1':
+    custom_sectorSize = 128;
+    break;
+  case '2':
+    custom_sectorSize = 256;
+    break;
+  case '5':
+    custom_sectorSize = 512;
+    break;
+  default:
+    return 0;
   }
   return 999;
 }
@@ -194,8 +195,8 @@ WSSubState input_set_wifi_select(void)
   unsigned char temp[29];
   k = input_ucase();
 
-  //sprintf(temp, "y=%d, nn=%d, sn=%d", bar_get(), numNetworks, selected_network);
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d, nn=%d, sn=%d", bar_get(), numNetworks, selected_network);
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -261,8 +262,8 @@ HDSubState input_hosts_and_devices_hosts(void)
 
   k = input_ucase();
 
-  //sprintf(temp, "y=%d,k=%02x", bar_get(), k);
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d,k=%02x", bar_get(), k);
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -316,8 +317,8 @@ HDSubState input_hosts_and_devices_hosts(void)
       return HD_HOSTS;
     }
   case '!':
-  case 'B':// Taken from original config. What is that checking for?
-    mount_and_boot(); 
+  case 'B': // Taken from original config. What is that checking for?
+    mount_and_boot();
   default:
     return HD_HOSTS;
   }
@@ -337,8 +338,8 @@ HDSubState input_hosts_and_devices_devices(void)
 
   k = input_ucase();
 
-  //sprintf(temp, "y=%d", bar_get());
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d", bar_get());
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -354,7 +355,6 @@ HDSubState input_hosts_and_devices_devices(void)
     selected_device_slot = bar_get() - DEVICES_START_Y;
     return HD_DEVICES;
   case CH_CLR: // Clear
-    // Theres an HD_CLEAR_ALL_DEVICES substate we can use here.
     return HD_CLEAR_ALL_DEVICES;
   case 0x1C:
   case '-':
@@ -378,14 +378,19 @@ HDSubState input_hosts_and_devices_devices(void)
     // Eject
     hosts_and_devices_eject(bar_get() - DEVICES_START_Y);
     return HD_DEVICES;
-
   case 0x7F:
     return HD_HOSTS;
   case 'R':
     // set device mode to read
+    selected_device_slot = bar_get() - DEVICES_START_Y;
+    set_device_slot_mode(selected_device_slot, 1);
+    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
     return HD_DEVICES;
   case 'W':
     // set device mode to write
+    selected_device_slot = bar_get() - DEVICES_START_Y;
+    set_device_slot_mode(selected_device_slot, 2);
+    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
     return HD_DEVICES;
   case 'C':
     state = SHOW_INFO;
@@ -410,8 +415,8 @@ SFSubState input_select_file_choose(void)
 
   k = input_ucase();
 
-  //sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -465,18 +470,19 @@ SFSubState input_select_file_choose(void)
   case 'N':
     return SF_NEW;
   case 'C':
-    if ( copy_mode == true ) {
+    if (copy_mode == true)
+    {
       return SF_DONE;
     }
     else
     {
       pos = bar_get() - FILES_START_Y;
       select_file_set_source_filename();
-      copy_host_slot=selected_host_slot;
+      copy_host_slot = selected_host_slot;
       return SF_COPY;
     }
-  case '!' :
-  case 'B' :
+  case '!':
+  case 'B':
     mount_and_boot();
   default:
     return SF_CHOOSE;
@@ -495,8 +501,8 @@ SSSubState input_select_slot_choose(void)
 
   k = input_ucase();
 
-  //sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -613,8 +619,8 @@ DHSubState input_destination_host_slot_choose(void)
 
   k = input_ucase();
 
-  //sprintf(temp, "y=%d", bar_get());
-  //screen_debug(temp);
+  // sprintf(temp, "y=%d", bar_get());
+  // screen_debug(temp);
 
   switch (k)
   {
@@ -659,4 +665,38 @@ DHSubState input_destination_host_slot_choose(void)
   }
 }
 
+void set_device_slot_mode(unsigned char slot, unsigned char mode)
+{
+  unsigned char tmp_hostSlot;
+  unsigned char tmp_file[FILE_MAXLEN];
+
+  if ( deviceSlots[slot].hostSlot == 0xFF )
+  {
+    return;
+  }
+
+  tmp_hostSlot = deviceSlots[slot].hostSlot;
+  memcpy(tmp_file, deviceSlots[slot].file, FILE_MAXLEN);
+  io_get_filename_for_device_slot(slot, fn);
+
+  io_umount_disk_image(slot);
+
+  deviceSlots[slot].hostSlot = tmp_hostSlot;
+  deviceSlots[slot].mode = mode;
+  memcpy(deviceSlots[slot].file, tmp_file, FILE_MAXLEN);
+
+  io_set_device_filename(slot, fn);
+  io_put_device_slots(&deviceSlots[0]);
+  io_mount_disk_image(slot, mode);
+
+  // If we couldn't mount read/write, then re-mount again as read-only
+  /*
+  in original config, this repeated same log (using same mode..)
+  if ( io_error() )  
+  {
+    io_umount_disk_image(slot);
+
+  }
+  */
+}
 #endif
