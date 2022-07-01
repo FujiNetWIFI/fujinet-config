@@ -454,4 +454,22 @@ void io_get_filename_for_device_slot(unsigned char slot, const char *filename)
   siov();
 }
 
+/**
+ * Mount all hosts and devices
+ */
+unsigned char io_mount_all(void)
+{
+  OS.dcb.ddevic=0x70;
+  OS.dcb.dunit=1;
+  OS.dcb.dcomnd=0xD7; 
+  OS.dcb.dstats=0x00; 
+  OS.dcb.dbuf=0x00;
+  OS.dcb.dtimlo=0x0F; 
+  OS.dcb.dbyt=0;      
+  OS.dcb.daux=0;
+  siov();
+
+  return OS.dcb.dstats; // 1 = successful, anything else = error.
+}
+
 #endif /* BUILD_ATARI */

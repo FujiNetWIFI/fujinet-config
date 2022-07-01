@@ -44,8 +44,8 @@ void io_disable_device(unsigned char d);
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot);
 unsigned char io_device_slot_to_device(unsigned char ds);
 void io_get_filename_for_device_slot(unsigned char slot, const char* filename);
+unsigned char io_mount_all(void);
 
-// TODO: move these?
 void siov();
 void rtclr();
 void cold_start();
