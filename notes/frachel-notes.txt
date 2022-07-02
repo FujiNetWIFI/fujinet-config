@@ -13,9 +13,5 @@ TO DO (estimate 90-95% done at this point):
   
     Selecting mode (r/w) on a new disk creation isn't working.
 
-    implement screen_select_file_display_long_filename()
-        exammple: fujinet.online, holmes cd1, atari, games, games_a, adventure 03.
-    implement screen_select_file_clear_long_filename()
-
     general cleanup, add comments, etc.
 
