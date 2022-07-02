@@ -73,6 +73,8 @@ extern unsigned short custom_sectorSize;
 
 extern bool mounting;
 
+extern unsigned char wifiEnabled;
+
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_ATARI */

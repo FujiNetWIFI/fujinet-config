@@ -6,3 +6,4 @@ and then their own (if necessary), such as "screen_atari.h" with functions only 
 TO DO
 
     "last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server."
+        in wifi section enabled=0 or 1

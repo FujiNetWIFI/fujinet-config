@@ -311,6 +311,10 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_DONE;
   case KCODE_RETURN:
     selected_host_slot = bar_get() - HOSTS_START_Y;
+    if ( !wifiEnabled && strcmp(hostSlots[selected_host_slot],"SD") != 0) // Don't go in a TNFS host if wifi is disabled.
+    {
+      return HD_HOSTS;
+    }
     if (hostSlots[selected_host_slot][0] != 0)
     {
       strcpy(selected_host_name, hostSlots[selected_host_slot]);

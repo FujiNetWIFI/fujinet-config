@@ -18,6 +18,7 @@ static NetConfig nc;
 static AdapterConfig adapterConfig;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
+unsigned char wifiEnabled=true;
 
 // variable to hold various responses that we just need to return a char*.
 char response[512];
@@ -49,6 +50,27 @@ void io_init(void)
   OS.color4 = 0x90;
   OS.coldst = 1;
   OS.sdmctl = 0; // Turn off screen
+}
+
+unsigned char io_get_wifi_enabled(void)
+{
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xEA; // Return wifi status
+  OS.dcb.dstats = 0x40; // Peripheral->Computer
+  OS.dcb.dbuf = &wifiEnabled;
+  OS.dcb.dbyt = 1;
+  OS.dcb.daux1 = 0;
+  siov();
+
+  if (wifiEnabled == 1)
+  {
+    return true;
+  }
+  else
+  {
+    bar_set_color(COLOR_SETTING_FAILED);
+    return false;
+  }
 }
 
 unsigned char io_get_wifi_status(void)
@@ -331,42 +353,41 @@ void io_boot(void)
 {
 }
 
-
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)
 {
-  if ( selected_size == 999 )
+  if (selected_size == 999)
   {
     newDisk.numSectors = custom_numSectors;
     newDisk.sectorSize = custom_sectorSize;
-  } 
+  }
   else
   {
-    switch ( selected_size )
+    switch (selected_size)
     {
-      case 90 :
-        newDisk.numSectors = 720;
-        newDisk.sectorSize = 128;
-        break;
-      case 130 :
-        newDisk.numSectors = 1040;
-        newDisk.sectorSize = 128;
-        break;
-      case 180 :
-        newDisk.numSectors = 720;
-        newDisk.sectorSize = 256;
-        break;
-      case 360 :
-        newDisk.numSectors = 1440;
-        newDisk.sectorSize = 256;
-        break;
-      case 720 :
-        newDisk.numSectors = 2880;
-        newDisk.sectorSize = 256;
-        break;
-      case 1440 :
-        newDisk.numSectors = 5760;
-        newDisk.sectorSize = 256;
-        break;
+    case 90:
+      newDisk.numSectors = 720;
+      newDisk.sectorSize = 128;
+      break;
+    case 130:
+      newDisk.numSectors = 1040;
+      newDisk.sectorSize = 128;
+      break;
+    case 180:
+      newDisk.numSectors = 720;
+      newDisk.sectorSize = 256;
+      break;
+    case 360:
+      newDisk.numSectors = 1440;
+      newDisk.sectorSize = 256;
+      break;
+    case 720:
+      newDisk.numSectors = 2880;
+      newDisk.sectorSize = 256;
+      break;
+    case 1440:
+      newDisk.numSectors = 5760;
+      newDisk.sectorSize = 256;
+      break;
     }
   }
 
@@ -420,17 +441,16 @@ void io_disable_device(unsigned char d)
  */
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
-  OS.dcb.ddevic=0x70;
-  OS.dcb.dunit=1;
-  OS.dcb.dcomnd=0xD8;
-  OS.dcb.dstats=0x80;
-  OS.dcb.dbuf=&copySpec;
-  OS.dcb.dtimlo=0xFE; // Max timeout
-  OS.dcb.dbyt=256;
-  OS.dcb.daux1=source_slot+1;
-  OS.dcb.daux2=destination_slot+1;
+  OS.dcb.ddevic = 0x70;
+  OS.dcb.dunit = 1;
+  OS.dcb.dcomnd = 0xD8;
+  OS.dcb.dstats = 0x80;
+  OS.dcb.dbuf = &copySpec;
+  OS.dcb.dtimlo = 0xFE; // Max timeout
+  OS.dcb.dbyt = 256;
+  OS.dcb.daux1 = source_slot + 1;
+  OS.dcb.daux2 = destination_slot + 1;
   siov();
-
 }
 
 unsigned char io_device_slot_to_device(unsigned char ds)
@@ -459,14 +479,14 @@ void io_get_filename_for_device_slot(unsigned char slot, const char *filename)
  */
 unsigned char io_mount_all(void)
 {
-  OS.dcb.ddevic=0x70;
-  OS.dcb.dunit=1;
-  OS.dcb.dcomnd=0xD7; 
-  OS.dcb.dstats=0x00; 
-  OS.dcb.dbuf=0x00;
-  OS.dcb.dtimlo=0x0F; 
-  OS.dcb.dbyt=0;      
-  OS.dcb.daux=0;
+  OS.dcb.ddevic = 0x70;
+  OS.dcb.dunit = 1;
+  OS.dcb.dcomnd = 0xD7;
+  OS.dcb.dstats = 0x00;
+  OS.dcb.dbuf = 0x00;
+  OS.dcb.dtimlo = 0x0F;
+  OS.dcb.dbyt = 0;
+  OS.dcb.daux = 0;
   siov();
 
   return OS.dcb.dstats; // 1 = successful, anything else = error.
