@@ -750,27 +750,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
   bar_clear(false);
 
 
-  // temp
-  /*
-  while (1)
-  {
-    i = input_ucase();
-    sprintf(temp, "k=%02x", i);
-    screen_debug(temp);
-    while (!kbhit())
-    {
-    }
-  }
-*/
-
   screen_puts(3, 0, "TNFS HOST LIST");
-  // A = 41
-  // INV A = C1
-  // INV A = A1 in this
-  // screen_puts(0,2, "\x07" " xx" );
-  // xx();
-  // POKE(cursor_ptr++, CSI_A+32);
-
   screen_puts(4, 11, "DRIVE SLOTS");
 
   while (retry > 0)
