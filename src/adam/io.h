@@ -43,6 +43,7 @@ void io_enable_device(unsigned char d);
 void io_disable_device(unsigned char d);
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot);
 unsigned char io_device_slot_to_device(unsigned char ds);
+bool io_get_wifi_enabled(void);
 
 #endif /* IO_H */
 #endif /* BUILD_ADAM */

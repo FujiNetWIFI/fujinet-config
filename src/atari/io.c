@@ -52,7 +52,7 @@ void io_init(void)
   OS.sdmctl = 0; // Turn off screen
 }
 
-unsigned char io_get_wifi_enabled(void)
+bool io_get_wifi_enabled(void)
 {
   set_sio_defaults();
   OS.dcb.dcomnd = 0xEA; // Return wifi status

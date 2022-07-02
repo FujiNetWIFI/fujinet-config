@@ -34,6 +34,7 @@ void io_mount_disk_image(unsigned char ds, unsigned char mode);
 void io_set_boot_config(unsigned char toggle);
 void io_umount_disk_image(unsigned char ds);
 void io_boot(void);
+bool io_get_wifi_enabled(void);
 
 #endif /* IO_H */
 #endif /* BUILD_C64 */
