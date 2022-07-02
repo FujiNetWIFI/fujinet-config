@@ -3,10 +3,6 @@ so why not make that common.. then at the individual system folder level each sc
 and then their own (if necessary), such as "screen_atari.h" with functions only they need.
 
 
-TO DO (estimate 90-95% done at this point):
+TO DO
 
-    From mozzwald testing:
-        last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server.
-
-    general cleanup, add comments, etc.
-
+    "last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server."
