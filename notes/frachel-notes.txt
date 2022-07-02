@@ -2,16 +2,11 @@ Maybe have common .h files at the top-level? For example, everyone has to have t
 so why not make that common.. then at the individual system folder level each screen.c would include "../screen.h", 
 and then their own (if necessary), such as "screen_atari.h" with functions only they need.
 
-nc->ssid and ac->ssid are out of sync.. look into which is right to use.
-
 
 TO DO (estimate 90-95% done at this point):
 
     From mozzwald testing:
         last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server.
-
-  
-    Selecting mode (r/w) on a new disk creation isn't working.
 
     general cleanup, add comments, etc.
 
