@@ -1,0 +1,9 @@
+Maybe have common .h files at the top-level? For example, everyone has to have the same function definitions in screen.h (its like an interface), 
+so why not make that common.. then at the individual system folder level each screen.c would include "../screen.h", 
+and then their own (if necessary), such as "screen_atari.h" with functions only they need.
+
+
+TO DO
+
+    "last thing I noticed, theres an option to configure wifi as disabled in fnconfig.ini. if wifi is disabled, config should skip the scan and not allow entry to a tnfs server."
+        in wifi section enabled=0 or 1

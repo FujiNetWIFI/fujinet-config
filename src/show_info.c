@@ -22,6 +22,15 @@
 #define PRINTER 0 // TBD
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/screen.h"
+#include "atari/input.h"
+#include "atari/globals.h"
+#include "atari/io.h"
+#define PRINTER 2 // ?
+#endif /* BUILD_ATARI */
+
+
 #ifdef BUILD_C64
 #include "c64/screen.h"
 #include "c64/input.h"

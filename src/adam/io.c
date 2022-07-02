@@ -360,4 +360,9 @@ unsigned char io_device_slot_to_device(unsigned char ds)
   return ds+4;
 }
 
+bool io_get_wifi_enabled(void)
+{
+	return true;
+}
+
 #endif /* BUILD_ADAM */

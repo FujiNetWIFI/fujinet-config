@@ -28,6 +28,15 @@
 // #include <stdio.h> // for debugging using sprintf
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/globals.h"
+#include "atari/fuji_typedefs.h"
+#include "atari/io.h"
+#include "atari/screen.h"
+#include "atari/input.h"
+#include "atari/bar.h"
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_C64
 #include "c64/globals.h"
 #include "c64/fuji_typedefs.h"
@@ -65,27 +74,26 @@ char selected_device_slot;
 char selected_host_name[32];
 char temp_filename[256];
 
-
 extern bool quick_boot;
 
 void hosts_and_devices_edit_host_slot(unsigned char i)
 {
   unsigned char o;
 
-  if (strlen(hostSlots[i])==0)
-    {
-      screen_hosts_and_devices_clear_host_slot(i);
-      o=0;
-    }
+  if (strlen(hostSlots[i]) == 0)
+  {
+    screen_hosts_and_devices_clear_host_slot(i);
+    o = 0;
+  }
   else
-    o=strlen(hostSlots[i]);
+    o = strlen(hostSlots[i]);
 
   screen_hosts_and_devices_edit_host_slot(i);
-  input_line_hosts_and_devices_host_slot(i,o,hostSlots[i]);
+  input_line_hosts_and_devices_host_slot(i, o, hostSlots[i]);
 
-  if (strlen(hostSlots[i])==0)
+  if (strlen(hostSlots[i]) == 0)
     screen_hosts_and_devices_host_slot_empty(i);
-  
+
   io_put_host_slots(&hostSlots[0]);
   screen_hosts_and_devices_hosts();
 }
@@ -93,25 +101,25 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 void hosts_and_devices_hosts(void)
 {
   io_update_devices_enabled(&deviceEnabled[0]);
-  
+
   screen_hosts_and_devices_hosts();
-  
-  while (hd_subState==HD_HOSTS)
-    hd_subState=input_hosts_and_devices_hosts();
+
+  while (hd_subState == HD_HOSTS)
+    hd_subState = input_hosts_and_devices_hosts();
 }
 
 void hosts_and_devices_long_filename(void)
 {
   char *f = io_get_device_filename(selected_device_slot);
-  
+
   screen_hosts_and_devices_long_filename(f);
 }
 
 void hosts_and_devices_eject(unsigned char ds)
 {
   io_umount_disk_image(ds);
-  memset(deviceSlots[ds].file,0,FILE_MAXLEN);
-  deviceSlots[ds].hostSlot=0xFF;
+  memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
+  deviceSlots[ds].hostSlot = 0xFF;
   io_put_device_slots(&deviceSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices_eject(ds);
@@ -121,62 +129,63 @@ void hosts_and_devices_eject(unsigned char ds)
 void hosts_and_devices_devices_clear_all(void)
 {
   char i;
-  
+
   screen_hosts_and_devices_devices_clear_all();
-  
-  for (i=0;i<4;i++)
+
+  // grouping this assumes same number of device and host slots..
+  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
     hosts_and_devices_eject(i);
 
-  hd_subState=HD_DEVICES;
+  hd_subState = HD_DEVICES;
 }
 
 void hosts_and_devices_devices(void)
 {
-  char k=0;
+  char k = 0;
 
   io_update_devices_enabled(&deviceEnabled[0]);
   screen_hosts_and_devices_devices();
   hosts_and_devices_long_filename();
-  
-  while (hd_subState==HD_DEVICES)
-    hd_subState=input_hosts_and_devices_devices();
+
+  while (hd_subState == HD_DEVICES)
+    hd_subState = input_hosts_and_devices_devices();
 }
 
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
-  memset(temp_filename,0,sizeof(temp_filename));
-  
+  memset(temp_filename, 0, sizeof(temp_filename));
+
   // Stow device slot temporarily
-  memcpy(&temp_deviceSlot,&deviceSlots[selected_device_slot],sizeof(DeviceSlot));
-  temp_deviceSlot.mode=m;
-  memcpy(temp_filename,io_get_device_filename(selected_device_slot),sizeof(temp_filename));
+  memcpy(&temp_deviceSlot, &deviceSlots[selected_device_slot], sizeof(DeviceSlot));
+  temp_deviceSlot.mode = m;
+  memcpy(temp_filename, io_get_device_filename(selected_device_slot), sizeof(temp_filename));
 
   // unmount disk image
   io_umount_disk_image(selected_device_slot);
 
   // copy device slot back in.
-  memcpy(&deviceSlots[selected_device_slot],&temp_deviceSlot,sizeof(DeviceSlot));
-  io_set_device_filename(selected_device_slot,temp_filename);
+  memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+  io_set_device_filename(selected_device_slot, temp_filename);
 
   io_put_device_slots(&deviceSlots[0]);
-  
+
   // Remount
-  io_mount_disk_image(selected_device_slot,m);
+  io_mount_disk_image(selected_device_slot, m);
 }
 
 void hosts_and_devices_devices_enable_toggle(unsigned char ds)
 {
-  bool s=io_get_device_enabled_status(io_device_slot_to_device(ds));
+  bool s = io_get_device_enabled_status(io_device_slot_to_device(ds));
 
-  if (s==true)
+  if (s == true)
     io_disable_device(io_device_slot_to_device(ds));
   else
     io_enable_device(io_device_slot_to_device(ds));
 
-  deviceEnabled[ds]=io_get_device_enabled_status(io_device_slot_to_device(ds));
-  
+  deviceEnabled[ds] = io_get_device_enabled_status(io_device_slot_to_device(ds));
+
   io_update_devices_enabled(&deviceEnabled[0]);
-  screen_hosts_and_devices_device_slots(11,&deviceSlots[0],&deviceEnabled[0]);
+  screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]);
   bar_update();
 }
 
@@ -185,51 +194,48 @@ void hosts_and_devices_done(void)
   char i;
   // char *msg[40];
 
-  for (i = 0; i < 4; i++) // 4 for apple for now, what about adam? 8 for atari?
+  for (i = 0; i < NUM_DEVICE_SLOTS; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
-      {
-	io_mount_host_slot(deviceSlots[i].hostSlot);
-	io_mount_disk_image(i, deviceSlots[i].mode);
-      }
-
+    {
+      io_mount_host_slot(deviceSlots[i].hostSlot);
+      io_mount_disk_image(i, deviceSlots[i].mode);
+    }
   }
 
-  state=DONE;
+  state = DONE;
 }
 
 void hosts_and_devices(void)
 {
-  if (quick_boot==true)
-    hd_subState=HD_DONE;
+  if (quick_boot == true)
+    hd_subState = HD_DONE;
   else
-    hd_subState=HD_HOSTS;
-  
+    hd_subState = HD_HOSTS;
+
   io_get_host_slots(&hostSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
   io_update_devices_enabled(&deviceEnabled[0]);
-  screen_hosts_and_devices(&hostSlots[0],&deviceSlots[0],&deviceEnabled[0]);
+  screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
 
   while (state == HOSTS_AND_DEVICES)
+  {
+    switch (hd_subState)
     {
-      switch(hd_subState)
-	{
-	case HD_HOSTS:
-	  hosts_and_devices_hosts();
-	  break;
-	case HD_DEVICES:
-	  hosts_and_devices_devices();
-	  break;
-	case HD_CLEAR_ALL_DEVICES:
-	  hosts_and_devices_devices_clear_all();
-	  break;
-	case HD_DONE:
-	  hosts_and_devices_done(); // this never gets called because HD_DONE is always paired with state != HOSTS_AND_DEVICES
-	  break;
-	}
+    case HD_HOSTS:
+      hosts_and_devices_hosts();
+      break;
+    case HD_DEVICES:
+      hosts_and_devices_devices();
+      break;
+    case HD_CLEAR_ALL_DEVICES:
+      hosts_and_devices_devices_clear_all();
+      break;
+    case HD_DONE:
+      hosts_and_devices_done(); // this never gets called because HD_DONE is always paired with state != HOSTS_AND_DEVICES
+      break;
     }
+  }
   if (state == DONE)
-  	  hosts_and_devices_done();
-
-
+    hosts_and_devices_done();
 }

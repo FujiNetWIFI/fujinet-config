@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <conio.h>
+#include <stdio.h>
 #include "set_wifi.h"
 #include "die.h"
 
@@ -26,6 +27,15 @@
 #include "apple2/input.h"
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
+
+#ifdef BUILD_ATARI
+#include "atari/io.h"
+#include "atari/fuji_typedefs.h"
+#include "atari/screen.h"
+#include "atari/bar.h"
+#include "atari/input.h"
+#include "atari/globals.h"
+#endif /* BUILD_ATARI */
 
 #ifdef BUILD_C64
 #include "c64/io.h"
@@ -93,8 +103,8 @@ void set_wifi_password(void)
 void set_wifi_scan(void)
 {
   char i;
-  
   screen_set_wifi(io_get_adapter_config());
+
 
   numNetworks = io_scan_for_networks();
 
@@ -109,8 +119,7 @@ void set_wifi_scan(void)
 
   for (i=0;i<numNetworks;i++)
     {
-      SSIDInfo *s = io_get_scan_result(i);
-      screen_set_wifi_display_ssid(i,s);
+      screen_set_wifi_display_ssid(i,io_get_scan_result(i));
     }
 
   ws_subState=WS_SELECT;
@@ -125,6 +134,7 @@ void set_wifi_done(void)
 
 void set_wifi(void)
 {
+
   while (state == SET_WIFI)
   {
     switch (ws_subState)

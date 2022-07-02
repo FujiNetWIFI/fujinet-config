@@ -23,6 +23,7 @@
     "ostream": "c",
     "sstream": "c",
     "streambuf": "c",
-    "select_file.h": "c"
+    "select_file.h": "c",
+    "cstdlib": "c"
   },
 }

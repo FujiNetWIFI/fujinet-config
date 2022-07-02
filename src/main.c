@@ -23,8 +23,15 @@
 #ifdef BUILD_APPLE2
 #include "apple2/io.h"
 #include "apple2/screen.h"
+#include "apple2/sp.h"
+// #include <conio.h> // for dev
 #include <stdint.h>
 #endif /* BUILD_APPLE2 */
+
+#ifdef BUILD_ATARI
+#include "atari/io.h"
+#include "atari/screen.h"
+#endif /* BUILD_ATARI */
 
 #ifdef BUILD_C64
 #include "c64/io.h"
@@ -42,7 +49,6 @@
 #endif /* BUILD_PC6001 */
 
 State state=HOSTS_AND_DEVICES;
-extern DeviceSlot deviceSlots[8];
 
 void setup(void)
 {

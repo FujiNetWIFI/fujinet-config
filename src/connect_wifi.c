@@ -19,6 +19,13 @@
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/io.h"
+#include "atari/screen.h"
+#include "atari/globals.h"
+#include "atari/bar.h"
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_C64
 #include "c64/io.h"
 #include "c64/screen.h"
@@ -39,19 +46,20 @@
 
 void connect_wifi(void)
 {
-  unsigned char retries=20;
-  NetConfig nc;
-  unsigned char s;
-  
-  memcpy(&nc,io_get_ssid(),sizeof(NetConfig));
+	unsigned char retries = 20;
+	NetConfig nc;
+	unsigned char s;
 
-  state = SET_WIFI;
-  
-  screen_connect_wifi(&nc);
+	memcpy(&nc, io_get_ssid(), sizeof(NetConfig));
+
+	state = SET_WIFI;
+
+	screen_connect_wifi(&nc);
 
 	while (retries > 0)
 	{
 		s = io_get_wifi_status();
+
 		switch (s)
 		{
 		case 1:
@@ -71,8 +79,7 @@ void connect_wifi(void)
 			retries--;
 			break;
 		}
-  }
-
+	}
 	screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
-	state=SET_WIFI;
+	state = SET_WIFI;
 }

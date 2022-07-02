@@ -3,10 +3,8 @@
  * 
  * Die function
  */
-#ifdef BUILD_ADAM
-#include <eos.h>
-#endif
-#include "die.h"
+#ifdef BUILD_PC8801
+#include "../die.h"
 
 void die(void)
 {
@@ -16,3 +14,4 @@ void die(void)
 void quit(void)
 {
 }
+#endif

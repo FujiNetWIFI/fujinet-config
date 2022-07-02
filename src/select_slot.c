@@ -28,6 +28,15 @@
 #define DIR_MAX_LEN 31
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/screen.h"
+#include "atari/input.h"
+#include "atari/globals.h"
+#include "atari/io.h"
+#include "atari/bar.h"
+#define DIR_MAX_LEN 36
+#endif
+
 #ifdef BUILD_C64
 #include "c64/screen.h"
 #include "c64/input.h"

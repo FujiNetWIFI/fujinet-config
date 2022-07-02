@@ -14,6 +14,11 @@
 #include "apple2/globals.h"
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_ATARI
+#include "atari/io.h"
+#include "atari/globals.h"
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_C64
 #include "c64/io.h"
 #include "c64/globals.h"
@@ -29,11 +34,19 @@
 #include "pc6001/globals.h"
 #endif /* BUILD_PC6001 */
 
+
 #include "check_wifi.h"
 
 void check_wifi(void)
 {
-  if (io_get_wifi_status() == 3)
+  // Before checking actual connectivity, there's a command to check if wifi is completely disabled, check that first. If it's
+  // disabled, don't go to the set/connect wifi screens.
+  //
+  if ( !io_get_wifi_enabled() )
+  {
+    state=HOSTS_AND_DEVICES;
+  }
+  else if (io_get_wifi_status() == 3)
     {
       state=HOSTS_AND_DEVICES;
     }
