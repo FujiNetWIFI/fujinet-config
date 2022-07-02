@@ -27,9 +27,13 @@ unsigned short custom_numSectors;
 unsigned short custom_sectorSize;
 extern char fn[256];
 bool mounting = false;
+extern unsigned short entry_timer;
 
 unsigned char input()
 {
+  if (entry_timer>0)
+    entry_timer--;
+
   if (kbhit())
   {
     rtclr();
@@ -416,14 +420,15 @@ SFSubState input_select_file_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d,ve=%d,pos=%d,eof=%d", bar_get(), _visibleEntries, pos, dir_eof);
-  screen_debug(temp);
+  //sprintf(temp, "y=%d,ve=%d,pos=%d,eof=%d", bar_get(), _visibleEntries, pos, dir_eof);
+  //screen_debug(temp);
 
   switch (k)
   {
   case 0x1C:
   case '-':
     // up
+    entry_timer=ENTRY_TIMER_DUR;
     if ((bar_get() == FILES_START_Y) && (pos > 0))
       return SF_PREV_PAGE;
 
@@ -435,6 +440,7 @@ SFSubState input_select_file_choose(void)
   case 0x1D:
   case '=':
     // down
+    entry_timer=ENTRY_TIMER_DUR;
     if ((bar_get() == _visibleEntries - 1 + FILES_START_Y) && (dir_eof == false))
       return SF_NEXT_PAGE;
 

@@ -531,7 +531,7 @@ void screen_select_slot(char *e)
   {
     // Modified time 
     sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
-    screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
+    screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
     // File size
     // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
@@ -635,12 +635,14 @@ void screen_select_file_display(char *p, char *f)
 
 void screen_select_file_display_long_filename(char *e)
 {
-  screen_puts(0, 24, "LF:");
-  screen_puts(4, 24, e);
+  screen_puts(0, 24, e);
 }
 
 void screen_select_file_clear_long_filename(void)
 {
+  screen_clear_line(24);
+  screen_clear_line(25);
+
 }
 
 void screen_select_file_filter(void)

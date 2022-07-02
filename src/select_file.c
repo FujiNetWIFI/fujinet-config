@@ -185,12 +185,20 @@ void select_display_long_filename(void)
 {
   char *e;
 
+#ifdef BUILD_ATARI
+  if ((entry_size[bar_get() - FILES_START_Y] > 30) && (entry_timer == 0))
+#else
   if ((entry_size[bar_get()] > 30) && (entry_timer == 0))
+#endif
   {
     if (long_entry_displayed == false)
     {
       io_open_directory(selected_host_slot, path, filter);
+#ifdef BUILD_ATARI      
+      io_set_directory_position(pos + bar_get() - FILES_START_Y);
+#else
       io_set_directory_position(pos + bar_get());
+#endif
       e = io_read_directory(64, 0);
       screen_select_file_display_long_filename(e);
       io_close_directory();
