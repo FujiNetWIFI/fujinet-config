@@ -416,7 +416,7 @@ SFSubState input_select_file_choose(void)
 
   k = input_ucase();
 
-  sprintf(temp, "y=%d,ve=%d,pos=%d,shs=%d", bar_get(), _visibleEntries, pos, selected_host_slot);
+  sprintf(temp, "y=%d,ve=%d,pos=%d,eof=%d", bar_get(), _visibleEntries, pos, dir_eof);
   screen_debug(temp);
 
   switch (k)
@@ -445,25 +445,31 @@ SFSubState input_select_file_choose(void)
     return SF_CHOOSE;
   case KCODE_RETURN:
   case '*': // took from fujinet-config
-    //pos = bar_get() - FILES_START_Y;
     pos += bar_get() - FILES_START_Y;
     if (select_file_is_folder())
       return SF_ADVANCE_FOLDER;
     else
     {
-      // state = SELECT_SLOT;
       return SF_DONE;
     }
   case KCODE_BACKSP:
     return SF_DEVANCE_FOLDER;
 
-  // Have to try these on real atari, see if they work.
-  case CH_CURS_LEFT:
-    if ((bar_get() == FILES_START_Y) && (pos > 0))
+  case '<':
+    if ( strlen(path) == 1 ) // Should probably check for path being '/', but this works too.
+    {
+      state = HOSTS_AND_DEVICES;
+      return SF_DONE;
+    }
+    if ( pos > 0 )
       return SF_PREV_PAGE;
-  case CH_CURS_RIGHT:
-    if ((bar_get() == _visibleEntries - 1 + FILES_START_Y) && (dir_eof == false))
+    else 
+      return SF_DEVANCE_FOLDER;
+    return SF_CHOOSE;
+  case '>':
+    if ((ENTRIES_PER_PAGE == _visibleEntries ) && (dir_eof == false))
       return SF_NEXT_PAGE;
+    return SF_CHOOSE;
   case KCODE_ESCAPE:
     state = HOSTS_AND_DEVICES;
     return SF_DONE;

@@ -19,7 +19,7 @@
 #include "io.h"
 #include "globals.h"
 #include "bar.h"
-
+#include "input.h"
 unsigned char *video_ptr;  // a pointer to the memory address containing the screen contents
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
 char _visibleEntries;
@@ -746,6 +746,20 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 
   screen_clear();
   bar_clear(false);
+
+
+  // temp
+  /*
+  while (1)
+  {
+    i = input_ucase();
+    sprintf(temp, "k=%02x", i);
+    screen_debug(temp);
+    while (!kbhit())
+    {
+    }
+  }
+*/
 
   screen_puts(3, 0, "TNFS HOST LIST");
   // A = 41
