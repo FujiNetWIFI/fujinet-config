@@ -81,6 +81,7 @@ unsigned char fontPatch[48] = {
     0x00, 0x78, 0x87, 0xff, 0xff, 0xff, 0xff, 0x00,
     0, 48, 120, 252, 48, 48, 48, 0};
 
+// Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
 void show_line_nums(void)
 {
   screen_puts(0, 0, "0");
