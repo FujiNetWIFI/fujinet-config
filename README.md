@@ -16,19 +16,16 @@ The CONFIG application must be coded and compiled to build a native binary appli
 ## Screen Shots
 
 CONFIG on the ADAM
-
 ![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
 
 
 
 CONFIG on the AppleII
-
-[[./docs/images/fn_apple_config_v1.jpg]]
+![Apple II CONFIG](./docs/images/fn_apple_config_v1.jpg)
 
 
 CONFIG on the Atari
-
-[[docs/images/fn_atari_config_v1.jpg]]
+![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
 
 
 
