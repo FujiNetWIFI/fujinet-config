@@ -222,7 +222,7 @@ uint16_t sp_dispatch_address(uint8_t slot)
 void sp_init(void)
 {
   uint8_t slot, f;
-  slot = sp_find_slot();
+  slot = (PEEK(0x43) & 0x70) >> 4; // determine slot used for booting, check unit number
   if (slot)
     sp_dispatch = sp_dispatch_address(slot);
   else
