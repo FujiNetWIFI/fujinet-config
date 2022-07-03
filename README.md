@@ -5,7 +5,7 @@ More documentation to be written as it takes shape.
 
 This repo is named fujinet-config-adam but it is really the primary repo for the CONFIG application for every supported platform on FujiNet. 
 
-In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common strands for the platforms began to take shape in this repo. Apple II soon joined and benefited from the comonality here. Atari was still on it's own but it is currently in the middle of being brought back into this repo (summer of 2022) so there is again just one place for all CONFIGs going forward.
+In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common strands for the platforms began to take shape in this repo. Apple II soon joined and benefited from the commonality here. Atari was still on it's own but it is currently in the middle of being brought back into this repo (summer of 2022) so there is again just one place for all CONFIGs going forward.
 
 ## What is CONFIG?
 CONFIG is the primary management application for the FujiNet device. It manages the WIFI connections and credentials, the SD card if one is inserted into your FN, and it traverses the HOSTS for images to mount in the Virtual SLOTS. The main page of CONFIG is the familiar HOSTS and SLOTS view that greets most people at boot with a FN device active on their system. CONFIG also can copy images to and from the SD card and finally has a configuration screen that shows the current network configuration of the ESP32 on your local network.
@@ -15,21 +15,22 @@ The CONFIG application must be coded and compiled to build a native binary appli
 
 ## Screen Shots
 
-CONFIG on the ADAM
+### CONFIG on the ADAM
 ![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
 
 
 
-CONFIG on the AppleII
+### CONFIG on the AppleII
 ![Apple II CONFIG](./docs/images/fn_apple_config_v1.jpg)
 
 
-CONFIG on the Atari
+### CONFIG on the Atari
 ![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
 
+* Note that the Atari screenshot above is from the classic CONFIG.
 
 
-
+## Compiling
 To compile, currently requires:
 
 * make
