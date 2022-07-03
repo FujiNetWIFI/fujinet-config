@@ -17,7 +17,8 @@ The CONFIG application must be coded and compiled to build a native binary appli
 
 CONFIG on the ADAM
 
-[[./docs/images/fn_adam_config_v1.jpg]]
+![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
+
 
 
 CONFIG on the AppleII
