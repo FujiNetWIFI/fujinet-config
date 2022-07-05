@@ -31,6 +31,7 @@ extern char filter[32];
 extern bool dir_eof;
 extern bool quick_boot;
 
+#define NUM_DEVICE_SLOTS 4
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_APPLE2 */
