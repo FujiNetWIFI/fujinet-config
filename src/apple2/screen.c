@@ -73,7 +73,12 @@ void screen_putlcc(char c)
   switch (ostype)
   {
   case APPLE_IIE: /* Apple //e                   */
-    modifier = 0;
+    if ((c > 63) && (c < 96))
+      // upper case
+      modifier = 64;
+    else if (c > 95)
+      // lower case
+      modifier = 128;
     break;
   case APPLE_IIC:  /* Apple //c                   */
     if ((c > 63) && (c < 96))
