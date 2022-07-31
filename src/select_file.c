@@ -230,7 +230,6 @@ void select_prev_page(void)
 
 void select_file_filter(void)
 {
-  memset(filter, 0, 32);
   screen_select_file_filter();
   input_line_filter(filter);
   dir_eof = quick_boot = false;
