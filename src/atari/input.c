@@ -466,7 +466,7 @@ SFSubState input_select_file_choose(void)
     return SF_DEVANCE_FOLDER;
 
   case '<':
-    if ( strlen(path) == 1 ) // Should probably check for path being '/', but this works too.
+    if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
     {
       state = HOSTS_AND_DEVICES;
       return SF_DONE;
