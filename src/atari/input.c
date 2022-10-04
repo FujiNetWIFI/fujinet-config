@@ -10,6 +10,7 @@
 #include <atari.h>
 #include <conio.h>
 #include <string.h>
+#include <peekpoke.h>
 #include "input.h"
 #include "io.h"
 #include "bar.h"
@@ -56,6 +57,7 @@ unsigned char input_handle_joystick(void)
   if ((OS.stick0 != 0x0F) && (OS.rtclok[2] > 6))
   {
     rtclr();
+    POKE(0x4d, 0); // Turn off ATRACT (screen saver) since it doesn't turn off via joystick movement like it does with a keypress.
     switch (OS.stick0)
     {
     case 14:
@@ -75,7 +77,10 @@ unsigned char input_handle_joystick(void)
     }
   }
   else if (OS.strig0 == 0)
+  {
+    POKE(0x4d, 0); // Turn off ATRACT (screen saver) since it doesn't turn off via joystick movement like it does with a keypress.
     return 0x9B;
+  }
   else
     return 0;
 }
