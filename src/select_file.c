@@ -274,6 +274,7 @@ void select_file_advance(void)
 
 void select_file_devance(void)
 {
+  int i;
   char *p = strrchr(path, '/'); // find end of directory string (last /)
 
   bar_clear(false);
@@ -284,6 +285,11 @@ void select_file_devance(void)
   p++;
 
   *p = 0; // truncate string.
+
+  for ( i = strlen (path); i < 224; i++ )
+  {
+    path[i] = 0;
+  }
 
   pos = 0;
   dir_eof = quick_boot = false;
