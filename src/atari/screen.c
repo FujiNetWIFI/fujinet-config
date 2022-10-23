@@ -81,42 +81,6 @@ unsigned char fontPatch[48] = {
     0x00, 0x78, 0x87, 0xff, 0xff, 0xff, 0xff, 0x00,
     0, 48, 120, 252, 48, 48, 48, 0};
 
-// Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
-void show_line_nums(void)
-{
-  screen_puts(0, 0, "0");
-  screen_puts(0, 1, "1");
-  screen_puts(0, 2, "2");
-  screen_puts(0, 3, "3");
-  screen_puts(0, 4, "4");
-  screen_puts(0, 5, "5");
-  screen_puts(0, 6, "6");
-  screen_puts(0, 7, "7");
-  screen_puts(0, 8, "8");
-  screen_puts(0, 9, "9");
-  screen_puts(0, 10, "10");
-  screen_puts(0, 11, "11");
-  screen_puts(0, 12, "12");
-  screen_puts(0, 13, "13");
-  screen_puts(0, 14, "14");
-  screen_puts(0, 15, "15");
-  screen_puts(0, 16, "16");
-  screen_puts(0, 17, "17");
-  screen_puts(0, 18, "18");
-  screen_puts(0, 19, "19");
-  screen_puts(0, 20, "20");
-  screen_puts(0, 21, "21");
-  screen_puts(0, 22, "22");
-  screen_puts(0, 23, "23");
-  screen_puts(0, 24, "24");
-  screen_puts(0, 25, "25");
-
-  while (!kbhit())
-  {
-  }
-  cgetc();
-  screen_clear();
-}
 
 void set_active_screen(unsigned char screen)
 {
@@ -125,12 +89,16 @@ void set_active_screen(unsigned char screen)
 
 void set_cursor(unsigned char x, unsigned char y)
 {
-  // Each screen uses a different displaylist, so we need to know how many columns each row is so we can calculate
-  // how many bytes to add to the base video memory pointer. Previously it assumed 40 columns, which resulted in the Y
+  // Each screen uses a different displaylist so we need to know how many columns each row is so we can calculate
+  // how many bytes to add to the base video memory pointer. Previously it assumed 40 columns which resulted in the Y
   // coordinate not always use correctly in screen functions.
   //
+  // For example, if line 1 is only 20 rows, and the rest of the lines are 40 rows and you called "set_cursor(0, 3)", the
+  // original set_cursor did "x+y*40" which would be an offset of 120 which would put the cursor 20 characters into the 4th line 
+  // since line 1 was only 20 characters.
+  //
   // This is a hacky way to do it - basically we just see what screen we're on, and since we "know" the layout so we do the math
-  // appopriately. This could be more elegant by doing somethihgn like "walking" through the displaylist, PEEKing the value,
+  // appopriately. This could be more elegant by doing something like "walking" through the displaylist, PEEKing the value,
   // determining how many colums in the returned mode, and doing the math accordingly, but this is good for now, just
   // verbose.
   //
@@ -314,12 +282,6 @@ void screen_append(char *s)
     put_char(*s);
     ++s;
   }
-}
-
-void screen_debug(char *message)
-{
-  screen_clear_line(24);
-  screen_puts(0, 24, message);
 }
 
 void screen_puts(unsigned char x, unsigned char y, char *s)
@@ -1099,37 +1061,49 @@ int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxle
   POKE(cursor_ptr, 0x00);      // clear cursor
 }
 
-/*
-int util_ellipsize(const char *src, char *dst, int dstsize)
+
+#ifdef DEBUG
+// Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
+void show_line_nums(void)
 {
-    // Don't do much if there's no space to copy anything
-    if (dstsize <= 1)
-    {
-        if (dstsize == 1)
-            dst[0] = '\0';
-        return 0;
-    }
+  screen_puts(0, 0, "0");
+  screen_puts(0, 1, "1");
+  screen_puts(0, 2, "2");
+  screen_puts(0, 3, "3");
+  screen_puts(0, 4, "4");
+  screen_puts(0, 5, "5");
+  screen_puts(0, 6, "6");
+  screen_puts(0, 7, "7");
+  screen_puts(0, 8, "8");
+  screen_puts(0, 9, "9");
+  screen_puts(0, 10, "10");
+  screen_puts(0, 11, "11");
+  screen_puts(0, 12, "12");
+  screen_puts(0, 13, "13");
+  screen_puts(0, 14, "14");
+  screen_puts(0, 15, "15");
+  screen_puts(0, 16, "16");
+  screen_puts(0, 17, "17");
+  screen_puts(0, 18, "18");
+  screen_puts(0, 19, "19");
+  screen_puts(0, 20, "20");
+  screen_puts(0, 21, "21");
+  screen_puts(0, 22, "22");
+  screen_puts(0, 23, "23");
+  screen_puts(0, 24, "24");
+  screen_puts(0, 25, "25");
 
-    int srclen = strlen(src);
-
-    // Do a simple copy if we have the room for it (or if we don't have room to create a string with ellipsis in the middle)
-    if (srclen < dstsize || dstsize < 6)
-    {
-        return strlcpy(dst, src, dstsize);
-    }
-
-    // Account for both the 3-character ellipses and the null character that needs to fit in the destination
-    int rightlen = (dstsize - 4) / 2;
-    // The left side gets one more character if the destination is odd
-    int leftlen = rightlen + dstsize % 2;
-
-    strlcpy(dst, src, leftlen + 1); // Add one because strlcpy wants to add its own NULL
-
-    dst[leftlen] = dst[leftlen + 1] = dst[leftlen + 2] = '.';
-
-    strlcpy(dst + leftlen + 3, src + (srclen - rightlen), rightlen + 1); // Add one because strlcpy wants to add its own NULL
-
-    return dstsize;
+  while (!kbhit())
+  {
+  }
+  cgetc();
+  screen_clear();
 }
-*/
+
+void screen_debug(char *message)
+{
+  screen_clear_line(24);
+  screen_puts(0, 24, message);
+}
+#endif //DEBUG
 #endif

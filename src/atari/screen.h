@@ -23,10 +23,14 @@ typedef enum
 
 #define screen_input(x, y, s) _screen_input((x), (y), (s), sizeof(s))
 
+#ifdef DEBUG
+void show_line_nums(void);
+void screen_debug(char *message);
+#endif // DEBUG
+
 void set_active_screen(unsigned char screen);
 void screen_mount_and_boot();
 int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
-void show_line_nums(void);
 void screen_dlist_connect_wifi(void);
 void screen_dlist_hosts_and_devices(void);
 void screen_dlist_show_info(void);
@@ -44,7 +48,6 @@ void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
 void screen_select_slot_mode(void);
 void font_init();
 extern void bar_setup_regs();
-void screen_debug(char *message);
 void screen_puts(unsigned char x, unsigned char y, char *s);
 void screen_clear_line(unsigned char y);
 void screen_error(const char *msg);
@@ -103,6 +106,7 @@ void screen_destination_host_slot(char *h, char *p);
 void screen_destination_host_slot_choose(void);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
+
 
 extern unsigned char *cursor_ptr;
 #define GRAPHICS_0_SCREEN_SIZE (40 * 25) // Defines the memory size in bytes
