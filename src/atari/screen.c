@@ -532,7 +532,7 @@ void screen_select_slot(char *e)
   {
     // Modified time 
     sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
-    screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
+    screen_puts(0, DEVICES_END_MOUNT_Y + 5, d);
 
     // File size
     // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
