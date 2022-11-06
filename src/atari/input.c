@@ -99,7 +99,7 @@ void input_line_set_wifi_custom(char *c)
 void input_line_set_wifi_password(char *c)
 {
   // bar_show(19);
-  _screen_input(0, 21, c, 32);
+  _screen_input(0, 21, c, 64);
 }
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
