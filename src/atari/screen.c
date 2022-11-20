@@ -642,7 +642,26 @@ void screen_select_file_prev(void)
 
 void screen_select_file_display_entry(unsigned char y, char *e)
 {
+
+/*
+  if (e[strlen(e)-1]=='/')
+    screen_puts(0,FILES_START_Y+y,CH_FOLDER);
+  else if (e[0]=='=') 
+    screen_puts(0,FILES_START_Y+y,CH_SERVER);
+  else
+  */
+
+  if (e[strlen(e)-1]=='/')
+  {
+    screen_puts(0,FILES_START_Y+y,CH_FOLDER);
+  }
+  else if (e[0]=='=') 
+  {
+    screen_puts(0,FILES_START_Y+y,CH_SERVER);
+  }
+  
   screen_puts(3, FILES_START_Y + y, e);
+
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -945,20 +964,22 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 
 void screen_dlist_select_file(void)
 {
-  POKE(DISPLAY_LIST + 0x06, 2);
-  POKE(DISPLAY_LIST + 0x0f, 2);
-  POKE(DISPLAY_LIST + 0x10, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x06, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 void screen_dlist_select_slot(void)
 {
-  POKE(DISPLAY_LIST + 0x06, 2);
-  POKE(DISPLAY_LIST + 0x0f, 2);
-  POKE(DISPLAY_LIST + 0x10, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x06, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 void screen_dlist_show_info(void)
@@ -968,31 +989,36 @@ void screen_dlist_show_info(void)
   // 1x20 (double height)
   // 1x20 normal
   // rest 40
+  //memcpy((void *)DISPLAY_LIST, &info_dlist, sizeof(info_dlist)); // copy display list to $0600
 
-  POKE(DISPLAY_LIST + 0x0a, 7);
-  POKE(DISPLAY_LIST + 0x0b, 6);
-  POKE(DISPLAY_LIST + 0x0f, 2);
-  POKE(DISPLAY_LIST + 0x10, 2);
+  // Start with original display list, then modify for this screen.
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR20x16x2); // This is 2 rows (16 scanlines) high, so need to clear out some other unused rows for this screen.
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+
+  POKE(DISPLAY_LIST + 0x1d, DL_BLK1);
+  POKE(DISPLAY_LIST + 0x1e, DL_BLK1);
 }
 
 void screen_dlist_set_wifi(void)
 {
-  POKE(DISPLAY_LIST + 0x0a, 2);
-  POKE(DISPLAY_LIST + 0x0b, 2);
-  POKE(DISPLAY_LIST + 0x1b, 6);
-  POKE(DISPLAY_LIST + 0x1c, 6);
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR20x8x2);
 }
 
 void screen_dlist_mount_and_boot(void)
 {
-  // Same as wifi layout
-  //screen_dlist_set_wifi();
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
   screen_dlist_select_file();
 }
 
 void screen_connect_wifi(NetConfig *nc)
 {
-  screen_dlist_show_info();
   screen_dlist_set_wifi();
   set_active_screen(SCREEN_CONNECT_WIFI);
   screen_clear();
@@ -1010,14 +1036,14 @@ void screen_dlist_hosts_and_devices(void)
   // 8x40 column (host list)
   // 2x20 column (drive slot header)
   // rest 40 column (drive slots and commands)
-
-  POKE(DISPLAY_LIST + 0x06, 6);
-  POKE(DISPLAY_LIST + 0x0f, 6);
-  POKE(DISPLAY_LIST + 0x10, 6);
-  POKE(DISPLAY_LIST + 0x0a, 2);
-  POKE(DISPLAY_LIST + 0x0b, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x06, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen)
