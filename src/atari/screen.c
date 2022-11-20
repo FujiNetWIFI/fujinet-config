@@ -70,43 +70,6 @@ void config_dlist =
         DISPLAY_LIST          // 0x1f, 0x20  Memory address containing the entire display list.
 };
 
-void info_dlist =
-    {
-        DL_BLK8,              // 0x00 (8 Blank Scanlines)
-        DL_BLK8,              // 0x01 (8 Blank Scanlines)
-        DL_BLK8,              // 0x02 (8 Blank Scanlines)
-        DL_LMS(DL_CHR20x8x2), // 0x03 Line 0 (first line of displayable text, will start at coordinates 0,0)
-        DISPLAY_MEMORY,       // 0x04 and 0x05 This is the high order bit location of the display list.  Defined in screen.h
-        DL_CHR20x8x2,         // 0x06  Line 1
-        DL_CHR40x8x1,         // 0x07  Line 2
-        DL_CHR40x8x1,         // 0x08  Line 3
-        DL_CHR40x8x1,         // 0x09  Line 4
-        7,         // 0x0a  Line 5
-        6,         // 0x0b  Line 6
-        DL_CHR40x8x1,         // 0x0c  Line 7
-        DL_CHR40x8x1,         // 0x0d  Line 8
-        DL_CHR40x8x1,         // 0x0e  Line 9
-        2,         // 0x0f  Line 10
-        2,         // 0x10  Line 11
-        DL_CHR40x8x1,         // 0x11  Line 12
-        DL_CHR40x8x1,         // 0x12  Line 13
-        DL_CHR40x8x1,         // 0x13  Line 14
-        DL_CHR40x8x1,         // 0x14  Line 15
-        DL_CHR40x8x1,         // 0x15  Line 16
-        DL_CHR40x8x1,         // 0x16  Line 17
-        DL_CHR40x8x1,         // 0x17  Line 18
-        DL_CHR40x8x1,         // 0x18  Line 19
-        DL_CHR40x8x1,         // 0x19  Line 20
-        DL_CHR40x8x1,         // 0x1a  Line 21
-        DL_CHR20x8x2,         // 0x1b  Line 22
-        DL_CHR20x8x2,         // 0x1c  Line 23
-        DL_CHR40x8x1,         // 0x1d  Line 24
-        DL_JVB,               // Signal to ANTIC end of DISPLAY_LIST has been reached and loop back to the beginning.  The jump to the begining is located at the next two bits defined below.
-        DISPLAY_LIST          // 0x1f, 0x20  Memory address containing the entire display list.
-};
-
-
-
 // Patch to the character set to add things like the folder icon and the wifi-signal-strength bars.
 // Each new character is 8-bytes.
 //
@@ -687,7 +650,18 @@ void screen_select_file_display_entry(unsigned char y, char *e)
     screen_puts(0,FILES_START_Y+y,CH_SERVER);
   else
   */
-    screen_puts(3, FILES_START_Y + y, e);
+
+  if (e[strlen(e)-1]=='/')
+  {
+    screen_puts(0,FILES_START_Y+y,CH_FOLDER);
+  }
+  else if (e[0]=='=') 
+  {
+    screen_puts(0,FILES_START_Y+y,CH_SERVER);
+  }
+  
+  screen_puts(3, FILES_START_Y + y, e);
+
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -991,21 +965,21 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 void screen_dlist_select_file(void)
 {
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
-  POKE(DISPLAY_LIST + 0x06, 2);
-  POKE(DISPLAY_LIST + 0x0f, 2);
-  POKE(DISPLAY_LIST + 0x10, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  POKE(DISPLAY_LIST + 0x06, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 void screen_dlist_select_slot(void)
 {
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
-  POKE(DISPLAY_LIST + 0x06, 2);
-  POKE(DISPLAY_LIST + 0x0f, 2);
-  POKE(DISPLAY_LIST + 0x10, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  POKE(DISPLAY_LIST + 0x06, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 void screen_dlist_show_info(void)
@@ -1015,34 +989,36 @@ void screen_dlist_show_info(void)
   // 1x20 (double height)
   // 1x20 normal
   // rest 40
-  memcpy((void *)DISPLAY_LIST, &info_dlist, sizeof(info_dlist)); // copy display list to $0600
+  //memcpy((void *)DISPLAY_LIST, &info_dlist, sizeof(info_dlist)); // copy display list to $0600
 
-  //POKE(DISPLAY_LIST + 0x0a, 7);
-  //POKE(DISPLAY_LIST + 0x0b, 6);
-  //POKE(DISPLAY_LIST + 0x0f, 2);
-  //POKE(DISPLAY_LIST + 0x10, 2);
+  // Start with original display list, then modify for this screen.
+  memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR20x16x2); // This is 2 rows (16 scanlines) high, so need to clear out some other unused rows for this screen.
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
+
+  POKE(DISPLAY_LIST + 0x1d, DL_BLK1);
+  POKE(DISPLAY_LIST + 0x1e, DL_BLK1);
 }
 
 void screen_dlist_set_wifi(void)
 {
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
-  POKE(DISPLAY_LIST + 0x0a, 2);
-  POKE(DISPLAY_LIST + 0x0b, 2);
-  POKE(DISPLAY_LIST + 0x1b, 6);
-  POKE(DISPLAY_LIST + 0x1c, 6);
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR20x8x2);
 }
 
 void screen_dlist_mount_and_boot(void)
 {
-  // Same as wifi layout
-  //screen_dlist_set_wifi();
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
   screen_dlist_select_file();
 }
 
 void screen_connect_wifi(NetConfig *nc)
 {
-  screen_dlist_show_info();
   screen_dlist_set_wifi();
   set_active_screen(SCREEN_CONNECT_WIFI);
   screen_clear();
@@ -1061,13 +1037,13 @@ void screen_dlist_hosts_and_devices(void)
   // 2x20 column (drive slot header)
   // rest 40 column (drive slots and commands)
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
-  POKE(DISPLAY_LIST + 0x06, 6);
-  POKE(DISPLAY_LIST + 0x0f, 6);
-  POKE(DISPLAY_LIST + 0x10, 6);
-  POKE(DISPLAY_LIST + 0x0a, 2);
-  POKE(DISPLAY_LIST + 0x0b, 2);
-  POKE(DISPLAY_LIST + 0x1b, 2);
-  POKE(DISPLAY_LIST + 0x1c, 2);
+  POKE(DISPLAY_LIST + 0x06, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0f, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x10, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
+  POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
 
 int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen)
@@ -1112,7 +1088,7 @@ int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxle
 }
 
 
-#ifdef DEBUG
+//#ifdef DEBUG
 // Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
 void show_line_nums(void)
 {
@@ -1155,5 +1131,5 @@ void screen_debug(char *message)
   screen_clear_line(24);
   screen_puts(0, 24, message);
 }
-#endif //DEBUG
+//#endif //DEBUG
 #endif
