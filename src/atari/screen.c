@@ -1088,7 +1088,7 @@ int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxle
 }
 
 
-//#ifdef DEBUG
+#ifdef DEBUG
 // Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
 void show_line_nums(void)
 {
@@ -1131,5 +1131,5 @@ void screen_debug(char *message)
   screen_clear_line(24);
   screen_puts(0, 24, message);
 }
-//#endif //DEBUG
+#endif //DEBUG
 #endif
