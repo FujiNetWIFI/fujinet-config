@@ -19,10 +19,8 @@ The CONFIG application must be coded and compiled to build a native binary appli
 ![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
 
 
-
 ### CONFIG on the AppleII
 ![Apple II CONFIG](./docs/images/fn_apple_config_v1.jpg)
-
 
 ### CONFIG on the Atari
 ![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
@@ -30,7 +28,34 @@ The CONFIG application must be coded and compiled to build a native binary appli
 * Note that the Atari screenshot above is from the classic CONFIG.
 
 
-## Compiling
+## Compiling on the Atari
+To compile, currently requires:
+
+* dir2atr - https://www.horus.com/~hias/atari/atarisio/atarisio-221009.tar.gz
+  * download, build and install on your local build system
+
+* https://github.com/FujiNetWIFI/fujinet-config-tools
+  ** clone that repo and then do a `make dist` in order to get the ftools built for atari
+  ** these are copied over to the FujiNet Atari Boot Disk to have available from DOS if needed
+
+
+Now with those prerequisites out of the way:
+
+$ make -f Makefile.atari clean dist
+
+Check for any errors. If sucessful there will be an 
+
+```
+created image "autorun.atr"
+```
+
+copy autorun.atr to ~//fujinet-platformio/data/BUILD_ATARI/ and then using PIO (Platform IO) build  
+"Build Filesystem Image" 
+Then use "Upload Filesystem Image" to load the new image onto the FujiNet. Your new CONFIG should be ready to use.
+
+
+
+## Compiling on the ADAM
 To compile, currently requires:
 
 * make
