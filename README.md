@@ -35,13 +35,13 @@ To compile, currently requires:
   * download, build and install on your local build system
 
 * https://github.com/FujiNetWIFI/fujinet-config-tools
-  ** clone that repo and then do a `make dist` in order to get the ftools built for atari
-  ** these are copied over to the FujiNet Atari Boot Disk to have available from DOS if needed
+  * clone that repo and then do a `make dist` in order to get the ftools built for atari
+  * these are copied over to the FujiNet Atari Boot Disk to have available from DOS if needed
 
 
 Now with those prerequisites out of the way:
 
-$ make -f Makefile.atari clean dist
+`$ make -f Makefile.atari clean dist`
 
 Check for any errors. If sucessful there will be an 
 
