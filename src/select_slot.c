@@ -69,6 +69,8 @@ char mode=0;
 bool create=false;
 SSSubState ss_subState;
 
+extern SFSubState sf_subState;
+
 void select_slot_init()
 {
   if (quick_boot==true)
@@ -177,7 +179,9 @@ void select_slot_done()
       io_close_directory();
       
     }
-  state=HOSTS_AND_DEVICES;
+  //state=HOSTS_AND_DEVICES; // Go back to the main screen
+  state=SELECT_FILE; // Return to the list of files were were just browsing
+  sf_subState=SF_BACKTO;
 }
 
 void select_slot(void)

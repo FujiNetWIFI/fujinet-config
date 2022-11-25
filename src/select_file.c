@@ -381,7 +381,10 @@ void select_file(void)
 {
   char visibleEntries = 0;
 
-  sf_subState = SF_INIT;
+  if (sf_subState==SF_BACKTO)
+    sf_subState = SF_DISPLAY;
+  else
+    sf_subState = SF_INIT;
 
   while (state == SELECT_FILE)
   {
