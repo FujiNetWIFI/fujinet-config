@@ -984,22 +984,13 @@ void screen_dlist_select_slot(void)
 
 void screen_dlist_show_info(void)
 {
-  // 2x20
-  // 3x40
-  // 1x20 (double height)
-  // 1x20 normal
-  // rest 40
-  //memcpy((void *)DISPLAY_LIST, &info_dlist, sizeof(info_dlist)); // copy display list to $0600
-
   // Start with original display list, then modify for this screen.
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
-  POKE(DISPLAY_LIST + 0x0a, DL_CHR20x16x2); // This is 2 rows (16 scanlines) high, so need to clear out some other unused rows for this screen.
+
+  POKE(DISPLAY_LIST + 0x0a, DL_CHR20x8x2);
   POKE(DISPLAY_LIST + 0x0b, DL_CHR20x8x2);
   POKE(DISPLAY_LIST + 0x0f, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x10, DL_CHR40x8x1);
-
-  POKE(DISPLAY_LIST + 0x1d, DL_BLK1);
-  POKE(DISPLAY_LIST + 0x1e, DL_BLK1);
 }
 
 void screen_dlist_set_wifi(void)
