@@ -94,6 +94,10 @@ uint8_t io_get_wifi_status(void)
 {
   // call the SP status command and get the returned byte
 
+  unsigned long l = 0;
+
+  for (l=0;l<4096;l++);
+  
   sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
   if (sp_error)
       return 0;
