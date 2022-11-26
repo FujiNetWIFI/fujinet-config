@@ -467,7 +467,7 @@ void input_line_set_wifi_custom(char *c)
 
 void input_line_set_wifi_password(char *c)
 {
-  input_line(2, STATUS_BAR + 1, 0, c, 64, false);
+  input_line(2, STATUS_BAR + 1, 0, c, 64, true);
 }
 
 WSSubState input_set_wifi_select(void)
