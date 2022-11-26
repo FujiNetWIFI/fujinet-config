@@ -162,6 +162,10 @@ void sp_list_devs()
 {
   int8_t err, num, i, j;
 
+  revers(1);
+  cprintf(" SMARTPORT DEVICE LIST \r\n\r\n");
+  revers(0);
+  
   err = sp_status(0x00, 0x00); // get number of devices
   num = sp_payload[0];
   num += 2;
@@ -173,6 +177,9 @@ void sp_list_devs()
       cputc(sp_payload[5 + j]);
     cputs("\r\n");
   }
+  revers(1);
+  cprintf("\r\n PRESS ANY KEY TO CONTINUE \r\n");
+  revers(0);
   cgetc();
 }
 
