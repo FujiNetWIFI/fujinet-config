@@ -76,7 +76,8 @@ static AdapterConfig ac;
 
 void io_init(void)
 {
-   sp_init();
+  clrscr();
+  sp_init();
 }
 
 uint8_t io_status(void)
