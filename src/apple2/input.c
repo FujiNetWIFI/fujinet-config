@@ -38,6 +38,8 @@
 
 #define STATUS_BAR 21 // defined in screen.c
 
+#define UNUSED(x) (void)(x);
+
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
 extern bool long_entry_displayed;
@@ -55,10 +57,6 @@ unsigned char input_ucase(void)
   unsigned char c = input();
   if ((c>='a') && (c<='z')) c&=~32;
   return c;
-}
-
-static void input_clear_bottom(void)
-{
 }
 
 /**
@@ -131,7 +129,10 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
         if (a>64 && a<91)
           a += uc;
         gotox(x + i);
-        screen_putlcc(a);
+	if (password)
+	  screen_putlcc('*');
+	else
+	  screen_putlcc(a);
         c[i++] = a;
       }
     break;
@@ -260,21 +261,26 @@ SFSubState input_select_file_choose(void)
 unsigned char input_select_file_new_type(void) 
 {
   // TODO: Implement
+  return 0;
 }
 
 unsigned long input_select_file_new_size(unsigned char t) 
 {
   // TODO: implement
+  UNUSED(t);
+  return 0;
 }
 
 unsigned long input_select_file_new_custom(void) 
 {
   // TODO: implement
+  return 0;
 }
 
 void input_select_file_new_name(char *c) 
 {
   // TODO: Implement
+  UNUSED(c);
 }
 
 SSSubState input_select_slot_choose(void)
@@ -368,7 +374,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     selected_host_slot = bar_get();
     if (hostSlots[selected_host_slot][0] != 0)
     {
-      strcpy(selected_host_name, hostSlots[selected_host_slot]);
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
       state = SELECT_FILE;
       return HD_DONE;
     }

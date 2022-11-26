@@ -14,6 +14,8 @@
 
 #define STATUS_BAR 21
 
+#define UNUSED(x) (void)(x);
+
 static const char *empty="EMPTY";
 static const char *off="OFF";
 
@@ -217,6 +219,7 @@ void screen_destination_host_slot_choose(void)
 
 const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
+  UNUSED(hs);
   if (fn[0]!=0x00)
     return fn;
   else if (e==false)
@@ -236,7 +239,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   
   for (i=0;i<4;i++)
     {
-      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
     } 
 }
 
@@ -255,7 +258,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot((char *)h[i])); 
     }
 
   screen_hosts_and_devices_device_slots(11,d,e);  
@@ -282,7 +285,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot(h[i])); 
+      gotoxy(0,i+1); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot((char *)h[i])); 
     }
 }
 
@@ -397,6 +400,7 @@ void screen_select_file_new_type(void)
 void screen_select_file_new_size(unsigned char k) 
 {
   // TODO: implement
+  UNUSED(k);
 }
 
 void screen_select_file_new_custom(void) 
@@ -460,6 +464,7 @@ void screen_select_file_new_name(void)
 void screen_hosts_and_devices_long_filename(char *f)
 {
   // TODO: implement
+  UNUSED(f);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)

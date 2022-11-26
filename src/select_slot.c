@@ -117,8 +117,6 @@ void select_slot_eject(unsigned char ds)
 
 void select_slot_choose()
 {
-  char k;
-  
   screen_select_slot_choose();
 
   while (ss_subState==SS_CHOOSE)

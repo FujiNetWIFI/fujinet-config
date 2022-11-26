@@ -50,6 +50,8 @@
 #define FUJICMD_DISABLE_DEVICE 0xD4
 #define FUJICMD_STATUS 0x53
 
+#define UNUSED(x) (void)(x);
+
 #include <string.h>
 #include "sp.h"
 
@@ -179,12 +181,18 @@ void io_set_ssid(NetConfig *nc)
 
 char *io_get_device_filename(uint8_t ds)
 {
+  UNUSED(ds);
   // TODO: implement
+  return 0;
 }
 
 void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsigned long selected_size,char *path)
 {
   // TODO: implement
+  UNUSED(selected_host_slot);
+  UNUSED(selected_device_slot);
+  UNUSED(selected_size);
+  UNUSED(path);
 }
 
 void io_get_device_slots(DeviceSlot *d)
@@ -237,9 +245,9 @@ void io_open_directory(uint8_t hs, char *p, char *f)
   sp_payload[idx++] = (uint8_t)(s >> 8);
   sp_payload[idx++] = hs;
 
-  strcpy(&sp_payload[idx++], p);
+  strcpy((char *)&sp_payload[idx++], p);
   idx += strlen(p);
-  strcpy(&sp_payload[idx], f);
+  strcpy((char *)&sp_payload[idx], f);
 
   sp_error = sp_control(sp_dest, FUJICMD_OPEN_DIRECTORY);
 }
@@ -257,7 +265,7 @@ char *io_read_directory(uint8_t l, uint8_t a)
   if (!sp_error)
     sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
     
-  return sp_payload;
+  return (char *)sp_payload;
 }
 
 void io_close_directory(void)
@@ -281,7 +289,7 @@ void io_set_device_filename(uint8_t ds, char* e)
   sp_payload[1] = 0;
   sp_payload[2] = ds;
 
-  strcpy(&sp_payload[3],e);
+  strcpy((char *)&sp_payload[3],e);
 
   sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
 }
@@ -302,7 +310,7 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
   idx = 2;
   sp_payload[idx++] = source_slot;
   sp_payload[idx++] = destination_slot;
-  strcpy(&sp_payload[idx], copySpec);
+  strcpy((char *)&sp_payload[idx], copySpec);
 
   idx += strlen(copySpec);
   idx++;
@@ -332,21 +340,22 @@ void io_umount_disk_image(uint8_t ds)
 
 void io_update_devices_enabled(bool *e)
 {
-
+  UNUSED(e);
 }
 
 void io_enable_device(unsigned char d)
 {
-
+  UNUSED(d);
 }
 
 void io_disable_device(unsigned char d)
 {
-
+  UNUSED(d);
 }
 
 bool io_get_device_enabled_status(unsigned char d)
 {
+  UNUSED(d);
   return false;
 }
 
@@ -357,7 +366,6 @@ unsigned char io_device_slot_to_device(unsigned char ds)
 
 void io_boot(void)
 {
-  int i;
   char ostype;
 
   ostype = get_ostype() & 0xF0;

@@ -70,7 +70,7 @@ extern SFSubState sf_subState;
 
 void destination_host_slot_init()
 {
-  screen_destination_host_slot(hostSlots[selected_host_slot],path);
+  screen_destination_host_slot((char *)hostSlots[selected_host_slot],(char *)path);
   dh_subState=DH_DISPLAY;
 }
 

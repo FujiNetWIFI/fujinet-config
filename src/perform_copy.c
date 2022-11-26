@@ -79,7 +79,7 @@ void perform_copy(void)
   
   clrscr();
 
-  screen_perform_copy(hostSlots[copy_host_slot],source_path,hostSlots[selected_host_slot],path);
+  screen_perform_copy((char *)hostSlots[copy_host_slot],(char *)source_path,(char *)hostSlots[selected_host_slot],(char *)path);
 
   io_copy_file(copy_host_slot, selected_host_slot);
 
