@@ -186,9 +186,14 @@ void io_set_ssid(NetConfig *nc)
 
 char *io_get_device_filename(uint8_t ds)
 {
-  UNUSED(ds);
-  // TODO: implement
-  return 0;
+  sp_payload[0] = 1; // 1 byte, device slot.
+  sp_payload[1] = 0;
+  sp_payload[2] = ds; // the device slot.
+  sp_error = sp_status(sp_dest, FUJICMD_GET_DEVICE_FULLPATH);
+  if (!sp_error)
+    return (char *)&sp_payload[0];
+  else
+    return 0;
 }
 
 void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsigned long selected_size,char *path)
