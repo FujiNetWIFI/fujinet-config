@@ -355,7 +355,12 @@ void io_umount_disk_image(uint8_t ds)
 
 void io_update_devices_enabled(bool *e)
 {
-  UNUSED(e);
+  char i;
+
+  for (i=0;i<4;i++)
+    {
+      e[i]=io_get_device_enabled_status(io_device_slot_to_device(i));
+    }
 }
 
 void io_enable_device(unsigned char d)
