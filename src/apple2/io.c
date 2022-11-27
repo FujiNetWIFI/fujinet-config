@@ -48,6 +48,7 @@
 #define FUJICMD_SET_BOOT_MODE 0xD6
 #define FUJICMD_ENABLE_DEVICE 0xD5
 #define FUJICMD_DISABLE_DEVICE 0xD4
+#define FUJICMD_DEVICE_STATUS 0xD1
 #define FUJICMD_STATUS 0x53
 
 #define UNUSED(x) (void)(x);
@@ -381,7 +382,13 @@ void io_disable_device(unsigned char d)
 
 bool io_get_device_enabled_status(unsigned char d)
 {
-  UNUSED(d);
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = d;
+  sp_error = sp_status(sp_dest,FUJICMD_DEVICE_STATUS);
+  if (!sp_error)
+    return (bool)sp_payload[0];
+
   return false;
 }
 
