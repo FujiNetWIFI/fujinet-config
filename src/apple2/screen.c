@@ -371,7 +371,7 @@ void screen_select_file_prev(void)
 void screen_select_file_display_long_filename(char *e) 
 {
   gotoxy(0,19);
-  cprintf("%-64s",e);
+  cprintf("%-40s",e);
 }
 
 void screen_select_file_next(void)
@@ -382,30 +382,40 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, char* e)
 {
   gotoxy(0,y+3);
-  // cprintf("%c%c",*e++,*e++);
-  // cprintf("%-30s",e);
   cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
 }
 
 void screen_select_file_clear_long_filename(void) 
 {
-  // TODO: Implement
+  cclearxy(0,13,80);
 }
 
 void screen_select_file_new_type(void) 
 {
-  // TODO: Implement
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR);
+  screen_print_menu(" NEW MEDIA: SELECT TYPE \r\n","");
+  screen_print_menu("P","O  ");
+  screen_print_menu("2","MG  ");
 }
 
 void screen_select_file_new_size(unsigned char k) 
 {
-  // TODO: implement
-  UNUSED(k);
+  UNUSED(k); // Image type is not used.
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR);
+  screen_print_menu(" NEW MEDIA: SELECT SIZE \r\n","");
+  screen_print_menu("1","40K  ");
+  screen_print_menu("8","00K  ");
+  screen_print_menu("3","2MB  ");
 }
 
 void screen_select_file_new_custom(void) 
 {
-  // TODO: Implement
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR);
+  screen_print_menu(" NEW MEDIA: CUSTOM SIZE \r\n","");
+  screen_print_menu("ENTER SIZE IN # OF 512-BYTE BLOCKS\r\n","");
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -416,6 +426,7 @@ void screen_select_file_choose(char visibleEntries)
   screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
   screen_print_menu("ESC",":PARENT  ");
   screen_print_menu("F","ILTER  ");
+  screen_print_menu("N","EW  ");
   screen_print_menu("ESC",":BOOT");  
 }
 
@@ -458,23 +469,35 @@ void screen_select_slot_choose(void)
 
 void screen_select_file_new_name(void)
 {
-  // TODO: implement
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(3,STATUS_BAR);
+  screen_print_menu(" NEW MEDIA: ENTER FILENAME \r\n","");
 }
 
 void screen_hosts_and_devices_long_filename(char *f)
 {
   // TODO: implement
-  UNUSED(f);
+  if (strlen(f)>31)
+    {
+      gotoxy(0,STATUS_BAR);
+      cprintf("%s",f);
+    }
+  else
+    cclearxy(0,STATUS_BAR,120);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-  // TODO: implement
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(3,STATUS_BAR); 
+  screen_print_menu(" CLEARING ALL DEVICE SLOTS ","");
 }
 
 void screen_select_file_new_creating(void)
 {
-  // TODO: implement
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(3,STATUS_BAR);
+  screen_print_menu(" CREATING DISK IMAGE \r\n","PLEASE WAIT...");
 }
 
 void screen_select_slot_mode(void)

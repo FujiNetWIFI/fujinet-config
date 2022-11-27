@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <apple2.h>
 #include <peekpoke.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "globals.h"
 #include "input.h"
 #include "bar.h"
@@ -207,6 +209,9 @@ SFSubState input_select_file_choose(void)
   case 'F':
   case 'f':
     return SF_FILTER;
+  case 'N':
+  case 'n':
+    return SF_NEW;
   // case KEY_RETURN: // KEY_SMART_VI:
   //   if (copy_mode == false)
   //   {
@@ -260,27 +265,46 @@ SFSubState input_select_file_choose(void)
 
 unsigned char input_select_file_new_type(void) 
 {
-  // TODO: Implement
-  return 0;
+  switch (cgetc())
+    {
+    case 'P':
+    case 'p':
+      return 1;
+    case '2':
+      return 2;
+    default:
+      return 0;
+    }
 }
 
 unsigned long input_select_file_new_size(unsigned char t) 
 {
-  // TODO: implement
-  UNUSED(t);
-  return 0;
+  UNUSED(t); // Type not used.
+  
+  switch (cgetc())
+    {
+    case '1':
+      return 280;
+    case '8':
+      return 1600;
+    case '3':
+      return 65535UL;
+    case 'C':
+    case 'c':
+      return 1; // CUSTOM
+    }
 }
 
 unsigned long input_select_file_new_custom(void) 
 {
-  // TODO: implement
-  return 0;
+  char c[12];
+  input_line(0,22,0,c,32,false);
+  return atol(c);
 }
 
 void input_select_file_new_name(char *c) 
 {
-  // TODO: Implement
-  UNUSED(c);
+  input_line(0,22,0,c,255,false);
 }
 
 SSSubState input_select_slot_choose(void)
