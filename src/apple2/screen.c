@@ -494,8 +494,8 @@ void screen_select_slot_eject(unsigned char ds)
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  cclearxy(1,13+ds,39);
-  gotoxy(2,13+ds); cprintf("Empty");
+  cclearxy(1,11+ds,39);
+  gotoxy(2,11+ds); cprintf("Empty");
   bar_jump(bar_get());
 }
 
