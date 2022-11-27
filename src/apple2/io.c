@@ -365,12 +365,18 @@ void io_update_devices_enabled(bool *e)
 
 void io_enable_device(unsigned char d)
 {
-  UNUSED(d);
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = d;
+  sp_error = sp_control(sp_dest,FUJICMD_ENABLE_DEVICE);
 }
 
 void io_disable_device(unsigned char d)
 {
-  UNUSED(d);
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = d;
+  sp_error = sp_control(sp_dest,FUJICMD_DISABLE_DEVICE);
 }
 
 bool io_get_device_enabled_status(unsigned char d)
