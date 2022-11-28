@@ -479,11 +479,11 @@ void screen_hosts_and_devices_long_filename(char *f)
   // TODO: implement
   if (strlen(f)>31)
     {
-      gotoxy(0,STATUS_BAR);
+      gotoxy(0,STATUS_BAR-3);
       cprintf("%s",f);
     }
   else
-    cclearxy(0,STATUS_BAR,120);
+    cclearxy(0,STATUS_BAR-3,120);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)

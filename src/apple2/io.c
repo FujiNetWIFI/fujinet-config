@@ -60,6 +60,8 @@ static NetConfig nc;
 static SSIDInfo ssid_response;
 static AdapterConfig ac;
 
+unsigned char io_create_type;
+
 /* Test Fixtures, remove when actual I/O present */
 // static DeviceSlot _ds[8];
 // static HostSlot _hs[8];
@@ -199,15 +201,16 @@ char *io_get_device_filename(uint8_t ds)
 
 void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsigned long selected_size,char *path)
 {
-  sp_payload[0] = 0x06; // 262 bytes
+  sp_payload[0] = 0x07; // 263 bytes
   sp_payload[1] = 0x01;
   sp_payload[2] = selected_host_slot;
   sp_payload[3] = selected_device_slot;
-  sp_payload[4] = selected_size & 0xFF;
-  sp_payload[5] = (selected_size >> 8) & 0xFF;
-  sp_payload[6] = (selected_size >> 16) & 0xFF;
-  sp_payload[7] = (selected_size >> 24) & 0xFF;
-  strncpy((char *)&sp_payload[8],path,256);
+  sp_payload[4] = io_create_type;
+  sp_payload[5] = selected_size & 0xFF;
+  sp_payload[6] = (selected_size >> 8) & 0xFF;
+  sp_payload[7] = (selected_size >> 16) & 0xFF;
+  sp_payload[8] = (selected_size >> 24) & 0xFF;
+  strncpy((char *)&sp_payload[9],path,256);
   sp_error = sp_control(sp_dest,FUJICMD_NEW_DISK);
 }
 
