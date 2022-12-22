@@ -140,7 +140,12 @@ unsigned char select_file_display(void)
   for (i = 0; i < ENTRIES_PER_PAGE; i++)
   {
     e = io_read_directory(DIR_MAX_LEN, 0);
-    if (e[1] == 0x7F) // this was [2] which i believe is wrong.
+#ifdef BUILD_ADAM
+#define FUDGE_OFFSET 2
+#else
+#define FUDGE_OFFSET 1
+#endif
+    if (e[FUDGE_OFFSET] == 0x7F) // I am truly ashamed of this, and will fix someday -thom
     {
       dir_eof = true;
       break;
