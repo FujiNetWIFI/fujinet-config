@@ -3,13 +3,13 @@
         {
             "name": "cc65 Apple II",
             "includePath": [
-                "/mnt/c/Users/jeffp/Documents/GitHub/cc65/include/**",
+                "/usr/share/cc65/include/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [
                 "BUILD_APPLE2"
             ],
-            "compilerPath": "/usr/local/bin/cl65",
+            "compilerPath": "/usr/bin/cl65",
             "cStandard": "c99",
             "cppStandard": "c++98",
             "intelliSenseMode": "${default}"
@@ -18,12 +18,28 @@
             "name": "cc65 Atari",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/share/cc65/include"
+                "/usr/share/cc65/include/**"
             ],
             "defines": [
                 "BUILD_ATARI"
             ],
-            "compilerPath": "/usr/local/bin/cc65",
+            "compilerPath": "/usr/bin/cc65",
+            "cStandard": "c99",
+            "cppStandard": "c++98",
+            "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "z88dk ADAM",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/local/share/z88dk/include/**",
+                "../eoslib/**",
+                "../smartkeyslib/**"
+            ],
+            "defines": [
+                "BUILD_ADAM"
+            ],
+            "compilerPath": "/usr/local/bin/zcc",
             "cStandard": "c99",
             "cppStandard": "c++98",
             "intelliSenseMode": "${default}"
