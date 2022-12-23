@@ -232,7 +232,7 @@ void hosts_and_devices(void)
       hosts_and_devices_devices_clear_all();
       break;
     case HD_DONE:
-      hosts_and_devices_done(); // this never gets called because HD_DONE is always paired with state != HOSTS_AND_DEVICES
+      state = DONE;
       break;
     }
   }

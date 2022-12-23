@@ -1,5 +1,5 @@
 #ifdef BUILD_ADAM
-/** 
+/**
  * Input routines
  */
 
@@ -158,12 +158,12 @@ unsigned char input()
 	      break;
 	    }
 	}
-      
+
       joystick_copy = joystick;
       button_copy = button;
       keypad_copy = keypad;
     }
-  
+
   return key;
 }
 
@@ -214,7 +214,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	      cursor_pos(x,y);
 	    }
 	}
-      else if (key > 0x1F && key < 0x7F) // Printable characters 
+      else if (key > 0x1F && key < 0x7F) // Printable characters
 	{
 	  if (pos < len)
 	    {
@@ -270,7 +270,7 @@ void input_line_set_wifi_password(char *c)
 HDSubState input_hosts_and_devices_hosts(void)
 {
   unsigned char k=input();
-  
+
   switch(k)
     {
     case KEY_1:
@@ -289,18 +289,18 @@ HDSubState input_hosts_and_devices_hosts(void)
     case KEY_RETURN:
       selected_host_slot=bar_get();
       if (hostSlots[selected_host_slot][0] != 0)
-	{
-	  strcpy(selected_host_name,hostSlots[selected_host_slot]);
-	  state=SELECT_FILE;
-	  smartkeys_sound_play(SOUND_CONFIRM);
-	  return HD_DONE;
-	}
+      {
+        strcpy(selected_host_name,hostSlots[selected_host_slot]);
+        state=SELECT_FILE;
+        smartkeys_sound_play(SOUND_CONFIRM);
+        return HD_DONE;
+      }
       else
-	return HD_HOSTS;
+        return HD_HOSTS;
     case KEY_ESCAPE: // ESC
       quit();
       break;
-    case KEY_SMART_IV: 
+    case KEY_SMART_IV:
       state=SHOW_INFO;
       return HD_DONE;
     case KEY_SMART_V:
@@ -387,7 +387,7 @@ SFSubState input_select_file_choose(void)
 
   if (entry_timer>0)
     entry_timer--;
-  
+
   switch(k)
     {
     case KEY_RETURN:
@@ -410,11 +410,11 @@ SFSubState input_select_file_choose(void)
       return SF_FILTER;
     case KEY_SMART_VI:
       if (copy_mode == false)
-	{
-	  quick_boot=true;
-	  pos+=bar_get();
-	  state=SELECT_SLOT;
-	}
+      {
+        quick_boot=true;
+        pos+=bar_get();
+        state=SELECT_SLOT;
+      }
       smartkeys_sound_play(SOUND_CONFIRM);
       return SF_DONE;
     case KEY_INSERT:
@@ -473,7 +473,7 @@ unsigned char input_select_file_new_type(void)
 }
 
 unsigned long input_select_file_new_size(unsigned char t)
-{  
+{
   switch (t)
     {
     case 1: // DDP
@@ -499,7 +499,7 @@ unsigned long input_select_file_new_size(unsigned char t)
 	case KEY_SMART_V:
 	  return 8192;
 	case KEY_SMART_VI:
-	  return 1; // CUSTOM 
+	  return 1; // CUSTOM
 	}
       break;
     }

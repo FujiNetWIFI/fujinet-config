@@ -93,16 +93,16 @@ void select_slot_display()
   else
     {
       io_open_directory(selected_host_slot,path,filter);
-      
+
       io_set_directory_position(pos);
-      
+
       io_get_device_slots(&deviceSlots[0]);
-      
+
       screen_select_slot(io_read_directory(49,0x80));
-      
+
       io_close_directory();
     }
-  
+
   ss_subState=SS_CHOOSE;
 }
 
@@ -128,7 +128,7 @@ void select_slot_done()
   char filename[256];
 
   memset(filename,0,sizeof(filename));
-  
+
   if (create==true)
     {
       create=false; // we're done with this until next time.
@@ -137,19 +137,19 @@ void select_slot_done()
       memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
       deviceSlots[selected_device_slot].mode=2;
       deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
-     
+
       io_put_device_slots(&deviceSlots[0]);
       io_set_device_filename(selected_device_slot,path);
 #ifdef BUILD_ADAM
       screen_select_slot_build_eos_directory();
       if (input_select_slot_build_eos_directory())
-	{
-	  io_mount_disk_image(selected_device_slot,2); // R/W
-	  screen_select_slot_build_eos_directory_label();
-	  input_select_slot_build_eos_directory_label(filename);
-	  screen_select_slot_build_eos_directory_creating();
-	  io_build_directory(selected_device_slot,selected_size,filename);
-	}
+      {
+        io_mount_disk_image(selected_device_slot,2); // R/W
+        screen_select_slot_build_eos_directory_label();
+        input_select_slot_build_eos_directory_label(filename);
+        screen_select_slot_build_eos_directory_creating();
+        io_build_directory(selected_device_slot,selected_size,filename);
+      }
 #endif
     }
   else
@@ -159,21 +159,21 @@ void select_slot_done()
       io_open_directory(selected_host_slot,path,filter);
 
       io_set_directory_position(pos);
-      
+
       strcat(filename,io_read_directory(255-strlen(path),0));
 
       io_set_device_filename(selected_device_slot,filename);
-     
+
       io_set_directory_position(pos);
-      
+
       memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
       deviceSlots[selected_device_slot].mode=mode;
       deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
-      
+
       io_put_device_slots(&deviceSlots[0]);
-            
+
       io_close_directory();
-      
+
     }
   state=HOSTS_AND_DEVICES;
 }
@@ -181,24 +181,24 @@ void select_slot_done()
 void select_slot(void)
 {
   ss_subState=SS_INIT;
-  
+
   while (state==SELECT_SLOT)
+  {
+    switch(ss_subState)
     {
-      switch(ss_subState)
-	{
-	case SS_INIT:
-	  select_slot_init();
-	  break;
-	case SS_DISPLAY:
-	  select_slot_display();
-	  break;
-	case SS_CHOOSE:
-	  select_slot_choose();
-	  break;
-	case SS_DONE:
-	  select_slot_done();
-	case SS_ABORT:
-	  break;
-	}
+    case SS_INIT:
+      select_slot_init();
+      break;
+    case SS_DISPLAY:
+      select_slot_display();
+      break;
+    case SS_CHOOSE:
+      select_slot_choose();
+      break;
+    case SS_DONE:
+      select_slot_done();
+    case SS_ABORT:
+      break;
     }
+  }
 }
