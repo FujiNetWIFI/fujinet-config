@@ -158,7 +158,6 @@ void screen_set_wifi_select_network(unsigned char nn)
   cclearxy(0,STATUS_BAR,120);
   bar_set(4,1,nn,0);
   gotoxy(10,STATUS_BAR); cprintf("FOUND %d NETWORKS.\r\n", nn);
-  //gotoxy(0,STATUS_BAR); cprintf("[H]IDDEN SSID  [R]ESCAN  [S]KIP\r\nOR PRESS NUMBER TO SELECT NETWORK.");
   gotoxy(4, STATUS_BAR + 1);
   screen_print_menu("H","IDDEN SSID  ");
   screen_print_menu("R","ESCAN  ");
@@ -170,7 +169,7 @@ void screen_set_wifi_select_network(unsigned char nn)
 void screen_set_wifi_custom(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("ENTER NAME OF HIDDDEN NETWORK");
+  gotoxy(0,STATUS_BAR); cprintf("ENTER NAME OF HIDDEN NETWORK");
 }
 
 void screen_set_wifi_password(void)
@@ -268,7 +267,6 @@ void screen_hosts_and_devices_hosts(void)
 {
   bar_set(1,1,8,0);
   cclearxy(0,STATUS_BAR,120);
-  // gotoxy(0,STATUS_BAR); cprintf("[C]ONFIG  [E]DIT SLOT  [ESC]BOOT\r\n[1-8]HOST SLOT  [RETURN]SELECT SLOT\r\n[TAB] DEVICE SLOTS");
   gotoxy(0,STATUS_BAR); 
   screen_print_menu("1-8", ":SLOT  ");
   screen_print_menu("E","DIT  ");
@@ -276,7 +274,6 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("C","ONFIG  ");
   screen_print_menu("TAB",":DRIVE SLOTS  ");
   screen_print_menu("ESC",":BOOT");
-  //cprintf("[1-8]SLOT  [E]DIT  [RETURN]SELECT FILES\r\n [C]ONFIG  [TAB]DRIVE SLOTS  [ESC]BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -326,7 +323,9 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   clrscr();
   
   gotoxy(4,5);
+  revers(1);
   cprintf("F U J I N E T      C O N F I G");
+  revers(0);
   gotoxy(0,8);
   cprintf("%10s%s\r\n","SSID: ",ac->ssid);
   cprintf("%10s%s\r\n","HOSTNAME: ",ac->hostname);
@@ -370,8 +369,9 @@ void screen_select_file_prev(void)
 
 void screen_select_file_display_long_filename(char *e) 
 {
-  gotoxy(0,19);
-  cprintf("%-40s",e);
+  // it wasn't this.
+  /* gotoxy(0,19); */
+  /* cprintf("%-40s",e); */
 }
 
 void screen_select_file_next(void)
@@ -387,7 +387,8 @@ void screen_select_file_display_entry(unsigned char y, char* e)
 
 void screen_select_file_clear_long_filename(void) 
 {
-  cclearxy(0,13,80);
+  // Is it this?
+  // cclearxy(0,13,80);
 }
 
 void screen_select_file_new_type(void) 
