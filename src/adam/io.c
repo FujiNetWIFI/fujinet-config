@@ -5,7 +5,7 @@
  * I/O Routines
  */
 
-#include <conio.h> // for sleep() 
+#include <conio.h> // for sleep()
 #include <stdlib.h>
 #include <eos.h>
 #include <string.h>
@@ -48,14 +48,14 @@ unsigned char io_get_wifi_status(void)
 
   sleep(1);
   io_command_and_response(&c,1);
-  
+
   return response[0];
 }
 
 NetConfig* io_get_ssid(void)
 {
   unsigned char c=0xFE;
-  
+
   io_command_and_response(&c,1);
 
   return (NetConfig *)response;
@@ -64,7 +64,7 @@ NetConfig* io_get_ssid(void)
 unsigned char io_scan_for_networks(void)
 {
   unsigned char c=0xFD;
-  
+
   io_command_and_response(&c,1);
 
   return response[0];
@@ -114,7 +114,7 @@ void io_get_host_slots(HostSlot *h)
   unsigned char c=0xF4;
 
   io_command_and_response(&c,1);
-  
+
   memcpy(h,response,256);
 }
 
@@ -124,7 +124,7 @@ void io_put_host_slots(HostSlot *h)
 
   memcpy(&c[1],h,256);
 
-  eos_write_character_device(FUJI_DEV,&c,sizeof(c));  
+  eos_write_character_device(FUJI_DEV,&c,sizeof(c));
 }
 
 void io_put_device_slots(DeviceSlot *d)
@@ -150,7 +150,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 {
   char c[258];
   char *e;
-  
+
   memset(&c,0,258);
   c[0]=0xF7;
   c[1]=hs;
@@ -197,7 +197,7 @@ void io_set_directory_position(DirectoryPosition pos)
 void io_set_device_filename(unsigned char ds, char* e)
 {
   char c[258]={0xE2,0x00};
-  
+
   c[1] = ds;
 
   strcpy(&c[2],e);
@@ -221,7 +221,7 @@ void io_create_new(unsigned char selected_host_slot,unsigned char selected_devic
   char nd[263]={0xE7,0x00,0x00,0x00,0x00,0x00,0x00};
   char *c = &nd[3];
   unsigned long *l = (unsigned long *)c;
-  
+
   nd[1]=selected_host_slot;
   nd[2]=selected_device_slot;
   *l=selected_size;
@@ -269,7 +269,7 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
 
   // Adjust device slot to EOS device #
   ds += 4;
-  
+
   // Set up block 0 to boot right into SmartWriter
   memset(response,0,1024);
   response[0]=0xC3;
@@ -347,11 +347,11 @@ void io_update_devices_enabled(bool *e)
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
   char cf[259]={0xD8,0x00,0x00};
-  
+
   cf[1]=source_slot;
   cf[2]=destination_slot;
   strcpy(&cf[3],copySpec);
-  
+
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
 }
 
