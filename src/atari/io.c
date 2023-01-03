@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <conio.h> // Used for interacting with the standard Atari 'console'
+#include <unistd.h> // For sleep
 #include "io.h"
 #include "globals.h"
 #include "screen.h"
@@ -76,6 +77,8 @@ bool io_get_wifi_enabled(void)
 unsigned char io_get_wifi_status(void)
 {
   unsigned char status;
+
+  sleep(1); // give the esp32 a moment to connect
 
   set_sio_defaults();
   OS.dcb.dcomnd = 0xFA; // Return wifi status
