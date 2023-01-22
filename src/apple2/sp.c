@@ -161,6 +161,9 @@ int8_t sp_find_fuji()
 void sp_list_devs()
 {
   int8_t err, num, i, j;
+  char ostype;
+
+  ostype = get_ostype();
 
   revers(1);
   cprintf(" SMARTPORT DEVICE LIST \r\n\r\n");
@@ -168,7 +171,12 @@ void sp_list_devs()
   
   err = sp_status(0x00, 0x00); // get number of devices
   num = sp_payload[0];
-  num += 2;
+
+  if (ostype == APPLE_IICPLUS)
+    num += 2;
+  else
+    num += 1;
+
   for (i = 1; i < num; i++)
   {
     cprintf("UNIT #%d NAME: ", i);
