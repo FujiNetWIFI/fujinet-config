@@ -1,5 +1,5 @@
 #ifdef BUILD_APPLE2
-/** 
+/**
  * Input routines
  */
 
@@ -85,9 +85,9 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
   i = o; // index into array and y-coordinate
   // x += o;
-  
+
   gotoy(y);
-    
+
   while(1)
   {
     gotox(x + i);
@@ -145,7 +145,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   }
 }
 
-DHSubState input_destination_host_slot_choose(void) 
+DHSubState input_destination_host_slot_choose(void)
 {
     unsigned char k=input();
 
@@ -254,11 +254,11 @@ SFSubState input_select_file_choose(void)
     }
     break;
   case ',':
-  case '<': 
+  case '<':
     if (pos > 0)
       return SF_PREV_PAGE;
   case '.':
-  case '>': 
+  case '>':
     if (dir_eof == false)
       return SF_NEXT_PAGE;
   default:
@@ -266,7 +266,7 @@ SFSubState input_select_file_choose(void)
   }
 }
 
-unsigned char input_select_file_new_type(void) 
+unsigned char input_select_file_new_type(void)
 {
   switch (cgetc())
     {
@@ -283,10 +283,10 @@ unsigned char input_select_file_new_type(void)
     }
 }
 
-unsigned long input_select_file_new_size(unsigned char t) 
+unsigned long input_select_file_new_size(unsigned char t)
 {
   UNUSED(t); // Type not used.
-  
+
   switch (cgetc())
     {
     case '1':
@@ -301,14 +301,14 @@ unsigned long input_select_file_new_size(unsigned char t)
     }
 }
 
-unsigned long input_select_file_new_custom(void) 
+unsigned long input_select_file_new_custom(void)
 {
   char c[12];
   input_line(0,22,0,c,32,false);
   return atol(c);
 }
 
-void input_select_file_new_name(char *c) 
+void input_select_file_new_name(char *c)
 {
   input_line(0,22,0,c,255,false);
 }

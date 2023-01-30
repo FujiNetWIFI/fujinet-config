@@ -90,7 +90,7 @@ uint8_t io_status(void)
 
 bool io_error(void)
 {
-  return sp_error; 
+  return sp_error;
 }
 
 uint8_t io_get_wifi_status(void)
@@ -100,18 +100,18 @@ uint8_t io_get_wifi_status(void)
   unsigned long l = 0;
 
   for (l=0;l<4096;l++);
-  
+
   sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
   if (sp_error)
       return 0;
- 
+
   return sp_payload[0];
 }
 
 NetConfig* io_get_ssid(void)
-{  
+{
   memset(&nc, 0, sizeof(nc));
-  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID); 
+  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID);
   if (!sp_error)
   {
     memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
@@ -230,7 +230,7 @@ void io_put_host_slots(HostSlot *h)
 {
   sp_payload[0] = 0;
   sp_payload[1] = 1; // 256 bytes
-  memcpy(&sp_payload[2], h, 256); 
+  memcpy(&sp_payload[2], h, 256);
   sp_error = sp_control(sp_dest, FUJICMD_WRITE_HOST_SLOTS);
 }
 
@@ -239,7 +239,7 @@ void io_put_device_slots(DeviceSlot *d)
   sp_payload[0] = 304 & 0xFF;
   sp_payload[1] = 304 >> 8;
   memcpy(&sp_payload[2],d,304);
-  
+
   sp_error = sp_control(sp_dest, FUJICMD_WRITE_DEVICE_SLOTS);
   // sleep(1);
 }
@@ -283,7 +283,7 @@ char *io_read_directory(uint8_t l, uint8_t a)
   sp_payload[0] = 0; // null string
   if (!sp_error)
     sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
-    
+
   return (char *)sp_payload;
 }
 

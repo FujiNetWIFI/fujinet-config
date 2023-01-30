@@ -44,10 +44,10 @@ void bar_clear(bool oldRow)
 void bar_update(void)
 {
   char i;
-  
+
   bar_clear(true);
-  
-  // Clear bar color 
+
+  // Clear bar color
   for (i=0;i<40;i++)
     ram[bar_coord(i,bar_y+bar_i)] &= 0x3f; // black char on white background is in lower half of char set
 }
@@ -75,7 +75,7 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 void bar_up()
 {
   bar_oldi=bar_i;
-  
+
   if (bar_i > 0)
     {
       bar_i--;
