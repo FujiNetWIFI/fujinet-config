@@ -7,7 +7,7 @@
 
 #ifdef __INTELLISENSE__
 // 18, expect closing parenthses - needed to use cc65 inline asm command with agruments.
-  #pragma diag_suppress 18 
+  #pragma diag_suppress 18
 #endif
 
 
@@ -38,7 +38,7 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
 {
   sp_error = 0;
   // build the command list
-  sp_cmdlist[0] = SP_STATUS_PARAM_COUNT; 
+  sp_cmdlist[0] = SP_STATUS_PARAM_COUNT;
   sp_cmdlist[1] = dest; // set before calling sp_status();
   sp_cmdlist[2] = (uint8_t)((uint16_t)&sp_payload & 0x00FF);
   sp_cmdlist[3] = (uint8_t)((uint16_t)&sp_payload >> 8) & 0xFF;
@@ -51,7 +51,7 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
 
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_STATUS);
-  __asm__ volatile ("sta %g", spCmd); // store status command # 
+  __asm__ volatile ("sta %g", spCmd); // store status command #
   __asm__ volatile ("lda %v", sp_cmdlist_low);
   __asm__ volatile ("sta %g", spCmdListLow); // store status command #
   __asm__ volatile ("lda %v", sp_cmdlist_high);
@@ -77,7 +77,7 @@ spCmdListHigh:
   __asm__ volatile ("stx %v", sp_rtn_low);
   __asm__ volatile ("sty %v", sp_rtn_high);
   __asm__ volatile ("sta %v", sp_err);
-  
+
   sp_count = ((uint16_t)sp_rtn_high << 8) | (uint16_t)sp_rtn_low;
   sp_error = sp_err;
   return sp_err;
@@ -88,7 +88,7 @@ int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
   sp_error = 0;
   // sp_dest = 5; // need to search
   // build the command list
-  sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT; 
+  sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT;
   sp_cmdlist[1] = dest; // set before calling sp_status();
   sp_cmdlist[2] = (uint8_t)((uint16_t)&sp_payload & 0x00FF);
   sp_cmdlist[3] = (uint8_t)((uint16_t)&sp_payload >> 8) & 0xFF;
@@ -158,32 +158,27 @@ int8_t sp_find_fuji()
   return 0;
 }
 
+/* Theoretical maximum # of SmartPort devices is 127
+ * Call out to each device and if they respond (err = 0),
+ * then display it's name
+ */
 void sp_list_devs()
 {
-  int8_t err, num, i, j;
-  char ostype;
-
-  ostype = get_ostype();
+  int8_t err, num = 127, i, j;
 
   revers(1);
   cprintf(" SMARTPORT DEVICE LIST \r\n\r\n");
   revers(0);
-  
-  err = sp_status(0x00, 0x00); // get number of devices
-  num = sp_payload[0];
-
-  if (ostype == APPLE_IICPLUS)
-    num += 2;
-  else
-    num += 1;
 
   for (i = 1; i < num; i++)
   {
-    cprintf("UNIT #%d NAME: ", i);
     err = sp_status(i, 0x03);
-    for (j = 0; j < sp_payload[4]; j++)
-      cputc(sp_payload[5 + j]);
-    cputs("\r\n");
+    if (err == 0){
+      cprintf("UNIT #%d NAME: ", i);
+      for (j = 0; j < sp_payload[4]; j++)
+        cputc(sp_payload[5 + j]);
+      cputs("\r\n");
+    }
   }
   revers(1);
   cprintf("\r\n PRESS ANY KEY TO CONTINUE \r\n");
