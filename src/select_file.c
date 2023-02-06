@@ -118,7 +118,7 @@ unsigned char select_file_display(void)
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
-    state = SHOW_INFO;
+    state = HOSTS_AND_DEVICES;
     return 0;
   }
 
@@ -130,7 +130,7 @@ unsigned char select_file_display(void)
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
-    state = SHOW_INFO;
+    state = HOSTS_AND_DEVICES;
     return 0;
   }
 
