@@ -17,21 +17,39 @@
 #include <apple2.h>
 #include <peekpoke.h>
 
+#ifdef __ORCAC__
+#include <stdint.h>
+#include <memory.h>
+#include <misctool.h>
+#endif
+
 #define SP_CMD_STATUS 0
 #define SP_CMD_CONTROL 4
 #define SP_STATUS_PARAM_COUNT 3
 #define SP_CONTROL_PARAM_COUNT 3
 
 // extern globals:
+#ifdef __ORCAC__
+uint8_t *sp_payload;
+#else
 uint8_t sp_payload[1024];
+#endif
 uint16_t sp_count;
 uint8_t sp_dest;
 uint16_t sp_dispatch;
 uint8_t sp_error;
 
+#ifdef __ORCAC__
+static int myId;
+static Handle sp_handle;
+static uint8_t *sp_cmdlist;
+static uint8_t *sp_instr;
+static FWRec fwRec;
+#else
 static uint8_t sp_cmdlist[10];
-static uint8_t sp_cmdlist_low, sp_cmdlist_high;
 static uint8_t sp_err, sp_rtn_low, sp_rtn_high;
+#endif
+static uint8_t sp_cmdlist_low, sp_cmdlist_high;
 static uint8_t sp_dispatch_low, sp_dispatch_high;
 
 int8_t sp_status(uint8_t dest, uint8_t statcode)
@@ -40,15 +58,41 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
   // build the command list
   sp_cmdlist[0] = SP_STATUS_PARAM_COUNT;
   sp_cmdlist[1] = dest; // set before calling sp_status();
+#ifdef __ORCAC__
+  sp_cmdlist[2] = (uint8_t)((uint16_t)sp_payload & 0x00FF);
+  sp_cmdlist[3] = (uint8_t)((uint16_t)sp_payload >> 8) & 0xFF;
+#else
   sp_cmdlist[2] = (uint8_t)((uint16_t)&sp_payload & 0x00FF);
   sp_cmdlist[3] = (uint8_t)((uint16_t)&sp_payload >> 8) & 0xFF;
+#endif
   sp_cmdlist[4] = statcode;
 
+#ifdef __ORCAC__
+  sp_cmdlist_low = (uint8_t)((uint16_t)sp_cmdlist & 0x00FF);
+  sp_cmdlist_high = (uint8_t)((uint16_t)sp_cmdlist >> 8) & 0xFF;
+#else
   sp_cmdlist_low = (uint8_t)((uint16_t)&sp_cmdlist & 0x00FF);
   sp_cmdlist_high = (uint8_t)((uint16_t)&sp_cmdlist >> 8) & 0xFF;
+#endif
   sp_dispatch_low = (uint8_t)((uint16_t)sp_dispatch & 0x00FF);
   sp_dispatch_high = (uint8_t)((uint16_t)sp_dispatch >> 8) & 0xFF;
 
+#ifdef __ORCAC__
+  // Make firmware call
+  sp_instr[0] = 0x20;	// JSR
+  sp_instr[1] = sp_dispatch_low;
+  sp_instr[2] = sp_dispatch_high;
+  sp_instr[3] = SP_CMD_STATUS;
+  sp_instr[4] = sp_cmdlist_low;
+  sp_instr[5] = sp_cmdlist_high;
+  sp_instr[6] = 0x60;	// RTS
+
+  // Call in emulation mode with FWEntry
+  fwRec = FWEntry(0, 0, 0, (Word)sp_instr);
+  sp_count = (fwRec.yRegExit << 8) | fwRec.xRegExit;
+  sp_error = fwRec.aRegExit;
+  return sp_error;
+#else
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_STATUS);
   __asm__ volatile ("sta %g", spCmd); // store status command #
@@ -81,6 +125,7 @@ spCmdListHigh:
   sp_count = ((uint16_t)sp_rtn_high << 8) | (uint16_t)sp_rtn_low;
   sp_error = sp_err;
   return sp_err;
+#endif
 }
 
 int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
@@ -90,15 +135,41 @@ int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
   // build the command list
   sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT;
   sp_cmdlist[1] = dest; // set before calling sp_status();
+#ifdef __ORCAC__
+  sp_cmdlist[2] = (uint8_t)((uint16_t)sp_payload & 0x00FF);
+  sp_cmdlist[3] = (uint8_t)((uint16_t)sp_payload >> 8) & 0xFF;
+#else
   sp_cmdlist[2] = (uint8_t)((uint16_t)&sp_payload & 0x00FF);
   sp_cmdlist[3] = (uint8_t)((uint16_t)&sp_payload >> 8) & 0xFF;
+#endif
   sp_cmdlist[4] = ctrlcode;
 
+#ifdef __ORCAC__
+  sp_cmdlist_low = (uint8_t)((uint16_t)sp_cmdlist & 0x00FF);
+  sp_cmdlist_high = (uint8_t)((uint16_t)sp_cmdlist >> 8) & 0xFF;
+#else
   sp_cmdlist_low = (uint8_t)((uint16_t)&sp_cmdlist & 0x00FF);
   sp_cmdlist_high = (uint8_t)((uint16_t)&sp_cmdlist >> 8) & 0xFF;
+#endif
   sp_dispatch_low = (uint8_t)((uint16_t)sp_dispatch & 0x00FF);
   sp_dispatch_high = (uint8_t)((uint16_t)sp_dispatch >> 8) & 0xFF;
 
+#ifdef __ORCAC__
+  // Make firmware call
+  sp_instr[0] = 0x20;	// JSR
+  sp_instr[1] = sp_dispatch_low;
+  sp_instr[2] = sp_dispatch_high;
+  sp_instr[3] = SP_CMD_CONTROL;
+  sp_instr[4] = sp_cmdlist_low;
+  sp_instr[5] = sp_cmdlist_high;
+  sp_instr[6] = 0x60;	// RTS
+
+  // Call in emulation mode with FWEntry
+  fwRec = FWEntry(0, 0, 0, (Word)sp_instr);
+  sp_count = (fwRec.yRegExit << 8) | fwRec.xRegExit;
+  sp_error = fwRec.aRegExit; 
+  return sp_error;                         
+#else
   // store cmd list
   __asm__ volatile ("lda #%b", SP_CMD_CONTROL);
   __asm__ volatile ("sta %g", spCmd); // store status command #
@@ -127,6 +198,7 @@ spCmdListHigh:
   __asm__ volatile ("sta %v", sp_err);
   sp_error = sp_err;
   return sp_err;
+#endif
 }
 
 int8_t sp_find_fuji()
@@ -232,7 +304,17 @@ uint16_t sp_dispatch_address(uint8_t slot)
 void sp_init(void)
 {
   uint8_t slot, f;
+#ifdef __ORCAC__
+  MTStartUp();
+  myId = MMStartUp();
+  sp_handle = NewHandle(0x500, myId, 0xC011, 0L);
+  sp_payload = *sp_handle;
+  sp_cmdlist = *sp_handle + 1024;
+  sp_instr = *sp_handle + 1034;
+  slot = 5;
+#else
   slot = (PEEK(0x43) & 0x70) >> 4; // determine slot used for booting, check unit number
+#endif
   if (slot)
     sp_dispatch = sp_dispatch_address(slot);
   else
@@ -242,5 +324,14 @@ void sp_init(void)
   if (f < 1)
     screen_error("FujiNet Not Found!");
 }
+
+#ifdef __ORCAC__
+void sp_done(void)
+{
+  DisposeHandle(sp_handle);
+  MMShutDown(myId);
+  MTShutDown();
+}
+#endif
 
 #endif /* BUILD_APPLE2 */

@@ -10,7 +10,11 @@
 
 #include <stdint.h>
 
+#ifdef __ORCAC__
+extern uint8_t *sp_payload;
+#else
 extern uint8_t sp_payload[1024];
+#endif
 extern uint16_t sp_count, sp_dispatch;
 extern uint8_t sp_dest;
 extern uint8_t sp_error;
@@ -21,7 +25,9 @@ int8_t sp_find_fuji(void);
 uint8_t sp_find_slot(void);
 uint16_t sp_dispatch_address(uint8_t slot);
 void sp_init(void);
-
+#ifdef __ORCAC__
+void sp_done(void);
+#endif
 void sp_list_devs();
 
 #endif /* SP_H */
