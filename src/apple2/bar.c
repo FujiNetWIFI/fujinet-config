@@ -3,6 +3,10 @@
  * Bar routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include <peekpoke.h>
 #include "bar.h"
 

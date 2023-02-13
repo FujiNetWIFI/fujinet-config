@@ -6,6 +6,10 @@
  * cc65 compatibility for ORCA/C
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -15,6 +19,7 @@
 #include <apple2.h>
 
 static char buffer[121];
+static unsigned char x;
 
 /* Functions from conio */
 
@@ -34,9 +39,7 @@ void gotox (unsigned char x)
 void gotoy (unsigned char y)
 /* Set the cursor to the specified Y position, leave the X position untouched */
 {
-  unsigned char x;
-
-  x = wherex();
+  x = PEEK(0x57b);
   POKE(0x25, y-1);
   WriteChar(0x8d);
   POKE(0x24, x);
@@ -73,14 +76,17 @@ void cputc (char c)
 void cputs (const char* s)
 /* Output a NUL-terminated string at the current cursor position */
 {
-  char prev;
-
-  while (prev = *s) {
-    if (*s == '\r' && wherey() == 23)
-      gotoxy(0, 0);
+  while (x = *s) {
+    if (*s == '\r' && PEEK(0x25) == 23)
+    {
+      POKE(0x25, 0xff);
+      WriteChar(0x8d);
+      POKE(0x24, 0);
+      POKE(0x57b, 0);
+    }
     else
       WriteChar(*s);
-    if (*++s == '\n' && prev == '\r')
+    if (*++s == '\n' && x == '\r')
       s++;
   }
 }
@@ -144,7 +150,10 @@ void cclear (unsigned char length)
 void cclearxy (unsigned char x, unsigned char y, unsigned char length)
 /* Same as "gotoxy (x, y); cclear (length);" */
 {
-  gotoxy(x, y);
+  POKE(0x25, y-1);
+  WriteChar(0x8d);
+  POKE(0x24, x);
+  POKE(0x57b, x);
   cclear(length);
 }
 

@@ -5,6 +5,10 @@
  * SmartPort MLI Routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #ifdef __INTELLISENSE__
 // 18, expect closing parenthses - needed to use cc65 inline asm command with agruments.
   #pragma diag_suppress 18

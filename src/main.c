@@ -21,6 +21,9 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/sp.h"
@@ -75,7 +78,6 @@ void done(void)
 {
   #ifdef __ORCAC__
 	sp_done();
-	clrscr();
 	WriteChar(0x92);  // Set 80 col
 	WriteChar(0x86);  // Cursor on
 	TextShutDown();
@@ -129,9 +131,22 @@ void run(void)
   }
 }
 
+#ifdef BUILD_A2CDA
+void Start(void)
+{
+	setup();
+	state = CHECK_WIFI;
+	run();
+}
+
+void ShutDown(void)
+{
+}
+#else
 void main(void)
 {
 	setup();
 	state = CHECK_WIFI;
 	run();
 }
+#endif /* BUILD_A2CDA */
