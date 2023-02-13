@@ -24,6 +24,7 @@
 #ifdef __ORCAC__
 #include <stdint.h>
 #include <memory.h>
+#include <string.h>
 #include <misctool.h>
 #endif
 
@@ -305,16 +306,49 @@ uint16_t sp_dispatch_address(uint8_t slot)
   return a + j + 3;
 }
 
+#ifdef __ORCAC__
+void sp_check_handle()
+{
+  if (sp_handle == NULL)
+  {
+    screen_error("COULD NOT ALLOCATE BUFFER!");
+    revers(1);
+    cprintf("\r\n PRESS ANY KEY TO EXIT \r\n");
+    revers(0);
+    cgetc();
+    exit(0);
+  };
+}
+
+void sp_get_buffer()
+{
+  if (PEEK(0xe100bc) == 0)  // Running under ProDOS 8
+    {
+      sp_handle = NewHandle(0x500, myId, 0x0000, 0L);
+      sp_check_handle();
+      sp_payload = (uint8_t *)0x800;
+      sp_cmdlist = sp_payload + 1024;
+      sp_instr = sp_payload + 1034;
+      memcpy(*sp_handle, sp_payload, 0x500);
+    }
+  else  // Under GS/OS or ProDOS 16
+    {
+      sp_handle = NewHandle(0x500, myId, 0xC011, 0L);
+      sp_check_handle();
+      sp_payload = *sp_handle;
+      sp_cmdlist = *sp_handle + 1024;
+      sp_instr = *sp_handle + 1034;
+    }
+}
+#endif
+
 void sp_init(void)
 {
   uint8_t slot, f;
 #ifdef __ORCAC__
   MTStartUp();
   myId = MMStartUp();
-  sp_handle = NewHandle(0x500, myId, 0xC011, 0L);
-  sp_payload = *sp_handle;
-  sp_cmdlist = *sp_handle + 1024;
-  sp_instr = *sp_handle + 1034;
+  sp_get_buffer();
   slot = 5;
 #else
   slot = (PEEK(0x43) & 0x70) >> 4; // determine slot used for booting, check unit number
@@ -332,6 +366,8 @@ void sp_init(void)
 #ifdef __ORCAC__
 void sp_done(void)
 {
+  if (PEEK(0xe100bc) == 0)  // Running under ProDOS 8
+    memcpy(sp_payload, *sp_handle, 0x500);
   DisposeHandle(sp_handle);
   MMShutDown(myId);
   MTShutDown();
