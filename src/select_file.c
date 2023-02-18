@@ -30,6 +30,9 @@
 #endif
 
 #ifdef BUILD_APPLE2
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
 #include "apple2/fuji_typedefs.h"
 #include "apple2/screen.h"
 #include "apple2/io.h"
@@ -302,10 +305,10 @@ void select_file_devance(void)
   sf_subState = SF_DISPLAY; // And display the result.
 }
 
-bool select_file_is_folder(void)
+unsigned char select_file_is_folder(void)
 {
   char *e;
-  bool result;
+  unsigned char result;
 
   io_open_directory(selected_host_slot, path, filter);
 

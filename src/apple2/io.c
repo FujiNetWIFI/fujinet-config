@@ -4,6 +4,11 @@
  *
  * I/O Routines
  */
+
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
@@ -340,6 +345,7 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
   sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
+#ifndef __ORCAC__
 void io_set_boot_config(uint8_t toggle)
 {
   sp_payload[0] = 1;
@@ -348,6 +354,7 @@ void io_set_boot_config(uint8_t toggle)
 
   sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
 }
+#endif
 
 void io_umount_disk_image(uint8_t ds)
 {
@@ -400,6 +407,7 @@ unsigned char io_device_slot_to_device(unsigned char ds)
   return ds;
 }
 
+#ifndef __ORCAC__
 void io_boot(void)
 {
   char ostype;
@@ -431,6 +439,7 @@ void io_boot(void)
     asm("JMP $0100");
   }
 }
+#endif
 
 bool io_get_wifi_enabled(void)
 {

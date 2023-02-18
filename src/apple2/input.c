@@ -3,6 +3,10 @@
  * Input routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>

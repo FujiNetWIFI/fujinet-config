@@ -5,6 +5,10 @@
  * Screen Routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"
@@ -273,7 +277,11 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("RETURN",":SELECT FILES\r\n ");
   screen_print_menu("C","ONFIG  ");
   screen_print_menu("TAB",":DRIVE SLOTS  ");
-  screen_print_menu("ESC",":BOOT");
+  #ifdef __ORCAC__
+    screen_print_menu("ESC",":EXIT");
+  #else
+    screen_print_menu("ESC",":BOOT");
+  #endif
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -525,6 +533,6 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(2,2+hs); cprintf("Empty");
+  gotoxy(2,1+hs); cprintf("Empty");
 }
 #endif /* BUILD_APPLE2 */
