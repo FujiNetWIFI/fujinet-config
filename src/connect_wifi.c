@@ -50,7 +50,7 @@
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
-	NetConfig nc;
+	static NetConfig nc;
 	unsigned char s;
 
 	memcpy(&nc, io_get_ssid(), sizeof(NetConfig));
