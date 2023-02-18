@@ -128,7 +128,11 @@ void select_slot_choose()
 
 void select_slot_done()
 {
+  #ifdef __ORCAC__
   static char filename[256];
+  #else
+  char filename[256];
+  #endif
 
   memset(filename,0,sizeof(filename));
 
