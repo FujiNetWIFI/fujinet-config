@@ -92,6 +92,8 @@ you will find your autorun.po in the directory indicated above. You can now flas
 
 ## Compiling on the Apple IIgs
 
+These instructions allow Apple IIgs users to build native GS/OS versions of CONFIG. Note that for generating the firmware version, instructions under __Compiling on the Apple II__ above still apply.
+
 Two makefiles allow building GS/OS versions of CONFIG:
 
 * Makefile.apple2gs builds a standalone ORCA shell EXE which can then be installed in the Utilities folder.
@@ -110,6 +112,9 @@ A copy of the Byte Works ORCA/C and its libraries is also required. You can get 
 
 #### Build GoldenGate:
 Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
+
+### CC65 headers installed in GoldenGate
+In addition, cc65 headers `conio.h`, `apple2.h` and `peekpoke.h` are necessary and should be present in ORCA/C include search path. You may copy them under ~/GoldenGate/Libraries/cc65. These are available here: https://github.com/cc65/cc65/tree/master/include.
 
 Now with those prerequisites out of the way:
 
