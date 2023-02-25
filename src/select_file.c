@@ -325,7 +325,11 @@ unsigned char select_file_is_folder(void)
 
 void select_file_new(void)
 {
+#ifdef __ORCAC__
+  static char f[128];
+#else
   char f[128];
+#endif
   char k;
 
   memset(f, 0, 128);

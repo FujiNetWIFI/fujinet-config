@@ -78,6 +78,7 @@ void done(void)
 {
   #ifdef __ORCAC__
 	sp_done();
+  	WriteChar(0x8c);  // Clear screen
 	WriteChar(0x92);  // Set 80 col
 	WriteChar(0x86);  // Cursor on
 	TextShutDown();
