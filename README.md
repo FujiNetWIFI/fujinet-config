@@ -1,9 +1,9 @@
-# fujinet-config-adam
+# fujinet-config
 
 More documentation to be written as it takes shape.
 
 
-This repo is named fujinet-config-adam but it is really the primary repo for the CONFIG application for every supported platform on FujiNet. 
+This repo is the primary repo for the CONFIG application for every supported platform on FujiNet. 
 
 In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common code for all the platforms began to take shape in this repo. Apple II soon joined, then RC2014 and soon C64. Atari was merged back in here in 2022 Fall by frachel so there is one place for all platform CONFIGs going forward.
 
