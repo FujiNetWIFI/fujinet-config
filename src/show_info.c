@@ -36,6 +36,7 @@
 #include "c64/input.h"
 #include "c64/globals.h"
 #include "c64/io.h"
+#define PRINTER 0
 #endif /* BUILD_C64 */
 
 #ifdef BUILD_PC8801

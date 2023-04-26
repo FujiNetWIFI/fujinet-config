@@ -6,10 +6,16 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include "globals.h"
+
+extern unsigned char *ram;
+
+unsigned short bar_coord(unsigned char x, unsigned char y);
+
 /**
  * Clear the currently displayed bar from screen
  */
-void bar_clear(void);
+void bar_clear(bool oldRow);
 
 /**
  * Set up bar and start display on row
@@ -35,6 +41,8 @@ void bar_down();
  * @param i new y offset
  */
 void bar_jump(unsigned char i);
+
+void bar_update();
 
 /**
  * Get current bar position

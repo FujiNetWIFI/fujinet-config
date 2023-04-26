@@ -1,6 +1,6 @@
 #ifdef BUILD_C64
 /**
- * FujiNet Config for Apple2
+ * FujiNet Config for C64
  * 
  * Cursor routines
  */
