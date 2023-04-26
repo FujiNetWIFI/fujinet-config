@@ -5,6 +5,10 @@
  * Screen Routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"
@@ -33,7 +37,7 @@ void screen_init(void)
 void screen_inverse_line(unsigned char y)
 {
   char i;
-  
+
   for (i=0;i<40;i++)
     ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
 }
@@ -103,9 +107,9 @@ void screen_putlcc(char c)
 
   if (ostype == APPLE_IIC)
     mousetext[1] = 1; // turn on mouse text
-  
+
   ram[bar_coord(wherex(), wherey())] = c + modifier;
-  
+
   if (ostype == APPLE_IIC)
     mousetext[0] = 1; // turn off mouse text
 }
@@ -131,7 +135,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 
   memset(ds,0x20,32);
   strncpy(ds,s->ssid,32);
-  
+
   if (s->rssi > -50)
     {
       meter[0] = '*';
@@ -147,10 +151,10 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     {
       meter[0] = '*';
     }
-  
+
   gotoxy(2,n+4); cprintf("%s",ds);
   gotoxy(36,n+4); cprintf("%s",meter);
-  
+
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
@@ -208,11 +212,11 @@ void screen_destination_host_slot_choose(void)
   chlinexy(0,1,40);
 
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); 
+  gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8",":CHOOSE SLOT\r\n");
   screen_print_menu("RETURN",":SELECT SLOT\r\n");
   screen_print_menu("ESC"," TO ABORT");
-  
+
   bar_set(2, 1, 8, selected_host_slot);
 }
 
@@ -235,11 +239,11 @@ char* screen_hosts_and_devices_slot(char *c)
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   char i;
-  
+
   for (i=0;i<4;i++)
     {
       gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
-    } 
+    }
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
@@ -247,33 +251,37 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   const char hl[] = "HOST LIST";
   const char ds[] = "DRIVE SLOTS";
   char i;
-  
+
   clrscr();
   gotoxy(0,0);  cprintf("%40s",hl); // screen_inverse(0);
   chlinexy(0,0,40 - sizeof(hl));
 
   gotoxy(0,10); cprintf("%40s",ds); // screen_inverse(10);
   chlinexy(0,10,40 - sizeof(ds));
-  
+
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot((char *)h[i])); 
+      gotoxy(0,i+1); cprintf("%d %s",i+1,screen_hosts_and_devices_slot((char *)h[i]));
     }
 
-  screen_hosts_and_devices_device_slots(11,d,e);  
+  screen_hosts_and_devices_device_slots(11,d,e);
 }
 
 void screen_hosts_and_devices_hosts(void)
 {
   bar_set(1,1,8,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); 
+  gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8", ":SLOT  ");
   screen_print_menu("E","DIT  ");
   screen_print_menu("RETURN",":SELECT FILES\r\n ");
   screen_print_menu("C","ONFIG  ");
   screen_print_menu("TAB",":DRIVE SLOTS  ");
-  screen_print_menu("ESC",":BOOT");
+  #ifdef __ORCAC__
+    screen_print_menu("ESC",":EXIT");
+  #else
+    screen_print_menu("ESC",":BOOT");
+  #endif
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -282,7 +290,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
   for (i=0;i<8;i++)
     {
-      gotoxy(0,i+1); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot((char *)h[i])); 
+      gotoxy(0,i+1); cprintf("%d %-32s",i+1,screen_hosts_and_devices_slot((char *)h[i]));
     }
 }
 
@@ -290,7 +298,7 @@ void screen_hosts_and_devices_devices(void)
 {
   bar_set(11,1,4,0);
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); 
+  gotoxy(0,STATUS_BAR);
   screen_print_menu("E","JECT  ");
   screen_print_menu("R","EAD ONLY  ");
   screen_print_menu("W","RITE\r\n");
@@ -321,7 +329,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 {
   clrscr();
-  
+
   gotoxy(4,5);
   revers(1);
   cprintf("F U J I N E T      C O N F I G");
@@ -336,7 +344,7 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
   cprintf("%10s%s\r\n","FNVER: ",ac->fn_version);
 
-  gotoxy(6,STATUS_BAR); 
+  gotoxy(6,STATUS_BAR);
   screen_print_menu("C","HANGE SSID  ");
   screen_print_menu("R","ECONNECT\r\n");
   cprintf("   PRESS ANY KEY TO RETURN TO HOSTS\r\n");
@@ -367,7 +375,7 @@ void screen_select_file_prev(void)
   gotoxy(0,2); cprintf("%-40s","[...]");
 }
 
-void screen_select_file_display_long_filename(char *e) 
+void screen_select_file_display_long_filename(char *e)
 {
   // it wasn't this.
   /* gotoxy(0,19); */
@@ -385,13 +393,13 @@ void screen_select_file_display_entry(unsigned char y, char* e)
   cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
 }
 
-void screen_select_file_clear_long_filename(void) 
+void screen_select_file_clear_long_filename(void)
 {
   // Is it this?
   // cclearxy(0,13,80);
 }
 
-void screen_select_file_new_type(void) 
+void screen_select_file_new_type(void)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
@@ -400,7 +408,7 @@ void screen_select_file_new_type(void)
   screen_print_menu("2","MG  ");
 }
 
-void screen_select_file_new_size(unsigned char k) 
+void screen_select_file_new_size(unsigned char k)
 {
   UNUSED(k); // Image type is not used.
   cclearxy(0,STATUS_BAR,120);
@@ -411,7 +419,7 @@ void screen_select_file_new_size(unsigned char k)
   screen_print_menu("3","2MB  ");
 }
 
-void screen_select_file_new_custom(void) 
+void screen_select_file_new_custom(void)
 {
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
@@ -423,12 +431,12 @@ void screen_select_file_choose(char visibleEntries)
 {
   bar_set(3,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); 
+  gotoxy(0,STATUS_BAR);
   screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
   screen_print_menu("ESC",":PARENT  ");
   screen_print_menu("F","ILTER  ");
   screen_print_menu("N","EW  ");
-  screen_print_menu("ESC",":BOOT");  
+  screen_print_menu("ESC",":BOOT");
 }
 
 void screen_select_file_filter(void)
@@ -446,7 +454,7 @@ void screen_select_slot(char *e)
   gotoxy(0,7);
   cprintf("%-40s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
-  
+
   s=(unsigned long *)e; // Cast the next four bytes as a long integer.
   cprintf("%8s %lu K\r\n\r\n","SIZE:",*s >> 10); // Quickly divide by 1024
 
@@ -454,14 +462,14 @@ void screen_select_slot(char *e)
   cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
-    
+
   bar_set(1,1,4,0);
 }
 
 void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(3,STATUS_BAR); 
+  gotoxy(3,STATUS_BAR);
   screen_print_menu("1-4"," SELECT SLOT OR USE ARROW KEYS\r\n ");
   screen_print_menu("RETURN/R",":INSERT READ ONLY\r\n ");
   screen_print_menu("W",":INSERT READ/WRITE\r\n ");
@@ -490,7 +498,7 @@ void screen_hosts_and_devices_long_filename(char *f)
 void screen_hosts_and_devices_devices_clear_all(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(3,STATUS_BAR); 
+  gotoxy(3,STATUS_BAR);
   screen_print_menu(" CLEARING ALL DEVICE SLOTS ","");
 }
 
@@ -504,7 +512,7 @@ void screen_select_file_new_creating(void)
 void screen_select_slot_mode(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(1,STATUS_BAR); 
+  gotoxy(1,STATUS_BAR);
   screen_print_menu("R","EAD ONLY  ");
   screen_print_menu("W",": READ/WRITE");
 }
@@ -525,6 +533,6 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(2,2+hs); cprintf("Empty");
-}  
+  gotoxy(2,1+hs); cprintf("Empty");
+}
 #endif /* BUILD_APPLE2 */

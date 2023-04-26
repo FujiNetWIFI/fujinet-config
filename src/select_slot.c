@@ -20,6 +20,9 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
 #include "apple2/screen.h"
 #include "apple2/input.h"
 #include "apple2/globals.h"
@@ -126,7 +129,11 @@ void select_slot_choose()
 
 void select_slot_done()
 {
+  #ifdef __ORCAC__
+  static char filename[256];
+  #else
   char filename[256];
+  #endif
 
   memset(filename,0,sizeof(filename));
 

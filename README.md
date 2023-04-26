@@ -1,9 +1,9 @@
-# fujinet-config-adam
+# fujinet-config
 
 More documentation to be written as it takes shape.
 
 
-This repo is named fujinet-config-adam but it is really the primary repo for the CONFIG application for every supported platform on FujiNet. 
+This repo is the primary repo for the CONFIG application for every supported platform on FujiNet. 
 
 In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common code for all the platforms began to take shape in this repo. Apple II soon joined, then RC2014 and soon C64. Atari was merged back in here in 2022 Fall by frachel so there is one place for all platform CONFIGs going forward.
 
@@ -88,6 +88,70 @@ cp dist.apple2/dist.po ../fujinet-platformio/data/BUILD_APPLE/autorun.po
 ```
 
 you will find your autorun.po in the directory indicated above. You can now flash this to the FN using the PIO's Upload Filesytem Image.
+
+
+## Compiling on the Apple IIgs
+
+These instructions allow Apple IIgs users to build native GS/OS versions of CONFIG. Note that for generating the firmware version, instructions under __Compiling on the Apple II__ above still apply.
+
+Two makefiles allow building GS/OS versions of CONFIG:
+
+* Makefile.apple2gs builds a standalone ORCA shell EXE which can then be installed in the Utilities folder.
+* Makefile.apple2cda builds a Classic Desk Accessory (CDA) which allows configuring wifi and mounting/umounting images on the go under GS/OS or ProDOS 8, without need for rebooting.
+
+To compile, currently requires:
+
+### GoldenGate built and installed on your system
+
+Note: you'll have to buy GoldenGate before being able to build it. See the project page: https://goldengate.gitlab.io/.
+
+A copy of the Byte Works ORCA/C and its libraries is also required. You can get it there: https://juiced.gs/store/opus-ii-software/.
+
+#### Pull down GoldenGate code
+   * https://gitlab.com/GoldenGate/GoldenGate
+
+#### Build GoldenGate:
+Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
+
+### CC65 headers installed in GoldenGate
+In addition, cc65 headers `conio.h`, `apple2.h` and `peekpoke.h` are necessary and should be present in ORCA/C include search path. You may copy them under ~/GoldenGate/Libraries/cc65. These are available here: https://github.com/cc65/cc65/tree/master/include.
+
+Now with those prerequisites out of the way:
+
+To build the ORCA shell EXE:
+```
+cd fujinet-config-adam.git
+$ make -f Makefile.apple2gs clean dist
+```
+
+Check for any errors. If successful there will be logs that say: 
+
+```
+...
+cp dist.apple2/bootable.po dist.apple2/dist.po
+java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config exe <config
+```
+
+You will find the `CONFIG` shell EXE in the disp.po image. Just copy it under prefix #17, then add this to 15:SYSCMND:  
+`CONFIG       U             configure Fujinet`
+
+Restart ORCA shell or issue a `commands 15:syscmnd` and you're ready.
+
+To build the CDA:
+```
+cd fujinet-config-adam.git
+$ make -f Makefile.apple2cda clean dist
+```
+
+Check for any errors. If successful there will be logs that say: 
+
+```
+...
+cp dist.apple2/bootable.po dist.apple2/dist.po
+java -jar dist.apple2/ac.jar -p dist.apple2/dist.po fuji.da cda <config
+```
+
+You will find the `FUJI.DA CDA` in the disp.po image. Just copy it on your GS/OS boot disk under System/Desc.Accs and you'll have  `FujiNet Config` in the Desk Accessories menu after a reboot.
 
 
 ## Compiling on the ADAM

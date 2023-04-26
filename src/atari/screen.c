@@ -409,20 +409,15 @@ void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
 /**
  * Convert hex to a string and print as a MAC address at position x, y
  */
+/**
+ * Convert hex to a string and print as a MAC address at position x, y
+ */
 void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf)
 {
-  unsigned char i = 0;
-  unsigned char tmp[3];
+  unsigned char mactmp[18];
 
-  set_cursor(x, y);
-  for (i = 0; i < 6; i++)
-  {
-    itoa_hex(buf[i], tmp);
-    screen_append(tmp);
-    if (i == 5)
-      break;
-    screen_append(":");
-  }
+  sprintf(mactmp, "%02X:%02X:%02X:%02X:%02X:%02X", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
+  screen_puts(x, y, mactmp);
 }
 
 /**

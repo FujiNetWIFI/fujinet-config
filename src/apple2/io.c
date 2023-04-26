@@ -4,6 +4,11 @@
  *
  * I/O Routines
  */
+
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
@@ -90,7 +95,7 @@ uint8_t io_status(void)
 
 bool io_error(void)
 {
-  return sp_error; 
+  return sp_error;
 }
 
 uint8_t io_get_wifi_status(void)
@@ -100,18 +105,18 @@ uint8_t io_get_wifi_status(void)
   unsigned long l = 0;
 
   for (l=0;l<4096;l++);
-  
+
   sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
   if (sp_error)
       return 0;
- 
+
   return sp_payload[0];
 }
 
 NetConfig* io_get_ssid(void)
-{  
+{
   memset(&nc, 0, sizeof(nc));
-  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID); 
+  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID);
   if (!sp_error)
   {
     memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
@@ -230,7 +235,7 @@ void io_put_host_slots(HostSlot *h)
 {
   sp_payload[0] = 0;
   sp_payload[1] = 1; // 256 bytes
-  memcpy(&sp_payload[2], h, 256); 
+  memcpy(&sp_payload[2], h, 256);
   sp_error = sp_control(sp_dest, FUJICMD_WRITE_HOST_SLOTS);
 }
 
@@ -239,7 +244,7 @@ void io_put_device_slots(DeviceSlot *d)
   sp_payload[0] = 304 & 0xFF;
   sp_payload[1] = 304 >> 8;
   memcpy(&sp_payload[2],d,304);
-  
+
   sp_error = sp_control(sp_dest, FUJICMD_WRITE_DEVICE_SLOTS);
   // sleep(1);
 }
@@ -283,7 +288,7 @@ char *io_read_directory(uint8_t l, uint8_t a)
   sp_payload[0] = 0; // null string
   if (!sp_error)
     sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
-    
+
   return (char *)sp_payload;
 }
 
@@ -340,6 +345,7 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
   sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
+#ifndef __ORCAC__
 void io_set_boot_config(uint8_t toggle)
 {
   sp_payload[0] = 1;
@@ -348,6 +354,7 @@ void io_set_boot_config(uint8_t toggle)
 
   sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
 }
+#endif
 
 void io_umount_disk_image(uint8_t ds)
 {
@@ -400,6 +407,7 @@ unsigned char io_device_slot_to_device(unsigned char ds)
   return ds;
 }
 
+#ifndef __ORCAC__
 void io_boot(void)
 {
   char ostype;
@@ -431,6 +439,7 @@ void io_boot(void)
     asm("JMP $0100");
   }
 }
+#endif
 
 bool io_get_wifi_enabled(void)
 {

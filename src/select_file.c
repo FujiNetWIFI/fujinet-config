@@ -30,6 +30,9 @@
 #endif
 
 #ifdef BUILD_APPLE2
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
 #include "apple2/fuji_typedefs.h"
 #include "apple2/screen.h"
 #include "apple2/io.h"
@@ -119,7 +122,7 @@ unsigned char select_file_display(void)
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
-    state = SHOW_INFO;
+    state = HOSTS_AND_DEVICES;
     return 0;
   }
 
@@ -131,7 +134,7 @@ unsigned char select_file_display(void)
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
-    state = SHOW_INFO;
+    state = HOSTS_AND_DEVICES;
     return 0;
   }
 
@@ -303,10 +306,10 @@ void select_file_devance(void)
   sf_subState = SF_DISPLAY; // And display the result.
 }
 
-bool select_file_is_folder(void)
+unsigned char select_file_is_folder(void)
 {
   char *e;
-  bool result;
+  unsigned char result;
 
   io_open_directory(selected_host_slot, path, filter);
 
@@ -323,7 +326,11 @@ bool select_file_is_folder(void)
 
 void select_file_new(void)
 {
+#ifdef __ORCAC__
+  static char f[128];
+#else
   char f[128];
+#endif
   char k;
 
   memset(f, 0, 128);

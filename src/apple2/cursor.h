@@ -1,7 +1,7 @@
 #ifdef BUILD_APPLE2
 /**
  * FujiNet Config for Apple2
- * 
+ *
  * Cursor routines
  */
 

@@ -3,6 +3,10 @@
  * Bar routines
  */
 
+#ifdef BUILD_A2CDA
+#pragma cda "FujiNet Config" Start ShutDown
+#endif /* BUILD_A2CDA */
+
 #include <peekpoke.h>
 #include "bar.h"
 
@@ -44,12 +48,25 @@ void bar_clear(bool oldRow)
 void bar_update(void)
 {
   char i;
-  
+  #ifdef __ORCAC__
+  unsigned short addr;
+  #endif
+
   bar_clear(true);
-  
-  // Clear bar color 
-  for (i=0;i<40;i++)
-    ram[bar_coord(i,bar_y+bar_i)] &= 0x3f; // black char on white background is in lower half of char set
+
+  // Clear bar color
+  #ifdef __ORCAC__
+    for (i=0;i<40;i++) {
+      addr = bar_coord(i,bar_y+bar_i);
+      if (ram[addr] >= 0xe0)
+        ram[addr] &= 0x7f;
+      else
+        ram[addr] &= 0x3f; // black char on white background is in lower half of char set
+    }
+  #else
+    for (i=0;i<40;i++)
+      ram[bar_coord(i,bar_y+bar_i)] &= 0x3f; // black char on white background is in lower half of char set
+  #endif
 }
 
 /**
@@ -75,7 +92,7 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 void bar_up()
 {
   bar_oldi=bar_i;
-  
+
   if (bar_i > 0)
     {
       bar_i--;
