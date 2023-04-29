@@ -6,52 +6,18 @@
  */
 #include "io.h"
 #include <stdint.h>
-#include <conio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <peekpoke.h> // For the insanity in io_boot()
+#include <c64.h>
+#include <cbm.h>
 #include "globals.h"
 
-#define FUJICMD_RESET 0xFF
-#define FUJICMD_GET_SSID 0xFE
-#define FUJICMD_SCAN_NETWORKS 0xFD
-#define FUJICMD_GET_SCAN_RESULT 0xFC
-#define FUJICMD_SET_SSID 0xFB
-#define FUJICMD_GET_WIFISTATUS 0xFA
-#define FUJICMD_MOUNT_HOST 0xF9
-#define FUJICMD_MOUNT_IMAGE 0xF8
-#define FUJICMD_OPEN_DIRECTORY 0xF7
-#define FUJICMD_READ_DIR_ENTRY 0xF6
-#define FUJICMD_CLOSE_DIRECTORY 0xF5
-#define FUJICMD_READ_HOST_SLOTS 0xF4
-#define FUJICMD_WRITE_HOST_SLOTS 0xF3
-#define FUJICMD_READ_DEVICE_SLOTS 0xF2
-#define FUJICMD_WRITE_DEVICE_SLOTS 0xF1
-#define FUJICMD_UNMOUNT_IMAGE 0xE9
-#define FUJICMD_GET_ADAPTERCONFIG 0xE8
-#define FUJICMD_NEW_DISK 0xE7
-#define FUJICMD_UNMOUNT_HOST 0xE6
-#define FUJICMD_GET_DIRECTORY_POSITION 0xE5
-#define FUJICMD_SET_DIRECTORY_POSITION 0xE4
-//#define FUJICMD_SET_HSIO_INDEX 0xE3
-#define FUJICMD_SET_DEVICE_FULLPATH 0xE2
-#define FUJICMD_SET_HOST_PREFIX 0xE1
-#define FUJICMD_GET_HOST_PREFIX 0xE0
-//#define FUJICMD_SET_SIO_EXTERNAL_CLOCK 0xDF
-#define FUJICMD_WRITE_APPKEY 0xDE
-#define FUJICMD_READ_APPKEY 0xDD
-#define FUJICMD_OPEN_APPKEY 0xDC
-#define FUJICMD_CLOSE_APPKEY 0xDB
-#define FUJICMD_GET_DEVICE_FULLPATH 0xDA
-#define FUJICMD_CONFIG_BOOT 0xD9
-#define FUJICMD_COPY_FILE 0xD8
-#define FUJICMD_MOUNT_ALL 0xD7
-#define FUJICMD_SET_BOOT_MODE 0xD6
-#define FUJICMD_ENABLE_DEVICE 0xD5
-#define FUJICMD_DISABLE_DEVICE 0xD4
-#define FUJICMD_DEVICE_STATUS 0xD1
-#define FUJICMD_STATUS 0x53
-
 #define UNUSED(x) (void)(x);
+
+#define LFN 15
+#define DEV 15
+#define SAN 15
 
 #include <string.h>
 
@@ -77,7 +43,12 @@ bool io_error(void)
 
 uint8_t io_get_wifi_status(void)
 {
-  return 0;
+  unsigned char ws=0xFF;
+  
+  cbm_open(LFN,DEV,SAN,"\xFA"); // FUJICMD_GET_WIFI_STATUS
+  cbm_read(LFN,&ws,sizeof(ws));
+  cbm_close(LFN);
+  return ws;
 }
 
 NetConfig* io_get_ssid(void)

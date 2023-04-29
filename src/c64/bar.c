@@ -3,16 +3,13 @@
  * Bar routines
  */
 
-#include <peekpoke.h>
+#include <c64.h>
 #include "bar.h"
 
-unsigned char *ram = (unsigned char *)0x0000;
+#define TEXT_RAM ((unsigned char *)0x0400)
 
-const unsigned short row[24]= {
-			       0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700,
-			       0x0780, 0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 0x07A8,
-			       0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0
-};
+#define COLOR_DESELECT 14;
+#define COLOR_SELECT   13;
 
 /**
  * static local variables for bar y, max, and index.
@@ -21,21 +18,27 @@ static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
 unsigned short bar_coord(unsigned char x, unsigned char y)
 {
-  return row[y]+x;
+  return (y*40)+x;
 }
 
 void bar_clear(bool oldRow)
 {
   char i;
   char by;
+  unsigned short o;
 
   if (oldRow)
     by = bar_y + bar_oldi;
   else
     by = bar_y + bar_i;
 
-  for (i = 0; i < 40; i++)
-    ram[bar_coord(i, by)] |= 0x80; // white char on black background is in upper half of char set
+  o = bar_coord(0,by);
+
+  for (i=0;i<40;i++)
+    {
+      COLOR_RAM[o+i] = COLOR_DESELECT;
+      TEXT_RAM[o+i] &= 0x7F;
+    }
 }
 
 /**
@@ -43,13 +46,16 @@ void bar_clear(bool oldRow)
  */
 void bar_update(void)
 {
-  char i;
-  
-  bar_clear(true);
-  
-  // Clear bar color 
+  unsigned short o;
+  unsigned char i;
+
+  o = bar_coord(0,bar_y+i);
+
   for (i=0;i<40;i++)
-    ram[bar_coord(i,bar_y+bar_i)] &= 0x3f; // black char on white background is in lower half of char set
+    {
+      COLOR_RAM[o+i] = COLOR_SELECT;
+      TEXT_RAM[o+i] |= 0x80;
+    }
 }
 
 /**

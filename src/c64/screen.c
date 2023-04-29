@@ -32,16 +32,10 @@ void screen_init(void)
 
 void screen_inverse_line(unsigned char y)
 {
-  char i;
-  
-  for (i=0;i<40;i++)
-    ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
 }
 
 void screen_put_inverse(const char c)
 {
-  cputc(c);
-  ram[bar_coord(wherex() - 1, wherey())] &= 0x3f;
 }
 
 void screen_print_inverse(const char *s)
