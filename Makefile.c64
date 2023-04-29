@@ -315,10 +315,8 @@ test: $(PROGRAM)
 	$(POSTEMUCMD)
 
 dist: $(PROGRAM)
-	     cp dist.apple2/bootable.po dist.apple2/dist.po
-	     java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config.system sys <dist.apple2/config.system
-	     java -jar dist.apple2/ac.jar -as dist.apple2/dist.po config <config
-
+	exomizer sfx sys config
+	cp a.out ~/Workspace/tnfs/config
 
 clean:
 	$(call RMFILES,$(OBJECTS))
