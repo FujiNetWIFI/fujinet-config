@@ -50,6 +50,7 @@
 #include "c64/globals.h"
 #include "c64/input.h"
 #include "c64/bar.h"
+#define DIR_MAX_LEN 36
 #define ENTRIES_PER_PAGE 15
 #endif /* BUILD_C64 */
 
