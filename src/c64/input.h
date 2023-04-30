@@ -7,6 +7,7 @@
 #define INPUT_H
 
 #include <stdbool.h>
+#include "../typedefs.h"
 
 /**
  * Get input from keyboard/joystick
@@ -31,8 +32,23 @@ unsigned char input_ucase();
  */
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password);
 
+DHSubState input_destination_host_slot_choose(void);
+SFSubState input_select_file_choose(void);
+unsigned char input_select_file_new_type(void);
+unsigned long input_select_file_new_size(unsigned char t);
+unsigned long input_select_file_new_custom(void);
+void input_select_file_new_name(char *c);
+
+SSSubState input_select_slot_choose(void);
+
+SISubState input_show_info(void);
+
+HDSubState input_hosts_and_devices_hosts(void);
+HDSubState input_hosts_and_devices_devices(void);
+
 void input_line_set_wifi_custom(char *c);
 void input_line_set_wifi_password(char *c);
+WSSubState input_set_wifi_select(void);
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c);
 void input_line_filter(char *c);
 

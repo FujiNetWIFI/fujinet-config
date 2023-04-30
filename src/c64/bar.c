@@ -3,15 +3,42 @@
  * Bar routines
  */
 
+#include <c64.h>
 #include "bar.h"
+
+#define TEXT_RAM ((unsigned char *)0x0400)
+
+#define COLOR_DESELECT 14;
+#define COLOR_SELECT   13;
 
 /**
  * static local variables for bar y, max, and index.
  */
 static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
-void bar_clear(void)
+unsigned short bar_coord(unsigned char x, unsigned char y)
 {
+  return (y*40)+x;
+}
+
+void bar_clear(bool oldRow)
+{
+  char i;
+  char by;
+  unsigned short o;
+
+  if (oldRow)
+    by = bar_y + bar_oldi;
+  else
+    by = bar_y + bar_i;
+
+  o = bar_coord(0,by);
+
+  for (i=0;i<40;i++)
+    {
+      COLOR_RAM[o+i] = COLOR_DESELECT;
+      TEXT_RAM[o+i] &= 0x7F;
+    }
 }
 
 /**
@@ -19,6 +46,16 @@ void bar_clear(void)
  */
 void bar_update(void)
 {
+  unsigned short o;
+  unsigned char i;
+
+  o = bar_coord(0,bar_y+i);
+
+  for (i=0;i<40;i++)
+    {
+      COLOR_RAM[o+i] = COLOR_SELECT;
+      TEXT_RAM[o+i] |= 0x80;
+    }
 }
 
 /**

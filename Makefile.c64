@@ -41,6 +41,10 @@ LDFLAGS = $(LDFLAGS.$(TARGETS))
 # Default: src
 SRCDIR :=
 
+# Path to the directory to output binary to 
+# Default: ~/Workspace/tnfs 
+DESTDIR := 
+
 # Path to the directory where object files are to be stored (inside respective target subdirectories).
 # Default: obj
 OBJDIR :=
@@ -133,6 +137,12 @@ endif
 # Set SRCDIR to override.
 ifeq ($(SRCDIR),)
   SRCDIR := src
+endif
+
+# Presume the destination for the binary in the subdirectory '/Workspace/tnfs'.
+# Set DESTDIR to override.
+ifeq ($(DESTDIR),)
+  DESTDIR := ~/Workspace/tnfs 
 endif
 
 # Presume the object and dependency files to be located in the subdirectory
@@ -315,10 +325,8 @@ test: $(PROGRAM)
 	$(POSTEMUCMD)
 
 dist: $(PROGRAM)
-	     cp dist.apple2/bootable.po dist.apple2/dist.po
-	     java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config.system sys <dist.apple2/config.system
-	     java -jar dist.apple2/ac.jar -as dist.apple2/dist.po config <config
-
+	exomizer sfx sys config
+	cp a.out $(DESTDIR)/config
 
 clean:
 	$(call RMFILES,$(OBJECTS))
