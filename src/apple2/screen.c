@@ -23,8 +23,6 @@
 static const char *empty="EMPTY";
 static const char *off="OFF";
 
-unsigned char *mousetext = (unsigned char *)0xC00E;
-
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
@@ -98,13 +96,7 @@ void screen_putlcc(char c)
     break;
   }
 
-  if (ostype == APPLE_IIC)
-    mousetext[1] = 1; // turn on mouse text
-
   ram[bar_coord(wherex(), wherey())] = c + modifier;
-
-  if (ostype == APPLE_IIC)
-    mousetext[0] = 1; // turn off mouse text
 }
 
 void screen_set_wifi(AdapterConfig *ac)
