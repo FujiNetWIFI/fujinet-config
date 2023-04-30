@@ -425,13 +425,25 @@ void io_boot(void)
   }
   else  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
   {
+    // Make the simulated 6502 RESET result in a cold start.
+    // INC $03F4
     POKE(0x100,0xEE);
     POKE(0x101,0xF4);
     POKE(0x102,0x03);
+
+    // Make sure to not get disturbed.
+    // SEI
     POKE(0x103,0x78);
+
+    // Disable Language Card (which is enabled for all cc65 programs).
+    // LDA $C082
     POKE(0x104,0xAD);
     POKE(0x105,0x82);
     POKE(0x106,0xC0);
+
+    // Simulate a 6502 RESET, additionally do it from the stack page to make the MMU
+    // see the 6502 memory access pattern which is characteristic for a 6502 RESET.
+    // JMP ($FFFC)
     POKE(0x107,0x6C);
     POKE(0x108,0xFC);
     POKE(0x109,0xFF);
