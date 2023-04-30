@@ -13,13 +13,13 @@
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-unsigned char input();
+unsigned char input(void);
 
 /**
  * Get input from keyboard/joystick, translating lowercase presses to uppercase
  * @return keycode (or synthesized keycode if joystick)
  */
-unsigned char input_ucase();
+unsigned char input_ucase(void);
 
 /**
  * Get line of input into c

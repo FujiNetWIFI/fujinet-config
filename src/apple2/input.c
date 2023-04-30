@@ -56,7 +56,7 @@ extern unsigned char io_create_type;
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-unsigned char input()
+unsigned char input(void)
 {
   return cgetc();
 }
