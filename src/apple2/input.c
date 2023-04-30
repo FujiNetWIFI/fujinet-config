@@ -176,7 +176,7 @@ DHSubState input_destination_host_slot_choose(void)
     case KEY_6:
     case KEY_7:
     case KEY_8:
-      bar_jump(k-0x31);
+      bar_jump(k-KEY_1);
       return DH_CHOOSE;
     case KEY_UP_ARROW:
       bar_up();
@@ -333,7 +333,7 @@ SSSubState input_select_slot_choose(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
-      bar_jump(k-0x31);
+      bar_jump(k-KEY_1);
       return SS_CHOOSE;
     // case KEY_SMART_IV:
     case 'E':
@@ -399,7 +399,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_6:
   case KEY_7:
   case KEY_8:
-    bar_jump(k - KEY_1);
+    bar_jump(k-KEY_1);
     return HD_HOSTS;
   case KEY_TAB:
     bar_clear(false);
