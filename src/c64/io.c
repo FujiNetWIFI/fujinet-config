@@ -182,18 +182,46 @@ void io_get_host_slots(HostSlot *h)
 
 void io_put_host_slots(HostSlot *h)
 {
+  memset(response,0,sizeof(response));
+  
+  response[0] = FUJICMD_WRITE_HOST_SLOTS;
+
+  memcpy(&response[1],h,256);
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_put_device_slots(DeviceSlot *d)
 {
+  memset(response,0,sizeof(response));
+  
+  response[0] = FUJICMD_WRITE_DEVICE_SLOTS;
+
+  memcpy(&response[1],d,152);
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_mount_host_slot(uint8_t hs)
 {
+  memset(response,0,sizeof(response));
+  
+  response[0] = FUJICMD_MOUNT_HOST;
+  response[1] = hs;
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
+  memset(response,0,sizeof(response));
+
+  response[0] = FUJICMD_OPEN_DIRECTORY;
+  response[1] = hs;
+  // 
 }
 
 char *io_read_directory(uint8_t l, uint8_t a)
