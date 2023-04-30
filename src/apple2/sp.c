@@ -239,7 +239,7 @@ int8_t sp_find_fuji()
  * Call out to each device and if they respond (err = 0),
  * then display it's name
  */
-void sp_list_devs()
+void sp_list_devs(void)
 {
   int8_t err, num = 127, i, j;
 

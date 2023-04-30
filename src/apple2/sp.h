@@ -28,7 +28,7 @@ void sp_init(void);
 #ifdef __ORCAC__
 void sp_done(void);
 #endif
-void sp_list_devs();
+void sp_list_devs(void);
 
 #endif /* SP_H */
 #endif /* BUILD_APPLE2 */
