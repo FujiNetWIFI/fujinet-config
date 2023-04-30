@@ -34,27 +34,18 @@ void screen_init(void)
   clrscr();
 }
 
-void screen_inverse_line(unsigned char y)
-{
-  char i;
-
-  for (i=0;i<40;i++)
-    ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
-}
-
 void screen_put_inverse(const char c)
 {
+  revers(1);
   cputc(c);
-  ram[bar_coord(wherex() - 1, wherey())] &= 0x3f;
+  revers(0);
 }
 
 void screen_print_inverse(const char *s)
 {
-  char i;
-  for (i=0;i< strlen(s);i++)
-  {
-    screen_put_inverse(s[i]);
-  }
+  revers(1);
+  cprintf(s);
+  revers(0);
 }
 
 void screen_print_menu(const char *si, const char *sc)
@@ -66,8 +57,10 @@ void screen_print_menu(const char *si, const char *sc)
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
-  screen_inverse_line(STATUS_BAR + 1);
+  gotoxy(0,STATUS_BAR + 1);
+  revers(1);
+  cprintf("%-40s",c);
+  revers(0);
 }
 
 void screen_putlcc(char c)
