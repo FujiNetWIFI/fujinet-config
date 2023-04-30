@@ -96,7 +96,11 @@ void screen_putlcc(char c)
     break;
   }
 
+#ifdef __ORCAC__
   ram[bar_coord(wherex(), wherey())] = c + modifier;
+#else
+  CURRENT_LINE[wherex()] = c + modifier;
+#endif
 }
 
 void screen_set_wifi(AdapterConfig *ac)

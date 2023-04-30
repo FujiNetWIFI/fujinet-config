@@ -12,7 +12,6 @@
 #include "fuji_typedefs.h"
 
 void screen_init(void);
-void screen_inverse_line(unsigned char y);
 void screen_error(const char *c);
 
 void screen_putlcc(char c);
