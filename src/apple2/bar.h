@@ -8,12 +8,7 @@
 
 #include "globals.h"
 
-#ifdef __ORCAC__
-extern unsigned char *ram;
-unsigned short bar_coord(unsigned char x, unsigned char y);
-#else
 #define CURRENT_LINE (*(char**)0x28)
-#endif
 
 /**
  * Clear the currently displayed bar from screen
