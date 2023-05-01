@@ -16,19 +16,6 @@
  */
 static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
-#ifdef __ORCAC__
-unsigned char *ram = (unsigned char *)0x0000;
-const unsigned short row[24]= {
-			       0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700,
-			       0x0780, 0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 0x07A8,
-			       0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0
-};
-unsigned short bar_coord(unsigned char x, unsigned char y)
-{
-  return row[y]+x;
-}
-#endif
-
 void bar_clear(bool oldRow)
 {
   char i;
@@ -39,14 +26,9 @@ void bar_clear(bool oldRow)
   else
     by = bar_y + bar_i;
 
-#ifdef __ORCAC__
-  for (i = 0; i < 40; i++)
-    ram[bar_coord(i, by)] |= 0x80; // white char on black background is in upper half of char set
-#else
   gotoy(by);
   for (i = 0; i < 40; i++)
     CURRENT_LINE[i] |= 0x80; // white char on black background is in upper half of char set
-#endif
 }
 
 /**
@@ -55,26 +37,13 @@ void bar_clear(bool oldRow)
 void bar_update(void)
 {
   char i;
-  #ifdef __ORCAC__
-  unsigned short addr;
-  #endif
 
   bar_clear(true);
 
   // Clear bar color
-  #ifdef __ORCAC__
-    for (i = 0; i < 40; i++) {
-      addr = bar_coord(i,bar_y + bar_i);
-      if (ram[addr] >= 0xe0)
-        ram[addr] &= 0x7f;
-      else
-        ram[addr] &= 0x3f; // black char on white background is in lower half of char set
-    }
-  #else
     gotoy(bar_y + bar_i);
     for (i = 0; i < 40; i++)
       CURRENT_LINE[i] &= 0x3f; // black char on white background is in lower half of char set
-  #endif
 }
 
 /**

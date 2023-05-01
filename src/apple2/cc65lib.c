@@ -70,6 +70,8 @@ unsigned char wherey (void)
 void cputc (char c)
 /* Output one character at the current cursor position */
 {
+  if ((c & 0x60) == 0x60) /* Lower case */
+    c -= 32;            /* Convert to upper case */
   WriteChar(c);
 }
 
@@ -85,7 +87,7 @@ void cputs (const char* s)
       POKE(0x57b, 0);
     }
     else
-      WriteChar(*s);
+      cputc(*s);
     if (*++s == '\n' && x == '\r')
       s++;
   }
@@ -162,7 +164,7 @@ void cclearxy (unsigned char x, unsigned char y, unsigned char length)
 unsigned char get_ostype (void)
 /* Get the machine type. Returns one of the APPLE_xxx codes. */
 {
-  return APPLE_II;
+  return APPLE_IIGS;
 }
 
 #endif /* __ORCAC__ */
