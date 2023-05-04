@@ -5,10 +5,6 @@
  * Screen Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"

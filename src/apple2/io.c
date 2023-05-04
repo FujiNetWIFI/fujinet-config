@@ -5,10 +5,6 @@
  * I/O Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>

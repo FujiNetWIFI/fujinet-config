@@ -6,10 +6,6 @@
  * cc65 compatibility for ORCA/C
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
