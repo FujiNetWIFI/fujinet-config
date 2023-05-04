@@ -5,10 +5,6 @@
  * I/O Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
@@ -60,6 +56,9 @@
 
 #include <string.h>
 #include "sp.h"
+#ifdef __ORCAC__
+#include <texttool.h>
+#endif
 
 static NetConfig nc;
 static SSIDInfo ssid_response;
@@ -345,16 +344,16 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
   sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
-#ifndef __ORCAC__
 void io_set_boot_config(uint8_t toggle)
 {
+  #ifndef __ORCAC__
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = toggle;
 
   sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
+  #endif
 }
-#endif
 
 void io_umount_disk_image(uint8_t ds)
 {
@@ -407,9 +406,17 @@ unsigned char io_device_slot_to_device(unsigned char ds)
   return ds;
 }
 
-#ifndef __ORCAC__
 void io_boot(void)
 {
+  #ifdef __ORCAC__
+  sp_done();
+  WriteChar(0x8c);  // Clear screen
+  WriteChar(0x92);  // Set 80 col
+  WriteChar(0x86);  // Cursor on
+  TextShutDown();
+  exit(0);
+
+  #else
   char ostype;
 
   ostype = get_ostype() & 0xF0;
@@ -450,8 +457,8 @@ void io_boot(void)
 
     asm("JMP $0100");
   }
+  #endif /* __ORCAC__ */
 }
-#endif
 
 bool io_get_wifi_enabled(void)
 {

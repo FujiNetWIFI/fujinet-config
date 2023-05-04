@@ -27,7 +27,7 @@ CONFIG  :=
 
 # Additional C compiler flags and options.
 # Default: none
-CFLAGS = -I -P cc=-i"src" cc=-i"src:apple2" cc=-i"13:cc65" cc=-dBUILD_APPLE2 cc=-d__APPLE2__ cc=-d__fastcall__=
+CFLAGS = -I -P +F cc=-p\"src:apple2:orcac.h\" cc=-isrc cc=-isrc:apple2 cc=-i13:cc65 cc=-dBUILD_APPLE2 cc=-d__APPLE2__ cc=-d__fastcall__=
 
 # Additional assembler flags and options.
 # Default: none

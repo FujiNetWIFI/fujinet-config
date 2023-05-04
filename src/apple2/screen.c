@@ -5,16 +5,16 @@
  * Screen Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"
 #include <conio.h>
 #include <string.h>
 #include <apple2.h>
+#ifdef __ORCAC__
+#include <texttool.h>
+#endif
+
 
 #define STATUS_BAR 21
 
@@ -29,6 +29,17 @@ extern bool deviceEnabled[8];
 
 void screen_init(void)
 {
+  #ifdef __ORCAC__
+    TextStartUp();
+    SetInGlobals(0x7f, 0x00);
+    SetOutGlobals(0xff, 0x80);
+    SetInputDevice(basicType, 3);
+    SetOutputDevice(basicType, 3);
+    InitTextDev(input);
+    InitTextDev(output);
+    WriteChar(0x91);  // Set 40 col
+    WriteChar(0x85);  // Cursor off
+  #endif
   clrscr();
 }
 

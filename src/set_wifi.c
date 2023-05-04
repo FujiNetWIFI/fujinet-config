@@ -20,9 +20,6 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
 #include "apple2/io.h"
 #include "apple2/fuji_typedefs.h"
 #include "apple2/screen.h"

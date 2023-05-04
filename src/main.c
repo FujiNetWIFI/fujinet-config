@@ -21,9 +21,6 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/sp.h"
@@ -51,42 +48,19 @@
 #include "pc6001/screen.h"
 #endif /* BUILD_PC6001 */
 
-#ifdef __ORCAC__
-#include <texttool.h>
-#endif
-
 State state=HOSTS_AND_DEVICES;
 
 void setup(void)
 {
-  #ifdef __ORCAC__
-	TextStartUp();
-	SetInGlobals(0x7f, 0x00);
-	SetOutGlobals(0xff, 0x80);
-	SetInputDevice(basicType, 3);
-	SetOutputDevice(basicType, 3);
-	InitTextDev(input);
-	InitTextDev(output);
-	WriteChar(0x91);  // Set 40 col
-	WriteChar(0x85);  // Cursor off
-  #endif
   io_init();
   screen_init();
 }
 
 void done(void)
 {
-  #ifdef __ORCAC__
-	sp_done();
-  	WriteChar(0x8c);  // Clear screen
-	WriteChar(0x92);  // Set 80 col
-	WriteChar(0x86);  // Cursor on
-	TextShutDown();
-  #else
   // reboot here
   io_set_boot_config(0); // disable config
   io_boot();             // and reboot.
-  #endif
 }
 
 void run(void)
@@ -123,31 +97,30 @@ void run(void)
 			show_info();
 			break;
 		case DONE:
-			done();
-			#ifdef __ORCAC__
-			return;
+			#ifdef BUILD_A2CDA
+				return;
+			#else
+				done();
 			#endif
 			break;
 		}
   }
 }
 
-#ifdef BUILD_A2CDA
-void Start(void)
+void main(void)
 {
 	setup();
 	state = CHECK_WIFI;
 	run();
 }
 
+#ifdef BUILD_A2CDA
+void Start(void)
+{
+	main();
+}
+
 void ShutDown(void)
 {
-}
-#else
-void main(void)
-{
-	setup();
-	state = CHECK_WIFI;
-	run();
 }
 #endif /* BUILD_A2CDA */
