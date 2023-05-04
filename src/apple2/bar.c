@@ -66,7 +66,7 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 /**
  * Move bar upward until index 0
  */
-void bar_up()
+void bar_up(void)
 {
   bar_oldi = bar_i;
 
@@ -80,7 +80,7 @@ void bar_up()
 /**
  * Move bar downward until index m
  */
-void bar_down()
+void bar_down(void)
 {
   bar_oldi = bar_i;
 
@@ -105,7 +105,7 @@ void bar_jump(unsigned char i)
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get()
+unsigned char bar_get(void)
 {
   return bar_i;
 }

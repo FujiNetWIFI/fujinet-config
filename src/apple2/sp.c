@@ -23,6 +23,7 @@
 
 #ifdef __ORCAC__
 #include <stdint.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <string.h>
 #include <misctool.h>
@@ -206,7 +207,7 @@ spCmdListHigh:
 #endif
 }
 
-int8_t sp_find_fuji()
+int8_t sp_find_fuji(void)
 {
   // const char fuji[9] = "THE_FUJI";
   const char fuji[14] = "FUJINET_DISK_0";
@@ -307,7 +308,7 @@ uint16_t sp_dispatch_address(uint8_t slot)
 }
 
 #ifdef __ORCAC__
-void sp_check_handle()
+void sp_check_handle(void)
 {
   if (sp_handle == NULL)
   {
@@ -320,7 +321,7 @@ void sp_check_handle()
   };
 }
 
-void sp_get_buffer()
+void sp_get_buffer(void)
 {
   if (PEEK(0xe100bc) == 0)  // Running under ProDOS 8
     {
@@ -335,9 +336,9 @@ void sp_get_buffer()
     {
       sp_handle = NewHandle(0x500, myId, 0xC011, 0L);
       sp_check_handle();
-      sp_payload = *sp_handle;
-      sp_cmdlist = *sp_handle + 1024;
-      sp_instr = *sp_handle + 1034;
+      sp_payload = (uint8_t *)*sp_handle;
+      sp_cmdlist = (uint8_t *)*sp_handle + 1024;
+      sp_instr = (uint8_t *)*sp_handle + 1034;
     }
 }
 #endif
