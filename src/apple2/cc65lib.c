@@ -64,8 +64,6 @@ unsigned char wherey (void)
 void cputc (char c)
 /* Output one character at the current cursor position */
 {
-  if ((c & 0x60) == 0x60) /* Lower case */
-    c -= 32;            /* Convert to upper case */
   WriteChar(c);
 }
 

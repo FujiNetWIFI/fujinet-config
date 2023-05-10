@@ -39,7 +39,10 @@ void bar_update(void)
   // Clear bar color
     gotoy(bar_y + bar_i);
     for (i = 0; i < 40; i++)
-      CURRENT_LINE[i] &= 0x3f; // black char on white background is in lower half of char set
+      if (CURRENT_LINE[i] < 0xe0)
+        CURRENT_LINE[i] &= 0x3f; // black char on white background is in lower half of char set
+      else
+        CURRENT_LINE[i] &= 0x7f; // keep bit 6 for lowercase
 }
 
 /**
