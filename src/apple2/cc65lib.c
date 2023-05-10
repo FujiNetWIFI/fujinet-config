@@ -38,8 +38,7 @@ void gotoy (unsigned char y)
   x = PEEK(0x57b);
   POKE(0x25, y-1);
   WriteChar(0x8d);
-  POKE(0x24, x);
-  POKE(0x57b, x);
+  gotox(x);
 }
 
 void gotoxy (unsigned char x, unsigned char y)
@@ -47,8 +46,7 @@ void gotoxy (unsigned char x, unsigned char y)
 {
   POKE(0x25, y-1);
   WriteChar(0x8d);
-  POKE(0x24, x);
-  POKE(0x57b, x);
+  gotox(x);
 }
 
 unsigned char wherex (void)
@@ -66,8 +64,6 @@ unsigned char wherey (void)
 void cputc (char c)
 /* Output one character at the current cursor position */
 {
-  if ((c & 0x60) == 0x60) /* Lower case */
-    c -= 32;            /* Convert to upper case */
   WriteChar(c);
 }
 
@@ -102,11 +98,16 @@ int cprintf (const char* format, ...)
 
 char cgetc (void)
 /* Return a character from the keyboard. If there is no character available,
-** the function waits until the user does press a key. If cursor is set to
-** 1 (see below), a blinking cursor is displayed while waiting.
+** the function waits until the user does press a key. No cursor displayed.
 */
 {
-  return (char)ReadChar(noEcho);
+  unsigned char c;
+
+  while ((c = PEEK(0xc000)) < 128); /* >= 128 when key down */
+  PEEK(0xc010);   /* Clear keyboard strobe */
+  if (PEEK(0xc061) < 128) /* Unless OpenApple is down, clear high bit */
+    c &= 0x7F;
+  return c;
 }
 
 unsigned char revers (unsigned char onoff)

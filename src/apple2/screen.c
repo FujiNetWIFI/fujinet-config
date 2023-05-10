@@ -38,7 +38,6 @@ void screen_init(void)
     InitTextDev(input);
     InitTextDev(output);
     WriteChar(0x91);  // Set 40 col
-    WriteChar(0x85);  // Cursor off
   #endif
   clrscr();
 }
