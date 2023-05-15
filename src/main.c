@@ -96,6 +96,11 @@ void run(void)
 		case SHOW_INFO:
 			show_info();
 			break;
+		#ifdef BUILD_APPLE2
+		case SHOW_DEVICES:
+			io_list_devs();
+			break;
+		#endif
 		case DONE:
 			#ifdef BUILD_A2CDA
 				return;

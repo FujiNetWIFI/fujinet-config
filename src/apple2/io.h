@@ -44,6 +44,7 @@ void io_disable_device(unsigned char d);
 unsigned char io_device_slot_to_device(unsigned char ds);
 void io_boot(void);
 bool io_get_wifi_enabled(void);
+void io_list_devs(void);
 
 #endif /* IO_H */
 #endif /* BUILD_APPLE2 */

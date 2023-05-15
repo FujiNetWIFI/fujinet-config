@@ -74,6 +74,9 @@ typedef enum _state
    DESTINATION_HOST_SLOT,
    PERFORM_COPY,
    SHOW_INFO,
+  #ifdef BUILD_APPLE2
+   SHOW_DEVICES,
+  #endif
    DONE
   }
 State;

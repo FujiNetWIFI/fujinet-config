@@ -240,6 +240,7 @@ void sp_list_devs(void)
 {
   int8_t err, num = 127, i, j;
 
+  clrscr();
   revers(1);
   cprintf(" SMARTPORT DEVICE LIST \r\n\r\n");
   revers(0);
@@ -354,9 +355,6 @@ void sp_init(void)
     sp_dispatch = sp_dispatch_address(slot);
   else
     screen_error("No SmartPort Firmware Found!");
-  #ifndef BUILD_A2CDA
-  sp_list_devs();
-  #endif
   f = sp_find_fuji();
   if (f < 1)
     screen_error("FujiNet Not Found!");

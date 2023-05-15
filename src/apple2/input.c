@@ -416,6 +416,10 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'c':
     state = SHOW_INFO;
     return HD_DONE;
+  case 'D':
+  case 'd':
+    state = SHOW_DEVICES;
+    return HD_DONE;
   case 'E':
   case 'e':
     // smartkeys_sound_play(SOUND_POSITIVE_CHIME);
