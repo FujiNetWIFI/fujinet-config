@@ -40,6 +40,9 @@ void screen_init(void)
     WriteChar(0x91);  // Set 40 col
   #endif
   clrscr();
+ #ifndef BUILD_A2CDA
+  screen_fujinetlogo();
+ #endif
 }
 
 void screen_put_inverse(const char c)
@@ -60,6 +63,35 @@ void screen_print_menu(const char *si, const char *sc)
 {
   screen_print_inverse(si);
   cprintf(sc);
+}
+
+void screen_fujinetlogo(void)
+{
+  unsigned char i, j;
+
+  gotoxy(20,12);
+  cprintf("O");
+
+  for (i = 0; i < 11; i++)
+  {
+      gotoxy(i+4,12);    // fuji scrolling across left to centre
+      cprintf(" FUJI*");
+      gotoxy(31-i,12);   // net scrolling back right to centre
+      cprintf("*NET ");
+      gotoxy(20,i);      // * coming down from the top
+      cprintf(" ");
+      gotoxy(20,i+1);
+      cprintf("*");
+      gotoxy(21,23-i);   // * coming up from bottom
+      cprintf("*");
+      gotoxy(21,23-i+1);
+      cprintf(" ");
+      for(j = 0; j < 255; j++);
+   }
+   for(i = 0; i < 127; i++) // delay a bit
+   {
+      for(j = 0; j < 255; j++);
+   }
 }
 
 void screen_error(const char *c)
@@ -269,9 +301,10 @@ void screen_hosts_and_devices_hosts(void)
   gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8", ":SLOT  ");
   screen_print_menu("E","DIT  ");
-  screen_print_menu("RETURN",":SELECT FILES\r\n ");
-  screen_print_menu("C","ONFIG  ");
-  screen_print_menu("TAB",":DRIVE SLOTS  ");
+  screen_print_menu("RETURN",":SELECT FILES\r\n");
+  screen_print_menu("C","ONFIG ");
+  screen_print_menu("TAB",":DRIVE SLOTS ");
+  screen_print_menu("D","EVICES ");
   #ifdef __ORCAC__
     screen_print_menu("ESC",":EXIT");
   #else
@@ -431,7 +464,6 @@ void screen_select_file_choose(char visibleEntries)
   screen_print_menu("ESC",":PARENT  ");
   screen_print_menu("F","ILTER  ");
   screen_print_menu("N","EW  ");
-  screen_print_menu("ESC",":BOOT");
 }
 
 void screen_select_file_filter(void)

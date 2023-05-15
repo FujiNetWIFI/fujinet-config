@@ -18,6 +18,7 @@ void screen_putlcc(char c);
 void screen_put_inverse(const char c);
 void screen_print_inverse(const char *s);
 void screen_print_menu(const char *si, const char *sc);
+void screen_fujinetlogo(void);
 
 void screen_set_wifi(AdapterConfig* ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);

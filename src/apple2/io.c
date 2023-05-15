@@ -462,7 +462,13 @@ void io_boot(void)
 
 bool io_get_wifi_enabled(void)
 {
-	return true;
+    return true;
+}
+
+void io_list_devs(void)
+{
+    sp_list_devs();
+    state = HOSTS_AND_DEVICES;
 }
 
 #endif /* BUILD_APPLE2 */
