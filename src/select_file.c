@@ -74,7 +74,6 @@
 SFSubState sf_subState;
 char path[224];
 char filter[32];
-char host[32];
 char source_path[224];
 char source_filter[32];
 char source_filename[128];
@@ -108,16 +107,8 @@ void select_file_init(void)
   quick_boot = dir_eof = false;
 }
 
-unsigned select_get_entry_type(char * buf, int bufSize)
-{
-  if (buf && buf[0] == '+') return ENTRY_TYPE_LINK;
-  else if (buf[bufSize] == '/') return ENTRY_TYPE_FOLDER;
-  else return ENTRY_TYPE_FILE;
-}
-
 unsigned char select_file_display(void)
 {
-  unsigned entryType = ENTRY_TYPE_FILE;
   char visibleEntries = 0;
   char i;
   char *e;
@@ -164,8 +155,7 @@ unsigned char select_file_display(void)
     {
       entry_size[i] = strlen(e);
       visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
-      entryType = select_get_entry_type(e, strlen(e));
-      screen_select_file_display_entry(i, e, entryType);
+      screen_select_file_display_entry(i, e, 0);
     }
   }
 
@@ -266,6 +256,38 @@ void select_file_choose(char visibleEntries)
   }
 }
 
+void select_file_link(void)
+{
+  char *e;
+  char tnfsHostname[128];
+  bar_clear(false);
+
+  io_open_directory(selected_host_slot, path, filter);
+
+  if (io_error())
+  {
+      sf_subState = SF_DONE;
+      state = HOSTS_AND_DEVICES;
+      return;
+  }
+
+  io_set_directory_position(pos);
+
+  e = io_read_directory(128, 0x20);
+
+  strcpy(tnfsHostname, &e[1]);
+
+  io_close_directory();
+
+  strcpy(hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
+  io_put_host_slots(&hostSlots[0]);
+
+  selected_host_slot = NUM_HOST_SLOTS-1;
+  strcpy(selected_host_name, tnfsHostname);
+  sf_subState = SF_INIT;
+
+}
+
 void select_file_advance(void)
 {
   char *e;
@@ -313,10 +335,10 @@ void select_file_devance(void)
   sf_subState = SF_DISPLAY; // And display the result.
 }
 
-unsigned char select_file_is_folder(void)
+unsigned select_file_entry_type(void)
 {
   char *e;
-  unsigned char result;
+  unsigned result;
 
   io_open_directory(selected_host_slot, path, filter);
 
@@ -324,7 +346,9 @@ unsigned char select_file_is_folder(void)
 
   e = io_read_directory(128, 0);
 
-  result = (strrchr(e, '/') != NULL);
+  if (strrchr(e, '/') != NULL) result = ENTRY_TYPE_FOLDER;
+  else if (e[0] == '+') result = ENTRY_TYPE_LINK;
+  else result = ENTRY_TYPE_FILE;
 
   io_close_directory();
 
@@ -424,6 +448,9 @@ void select_file(void)
       break;
     case SF_FILTER:
       select_file_filter();
+      break;
+    case SF_LINK:
+      select_file_link();
       break;
     case SF_ADVANCE_FOLDER:
       select_file_advance();
