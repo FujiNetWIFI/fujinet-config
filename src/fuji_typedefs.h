@@ -14,6 +14,15 @@
 #define MAX_HOST_LEN 32
 #define NUM_HOST_SLOTS 8
 
+typedef enum _entry_types
+{
+  ENTRY_TYPE_TEXT,
+  ENTRY_TYPE_FOLDER,
+  ENTRY_TYPE_FILE,
+  ENTRY_TYPE_LINK,
+  ENTRY_TYPE_MENU
+} EntryType;
+
 typedef unsigned short DirectoryPosition;
 
 /**
