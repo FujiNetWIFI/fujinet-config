@@ -74,6 +74,7 @@
 SFSubState sf_subState;
 char path[224];
 char filter[32];
+char host[32];
 char source_path[224];
 char source_filter[32];
 char source_filename[128];
@@ -107,8 +108,16 @@ void select_file_init(void)
   quick_boot = dir_eof = false;
 }
 
+unsigned select_get_entry_type(char * buf, int bufSize)
+{
+  if (buf && buf[0] == '+') return ENTRY_TYPE_LINK;
+  else if (buf[bufSize] == '/') return ENTRY_TYPE_FOLDER;
+  else return ENTRY_TYPE_FILE;
+}
+
 unsigned char select_file_display(void)
 {
+  unsigned entryType = ENTRY_TYPE_FILE;
   char visibleEntries = 0;
   char i;
   char *e;
@@ -155,7 +164,8 @@ unsigned char select_file_display(void)
     {
       entry_size[i] = strlen(e);
       visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
-      screen_select_file_display_entry(i, e);
+      entryType = select_get_entry_type(e, strlen(e));
+      screen_select_file_display_entry(i, e, entryType);
     }
   }
 

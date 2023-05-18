@@ -7,6 +7,15 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+typedef enum _entry_types
+{
+  ENTRY_TYPE_TEXT,
+  ENTRY_TYPE_FOLDER,
+  ENTRY_TYPE_FILE,
+  ENTRY_TYPE_LINK,
+  ENTRY_TYPE_MENU
+} EntryType;
+
 typedef enum _ws_subState
   {
    WS_SCAN,
