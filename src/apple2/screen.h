@@ -9,7 +9,7 @@
 #define SCREEN_H
 
 #include <stdbool.h>
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 void screen_init(void);
 void screen_error(const char *c);

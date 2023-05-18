@@ -1,4 +1,3 @@
-#ifdef BUILD_ADAM
 /**
  * CONFIG custom types
  */
@@ -11,6 +10,9 @@
 
 #define MODE_READ 1
 #define MODE_WRITE 2
+
+#define MAX_HOST_LEN 32
+#define NUM_HOST_SLOTS 8
 
 typedef unsigned short DirectoryPosition;
 
@@ -66,4 +68,3 @@ typedef struct
 } NewDisk;
 
 #endif /* FUJI_TYPEDEFS_H */
-#endif

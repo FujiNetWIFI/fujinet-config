@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 #include "../typedefs.h"
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 #ifndef GLOBALS_H
 #define GLOBALS_H

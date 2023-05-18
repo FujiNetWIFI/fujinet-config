@@ -8,7 +8,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 void screen_init(void);
 void screen_error(const char *c);
