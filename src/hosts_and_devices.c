@@ -8,10 +8,10 @@
 #include "hosts_and_devices.h"
 #include "die.h"
 #include "typedefs.h"
+#include "fuji_typedefs.h"
 
 #ifdef BUILD_ADAM
 #include "adam/globals.h"
-#include "adam/fuji_typedefs.h"
 #include "adam/io.h"
 #include "adam/screen.h"
 #include "adam/input.h"
@@ -20,7 +20,6 @@
 
 #ifdef BUILD_APPLE2
 #include "apple2/globals.h"
-#include "apple2/fuji_typedefs.h"
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/input.h"
@@ -30,7 +29,6 @@
 
 #ifdef BUILD_ATARI
 #include "atari/globals.h"
-#include "atari/fuji_typedefs.h"
 #include "atari/io.h"
 #include "atari/screen.h"
 #include "atari/input.h"
@@ -39,7 +37,6 @@
 
 #ifdef BUILD_C64
 #include "c64/globals.h"
-#include "c64/fuji_typedefs.h"
 #include "c64/io.h"
 #include "c64/screen.h"
 #include "c64/input.h"
@@ -48,7 +45,6 @@
 
 #ifdef BUILD_PC8801
 #include "pc8801/globals.h"
-#include "pc8801/fuji_typedefs.h"
 #include "pc8801/io.h"
 #include "pc8801/screen.h"
 #include "pc8801/input.h"
@@ -57,7 +53,6 @@
 
 #ifdef BUILD_PC6001
 #include "pc6001/globals.h"
-#include "pc6001/fuji_typedefs.h"
 #include "pc6001/io.h"
 #include "pc6001/screen.h"
 #include "pc6001/input.h"

@@ -7,9 +7,9 @@
 #include <conio.h>
 #include <string.h>
 #include "select_file.h"
+#include "fuji_typedefs.h"
 
 #ifdef BUILD_ADAM
-#include "adam/fuji_typedefs.h"
 #include "adam/screen.h"
 #include "adam/io.h"
 #include "adam/globals.h"
@@ -20,7 +20,6 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_ATARI
-#include "atari/fuji_typedefs.h"
 #include "atari/screen.h"
 #include "atari/io.h"
 #include "atari/globals.h"
@@ -30,7 +29,6 @@
 #endif
 
 #ifdef BUILD_APPLE2
-#include "apple2/fuji_typedefs.h"
 #include "apple2/screen.h"
 #include "apple2/io.h"
 #include "apple2/globals.h"
@@ -41,7 +39,6 @@
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_C64
-#include "c64/fuji_typedefs.h"
 #include "c64/screen.h"
 #include "c64/io.h"
 #include "c64/globals.h"
@@ -52,7 +49,6 @@
 #endif /* BUILD_C64 */
 
 #ifdef BUILD_PC8801
-#include "pc8801/fuji_typedefs.h"
 #include "pc8801/screen.h"
 #include "pc8801/io.h"
 #include "pc8801/globals.h"
@@ -62,7 +58,6 @@
 #endif /* BUILD_PC8801 */
 
 #ifdef BUILD_PC6001
-#include "pc6001/fuji_typedefs.h"
 #include "pc6001/screen.h"
 #include "pc6001/io.h"
 #include "pc6001/globals.h"
@@ -155,7 +150,7 @@ unsigned char select_file_display(void)
     {
       entry_size[i] = strlen(e);
       visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
-      screen_select_file_display_entry(i, e);
+      screen_select_file_display_entry(i, e, 0);
     }
   }
 
@@ -256,6 +251,38 @@ void select_file_choose(char visibleEntries)
   }
 }
 
+void select_file_link(void)
+{
+  char *e;
+  char tnfsHostname[128];
+  bar_clear(false);
+
+  io_open_directory(selected_host_slot, path, filter);
+
+  if (io_error())
+  {
+      sf_subState = SF_DONE;
+      state = HOSTS_AND_DEVICES;
+      return;
+  }
+
+  io_set_directory_position(pos);
+
+  e = io_read_directory(128, 0x20);
+
+  strcpy(tnfsHostname, &e[1]);
+
+  io_close_directory();
+
+  strcpy(hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
+  io_put_host_slots(&hostSlots[0]);
+
+  selected_host_slot = NUM_HOST_SLOTS-1;
+  strcpy(selected_host_name, tnfsHostname);
+  sf_subState = SF_INIT;
+
+}
+
 void select_file_advance(void)
 {
   char *e;
@@ -303,10 +330,10 @@ void select_file_devance(void)
   sf_subState = SF_DISPLAY; // And display the result.
 }
 
-unsigned char select_file_is_folder(void)
+unsigned select_file_entry_type(void)
 {
   char *e;
-  unsigned char result;
+  unsigned result;
 
   io_open_directory(selected_host_slot, path, filter);
 
@@ -314,7 +341,9 @@ unsigned char select_file_is_folder(void)
 
   e = io_read_directory(128, 0);
 
-  result = (strrchr(e, '/') != NULL);
+  if (strrchr(e, '/') != NULL) result = ENTRY_TYPE_FOLDER;
+  else if (e[0] == '+') result = ENTRY_TYPE_LINK;
+  else result = ENTRY_TYPE_FILE;
 
   io_close_directory();
 
@@ -414,6 +443,9 @@ void select_file(void)
       break;
     case SF_FILTER:
       select_file_filter();
+      break;
+    case SF_LINK:
+      select_file_link();
       break;
     case SF_ADVANCE_FOLDER:
       select_file_advance();

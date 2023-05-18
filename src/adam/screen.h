@@ -9,7 +9,7 @@
 #define SCREEN_H
 
 #include <stdbool.h>
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 void screen_init(void);
 void screen_error(const char *c);
@@ -47,7 +47,7 @@ void screen_select_file_clear_long_filename(void);
 void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_prev(void);
-void screen_select_file_display_entry(unsigned char y, char* e);
+void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType);
 void screen_select_file_choose(char visibleEntries);
 void screen_select_file_new_type(void);
 void screen_select_file_new_size(unsigned char k);

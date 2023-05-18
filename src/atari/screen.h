@@ -3,7 +3,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 #define FONT_MEMORY 0x7800
 
@@ -87,7 +87,7 @@ void screen_select_file_clear_long_filename(void);
 void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_prev(void);
-void screen_select_file_display_entry(unsigned char y, char *e);
+void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType);
 void screen_select_file_choose(char visibleEntries);
 void screen_select_file_new_type(void);
 void screen_select_file_new_size(unsigned char k);

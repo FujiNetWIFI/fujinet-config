@@ -5,13 +5,12 @@
 
 #include <stdbool.h>
 #include "../typedefs.h"
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
 #define NUM_DEVICE_SLOTS    8
-#define NUM_HOST_SLOTS      8
 
 // # of files to display on the page. Moved from select_file.c to here, for Atari.
 #define ENTRIES_PER_PAGE 13

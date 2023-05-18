@@ -383,6 +383,7 @@ void input_line_filter(char *c)
 
 SFSubState input_select_file_choose(void)
 {
+  unsigned entryType;
   unsigned char k=input();
 
   if (entry_timer>0)
@@ -392,8 +393,11 @@ SFSubState input_select_file_choose(void)
     {
     case KEY_RETURN:
       pos+=bar_get();
-	  if (select_file_is_folder())
-	    return SF_ADVANCE_FOLDER;
+      entryType = select_file_is_folder()
+      if (entryType == ENTRY_TYPE_FOLDER)
+        return SF_ADVANCE_FOLDER;
+      else if (entryType == ENTRY_TYPE_LINK)
+        return SF_LINK;
       else
         return SF_DONE;
     case KEY_ESCAPE:
