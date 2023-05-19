@@ -25,6 +25,16 @@ void bar_clear(bool oldRow);
 void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i);
 
 /**
+ * Set up bar and start display on row
+ * @param y Y column for bar display
+ * @param c # of columns for left
+ * @param m number of items
+ * @param i item index to start display
+ * @param s s split s lines (used to allow for diskII separater)
+ */
+void bar_set_split(unsigned char y, unsigned char c, unsigned char m, unsigned char i, unsigned char s);
+
+/**
  * Move bar upward until index 0
  */
 void bar_up(void);

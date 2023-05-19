@@ -367,7 +367,7 @@ void io_update_devices_enabled(bool *e)
 {
   char i;
 
-  for (i=0;i<4;i++)
+  for (i=0;i<6;i++)
     {
       e[i]=io_get_device_enabled_status(io_device_slot_to_device(i));
     }
