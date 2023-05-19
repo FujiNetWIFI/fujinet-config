@@ -102,10 +102,9 @@ void run(void)
 			break;
 		#endif
 		case DONE:
+			done();
 			#ifdef BUILD_A2CDA
 				return;
-			#else
-				done();
 			#endif
 			break;
 		}

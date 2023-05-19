@@ -410,11 +410,13 @@ void io_boot(void)
 {
   #ifdef __ORCAC__
   sp_done();
+	#ifndef BUILD_A2CDA
   WriteChar(0x8c);  // Clear screen
   WriteChar(0x92);  // Set 80 col
   WriteChar(0x86);  // Cursor on
   TextShutDown();
   exit(0);
+	#endif
 
   #else
   char ostype;
