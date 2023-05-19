@@ -333,8 +333,10 @@ SSSubState input_select_slot_choose(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
+    case KEY_5:
+    case KEY_6:
       bar_jump(k-KEY_1);
-      return SS_CHOOSE;
+	  return SS_CHOOSE;
     // case KEY_SMART_IV:
     case 'E':
     case 'e':
@@ -456,6 +458,8 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
+    case KEY_5:
+    case KEY_6:
       bar_jump(k-KEY_1);
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();

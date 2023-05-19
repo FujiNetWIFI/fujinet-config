@@ -10,7 +10,7 @@
 /**
  * static local variables for bar y, max, and index.
  */
-static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
+static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0, bar_s = 0;
 
 void bar_clear(bool oldRow)
 {
@@ -20,7 +20,14 @@ void bar_clear(bool oldRow)
   if (oldRow)
     by = bar_y + bar_oldi;
   else
+  {
+    // adjust for split (diskII slots)
+    if (bar_s && (bar_i > 3) && (bar_oldi < 4))
+      bar_y += bar_s;
+    else if (bar_s && (bar_i < 4) && (bar_oldi > 3))
+      bar_y -= bar_s;
     by = bar_y + bar_i;
+  }
 
   gotoy(by);
   for (i = 0; i < 40; i++)
@@ -35,6 +42,13 @@ void bar_update(void)
   char i;
 
   bar_clear(true);
+
+  // adjust for split (diskII slots)
+  if (bar_s && (bar_i > 3) && (bar_oldi < 4))
+    bar_y += bar_s;
+  else if (bar_s && (bar_i < 4) && (bar_oldi > 3))
+    bar_y -= bar_s;
+
 
   // Clear bar color
     gotoy(bar_y + bar_i);
@@ -59,6 +73,26 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
   bar_m = m-1;
   bar_i = i;
   bar_oldi = bar_i;
+  bar_s = 0;
+  bar_update();
+}
+
+/**
+ * Set up bar and start display on row
+ * @param y Y column for bar display
+ * @param c column size in characters
+ * @param m number of items
+ * @param i item index to start display
+ * @param s split s lines (used to allow for diskII separater)
+ */
+void bar_set_split(unsigned char y, unsigned char c, unsigned char m, unsigned char i, unsigned char s)
+{
+  bar_y = y;
+  bar_c = c;
+  bar_m = m-1;
+  bar_i = i;
+  bar_oldi = bar_i;
+  bar_s = s;
   bar_update();
 }
 
