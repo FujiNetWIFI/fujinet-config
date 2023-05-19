@@ -274,7 +274,7 @@ void select_file_link(void)
 
   io_close_directory();
 
-  strcpy(hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
+  strcpy((char *)hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
   io_put_host_slots(&hostSlots[0]);
 
   selected_host_slot = NUM_HOST_SLOTS-1;
