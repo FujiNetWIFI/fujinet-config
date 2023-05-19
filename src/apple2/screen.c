@@ -280,9 +280,9 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
-  const char hl[] = "HOST LIST";
-  const char ss[] = "SMARTPORT DRIVES";
-  const char ds[] = "DISKII DRIVES";
+  static const char hl[] = "HOST LIST";
+  static const char ss[] = "SMARTPORT DRIVES";
+  static const char ds[] = "DISKII DRIVES";
   char i;
 
   clrscr();
@@ -484,8 +484,8 @@ void screen_select_file_filter(void)
 void screen_select_slot(char *e)
 {
   unsigned long *s;
-  const char ss[] = "SMARTPORT DRIVES";
-  const char ds[] = "DISKII DRIVES";
+  static const char ss[] = "SMARTPORT DRIVES";
+  static const char ds[] = "DISKII DRIVES";
 
   clrscr();
 
