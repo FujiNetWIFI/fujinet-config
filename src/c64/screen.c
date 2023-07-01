@@ -32,10 +32,24 @@ void screen_init(void)
 
 void screen_inverse_line(unsigned char y)
 {
+  unsigned char i;
+  
+  for (i=0;i<40;i++)
+    {
+      char c;
+      gotoxy(i,y);
+      c = cpeekc();
+      revers(1);
+      cputcxy(c,i,y);
+      revers(0);
+    }
 }
 
 void screen_put_inverse(const char c)
 {
+  revers(1);
+  cputc(c);
+  revers(0);
 }
 
 void screen_print_inverse(const char *s)
