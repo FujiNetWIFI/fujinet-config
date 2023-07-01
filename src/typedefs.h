@@ -31,6 +31,7 @@ typedef enum _sf_subState
    SF_NEXT_PAGE,
    SF_PREV_PAGE,
    SF_CHOOSE,
+   SF_LINK,
    SF_FILTER,
    SF_ADVANCE_FOLDER,
    SF_DEVANCE_FOLDER,
@@ -74,6 +75,9 @@ typedef enum _state
    DESTINATION_HOST_SLOT,
    PERFORM_COPY,
    SHOW_INFO,
+  #ifdef BUILD_APPLE2
+   SHOW_DEVICES,
+  #endif
    DONE
   }
 State;

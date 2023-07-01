@@ -6,10 +6,6 @@
  * cc65 compatibility for ORCA/C
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -42,8 +38,7 @@ void gotoy (unsigned char y)
   x = PEEK(0x57b);
   POKE(0x25, y-1);
   WriteChar(0x8d);
-  POKE(0x24, x);
-  POKE(0x57b, x);
+  gotox(x);
 }
 
 void gotoxy (unsigned char x, unsigned char y)
@@ -51,8 +46,7 @@ void gotoxy (unsigned char x, unsigned char y)
 {
   POKE(0x25, y-1);
   WriteChar(0x8d);
-  POKE(0x24, x);
-  POKE(0x57b, x);
+  gotox(x);
 }
 
 unsigned char wherex (void)
@@ -85,7 +79,7 @@ void cputs (const char* s)
       POKE(0x57b, 0);
     }
     else
-      WriteChar(*s);
+      cputc(*s);
     if (*++s == '\n' && x == '\r')
       s++;
   }
@@ -104,11 +98,16 @@ int cprintf (const char* format, ...)
 
 char cgetc (void)
 /* Return a character from the keyboard. If there is no character available,
-** the function waits until the user does press a key. If cursor is set to
-** 1 (see below), a blinking cursor is displayed while waiting.
+** the function waits until the user does press a key. No cursor displayed.
 */
 {
-  return (char)ReadChar(noEcho);
+  unsigned char c;
+
+  while ((c = PEEK(0xc000)) < 128); /* >= 128 when key down */
+  PEEK(0xc010);   /* Clear keyboard strobe */
+  if (PEEK(0xc061) < 128) /* Unless OpenApple is down, clear high bit */
+    c &= 0x7F;
+  return c;
 }
 
 unsigned char revers (unsigned char onoff)
@@ -162,7 +161,7 @@ void cclearxy (unsigned char x, unsigned char y, unsigned char length)
 unsigned char get_ostype (void)
 /* Get the machine type. Returns one of the APPLE_xxx codes. */
 {
-  return APPLE_II;
+  return APPLE_IIGS;
 }
 
 #endif /* __ORCAC__ */

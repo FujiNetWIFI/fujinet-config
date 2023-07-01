@@ -5,16 +5,16 @@
  * Screen Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"
 #include <conio.h>
 #include <string.h>
 #include <apple2.h>
+#ifdef __ORCAC__
+#include <texttool.h>
+#endif
+
 
 #define STATUS_BAR 21
 
@@ -23,38 +23,40 @@
 static const char *empty="EMPTY";
 static const char *off="OFF";
 
-unsigned char *mousetext = (unsigned char *)0xC00E;
-
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
 
 void screen_init(void)
 {
+  #ifdef __ORCAC__
+    TextStartUp();
+    SetInGlobals(0x7f, 0x00);
+    SetOutGlobals(0xff, 0x80);
+    SetInputDevice(basicType, 3);
+    SetOutputDevice(basicType, 3);
+    InitTextDev(input);
+    InitTextDev(output);
+    WriteChar(0x91);  // Set 40 col
+  #endif
   clrscr();
-}
-
-void screen_inverse_line(unsigned char y)
-{
-  char i;
-
-  for (i=0;i<40;i++)
-    ram[bar_coord(i,y)] &= 0x3f; // black char on white background is in lower half of char set
+ #ifndef BUILD_A2CDA
+  screen_fujinetlogo();
+ #endif
 }
 
 void screen_put_inverse(const char c)
 {
+  revers(1);
   cputc(c);
-  ram[bar_coord(wherex() - 1, wherey())] &= 0x3f;
+  revers(0);
 }
 
 void screen_print_inverse(const char *s)
 {
-  char i;
-  for (i=0;i< strlen(s);i++)
-  {
-    screen_put_inverse(s[i]);
-  }
+  revers(1);
+  cprintf(s);
+  revers(0);
 }
 
 void screen_print_menu(const char *si, const char *sc)
@@ -63,11 +65,42 @@ void screen_print_menu(const char *si, const char *sc)
   cprintf(sc);
 }
 
+void screen_fujinetlogo(void)
+{
+  unsigned char i, j;
+
+  gotoxy(20,12);
+  cprintf("O");
+
+  for (i = 0; i < 11; i++)
+  {
+      gotoxy(i+4,12);    // fuji scrolling across left to centre
+      cprintf(" FUJI*");
+      gotoxy(31-i,12);   // net scrolling back right to centre
+      cprintf("*NET ");
+      gotoxy(20,i);      // * coming down from the top
+      cprintf(" ");
+      gotoxy(20,i+1);
+      cprintf("*");
+      gotoxy(21,23-i);   // * coming up from bottom
+      cprintf("*");
+      gotoxy(21,23-i+1);
+      cprintf(" ");
+      for(j = 0; j < 255; j++);
+   }
+   for(i = 0; i < 127; i++) // delay a bit
+   {
+      for(j = 0; j < 255; j++);
+   }
+}
+
 void screen_error(const char *c)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR + 1); cprintf("%-40s",c);
-  screen_inverse_line(STATUS_BAR + 1);
+  gotoxy(0,STATUS_BAR + 1);
+  revers(1);
+  cprintf("%-40s",c);
+  revers(0);
 }
 
 void screen_putlcc(char c)
@@ -105,13 +138,7 @@ void screen_putlcc(char c)
     break;
   }
 
-  if (ostype == APPLE_IIC)
-    mousetext[1] = 1; // turn on mouse text
-
-  ram[bar_coord(wherex(), wherey())] = c + modifier;
-
-  if (ostype == APPLE_IIC)
-    mousetext[0] = 1; // turn off mouse text
+  CURRENT_LINE[wherex()] = c + modifier;
 }
 
 void screen_set_wifi(AdapterConfig *ac)
@@ -240,24 +267,33 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 {
   char i;
 
-  for (i=0;i<4;i++)
+  for (i=0;i<4;i++) // smartport
     {
       gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
+    }
+
+  for (i=4;i<6;i++) // diskII
+    {
+      gotoxy(0,i+y+1); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
     }
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
-  const char hl[] = "HOST LIST";
-  const char ds[] = "DRIVE SLOTS";
+  static const char hl[] = "HOST LIST";
+  static const char ss[] = "SMARTPORT DRIVES";
+  static const char ds[] = "DISKII DRIVES";
   char i;
 
   clrscr();
-  gotoxy(0,0);  cprintf("%40s",hl); // screen_inverse(0);
+  gotoxy(0,0);  cprintf("%40s",hl);
   chlinexy(0,0,40 - sizeof(hl));
 
-  gotoxy(0,10); cprintf("%40s",ds); // screen_inverse(10);
-  chlinexy(0,10,40 - sizeof(ds));
+  gotoxy(0,10); cprintf("%40s",ss);
+  chlinexy(0,10,40 - sizeof(ss));
+
+  gotoxy(0,15); cprintf("%40s",ds);
+  chlinexy(0,15,40 - sizeof(ds));
 
   for (i=0;i<8;i++)
     {
@@ -272,11 +308,12 @@ void screen_hosts_and_devices_hosts(void)
   bar_set(1,1,8,0);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
-  screen_print_menu("1-8", ":SLOT  ");
+  screen_print_menu("1-8", ":HOST  ");
   screen_print_menu("E","DIT  ");
-  screen_print_menu("RETURN",":SELECT FILES\r\n ");
-  screen_print_menu("C","ONFIG  ");
-  screen_print_menu("TAB",":DRIVE SLOTS  ");
+  screen_print_menu("RETURN",":SELECT FILES\r\n");
+  screen_print_menu("C","ONFIG ");
+  screen_print_menu("TAB",":DRIVES ");
+  screen_print_menu("D","EVICES ");
   #ifdef __ORCAC__
     screen_print_menu("ESC",":EXIT");
   #else
@@ -296,7 +333,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-  bar_set(11,1,4,0);
+  bar_set_split(11,1,6,0,1);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("E","JECT  ");
@@ -387,7 +424,7 @@ void screen_select_file_next(void)
   gotoxy(0,18); cprintf("%-40s","[...]");
 }
 
-void screen_select_file_display_entry(unsigned char y, char* e)
+void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
 {
   gotoxy(0,y+3);
   cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
@@ -436,7 +473,6 @@ void screen_select_file_choose(char visibleEntries)
   screen_print_menu("ESC",":PARENT  ");
   screen_print_menu("F","ILTER  ");
   screen_print_menu("N","EW  ");
-  screen_print_menu("ESC",":BOOT");
 }
 
 void screen_select_file_filter(void)
@@ -448,10 +484,18 @@ void screen_select_file_filter(void)
 void screen_select_slot(char *e)
 {
   unsigned long *s;
+  static const char ss[] = "SMARTPORT DRIVES";
+  static const char ds[] = "DISKII DRIVES";
 
   clrscr();
 
-  gotoxy(0,7);
+  gotoxy(0,1); cprintf("%40s",ss);
+  chlinexy(0,1,40 - sizeof(ss));
+
+  gotoxy(0,6); cprintf("%40s",ds);
+  chlinexy(0,6,40 - sizeof(ds));
+
+  gotoxy(0,12);
   cprintf("%-40s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
 
@@ -461,16 +505,16 @@ void screen_select_slot(char *e)
   e += sizeof(unsigned long) + 2; // I do not need the next two bytes.
   cprintf("%-40s",e);
 
-  screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
+  screen_hosts_and_devices_device_slots(2,&deviceSlots[0],&deviceEnabled[0]);
 
-  bar_set(1,1,4,0);
+  bar_set_split(2,1,6,0,1);
 }
 
 void screen_select_slot_choose(void)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(3,STATUS_BAR);
-  screen_print_menu("1-4"," SELECT SLOT OR USE ARROW KEYS\r\n ");
+  gotoxy(1,STATUS_BAR);
+  screen_print_menu("1-6"," SELECT DRIVE OR USE ARROW KEYS\r\n ");
   screen_print_menu("RETURN/R",":INSERT READ ONLY\r\n ");
   screen_print_menu("W",":INSERT READ/WRITE\r\n ");
   screen_print_menu("ESC"," TO ABORT.");
@@ -491,8 +535,8 @@ void screen_hosts_and_devices_long_filename(char *f)
       gotoxy(0,STATUS_BAR-3);
       cprintf("%s",f);
     }
-  else
-    cclearxy(0,STATUS_BAR-3,120);
+  //else
+  //  cclearxy(0,STATUS_BAR-3,120); // this was wiping the diskII, take out for now
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)
@@ -526,8 +570,16 @@ void screen_select_slot_eject(unsigned char ds)
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  cclearxy(1,11+ds,39);
-  gotoxy(2,11+ds); cprintf("Empty");
+  if (ds > 3) // diskII split
+  {
+	  cclearxy(1,12+ds,39);
+      gotoxy(2,12+ds); cprintf("Empty");
+  }
+  else
+  {
+	  cclearxy(1,11+ds,39);
+      gotoxy(2,11+ds); cprintf("Empty");
+  }
   bar_jump(bar_get());
 }
 

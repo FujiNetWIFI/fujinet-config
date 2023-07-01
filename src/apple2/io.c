@@ -5,10 +5,6 @@
  * I/O Routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
@@ -60,6 +56,9 @@
 
 #include <string.h>
 #include "sp.h"
+#ifdef __ORCAC__
+#include <texttool.h>
+#endif
 
 static NetConfig nc;
 static SSIDInfo ssid_response;
@@ -345,16 +344,16 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
   sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
 }
 
-#ifndef __ORCAC__
 void io_set_boot_config(uint8_t toggle)
 {
+  #ifndef __ORCAC__
   sp_payload[0] = 1;
   sp_payload[1] = 0;
   sp_payload[2] = toggle;
 
   sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
+  #endif
 }
-#endif
 
 void io_umount_disk_image(uint8_t ds)
 {
@@ -368,7 +367,7 @@ void io_update_devices_enabled(bool *e)
 {
   char i;
 
-  for (i=0;i<4;i++)
+  for (i=0;i<6;i++)
     {
       e[i]=io_get_device_enabled_status(io_device_slot_to_device(i));
     }
@@ -407,9 +406,19 @@ unsigned char io_device_slot_to_device(unsigned char ds)
   return ds;
 }
 
-#ifndef __ORCAC__
 void io_boot(void)
 {
+  #ifdef __ORCAC__
+  sp_done();
+	#ifndef BUILD_A2CDA
+  WriteChar(0x8c);  // Clear screen
+  WriteChar(0x92);  // Set 80 col
+  WriteChar(0x86);  // Cursor on
+  TextShutDown();
+  exit(0);
+	#endif
+
+  #else
   char ostype;
 
   ostype = get_ostype() & 0xF0;
@@ -425,25 +434,43 @@ void io_boot(void)
   }
   else  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
   {
+    // Make the simulated 6502 RESET result in a cold start.
+    // INC $03F4
     POKE(0x100,0xEE);
     POKE(0x101,0xF4);
     POKE(0x102,0x03);
+
+    // Make sure to not get disturbed.
+    // SEI
     POKE(0x103,0x78);
+
+    // Disable Language Card (which is enabled for all cc65 programs).
+    // LDA $C082
     POKE(0x104,0xAD);
     POKE(0x105,0x82);
     POKE(0x106,0xC0);
+
+    // Simulate a 6502 RESET, additionally do it from the stack page to make the MMU
+    // see the 6502 memory access pattern which is characteristic for a 6502 RESET.
+    // JMP ($FFFC)
     POKE(0x107,0x6C);
     POKE(0x108,0xFC);
     POKE(0x109,0xFF);
 
     asm("JMP $0100");
   }
+  #endif /* __ORCAC__ */
 }
-#endif
 
 bool io_get_wifi_enabled(void)
 {
-	return true;
+    return true;
+}
+
+void io_list_devs(void)
+{
+    sp_list_devs();
+    state = HOSTS_AND_DEVICES;
 }
 
 #endif /* BUILD_APPLE2 */

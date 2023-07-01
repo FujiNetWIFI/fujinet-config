@@ -421,6 +421,7 @@ SFSubState input_select_file_choose(void)
   unsigned char k;
   unsigned char y;
   unsigned char temp[30];
+  unsigned entryType;
 
   if (input_handle_console_keys() == 0x03)
   {
@@ -462,8 +463,12 @@ SFSubState input_select_file_choose(void)
   case '*': // took from fujinet-config
     pos += bar_get() - FILES_START_Y;
     screen_select_file_clear_long_filename();
-    if (select_file_is_folder())
+    entryType = select_file_entry_type();
+    
+    if (entryType == ENTRY_TYPE_FOLDER)
       return SF_ADVANCE_FOLDER;
+    else if (entryType == ENTRY_TYPE_LINK)
+      return SF_LINK;
     else
     {
       return SF_DONE;

@@ -9,10 +9,10 @@
 #include <stdio.h>
 #include "set_wifi.h"
 #include "die.h"
+#include "fuji_typedefs.h"
 
 #ifdef BUILD_ADAM
 #include "adam/io.h"
-#include "adam/fuji_typedefs.h"
 #include "adam/screen.h"
 #include "adam/bar.h"
 #include "adam/input.h"
@@ -20,11 +20,7 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
 #include "apple2/io.h"
-#include "apple2/fuji_typedefs.h"
 #include "apple2/screen.h"
 #include "apple2/bar.h"
 #include "apple2/input.h"
@@ -33,7 +29,6 @@
 
 #ifdef BUILD_ATARI
 #include "atari/io.h"
-#include "atari/fuji_typedefs.h"
 #include "atari/screen.h"
 #include "atari/bar.h"
 #include "atari/input.h"
@@ -42,7 +37,6 @@
 
 #ifdef BUILD_C64
 #include "c64/io.h"
-#include "c64/fuji_typedefs.h"
 #include "c64/screen.h"
 #include "c64/bar.h"
 #include "c64/input.h"
@@ -51,7 +45,6 @@
 
 #ifdef BUILD_PC8801
 #include "pc8801/io.h"
-#include "pc8801/fuji_typedefs.h"
 #include "pc8801/screen.h"
 #include "pc8801/bar.h"
 #include "pc8801/input.h"
@@ -60,7 +53,6 @@
 
 #ifdef BUILD_PC6001
 #include "pc6001/io.h"
-#include "pc6001/fuji_typedefs.h"
 #include "pc6001/screen.h"
 #include "pc6001/bar.h"
 #include "pc6001/input.h"

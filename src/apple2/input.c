@@ -3,10 +3,6 @@
  * Input routines
  */
 
-#ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
-#endif /* BUILD_A2CDA */
-
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -56,7 +52,7 @@ extern unsigned char io_create_type;
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-unsigned char input()
+unsigned char input(void)
 {
   return cgetc();
 }
@@ -176,7 +172,7 @@ DHSubState input_destination_host_slot_choose(void)
     case KEY_6:
     case KEY_7:
     case KEY_8:
-      bar_jump(k-0x31);
+      bar_jump(k-KEY_1);
       return DH_CHOOSE;
     case KEY_UP_ARROW:
       bar_up();
@@ -191,14 +187,18 @@ DHSubState input_destination_host_slot_choose(void)
 
 SFSubState input_select_file_choose(void)
 {
+  unsigned entryType;
   unsigned char k = cgetc();
 
   switch (k)
   {
   case KEY_RETURN:
     pos += bar_get();
-    if (select_file_is_folder())
+    entryType = select_file_entry_type();
+    if (entryType == ENTRY_TYPE_FOLDER)
       return SF_ADVANCE_FOLDER;
+    else if (entryType == ENTRY_TYPE_LINK)
+      return SF_LINK;
     else
     {
       return SF_DONE;
@@ -333,8 +333,10 @@ SSSubState input_select_slot_choose(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
-      bar_jump(k-0x31);
-      return SS_CHOOSE;
+    case KEY_5:
+    case KEY_6:
+      bar_jump(k-KEY_1);
+	  return SS_CHOOSE;
     // case KEY_SMART_IV:
     case 'E':
     case 'e':
@@ -399,7 +401,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_6:
   case KEY_7:
   case KEY_8:
-    bar_jump(k - KEY_1);
+    bar_jump(k-KEY_1);
     return HD_HOSTS;
   case KEY_TAB:
     bar_clear(false);
@@ -419,6 +421,10 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'C':
   case 'c':
     state = SHOW_INFO;
+    return HD_DONE;
+  case 'D':
+  case 'd':
+    state = SHOW_DEVICES;
     return HD_DONE;
   case 'E':
   case 'e':
@@ -452,6 +458,8 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
+    case KEY_5:
+    case KEY_6:
       bar_jump(k-KEY_1);
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();

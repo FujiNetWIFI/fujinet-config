@@ -177,14 +177,18 @@ DHSubState input_destination_host_slot_choose(void)
 
 SFSubState input_select_file_choose(void)
 {
+  unsigned entryType;
   unsigned char k = cgetc();
 
   switch (k)
   {
   case KEY_RETURN:
     pos += bar_get();
-    if (select_file_is_folder())
+    entryType = select_file_entry_type();
+    if (entryType == ENTRY_TYPE_FOLDER)
       return SF_ADVANCE_FOLDER;
+    else if (entryType == ENTRY_TYPE_LINK)
+      return SF_LINK;
     else
     {
       return SF_DONE;

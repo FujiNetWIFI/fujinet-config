@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 #include "../typedefs.h"
-#include "fuji_typedefs.h"
+#include "../fuji_typedefs.h"
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
@@ -31,7 +31,7 @@ extern char filter[32];
 extern bool dir_eof;
 extern bool quick_boot;
 
-#define NUM_DEVICE_SLOTS 4
+#define NUM_DEVICE_SLOTS 6
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_APPLE2 */
