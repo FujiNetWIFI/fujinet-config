@@ -221,28 +221,61 @@ void io_open_directory(uint8_t hs, char *p, char *f)
 
   response[0] = FUJICMD_OPEN_DIRECTORY;
   response[1] = hs;
-  // 
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 char *io_read_directory(uint8_t l, uint8_t a)
 {
-  return (char *)0;
+  memset(response,0,sizeof(response));
+
+  response[0] = FUJICMD_READ_DIR_ENTRY;
+  response[1] = l;
+  response[2] = a;
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_read(LFN,response,sizeof(response));
+  return (char *)response;
 }
 
 void io_close_directory(void)
 {
+  memset(response,0,sizeof(response));
+
+  response[0] = FUJICMD_CLOSE_DIRECTORY;
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_set_directory_position(DirectoryPosition pos)
 {
+  memset(response,0,sizeof(response));
+
+  response[0] = FUJICMD_SET_DIRECTORY_POSITION;
+  response[1] = pos & 0xFF;
+  response[2] = pos >> 8;
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_set_device_filename(uint8_t ds, char* e)
 {
+  memset(response,0,sizeof(response));
+
+  response[0] = FUJICMD_SET_DEVICE_FULLPATH;
+  response[1] = ds;
+  strcpy((char *)&response[2],e);
+
+  cbm_open(LFN,DEV,SAN,response);
+  cbm_close(LFN);
 }
 
 void io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
+  response[0] = FUJICMD_MOUNT_IMAGE;
 }
 
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
