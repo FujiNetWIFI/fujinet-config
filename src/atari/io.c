@@ -21,8 +21,7 @@ NewDisk newDisk;
 unsigned char wifiEnabled=true;
 
 // variable to hold various responses that we just need to return a char*.
-char response[512];
-unsigned char directory_plus_filter[256];
+char response[256];
 
 void set_sio_defaults(void)
 {
@@ -233,10 +232,10 @@ void io_open_directory(unsigned char hs, char *p, char *f)
   if (f[0] != 0x00)
   {
     // We have a filter, create a directory+filter string
-    memset(directory_plus_filter, 0, 256);
-    strcpy(directory_plus_filter, p);
-    strcpy(&directory_plus_filter[strlen(directory_plus_filter) + 1], f);
-    OS.dcb.dbuf = &directory_plus_filter;
+    memset(response, 0, 256);
+    strcpy(response, p);
+    strcpy(&response[strlen(response) + 1], f);
+    OS.dcb.dbuf = &response;
   }
   else
   {
