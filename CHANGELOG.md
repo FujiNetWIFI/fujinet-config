@@ -6,6 +6,7 @@
 * [Atari] - Added 'L' command to boot into the FujiNet Lobby client. Available from the main host/device screen.
 * [Atari] - Remove use of 'sprintf' to reduce the memory footprint of the program
 * [Atari] - Changed display header from "TNFS HOST LIST" to just "HOST LIST" since there can be host types other than TNFS (SD for example)
+* [Atari] - Removed verbose output from the "mount and boot" screen.
 
 ## 2022-11-25
 
