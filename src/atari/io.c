@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include <stdio.h>
 #include <conio.h> // Used for interacting with the standard Atari 'console'
 #include <unistd.h> // For sleep
 #include "io.h"
@@ -327,6 +326,19 @@ void io_set_boot_config(unsigned char toggle)
   OS.dcb.daux1 = toggle;
   siov();
 }
+
+void io_set_boot_mode(unsigned char mode)
+{
+  set_sio_defaults();
+  OS.dcb.dcomnd = 0xD6;
+  OS.dcb.dstats = 0x00;
+  OS.dcb.dbuf = NULL;
+  OS.dcb.dtimlo = 0x0f;
+  OS.dcb.dbyt = 0;
+  OS.dcb.daux1 = mode;
+  siov();
+}
+
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {

@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <conio.h>
 #include <stdint.h>
 #include <peekpoke.h>
@@ -409,15 +408,21 @@ void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
 /**
  * Convert hex to a string and print as a MAC address at position x, y
  */
-/**
- * Convert hex to a string and print as a MAC address at position x, y
- */
 void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf)
 {
-  unsigned char mactmp[18];
+  unsigned char tmp[3];
+  unsigned char i = 0;
 
-  sprintf(mactmp, "%02X:%02X:%02X:%02X:%02X:%02X", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
-  screen_puts(x, y, mactmp);
+  set_cursor(x, y);
+
+  for (i = 0; i < 6; i++)
+  {
+      itoa_hex(buf[i], tmp);
+      screen_append(tmp);
+      if (i == 5) 
+        break;
+      screen_append(":");
+  }
 }
 
 /**
@@ -438,7 +443,6 @@ void itoa_hex(unsigned char val, char *buf)
  */
 void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
-  unsigned char i;
   screen_dlist_show_info();
   set_active_screen(SCREEN_SHOW_INFO);
   screen_clear();
@@ -471,9 +475,6 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 
 void screen_select_slot(char *e)
 {
-  unsigned int *s;
-  unsigned char d[40];
-
   screen_dlist_select_slot();
   set_active_screen(SCREEN_SELECT_SLOT);
 
@@ -488,8 +489,10 @@ void screen_select_slot(char *e)
   if ( create == false )
   {
     // Modified time 
-    sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
-    screen_puts(0, DEVICES_END_MOUNT_Y + 5, d);
+    // sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+
+    // Remove for now (wasn't in original config, not really all that important and removng sprintf usage), so skip over the 6 bytes for the file date/time info.
+    e += 6;
 
     // File size
     // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
@@ -504,8 +507,8 @@ void screen_select_slot(char *e)
     e += 4;
 
     // Filename
-    screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
-    screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
+    screen_puts(1, DEVICES_END_MOUNT_Y + 2, "FILE:");
+    screen_puts(7, DEVICES_END_MOUNT_Y + 2, e);
   }
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
@@ -718,7 +721,6 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
   unsigned char retry = 5;
   unsigned char i;
-  char temp[10];
 
   screen_dlist_hosts_and_devices();
   set_active_screen(SCREEN_HOSTS_AND_DEVICES);
@@ -727,7 +729,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
   bar_clear(false);
 
 
-  screen_puts(3, 0, "TNFS HOST LIST");
+  screen_puts(5, 0, "HOST LIST");
   screen_puts(4, 11, "DRIVE SLOTS");
 
   while (retry > 0)
@@ -788,7 +790,7 @@ void screen_hosts_and_devices_hosts(void)
   screen_clear_line(22);
   screen_clear_line(23);
   screen_puts(0, 22,
-              CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "dit Slot" CH_KEY_RETURN "Select Files");
+              CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "dit" CH_KEY_RETURN "Browse" CH_KEY_LABEL_L CH_INV_L CH_KEY_LABEL_R "obby");
   screen_puts(2, 23,
               CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig" CH_KEY_TAB "Drive Slots" CH_KEY_OPTION "Boot");
 
@@ -805,8 +807,8 @@ void screen_hosts_and_devices_devices(void)
   screen_clear_line(11);
   screen_puts(4, 11, "DRIVE SLOTS");
 
-  screen_puts(3, 22,
-              CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_LABEL_L CH_INV_C CH_INV_L CH_INV_E CH_INV_A CH_INV_R CH_KEY_LABEL_R "All Slots");
+  screen_puts(0, 22,
+              CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_LABEL_L CH_INV_C CH_INV_L CH_INV_E CH_INV_A CH_INV_R CH_KEY_LABEL_R "All Slots" CH_KEY_LABEL_L CH_INV_L CH_KEY_LABEL_R "obby");
   screen_puts(3, 23,
               CH_KEY_TAB "Hosts" CH_KEY_LABEL_L CH_INV_R CH_KEY_LABEL_R "ead " CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "rite" CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig");
   bar_show(selected_device_slot + DEVICES_START_Y);
