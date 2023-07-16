@@ -6,7 +6,6 @@
 
 #include <string.h>
 #include <conio.h>
-#include <stdio.h>
 #include "set_wifi.h"
 #include "die.h"
 #include "fuji_typedefs.h"

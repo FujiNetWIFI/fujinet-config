@@ -6,7 +6,6 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <atari.h>
 #include <conio.h>
 #include <string.h>
@@ -314,6 +313,22 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'C':
     state = SHOW_INFO;
     return HD_DONE;
+  case 'L':
+    // boot lobby.
+    memset(temp, 0, sizeof(temp));
+    screen_puts(0,24,"Boot Lobby Y/N? ");
+    _screen_input(16,24,temp,2);
+    screen_clear_line(24);
+    switch (temp[0])
+    {
+      case 'Y':
+      case 'y':
+        mount_and_boot_lobby();
+        return HD_DONE;
+      default: // Anything but Y/y take to mean "no"
+        return HD_HOSTS;
+      }
+    return HD_HOSTS;
   case KCODE_RETURN:
     selected_host_slot = bar_get() - HOSTS_START_Y;
     if ( !wifiEnabled && strcmp(hostSlots[selected_host_slot],"SD") != 0) // Don't go in a TNFS host if wifi is disabled.
@@ -409,6 +424,23 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'C':
     state = SHOW_INFO;
     return HD_DONE;
+  case 'L':
+    // boot lobby.
+    // boot lobby.
+    memset(temp, 0, sizeof(temp));
+    screen_puts(0,24,"Boot Lobby Y/N? ");
+    _screen_input(16,24,temp,2);
+    screen_clear_line(24);
+    switch (temp[0])
+    {
+      case 'Y':
+      case 'y':
+        mount_and_boot_lobby();
+        return HD_DONE;
+      default: // Anything but Y/y take to mean "no"
+        return HD_DEVICES;
+      }
+    return HD_DEVICES;
   case '!':
     mount_and_boot();
   default:
