@@ -62,7 +62,7 @@ WSSubState ws_subState;
 
 NetConfig nc;
 
-static unsigned char numNetworks;
+unsigned char numNetworks;
 
 void set_wifi_set_ssid(unsigned char i)
 {
