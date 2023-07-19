@@ -67,7 +67,7 @@ $ sudo PREFIX=/usr/local/cc65 make install
 ### Pull PlatformIO repo & config repo
 ```
 git clone https://github.com/FujiNetWIFI/fujinet-platformio.git
-git clone https://github.com/FujiNetWIFI/fujinet-config-adam.git
+git clone https://github.com/FujiNetWIFI/fujinet-config.git
 ```
 
 * You need the platformIO repo because the build script expects it to be in the same directory as CONFIG, so that it can push the completed Apple boot disk into the proper folder to be pushed to the FN device.
