@@ -21,13 +21,30 @@ To compile, currently requires:
 #### Pull down cc65 code
    * https://github.com/cc65/cc65
 
-#### Build cc65:
-``` 
+#### Build cc65
+
+For unix environments:
+```shell
 $ PREFIX=/usr/local/cc65 make
 $ sudo PREFIX=/usr/local/cc65 make install
 ```
 
-It also requires these additional tools:
+For [MSYS2 environments](https://www.msys2.org/docs/environments/), you must be in an MSYS2 shell, and then install with
+
+```shell
+$ PREFIX=/usr/local/cc65 make
+$ PREFIX=/usr/local/cc65 make install
+```
+Note the lack of `sudo`.
+
+After this, you can use any subsystem shell (e.g. UCRT64) to run cc65 as normal.
+
+WARNING: If you are in a MinGW shell or any other sub-environment, the install will work, but will not be able to find the installed cfg, lib etc files.
+You must be in the MSYS2 shell for compiling and installing cc65, but not to run it.
+
+### Additional Tools
+
+Building config also requires these additional tools:
 
 * dir2atr - https://www.horus.com/~hias/atari/atarisio/atarisio-221009.tar.gz
   * download, build and install on your local build system
