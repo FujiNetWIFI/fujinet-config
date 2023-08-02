@@ -135,52 +135,53 @@ void select_slot_done()
   memset(filename,0,sizeof(filename));
 
   if (create==true)
-    {
-      create=false; // we're done with this until next time.
-      screen_select_file_new_creating();
-      io_create_new(selected_host_slot,selected_device_slot,selected_size,path);
-      memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
-      deviceSlots[selected_device_slot].mode=2;
-      deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
+  {
+    create=false; // we're done with this until next time.
+    screen_select_file_new_creating();
+    io_create_new(selected_host_slot,selected_device_slot,selected_size,path);
+    memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
+    deviceSlots[selected_device_slot].mode=2;
+    deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
-      io_put_device_slots(&deviceSlots[0]);
-      io_set_device_filename(selected_device_slot,path);
+    io_put_device_slots(&deviceSlots[0]);
+    io_set_device_filename(selected_device_slot,path);
 #ifdef BUILD_ADAM
-      screen_select_slot_build_eos_directory();
-      if (input_select_slot_build_eos_directory())
-      {
-        io_mount_disk_image(selected_device_slot,2); // R/W
-        screen_select_slot_build_eos_directory_label();
-        input_select_slot_build_eos_directory_label(filename);
-        screen_select_slot_build_eos_directory_creating();
-        io_build_directory(selected_device_slot,selected_size,filename);
-      }
-#endif
-    }
-  else
+    screen_select_slot_build_eos_directory();
+    if (input_select_slot_build_eos_directory())
     {
-      strcat(filename,path);
-
-      io_open_directory(selected_host_slot,path,filter);
-
-      io_set_directory_position(pos);
-
-      strcat(filename,io_read_directory(255-strlen(path),0));
-
-      io_set_device_filename(selected_device_slot,filename);
-
-      io_set_directory_position(pos);
-
-      memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
-      deviceSlots[selected_device_slot].mode=mode;
-      deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
-
-      io_put_device_slots(&deviceSlots[0]);
-
-      io_close_directory();
-
+      io_mount_disk_image(selected_device_slot,2); // R/W
+      screen_select_slot_build_eos_directory_label();
+      input_select_slot_build_eos_directory_label(filename);
+      screen_select_slot_build_eos_directory_creating();
+      io_build_directory(selected_device_slot,selected_size,filename);
     }
-  state=HOSTS_AND_DEVICES;
+#endif
+  }
+  else
+  {
+    strcat(filename,path);
+
+    io_open_directory(selected_host_slot,path,filter);
+
+    io_set_directory_position(pos);
+
+    strcat(filename,io_read_directory(255-strlen(path),0));
+
+    io_set_device_filename(selected_device_slot,filename);
+
+    io_set_directory_position(pos);
+
+    memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
+    deviceSlots[selected_device_slot].mode=mode;
+    deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
+
+    io_put_device_slots(&deviceSlots[0]);
+
+    io_close_directory();
+
+  }
+  state=SELECT_FILE;
+  backToFiles = true;
 }
 
 void select_slot(void)

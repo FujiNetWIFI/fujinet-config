@@ -80,6 +80,6 @@ void perform_copy(void)
 
   copy_mode = false;
   
-  state = HOSTS_AND_DEVICES;
-
+  state=SELECT_FILE;
+  backFromCopy = true;
 }

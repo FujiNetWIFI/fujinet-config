@@ -419,8 +419,33 @@ void select_file_done(void)
 void select_file(void)
 {
   char visibleEntries = 0;
+  char *match;
+  int len;
 
-  sf_subState = SF_INIT;
+  if (backToFiles)
+  {
+    // Return to the previous dir
+    sf_subState = SF_DISPLAY;
+    backToFiles = false;
+  }
+  else if (backFromCopy)
+  {
+    // Return to the source dir
+    sf_subState = SF_DISPLAY;
+    // get rid of filename from path
+    len = strlen(source_filename);
+    while ((match = strstr(source_path, source_filename))) {
+        *match = '\0';
+        strcat(source_path, match+len);
+    }
+    strncpy(path, source_path, sizeof(path));
+    selected_host_slot = copy_host_slot;
+    backFromCopy = false;
+  }
+  else
+  {
+    sf_subState = SF_INIT;
+  }
 
   while (state == SELECT_FILE)
   {

@@ -605,6 +605,7 @@ SSSubState input_select_slot_choose(void)
     return SS_CHOOSE;
   case KCODE_ESCAPE:
     state = SELECT_FILE;
+    backToFiles = true;
     return SS_DONE;
   case KCODE_RETURN: // For Atari I think we need to ask for file mode after this, it's not in the main select_slot.c code.
     selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
@@ -615,6 +616,7 @@ SSSubState input_select_slot_choose(void)
     if (!k)
     {
       state = SELECT_FILE;
+      backToFiles = true;
     }
     return SS_DONE;
   default:

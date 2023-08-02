@@ -27,6 +27,8 @@ extern char filter[32];
 extern bool create;
 extern bool dir_eof;
 extern bool quick_boot;
+extern bool backToFiles;
+extern bool backFromCopy;
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_PC8801 */

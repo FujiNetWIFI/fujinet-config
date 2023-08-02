@@ -30,6 +30,8 @@ extern bool create;
 extern char filter[32];
 extern bool dir_eof;
 extern bool quick_boot;
+extern bool backToFiles;
+extern bool backFromCopy;
 
 #define NUM_DEVICE_SLOTS 4
 

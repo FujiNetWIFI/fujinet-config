@@ -64,7 +64,8 @@ extern bool create;
 extern bool dir_eof;
 extern bool quick_boot;
 extern bool deviceEnabled[8];
-
+extern bool backToFiles;
+extern bool backFromCopy;
 extern char _visibleEntries;
 
 extern unsigned short custom_numSectors;
@@ -73,7 +74,6 @@ extern unsigned short custom_sectorSize;
 extern bool mounting;
 
 extern unsigned char wifiEnabled;
-
 
 #endif /* GLOBALS_H */
 #endif /* BUILD_ATARI */
