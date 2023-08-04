@@ -440,6 +440,7 @@ void select_file(void)
     }
     strncpy(path, source_path, sizeof(path));
     selected_host_slot = copy_host_slot;
+    screen_select_file();
     backFromCopy = false;
   }
   else
