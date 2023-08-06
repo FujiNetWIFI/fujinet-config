@@ -192,6 +192,7 @@ SFSubState input_select_file_choose(void)
 
   switch (k)
   {
+  case KEY_RIGHT_ARROW:
   case KEY_RETURN:
     pos += bar_get();
     entryType = select_file_entry_type();
@@ -235,7 +236,6 @@ SFSubState input_select_file_choose(void)
     select_file_set_source_filename();
     return SF_COPY;
   case KEY_UP_ARROW:
-  case KEY_LEFT_ARROW:
     if ((bar_get() == 0) && (pos > 0))
       return SF_PREV_PAGE;
     else
@@ -245,8 +245,18 @@ SFSubState input_select_file_choose(void)
       select_display_long_filename();
       return SF_CHOOSE;
     }
+  case KEY_LEFT_ARROW:
+    if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
+    {
+      state = HOSTS_AND_DEVICES;
+      return SF_DONE;
+    }
+    if (pos > 0)
+      return SF_PREV_PAGE;
+    else
+      return SF_DEVANCE_FOLDER;
+    return SF_CHOOSE;
   case KEY_DOWN_ARROW:
-  case KEY_RIGHT_ARROW:
     if ((bar_get() == 14) && (dir_eof == false))
       return SF_NEXT_PAGE;
     else
@@ -497,6 +507,8 @@ HDSubState input_hosts_and_devices_devices(void)
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
+    case KEY_ESCAPE: // ESC
+      return HD_DONE;
     default:
       return HD_DEVICES;
     }
