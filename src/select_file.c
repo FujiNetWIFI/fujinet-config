@@ -82,6 +82,8 @@ bool long_entry_displayed = false;
 bool copy_mode = false;
 
 extern unsigned char copy_host_slot;
+extern bool backToFiles = false;
+extern bool backFromCopy = false;
 
 void select_file_init(void)
 {

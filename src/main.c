@@ -49,8 +49,6 @@
 #endif /* BUILD_PC6001 */
 
 State state=HOSTS_AND_DEVICES;
-bool backToFiles = false;
-bool backFromCopy = false;
 
 void setup(void)
 {
