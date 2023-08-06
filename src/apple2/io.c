@@ -420,10 +420,26 @@ void io_boot(void)
 
   #else
   char ostype;
+  int i;
 
   ostype = get_ostype() & 0xF0;
   clrscr();
   cprintf("BOOTING...");
+
+  if (ostype == APPLE_II ||
+    ostype == APPLE_IIPLUS ||
+    ostype == APPLE_IIE ||
+    ostype == APPLE_IIEENH)
+  {
+    // Wait for fujinet disk ii states to be ready
+    for (i = 0; i < 2000; i++)
+    {
+      if (i % 250 == 0)
+      {
+        cprintf(".");
+      }
+    }
+  }
 
   if (ostype == APPLE_IIIEM)
   {
