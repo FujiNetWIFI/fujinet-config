@@ -340,6 +340,7 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("R","EAD ONLY  ");
   screen_print_menu("W","RITE\r\n");
   screen_print_menu("TAB",":HOST SLOTS");
+  screen_print_menu("ESC", ":BOOT");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -470,7 +471,7 @@ void screen_select_file_choose(char visibleEntries)
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
-  screen_print_menu("ESC",":PARENT  ");
+  screen_print_menu("ESC",":ABORT  ");
   screen_print_menu("F","ILTER  ");
   screen_print_menu("N","EW  ");
 }
