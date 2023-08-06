@@ -428,11 +428,13 @@ void select_file(void)
     sf_subState = SF_DISPLAY;
     backToFiles = false;
     pos = 0;
+    screen_select_file();
   }
   else if (backFromCopy)
   {
     // Return to the source dir
     sf_subState = SF_DISPLAY;
+    backFromCopy = false;
     // get rid of filename from path
     len = strlen(source_filename);
     while ((match = strstr(source_path, source_filename))) {
@@ -442,7 +444,6 @@ void select_file(void)
     strncpy(path, source_path, sizeof(path));
     selected_host_slot = copy_host_slot;
     screen_select_file();
-    backFromCopy = false;
   }
   else
   {
