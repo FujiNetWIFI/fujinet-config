@@ -96,7 +96,7 @@ void select_file_init(void)
   io_close_directory();
   pos = 0;
   memset(entry_size, 0, ENTRIES_PER_PAGE);
-  memset(path, 0, 256);
+  memset(path, 0, 224);
   path[0] = '/';
   memset(filter, 0, 32);
   screen_select_file();
