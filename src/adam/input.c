@@ -35,8 +35,6 @@ extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
 
-bool select_file_is_folder(void);
-
 /**
  * ADAM keyboard mapping
  */
@@ -393,7 +391,7 @@ SFSubState input_select_file_choose(void)
     {
     case KEY_RETURN:
       pos+=bar_get();
-      entryType = select_file_is_folder()
+      entryType = select_file_entry_type();
       if (entryType == ENTRY_TYPE_FOLDER)
         return SF_ADVANCE_FOLDER;
       else if (entryType == ENTRY_TYPE_LINK)
