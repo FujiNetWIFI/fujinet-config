@@ -152,15 +152,9 @@ DHSubState input_destination_host_slot_choose(void)
   switch(k)
     {
     case KEY_RETURN:
-      if (hostSlots[bar_get()][0] != 0x00)
-	{
-	  copy_host_slot=bar_get();
-	  copy_mode=true;
-	  state=SELECT_FILE;
-	  return DH_DONE;
-	}
-      else
-	return DH_CHOOSE;
+      selected_host_slot=bar_get();
+      copy_mode=true;
+      return DH_DONE;
     case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
       return DH_ABORT;
