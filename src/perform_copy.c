@@ -80,8 +80,6 @@ void perform_copy(void)
   strcat(copySpec, path);
   strcat(copySpec,source_filename);
   
-  clrscr();
-
   screen_perform_copy((char *)hostSlots[copy_host_slot],(char *)source_path,(char *)hostSlots[selected_host_slot],(char *)path);
 
   io_copy_file(copy_host_slot, selected_host_slot);
