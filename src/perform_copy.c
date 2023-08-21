@@ -4,7 +4,6 @@
  * Perform Copy operation
  */
 
-#include <conio.h>
 #include <string.h>
 #include "fuji_typedefs.h"
 
@@ -55,6 +54,15 @@
 #include "pc6001/input.h"
 #include "pc6001/bar.h"
 #endif /* BUILD_Pc6001 */
+
+#ifdef BUILD_RC2014
+#include "rc2014/screen.h"
+#include "rc2014/io.h"
+#include "rc2014/globals.h"
+#include "rc2014/input.h"
+#include "rc2014/bar.h"
+#include <conio.h>
+#endif /* BUILD_RC2014 */
 
 #include "perform_copy.h"
 

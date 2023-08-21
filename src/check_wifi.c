@@ -34,6 +34,10 @@
 #include "pc6001/globals.h"
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_RC2014
+#include "rc2014/io.h"
+#include "rc2014/globals.h"
+#endif /* BUILD_RC2014 */
 
 #include "check_wifi.h"
 
