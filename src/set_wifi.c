@@ -58,6 +58,14 @@
 #include "pc6001/globals.h"
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_RC2014
+#include "rc2014/io.h"
+#include "rc2014/screen.h"
+#include "rc2014/bar.h"
+#include "rc2014/input.h"
+#include "rc2014/globals.h"
+#endif /* BUILD_RC2014 */
+
 WSSubState ws_subState;
 
 NetConfig nc;
