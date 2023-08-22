@@ -17,7 +17,7 @@
 #define STATUS_BAR 20
 
 extern bool copy_mode;
-extern char copy_host_name;
+extern char copy_host_name[32];
 extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
 

@@ -13,7 +13,7 @@ SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.asm)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
-CFLAGS=+cpm -DBUILD_RC2014 -I$(LIB_PROJECT_INC) -clib=ansi -pragma-redirect:fputc_cons=fputc_cons_generic
+CFLAGS=+cpm -DBUILD_RC2014 -I$(LIB_PROJECT_INC) -compiler=sdcc -clib=ansi -pragma-redirect:fputc_cons=fputc_cons_generic
 LDFLAGS=+cpm -create-app -I$(LIB_PROJECT_INC) -o$(TARGET_EXEC)
 ASFLAGS=+cpm
 

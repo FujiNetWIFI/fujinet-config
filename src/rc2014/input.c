@@ -85,7 +85,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   // x += o;
 
   cursor_pos(0, y);
-    cputc(":");
+  cputc(':');
   while(1)
   {
     cursor_pos(x + i, y);
