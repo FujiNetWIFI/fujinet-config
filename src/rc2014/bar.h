@@ -14,6 +14,8 @@
  */
 void bar_clear(bool old);
 
+void bar_update(void);
+
 /**
  * Set up bar and start display on row
  * @param y Y column for bar display

@@ -18,11 +18,11 @@
 #undef MOCK_DEVICES
 #undef MOCK_HOSTS
 
-static uint8_t response[1024];
-static FUJINET_RC last_rc = FUJINET_RC_OK;
+uint8_t response[1024];
+FUJINET_RC last_rc = FUJINET_RC_OK;
 
-extern unsigned char source_path;
-extern unsigned char path;
+extern unsigned char source_path[224];
+extern unsigned char path[224];
 
 #ifdef MOCK_WIFI
 AdapterConfig mock_cfg = {
@@ -110,8 +110,10 @@ NetConfig* io_get_ssid(void)
   last_rc = FUJINET_RC_OK;
   return mock_netconfig;
 #else
-  last_rc = fujinet_get_ssid(response);
-  return (NetConfig *)response;
+
+  NetConfig* nc = (NetConfig*)response;
+  last_rc = fujinet_get_ssid(nc);
+  return nc;
 #endif
 }
 
@@ -132,8 +134,9 @@ SSIDInfo *io_get_scan_result(unsigned char n)
   last_rc = FUJINET_RC_OK;
   return &mock_ssid[n];
 #else
-  last_rc = fujinet_get_scan_result(n, response);
-  return (SSIDInfo *)response;
+  SSIDInfo* info = (SSIDInfo*)response;
+  last_rc = fujinet_get_scan_result(n, info);
+  return info;
 #endif
 }
 
@@ -143,8 +146,9 @@ AdapterConfig *io_get_adapter_config(void)
   last_rc = FUJINET_RC_OK;
   return mock_cfg;
 #else
-  last_rc = fujinet_get_adapter_config(response);
-  return (AdapterConfig *)response;
+  AdapterConfig* ac = (AdapterConfig*)response;
+  last_rc = fujinet_get_adapter_config(ac);
+  return ac;
 #endif
 }
 
