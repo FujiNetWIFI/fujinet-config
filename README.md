@@ -182,6 +182,14 @@ To compile, currently requires:
 Make using 'make -f <file>'
   where file is Makefile.<platform>
 
+## Compiling on the RC2014
+To compiled, currently requires:
+
+* make
+* Z88DK (http://github.com/z88dk/z88dk)
+* fujinet-rc2014 (https://github.com/juzzas/fujinet-rc2014)
+
+Make using `make -f Makefile.rc2014`
 
 ## Screen Shots
 

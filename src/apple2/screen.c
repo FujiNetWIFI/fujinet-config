@@ -234,9 +234,11 @@ void screen_destination_host_slot(char *h, char *p)
 
 void screen_destination_host_slot_choose(void)
 {
+  static const char ct[] = "COPY TO HOST SLOT";
+
   gotoxy(0, 0);
-  cprintf("COPY TO HOST SLOT");
-  chlinexy(0,1,40);
+  cprintf("%40s", ct);
+  chlinexy(0,0,40 - sizeof(ct));
 
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
@@ -244,7 +246,7 @@ void screen_destination_host_slot_choose(void)
   screen_print_menu("RETURN",":SELECT SLOT\r\n");
   screen_print_menu("ESC"," TO ABORT");
 
-  bar_set(2, 1, 8, selected_host_slot);
+  bar_set(1, 1, 8, selected_host_slot);
 }
 
 const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)

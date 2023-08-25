@@ -66,6 +66,16 @@
 #define ENTRIES_PER_PAGE 15
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_RC2014
+#include "rc2014/screen.h"
+#include "rc2014/io.h"
+#include "rc2014/globals.h"
+#include "rc2014/input.h"
+#include "rc2014/bar.h"
+#define DIR_MAX_LEN 31
+#define ENTRIES_PER_PAGE 15
+#endif /* BUILD_RC2014 */
+
 SFSubState sf_subState;
 char path[224];
 char filter[32];

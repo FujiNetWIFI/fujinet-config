@@ -4,7 +4,6 @@
  * Perform Copy operation
  */
 
-#include <conio.h>
 #include <string.h>
 #include "fuji_typedefs.h"
 
@@ -56,6 +55,15 @@
 #include "pc6001/bar.h"
 #endif /* BUILD_Pc6001 */
 
+#ifdef BUILD_RC2014
+#include "rc2014/screen.h"
+#include "rc2014/io.h"
+#include "rc2014/globals.h"
+#include "rc2014/input.h"
+#include "rc2014/bar.h"
+#include <conio.h>
+#endif /* BUILD_RC2014 */
+
 #include "perform_copy.h"
 
 extern char source_filename[128];
@@ -72,8 +80,6 @@ void perform_copy(void)
   strcat(copySpec, path);
   strcat(copySpec,source_filename);
   
-  clrscr();
-
   screen_perform_copy((char *)hostSlots[copy_host_slot],(char *)source_path,(char *)hostSlots[selected_host_slot],(char *)path);
 
   io_copy_file(copy_host_slot, selected_host_slot);

@@ -48,6 +48,11 @@
 #include "pc6001/screen.h"
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_RC2014
+#include "rc2014/io.h"
+#include "rc2014/screen.h"
+#endif /* BUILD_RC2014 */
+
 State state=HOSTS_AND_DEVICES;
 
 void setup(void)
