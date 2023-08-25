@@ -189,8 +189,16 @@ void select_slot_done()
     io_close_directory();
 
   }
-  state=SELECT_FILE;
-  backToFiles = true;
+  
+  if (!quick_boot)
+    {
+      state=SELECT_FILE;
+      backToFiles = true;
+    }
+  else
+    {
+      state=HOSTS_AND_DEVICES;
+    }
 }
 
 void select_slot(void)
@@ -212,6 +220,7 @@ void select_slot(void)
       break;
     case SS_DONE:
       select_slot_done();
+      break;
     case SS_ABORT:
       break;
     }
