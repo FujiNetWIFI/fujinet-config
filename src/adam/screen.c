@@ -373,7 +373,7 @@ void screen_select_file_choose(char visibleEntries)
     }
   else
     {
-      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? " BOOT" : "  QUICK\n  BOOT");
+      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? "  BOOT" : "  QUICK\n  BOOT");
       smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
     }
   
