@@ -262,7 +262,7 @@ void io_boot(void)
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
 {
-  unsigned int nb = numBlocks;
+  unsigned int nb = 3; // EOS is nominally 3 dir blocks.
 
   // End volume label
   v[strlen(v)]=0x03;
