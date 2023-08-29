@@ -152,8 +152,14 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
+#ifdef BUILD_ATARI
+    // why hardcoded to 2 here?
+    io_set_device_filename(selected_device_slot, selected_host_slot, 2, path);
+#else
     io_put_device_slots(&deviceSlots[0]);
-    io_set_device_filename(selected_device_slot,path);
+    io_set_device_filename(selected_device_slot, path);
+#endif
+
 #ifdef BUILD_ADAM
     screen_select_slot_build_eos_directory();
     if (input_select_slot_build_eos_directory())
@@ -176,7 +182,11 @@ void select_slot_done()
 
     strcat(filename,io_read_directory(255-strlen(path),0));
 
+#ifdef BUILD_ATARI
+    io_set_device_filename(selected_device_slot, selected_host_slot, mode, filename);
+#else
     io_set_device_filename(selected_device_slot,filename);
+#endif
 
     io_set_directory_position(pos);
 
@@ -184,7 +194,9 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=mode;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
+#ifndef BUILD_ATARI
     io_put_device_slots(&deviceSlots[0]);
+#endif
 
     io_close_directory();
 

@@ -168,7 +168,12 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+#ifdef BUILD_ATARI
+  io_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
+#else
+  // i promise to implement in all cases.
   io_set_device_filename(selected_device_slot, temp_filename);
+#endif
 
   io_put_device_slots(&deviceSlots[0]);
 
