@@ -752,7 +752,7 @@ void set_device_slot_mode(unsigned char slot, unsigned char mode)
   deviceSlots[slot].mode = mode;
   memcpy(deviceSlots[slot].file, tmp_file, FILE_MAXLEN);
 
-  io_set_device_filename(slot, fn);
+  io_set_device_filename(slot, tmp_hostSlot, mode, fn);
   io_put_device_slots(&deviceSlots[0]);
   io_mount_disk_image(slot, mode);
 
