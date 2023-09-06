@@ -16,7 +16,7 @@
 #include "fn_io.h"
 
 static NetConfig nc;
-static AdapterConfig adapterConfig;
+static AdapterConfigExtended adapterConfig;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
@@ -101,9 +101,9 @@ SSIDInfo *io_get_scan_result(unsigned char n)
   return &ssidInfo;
 }
 
-AdapterConfig *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config(void)
 {
-  fn_io_get_adapter_config(&adapterConfig);
+  fn_io_get_adapter_config_extended(&adapterConfig);
   return &adapterConfig;
 }
 

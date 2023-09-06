@@ -38,9 +38,6 @@ void screen_dlist_select_file(void);
 void screen_dlist_set_wifi(void);
 void screen_dlist_mount_and_boot(void);
 void screen_dlist_select_slot(void);
-void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf);
-void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf);
-void itoa_hex(unsigned char val, char *buf);
 void screen_clear(void);
 void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
 // void screen_set_wifi_display_mac_address(AdapterConfig *adapterConfig);
@@ -55,7 +52,7 @@ void screen_error(const char *msg);
 void screen_init(void);
 void screen_error(const char *c);
 
-void screen_set_wifi(AdapterConfig *ac);
+void screen_set_wifi(AdapterConfigExtended *ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
 void screen_set_wifi_select_network(unsigned char nn);
 void screen_set_wifi_custom(void);
@@ -78,7 +75,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
 
 void screen_hosts_and_devices_long_filename(char *f);
 
-void screen_show_info(int printerEnabled, AdapterConfig *ac);
+void screen_show_info(int printerEnabled, AdapterConfigExtended *ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);
