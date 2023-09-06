@@ -321,19 +321,7 @@ void screen_set_wifi(AdapterConfigExtended *ac)
   screen_puts(0, 0, "WELCOME TO #FUJINET!");
   screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
-  screen_puts(15, 2, ":");
-  screen_puts(18, 2, ":");
-  screen_puts(21, 2, ":");
-  screen_puts(24, 2, ":");
-  screen_puts(27, 2, ":");
-
-  // screen_set_wifi_display_mac_address(ac);
-  for (i = 0; i < 6; i++)
-  {
-    itoa(ac->macAddress[i], mactmp, 16);
-    screen_puts(x, 2, mactmp);
-    x += 3;
-  }
+  screen_puts(13, 2, ac->sMacAddress);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
