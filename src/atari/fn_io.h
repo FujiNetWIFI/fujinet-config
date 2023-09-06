@@ -64,6 +64,7 @@ void fn_io_create_new(NewDisk *new_disk);
 void fn_io_disable_device(uint8_t d);
 void fn_io_enable_device(uint8_t d);
 void fn_io_get_adapter_config(AdapterConfig *ac);
+void fn_io_get_adapter_config_extended(AdapterConfigExtended *ac);
 bool fn_io_get_device_enabled_status(uint8_t d);
 void fn_io_get_device_filename(uint8_t ds, char *buffer);
 void fn_io_get_device_slots(DeviceSlot *d);
