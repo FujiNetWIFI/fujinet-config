@@ -63,12 +63,12 @@ typedef struct
 {
   char ssid[SSID_MAXLEN];
   char hostname[64];
-  uint8_t localIP[4];
-  uint8_t gateway[4];
-  uint8_t netmask[4];
-  uint8_t dnsIP[4];
-  uint8_t macAddress[6];
-  uint8_t bssid[6];
+  unsigned char localIP[4];
+  unsigned char gateway[4];
+  unsigned char netmask[4];
+  unsigned char dnsIP[4];
+  unsigned char macAddress[6];
+  unsigned char bssid[6];
   char fn_version[15];
   char sLocalIP[16];
   char sGateway[16];
