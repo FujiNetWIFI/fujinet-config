@@ -8,11 +8,13 @@
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 a.out
+altirra-debug.ini
 autorun
 autorun.atr
 build
 config
 config.com
+config.com.lbl
 config.map
 dist.apple2/dist.po
 dist.apple2/prepimg.sh
