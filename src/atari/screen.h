@@ -28,6 +28,8 @@ void show_line_nums(void);
 void screen_debug(char *message);
 #endif // DEBUG
 
+void set_cursor(unsigned char x, unsigned char y);
+
 void set_active_screen(unsigned char screen);
 void screen_mount_and_boot();
 int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
