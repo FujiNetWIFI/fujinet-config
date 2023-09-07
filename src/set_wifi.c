@@ -98,6 +98,7 @@ void set_wifi_custom(void)
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
+  screen_puts(0, 21, nc.password);
   input_line_set_wifi_password(nc.password);
   ws_subState=WS_DONE;
 }

@@ -92,23 +92,23 @@ void input_line_set_wifi_custom(char *c)
 {
   bar_show(20);
   memset(c, 0, 32);
-  _screen_input(2, 20, c, 32);
+  edit_line(2, 20, c, 32);
 }
 
 void input_line_set_wifi_password(char *c)
 {
   // bar_show(19);
-  _screen_input(0, 21, c, 64);
+  edit_line(0, 21, c, 64);
 }
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
-  _screen_input(5, i + HOSTS_START_Y, c, 32);
+  edit_line(5, i + HOSTS_START_Y, c, 32);
 }
 
 void input_line_filter(char *c)
 {
-  _screen_input(5, 2, c, 32);
+  edit_line(5, 2, c, 32);
 }
 
 unsigned char input_select_file_new_type(void)
@@ -121,7 +121,7 @@ unsigned long input_select_file_new_size(unsigned char t)
 {
   char temp[8];
   memset(temp, 0, sizeof(temp));
-  _screen_input(34, 21, temp, sizeof(temp));
+  edit_line(34, 21, temp, sizeof(temp));
 
   // TODO: make an enum so these are easier to understand
   switch (temp[0])
@@ -157,14 +157,14 @@ unsigned long input_select_file_new_custom(void)
 
   // Number of Sectors
   memset(tmp_str, 0, sizeof(tmp_str));
-  _screen_input(11, 20, tmp_str, sizeof(tmp_str));
+  edit_line(11, 20, tmp_str, sizeof(tmp_str));
   custom_numSectors = atoi(tmp_str);
 
   // Sector Size
   memset(tmp_str, 0, sizeof(tmp_str));
   while (tmp_str[0] != '1' && tmp_str[0] != '2' && tmp_str[0] != '5')
   {
-    _screen_input(27, 21, tmp_str, sizeof(tmp_str));
+    edit_line(27, 21, tmp_str, sizeof(tmp_str));
   }
 
   switch (tmp_str[0])
@@ -187,7 +187,7 @@ unsigned long input_select_file_new_custom(void)
 void input_select_file_new_name(char *c)
 {
   // TODO: Find out actual max length we shoud allow here. Input variable is [128] but do we allow filenames that large?
-  _screen_input(0, 21, c, 128);
+  edit_line(0, 21, c, 128);
 }
 
 bool input_select_slot_build_eos_directory(void)
@@ -317,7 +317,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     // boot lobby.
     memset(temp, 0, sizeof(temp));
     screen_puts(0,24,"Boot Lobby Y/N? ");
-    _screen_input(16,24,temp,2);
+    edit_line(16,24,temp,2);
     screen_clear_line(24);
     switch (temp[0])
     {
@@ -429,7 +429,7 @@ HDSubState input_hosts_and_devices_devices(void)
     // boot lobby.
     memset(temp, 0, sizeof(temp));
     screen_puts(0,24,"Boot Lobby Y/N? ");
-    _screen_input(16,24,temp,2);
+    edit_line(16,24,temp,2);
     screen_clear_line(24);
     switch (temp[0])
     {

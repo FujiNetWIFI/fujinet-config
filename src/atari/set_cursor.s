@@ -5,8 +5,6 @@
         .import     _video_ptr
         .import     popa
 
-        .import     _cfg_debug
-
         .include    "zeropage.inc"
         .include    "cfg-macros.inc"
 
@@ -73,7 +71,7 @@ sc_show_info:
     .word 0, 20
     .word 40, 80, 120
     .word 160, 180
-    .word 200, 240, 280, 320, 360, 400, 440, 480, 520, 560, 600, 640, 680, 720, 760, 800
+    .word 200, 240, 280, 320, 360, 400, 440, 480, 520, 560, 600, 640, 680, 720, 760, 800, 840
 
 sc_sel_file:
 sc_sel_slot:

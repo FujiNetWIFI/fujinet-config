@@ -21,18 +21,16 @@ typedef enum
    SCREEN_CONNECT_WIFI
 } _screen;
 
-#define screen_input(x, y, s) _screen_input((x), (y), (s), sizeof(s))
-
 #ifdef DEBUG
 void show_line_nums(void);
 void screen_debug(char *message);
 #endif // DEBUG
 
 void set_cursor(unsigned char x, unsigned char y);
+int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
 
 void set_active_screen(unsigned char screen);
 void screen_mount_and_boot();
-int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
 void screen_dlist_connect_wifi(void);
 void screen_dlist_hosts_and_devices(void);
 void screen_dlist_show_info(void);
