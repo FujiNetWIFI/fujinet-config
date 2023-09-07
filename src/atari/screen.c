@@ -308,7 +308,7 @@ void screen_mount_and_boot()
   bar_clear(false);
 }
 
-void screen_set_wifi(AdapterConfig *ac)
+void screen_set_wifi(AdapterConfigExtended *ac)
 {
   char mactmp[3];
   unsigned char i = 0;
@@ -321,19 +321,7 @@ void screen_set_wifi(AdapterConfig *ac)
   screen_puts(0, 0, "WELCOME TO #FUJINET!");
   screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
-  screen_puts(15, 2, ":");
-  screen_puts(18, 2, ":");
-  screen_puts(21, 2, ":");
-  screen_puts(24, 2, ":");
-  screen_puts(27, 2, ":");
-
-  // screen_set_wifi_display_mac_address(ac);
-  for (i = 0; i < 6; i++)
-  {
-    itoa(ac->macAddress[i], mactmp, 16);
-    screen_puts(x, 2, mactmp);
-    x += 3;
-  }
+  screen_puts(13, 2, ac->sMacAddress);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -389,59 +377,11 @@ void screen_set_wifi_password(void)
   screen_puts(3, 22, "   ENTER PASSWORD");
 }
 
-void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
-{
-  unsigned char i = 0;
-  unsigned char tmp[4];
-
-  set_cursor(x, y);
-  for (i = 0; i < 4; i++)
-  {
-    itoa(buf[i], tmp, 10);
-    screen_append(tmp);
-    if (i == 3)
-      break;
-    screen_append(".");
-  }
-}
-
-/**
- * Convert hex to a string and print as a MAC address at position x, y
- */
-void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf)
-{
-  unsigned char tmp[3];
-  unsigned char i = 0;
-
-  set_cursor(x, y);
-
-  for (i = 0; i < 6; i++)
-  {
-      itoa_hex(buf[i], tmp);
-      screen_append(tmp);
-      if (i == 5) 
-        break;
-      screen_append(":");
-  }
-}
-
-/**
- * Convert hex to a string.  Special hex output of numbers under 16, e.g. 9 -> 09, 10 -> 0A
- */
-void itoa_hex(unsigned char val, char *buf)
-{
-
-  if (val < 16)
-  {
-    *(buf++) = '0';
-  }
-  itoa(val, buf, 16);
-}
 
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfig *ac)
+void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 {
   screen_dlist_show_info();
   set_active_screen(SCREEN_SHOW_INFO);
@@ -464,12 +404,12 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 
   screen_puts(17, 7, ac->ssid);
   screen_puts(17, 8, ac->hostname);
-  screen_print_ip(17, 9, ac->localIP);
-  screen_print_ip(17, 10, ac->gateway);
-  screen_print_ip(17, 11, ac->dnsIP);
-  screen_print_ip(17, 12, ac->netmask);
-  screen_print_mac(17, 13, ac->macAddress);
-  screen_print_mac(17, 14, ac->bssid);
+  screen_puts(17, 9, ac->sLocalIP);
+  screen_puts(17, 10, ac->sGateway);
+  screen_puts(17, 11, ac->sDnsIP);
+  screen_puts(17, 12, ac->sNetmask);
+  screen_puts(17, 13, ac->sMacAddress);
+  screen_puts(17, 14, ac->sBssid);
   screen_puts(17, 15, ac->fn_version);
 }
 
