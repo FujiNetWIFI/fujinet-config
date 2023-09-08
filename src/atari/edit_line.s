@@ -234,9 +234,8 @@ not_left:
         bne     not_right
 
         ; if cursor already at max, don't move.
-        mva     el_max_len_min2, tmp1
         lda     el_crs_idx
-        cmp     tmp1
+        cmp     el_max_len_min2
 
         beq     :+
         ; also can't be longer than the current buffer length
@@ -282,6 +281,9 @@ not_end_key:
         cmp     #CFK_KILL ; kill text to end of buffer
         bne     not_kill
 
+        ; set buffer length to current char index (y)
+        sty     el_buf_len
+
         lda     #$00
 :       sta     (ptr3), y       ; current cursor position forward should become 0s
         iny
@@ -320,8 +322,7 @@ space_or_more:
         inc     el_buf_len
 
         ; can we move cursor on? yes if not now at end
-:       mva     el_max_len_min2, tmp1
-        cpy     tmp1
+:       cpy     el_max_len_min2
         beq     :+
 
         ; allowed to move cursor
