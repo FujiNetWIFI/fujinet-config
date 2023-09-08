@@ -208,7 +208,7 @@ void screen_set_wifi_custom(void)
 void screen_set_wifi_password(void)
 {
   screen_clear_line(22);
-  screen_puts(3, 22, "   ENTER PASSWORD");
+  screen_puts(0, 23, "    ENTER PASSWORD");
 }
 
 
@@ -602,18 +602,12 @@ void screen_hosts_and_devices_devices_clear_all(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  // i comes in as the place in the array for this host slot. To get the corresponding position on the screen, add HOSTS_START_Y
-  screen_clear_line(i + HOSTS_START_Y);
+  // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
-  char tmp[2] = {0, 0};
-  int newloc = i + HOSTS_START_Y;
-
-  screen_clear_line(newloc);
-  tmp[0] = newloc - HOSTS_START_Y + 0x31;
-  screen_puts(2, newloc, tmp);
+  // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
@@ -763,48 +757,6 @@ void screen_dlist_hosts_and_devices(void)
   POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
-
-int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen)
-{
-  unsigned char k, o;
-  unsigned char *input_start_ptr;
-
-  o = strlen(s);                // assign to local var the size of s which contains the current string
-  set_cursor(x, y);             // move the cusor to coordinates x,y
-  input_start_ptr = cursor_ptr; // assign the value currently in cursor_ptr to local var input_start
-  screen_append(s);             // call screen_append function and pass by value (a copy) the contents of s
-
-  POKE(cursor_ptr, 0x80); // turn on cursor
-
-  // Start capturing the keyboard input into local var k
-  do
-  {
-    k = cgetc(); // Capture keyboard input into k
-
-    if (k == KCODE_ESCAPE) // KCODE_ESCAPE is the ATASCI code for the escape key which is commonly used to cancel.
-      return -1;
-
-    if (k == KCODE_BACKSP) // KCODE_BACKSP is the ATASCI backspace key.  This if clause test for backspace and updates cursor_ptr to the remainder of contents upto the last backspace
-    {
-      if (cursor_ptr > input_start_ptr) // execute only if cursor_ptr is greater than input_start_ptr
-      {
-        s[--o] = 0;                  //
-        POKEW(--cursor_ptr, 0x0080); // move the last bit of the cursor_ptr back one and write the location of the cursor_ptr contents to user zero page address 0x80
-      }
-    }
-    else if ((k > 0x1F) && (k < 0x80)) // Display printable ascii to screen
-    {
-      if (o < maxlen - 1)
-      {
-        put_char(k);
-        s[o++] = k;
-        POKE(cursor_ptr, 0x80);
-      }
-    }
-  } while (k != KCODE_RETURN); // Continue to capture keyboard input until return (0x9B)
-  POKE(cursor_ptr, 0x00);      // clear cursor
-}
-
 
 #ifdef DEBUG
 // Debugging function to show line #'s, used to test if the Y coordinate calculations are working.
