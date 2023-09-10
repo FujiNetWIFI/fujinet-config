@@ -134,7 +134,8 @@ void io_put_device_slots(DeviceSlot *d)
 
 void io_mount_host_slot(unsigned char hs)
 {
-  fn_io_mount_host_slot(hs, &hostSlots);
+  if (hostSlots[hs][0] == 0) return;
+  fn_io_mount_host_slot(hs);
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
