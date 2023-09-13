@@ -135,7 +135,7 @@ AdapterConfig *io_get_adapter_config(void)
   return &ac;
 }
 
-void io_set_ssid(NetConfig *nc)
+int io_set_ssid(NetConfig *nc)
 {
   char c[98];
 
@@ -144,6 +144,7 @@ void io_set_ssid(NetConfig *nc)
 
   cbm_open(LFN,DEV,SAN,c);
   cbm_close(LFN);
+  return 0;
 }
 
 char *io_get_device_filename(uint8_t ds)

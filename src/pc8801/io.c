@@ -53,8 +53,9 @@ AdapterConfig *io_get_adapter_config(void)
   return NULL;
 }
 
-void io_set_ssid(NetConfig *nc)
+int io_set_ssid(NetConfig *nc)
 {
+  return 0;
 }
 
 void io_get_device_slots(DeviceSlot *d)
