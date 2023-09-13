@@ -7,6 +7,8 @@
 #include "connect_wifi.h"
 #include <string.h>
 
+#include "pause.h"
+
 #ifdef BUILD_ADAM
 #include "adam/io.h"
 #include "adam/screen.h"
@@ -73,23 +75,30 @@ void connect_wifi(void)
 		switch (s)
 		{
 		case 1:
-			screen_error("NO SSID AVAILABLE. PRESS ANYKEY.");
+			screen_error("NO SSID AVAILABLE");
+			pause(150);
 			return;
 		case 3:
 			screen_error("CONNECTION SUCCESSFUL!");
 			state = HOSTS_AND_DEVICES;
+			pause(60);
 			return;
 		case 4:
-			screen_error("CONNECT FAILED. PRESS ANYKEY.");
+			screen_error("CONNECT FAILED");
+			pause(150);
 			return;
 		case 5:
-			screen_error("CONNECTION LOST. PRESS ANYKEY.");
+			screen_error("CONNECTION LOST");
+			pause(150);
 			return;
 		default:
+			screen_error("Unknown error. Retrying.");
+ 			pause(1);
 			retries--;
 			break;
 		}
 	}
-	screen_error("UNABLE TO CONNECT. PRESS ANYKEY.");
+	screen_error("UNABLE TO CONNECT");
+	pause(150);
 	state = SET_WIFI;
 }

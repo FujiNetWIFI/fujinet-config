@@ -15,6 +15,7 @@ build
 config
 config.com
 config.com.lbl
+config.lbl
 config.map
 dist.apple2/dist.po
 dist.apple2/prepimg.sh

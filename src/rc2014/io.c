@@ -152,7 +152,7 @@ AdapterConfig *io_get_adapter_config(void)
 #endif
 }
 
-void io_set_ssid(NetConfig *nc)
+int io_set_ssid(NetConfig *nc)
 {
 #ifdef MOCK_WIFI
   memcpy(&mock_cfg, nc, sizeof(NetConfig));
@@ -160,6 +160,7 @@ void io_set_ssid(NetConfig *nc)
 #else
   last_rc = fujinet_set_ssid(nc);
 #endif
+  return 0;
 }
 
 void io_get_device_slots(DeviceSlot *d)

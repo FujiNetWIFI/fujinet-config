@@ -98,7 +98,6 @@ void set_wifi_custom(void)
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
-  screen_puts(0, 21, nc.password);
   input_line_set_wifi_password(nc.password);
   ws_subState=WS_DONE;
 }
@@ -130,14 +129,17 @@ void set_wifi_scan(void)
 
 void set_wifi_done(void)
 {
-  io_set_ssid(&nc);
-  ws_subState=WS_SCAN;
+  int result = io_set_ssid(&nc);
+  // always (good or bad) go to connect_wifi.
+  // I had used result to only show this when we have good return, but
+  // the connect_wifi shows error messages for us and jumps back to set wifi
+  // anyway when there's an error, so it's the correct choice either way.
   state = CONNECT_WIFI;
 }
 
 void set_wifi(void)
 {
-
+  ws_subState = WS_SCAN;
   while (state == SET_WIFI)
   {
     switch (ws_subState)
@@ -156,7 +158,7 @@ void set_wifi(void)
       break;
     case WS_DONE:
       set_wifi_done();
-      return;
+      break;
     }
   }
 }

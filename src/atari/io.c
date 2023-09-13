@@ -72,6 +72,7 @@ unsigned char io_get_wifi_status(void)
   unsigned char status = fn_io_get_wifi_status();
 
   // Shouldn't do this here, but for now its temporary
+  // If ^^ is ever fixed, need to change io_set_ssid below too, which uses this colour hack
   if (status != 3)
   {
     bar_set_color(COLOR_SETTING_FAILED);
@@ -107,9 +108,14 @@ AdapterConfigExtended *io_get_adapter_config(void)
   return &adapterConfig;
 }
 
-void io_set_ssid(NetConfig *nc)
+int io_set_ssid(NetConfig *nc)
 {
+  bool is_err;
+ 
   fn_io_set_ssid(nc);
+  is_err = fn_io_error();
+  io_get_wifi_status(); // change bar color based on status.
+  return is_err;
 }
 
 void io_get_device_slots(DeviceSlot *d)

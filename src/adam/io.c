@@ -90,14 +90,14 @@ AdapterConfig *io_get_adapter_config(void)
   return (AdapterConfig *)response;
 }
 
-void io_set_ssid(NetConfig *nc)
+int io_set_ssid(NetConfig *nc)
 {
   unsigned char c[98]={0xFB};
 
   memcpy(&c[1],nc,sizeof(NetConfig));
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
-
+  return 0;
 }
 
 void io_get_device_slots(DeviceSlot *d)

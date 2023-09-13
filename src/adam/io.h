@@ -19,7 +19,7 @@ NetConfig* io_get_ssid(void);
 unsigned char io_scan_for_networks(void);
 SSIDInfo *io_get_scan_result(unsigned char n);
 AdapterConfig *io_get_adapter_config(void);
-void io_set_ssid(NetConfig *nc);
+int io_set_ssid(NetConfig *nc);
 void io_get_device_slots(DeviceSlot *d);
 void io_get_host_slots(HostSlot *h);
 void io_put_host_slots(HostSlot *h);
