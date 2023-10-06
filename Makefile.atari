@@ -162,7 +162,34 @@ plus4_EMUCMD := $(VICE_HOME)xplus4 -TEDdsize -autoload
 c16_EMUCMD := $(VICE_HOME)xplus4 -ramsize 16 -TEDdsize -autoload
 cbm510_EMUCMD := $(VICE_HOME)xcbm2 -model 510 -VICIIdsize -autoload
 cbm610_EMUCMD := $(VICE_HOME)xcbm2 -model 610 -Crtcdsize -autoload
-atari_EMUCMD := atari800 -windowed -xl -pal -nopatchall -run
+#atari_EMUCMD := atari800 -windowed -xl -pal -nopatchall -run
+
+ifeq '$(findstring ;,$(PATH))' ';'
+    detected_OS := Windows
+else
+    detected_OS := $(shell uname 2>/dev/null || echo Unknown)
+    detected_OS := $(patsubst CYGWIN%,Cygwin,$(detected_OS))
+    detected_OS := $(patsubst MSYS%,MSYS,$(detected_OS))
+    detected_OS := $(patsubst MINGW%,MSYS,$(detected_OS))
+endif
+
+XS := ""
+ifeq ($(detected_OS),$(filter $(detected_OS),MSYS MINGW))
+# need an eXtra Slash for altirra things
+	XS := /
+endif
+
+LBL_SYM := $(XS)/debugcmd: ".loadsym $(PROGRAM).com.lbl"
+
+ALTIRRA ?= $(ALTIRRA_HOME)/Altirra64.exe \
+  $(XS)/portable $(XS)/portablealt:altirra-debug.ini \
+  $(XS)/debug \
+  $(LBL_SYM) \
+  $(XS)/debugcmd: "bp _cfg_debug"
+
+# Add any additional break points by copying last line
+
+atari_EMUCMD := $(ALTIRRA)
 
 ifeq ($(EMUCMD),)
   EMUCMD = $($(CC65TARGET)_EMUCMD)
@@ -244,6 +271,8 @@ ifneq ($(word 2,$(CONFIG)),)
   CONFIG := $(firstword $(CONFIG))
   $(info Using config file $(CONFIG) for linking)
 endif
+
+ASFLAGS += --asm-include-dir src/atari/asminc
 
 .SUFFIXES:
 .PHONY: all test clean zap love

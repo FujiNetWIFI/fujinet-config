@@ -20,7 +20,7 @@ NetConfig* io_get_ssid(void);
 unsigned char io_scan_for_networks(void);
 SSIDInfo *io_get_scan_result(unsigned char n);
 AdapterConfig *io_get_adapter_config(void);
-void io_set_ssid(NetConfig *nc);
+int io_set_ssid(NetConfig *nc);
 char *io_get_device_filename(unsigned char ds);
 void io_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path);
 void io_get_device_slots(DeviceSlot *d);

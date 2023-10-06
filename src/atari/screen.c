@@ -19,6 +19,7 @@
 #include "globals.h"
 #include "bar.h"
 #include "input.h"
+
 unsigned char *video_ptr;  // a pointer to the memory address containing the screen contents
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
 char _visibleEntries;
@@ -86,173 +87,6 @@ void set_active_screen(unsigned char screen)
   active_screen = screen;
 }
 
-void set_cursor(unsigned char x, unsigned char y)
-{
-  // Each screen uses a different displaylist so we need to know how many columns each row is so we can calculate
-  // how many bytes to add to the base video memory pointer. Previously it assumed 40 columns which resulted in the Y
-  // coordinate not always use correctly in screen functions.
-  //
-  // For example, if line 1 is only 20 rows, and the rest of the lines are 40 rows and you called "set_cursor(0, 3)", the
-  // original set_cursor did "x+y*40" which would be an offset of 120 which would put the cursor 20 characters into the 4th line 
-  // since line 1 was only 20 characters.
-  //
-  // This is a hacky way to do it - basically we just see what screen we're on, and since we "know" the layout so we do the math
-  // appopriately. This could be more elegant by doing something like "walking" through the displaylist, PEEKing the value,
-  // determining how many colums in the returned mode, and doing the math accordingly, but this is good for now, just
-  // verbose.
-  //
-  if (active_screen == SCREEN_HOSTS_AND_DEVICES)
-  {
-    // 2x20 column (host header)
-    // 8x40 column (host list)
-    // 2x20 column (drive slot header)
-    // rest 40 column (drive slots and commands)
-    if (y < 2)
-    {
-      cursor_ptr = video_ptr + x + (y * 20); // * 20 since these are 20 column lines.
-    }
-    else if (y < 10)
-    {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40); // * 40 since these are 40 column lines, and add 40 to cover the 1st 2 lines of 20 (prev condition)
-    }
-    else if (y < 12)
-    {
-      cursor_ptr = video_ptr + 40 + 320 + x + ((y - 10) * 20); // * 20 since these are 20 column lines, add 320 to cover the previous set of 40 chol lines, and 40 for the 1st set of 20 col lines.
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + x + ((y - 12) * 40); // * 20, rest of the the lines are 40 column, add 40 (1st 2), 320 (next 8 of 40), 40 (next 2 of 20)
-    }
-  }
-  else if (active_screen == SCREEN_SHOW_INFO)
-  {
-    // 2x20
-    // 3x40
-    // 1x20 (double height)
-    // 1x20 normal
-    // rest 40
-    if (y < 2)
-    {
-      cursor_ptr = video_ptr + x + (y * 20);
-    }
-    else if (y < 5)
-    {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
-    }
-    else if (y < 6)
-    {
-      cursor_ptr = video_ptr + 40 + 120 + x + ((y - 5) * 20);
-    }
-    else if (y < 7)
-    {
-      cursor_ptr = video_ptr + 40 + 140 + x + ((y - 6) * 20);
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 40 + 160 + x + ((y - 7) * 40);
-    }
-  }
-  // Right now these two are the same, break apart in future if they start to differ.
-  else if (active_screen == SCREEN_SELECT_FILE || active_screen == SCREEN_SELECT_SLOT || active_screen == SCREEN_MOUNT_AND_BOOT)
-  {
-    // 1x20
-    // rest 40
-    if (y < 1)
-    {
-      cursor_ptr = video_ptr + x + (y * 20);
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 20 + x + ((y - 1) * 40);
-    }
-  }
-  else if (active_screen == SCREEN_SET_WIFI)
-  {
-    // 2x20
-    // 20x40
-    // 2x20
-    // 2x40
-    if (y < 2)
-    {
-      cursor_ptr = video_ptr + x + (y * 20);
-    }
-    else if (y < 22)
-    {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
-    }
-    else if (y < 24)
-    {
-      cursor_ptr = video_ptr + 40 + 800 + ((y - 22) * 20);
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
-    }
-  }
-  else if (active_screen == SCREEN_CONNECT_WIFI)
-  {
-    // 2x20
-    // 20x40
-    // 2x20
-    // rest 40
-    if (y < 2)
-    {
-      cursor_ptr = video_ptr + x + (y * 20);
-    }
-    else if (y < 22)
-    {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
-    }
-    else if (y < 24)
-    {
-      cursor_ptr = video_ptr + 40 + 800 + ((y - 22) * 20);
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 40 + 800 + 40 + ((y - 24) * 40);
-    }
-  }
-  /*
-  else if (active_screen == SCREEN_MOUNT_AND_BOOT)
-  {
-    // 2x20
-    // 8x40
-    // 2x20
-    // 10x40
-    // 2x20
-    // rest 40
-    if (y < 2)
-    {
-      cursor_ptr = video_ptr + x + (y * 20);
-    }
-    else if (y < 10)
-    {
-      cursor_ptr = video_ptr + 40 + x + ((y - 2) * 40);
-    }
-    else if (y < 12)
-    {
-      cursor_ptr = video_ptr + 40 + 320 + x + ((y - 10) * 20);
-    }
-    else if (y < 22)
-    {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + ((y - 12) * 40);
-    }
-    else if (y < 24)
-    {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + ((y - 22) * 20);
-    }
-    else
-    {
-      cursor_ptr = video_ptr + 40 + 320 + 40 + 400 + 40 + ((y - 24) * 40);
-    }
-  }*/
-  else
-  {
-    // Default to all 40 character lines.
-    cursor_ptr = video_ptr + x + (y * 40);
-  }
-}
-
 /**********************
  * Print ATASCII string to display memory.  Note: ATASCII is not a 1:1 mapping for ASCII.  It is a ven diagram with significant overlap.
  */
@@ -308,7 +142,7 @@ void screen_mount_and_boot()
   bar_clear(false);
 }
 
-void screen_set_wifi(AdapterConfig *ac)
+void screen_set_wifi(AdapterConfigExtended *ac)
 {
   char mactmp[3];
   unsigned char i = 0;
@@ -321,19 +155,7 @@ void screen_set_wifi(AdapterConfig *ac)
   screen_puts(0, 0, "WELCOME TO #FUJINET!");
   screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
-  screen_puts(15, 2, ":");
-  screen_puts(18, 2, ":");
-  screen_puts(21, 2, ":");
-  screen_puts(24, 2, ":");
-  screen_puts(27, 2, ":");
-
-  // screen_set_wifi_display_mac_address(ac);
-  for (i = 0; i < 6; i++)
-  {
-    itoa(ac->macAddress[i], mactmp, 16);
-    screen_puts(x, 2, mactmp);
-    x += 3;
-  }
+  screen_puts(13, 2, ac->sMacAddress);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -386,62 +208,14 @@ void screen_set_wifi_custom(void)
 void screen_set_wifi_password(void)
 {
   screen_clear_line(22);
-  screen_puts(3, 22, "   ENTER PASSWORD");
+  screen_puts(0, 23, "    ENTER PASSWORD");
 }
 
-void screen_print_ip(unsigned char x, unsigned char y, unsigned char *buf)
-{
-  unsigned char i = 0;
-  unsigned char tmp[4];
-
-  set_cursor(x, y);
-  for (i = 0; i < 4; i++)
-  {
-    itoa(buf[i], tmp, 10);
-    screen_append(tmp);
-    if (i == 3)
-      break;
-    screen_append(".");
-  }
-}
-
-/**
- * Convert hex to a string and print as a MAC address at position x, y
- */
-void screen_print_mac(unsigned char x, unsigned char y, unsigned char *buf)
-{
-  unsigned char tmp[3];
-  unsigned char i = 0;
-
-  set_cursor(x, y);
-
-  for (i = 0; i < 6; i++)
-  {
-      itoa_hex(buf[i], tmp);
-      screen_append(tmp);
-      if (i == 5) 
-        break;
-      screen_append(":");
-  }
-}
-
-/**
- * Convert hex to a string.  Special hex output of numbers under 16, e.g. 9 -> 09, 10 -> 0A
- */
-void itoa_hex(unsigned char val, char *buf)
-{
-
-  if (val < 16)
-  {
-    *(buf++) = '0';
-  }
-  itoa(val, buf, 16);
-}
 
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfig *ac)
+void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 {
   screen_dlist_show_info();
   set_active_screen(SCREEN_SHOW_INFO);
@@ -464,12 +238,12 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 
   screen_puts(17, 7, ac->ssid);
   screen_puts(17, 8, ac->hostname);
-  screen_print_ip(17, 9, ac->localIP);
-  screen_print_ip(17, 10, ac->gateway);
-  screen_print_ip(17, 11, ac->dnsIP);
-  screen_print_ip(17, 12, ac->netmask);
-  screen_print_mac(17, 13, ac->macAddress);
-  screen_print_mac(17, 14, ac->bssid);
+  screen_puts(17, 9, ac->sLocalIP);
+  screen_puts(17, 10, ac->sGateway);
+  screen_puts(17, 11, ac->sDnsIP);
+  screen_puts(17, 12, ac->sNetmask);
+  screen_puts(17, 13, ac->sMacAddress);
+  screen_puts(17, 14, ac->sBssid);
   screen_puts(17, 15, ac->fn_version);
 }
 
@@ -828,18 +602,12 @@ void screen_hosts_and_devices_devices_clear_all(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-  // i comes in as the place in the array for this host slot. To get the corresponding position on the screen, add HOSTS_START_Y
-  screen_clear_line(i + HOSTS_START_Y);
+  // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
-  char tmp[2] = {0, 0};
-  int newloc = i + HOSTS_START_Y;
-
-  screen_clear_line(newloc);
-  tmp[0] = newloc - HOSTS_START_Y + 0x31;
-  screen_puts(2, newloc, tmp);
+  // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
@@ -989,48 +757,6 @@ void screen_dlist_hosts_and_devices(void)
   POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
 }
-
-int _screen_input(unsigned char x, unsigned char y, char *s, unsigned char maxlen)
-{
-  unsigned char k, o;
-  unsigned char *input_start_ptr;
-
-  o = strlen(s);                // assign to local var the size of s which contains the current string
-  set_cursor(x, y);             // move the cusor to coordinates x,y
-  input_start_ptr = cursor_ptr; // assign the value currently in cursor_ptr to local var input_start
-  screen_append(s);             // call screen_append function and pass by value (a copy) the contents of s
-
-  POKE(cursor_ptr, 0x80); // turn on cursor
-
-  // Start capturing the keyboard input into local var k
-  do
-  {
-    k = cgetc(); // Capture keyboard input into k
-
-    if (k == KCODE_ESCAPE) // KCODE_ESCAPE is the ATASCI code for the escape key which is commonly used to cancel.
-      return -1;
-
-    if (k == KCODE_BACKSP) // KCODE_BACKSP is the ATASCI backspace key.  This if clause test for backspace and updates cursor_ptr to the remainder of contents upto the last backspace
-    {
-      if (cursor_ptr > input_start_ptr) // execute only if cursor_ptr is greater than input_start_ptr
-      {
-        s[--o] = 0;                  //
-        POKEW(--cursor_ptr, 0x0080); // move the last bit of the cursor_ptr back one and write the location of the cursor_ptr contents to user zero page address 0x80
-      }
-    }
-    else if ((k > 0x1F) && (k < 0x80)) // Display printable ascii to screen
-    {
-      if (o < maxlen - 1)
-      {
-        put_char(k);
-        s[o++] = k;
-        POKE(cursor_ptr, 0x80);
-      }
-    }
-  } while (k != KCODE_RETURN); // Continue to capture keyboard input until return (0x9B)
-  POKE(cursor_ptr, 0x00);      // clear cursor
-}
-
 
 #ifdef DEBUG
 // Debugging function to show line #'s, used to test if the Y coordinate calculations are working.

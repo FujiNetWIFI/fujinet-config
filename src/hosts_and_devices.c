@@ -92,6 +92,8 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
     o = strlen((const char *)hostSlots[i]);
 
   screen_hosts_and_devices_edit_host_slot(i);
+  // FRUSTRATINGLY the signature is void return, so noone ever knows if the return was good or bad
+  // and just carries on and saves changes anyway. Fortunately ESC now handled well (on atari) and will save same thing back to FN
   input_line_hosts_and_devices_host_slot(i, o, (char *)hostSlots[i]);
 
   if (strlen((const char*)hostSlots[i]) == 0)
@@ -168,7 +170,12 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+#ifdef BUILD_ATARI
+  io_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
+#else
+  // i promise to implement in all cases.
   io_set_device_filename(selected_device_slot, temp_filename);
+#endif
 
   io_put_device_slots(&deviceSlots[0]);
 

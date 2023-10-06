@@ -1,6 +1,6 @@
 #ifdef BUILD_ATARI
 /**
- * FujiNet CONFIG for #Adam
+ * FujiNet CONFIG for #Atari
  *
  * I/O Routines
  */
@@ -18,8 +18,8 @@ unsigned char io_get_wifi_status(void);
 NetConfig* io_get_ssid(void);
 unsigned char io_scan_for_networks(void);
 SSIDInfo *io_get_scan_result(unsigned char n);
-AdapterConfig *io_get_adapter_config(void);
-void io_set_ssid(NetConfig *nc);
+AdapterConfigExtended *io_get_adapter_config(void);
+int io_set_ssid(NetConfig *nc);
 void io_get_device_slots(DeviceSlot *d);
 void io_get_host_slots(HostSlot *h);
 void io_put_host_slots(HostSlot *h);
@@ -29,7 +29,7 @@ void io_open_directory(unsigned char hs, char *p, char *f);
 char *io_read_directory(unsigned char l, unsigned char a);
 void io_close_directory(void);
 void io_set_directory_position(DirectoryPosition pos);
-void io_set_device_filename(unsigned char ds, char* e);
+void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mode, char* e);
 char *io_get_device_filename(unsigned char ds);
 void io_mount_disk_image(unsigned char ds, unsigned char mode);
 void io_set_boot_config(unsigned char toggle);

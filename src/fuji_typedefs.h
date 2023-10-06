@@ -59,6 +59,25 @@ typedef struct
   char fn_version[15];
 } AdapterConfig;
 
+typedef struct
+{
+  char ssid[SSID_MAXLEN];
+  char hostname[64];
+  unsigned char localIP[4];
+  unsigned char gateway[4];
+  unsigned char netmask[4];
+  unsigned char dnsIP[4];
+  unsigned char macAddress[6];
+  unsigned char bssid[6];
+  char fn_version[15];
+  char sLocalIP[16];
+  char sGateway[16];
+  char sNetmask[16];
+  char sDnsIP[16];
+  char sMacAddress[18];
+  char sBssid[18];
+} AdapterConfigExtended;
+
 typedef unsigned char HostSlot[32];
 
 typedef struct {
