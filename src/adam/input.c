@@ -3,7 +3,7 @@
  * Input routines
  */
 
-#include <msx.h>
+#include <video/tms99x8.h>
 #include <eos.h>
 #include <smartkeys.h>
 #include <conio.h>
@@ -174,7 +174,7 @@ unsigned char input_ucase(void)
 
 static void input_clear_bottom(void)
 {
-  msx_vfill(0x1200,0x00,768);
+  vdp_vfill(0x1200,0x00,768);
 }
 
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)

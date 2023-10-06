@@ -196,7 +196,6 @@ void hosts_and_devices_done(void)
 {
   char i;
   // char *msg[40];
-
   for (i = 0; i < NUM_DEVICE_SLOTS; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
