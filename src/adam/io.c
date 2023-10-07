@@ -347,12 +347,15 @@ void io_update_devices_enabled(bool *e)
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
   char cf[259]={0xD8,0x00,0x00};
-
+  DCB *dcb = NULL;
+  
   cf[1]=source_slot;
   cf[2]=destination_slot;
   strcpy(&cf[3],copySpec);
 
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
+
+  while (eos_request_device_status(FUJI_DEV,dcb) != 0x80);
 }
 
 unsigned char io_device_slot_to_device(unsigned char ds)
