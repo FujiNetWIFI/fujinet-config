@@ -262,31 +262,34 @@ void io_boot(void)
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
 {
-  unsigned int nb = 3; // EOS is nominally 3 dir blocks.
-
+  unsigned int db = 1; // 1 directory block by default
+  unsigned int nb = (unsigned short)numBlocks;
+  DCB *dcb = NULL;
+  unsigned char s=0;
+  
   // End volume label
   v[strlen(v)]=0x03;
 
   // Adjust device slot to EOS device #
   ds += 4;
 
-  // Set up block 0 to boot right into SmartWriter
-  memset(response,0,1024);
+  if (numBlocks>719)
+    db=6;
+  else if (numBlocks>319)
+    db=3;
+  else if (numBlocks>160)
+    db=2;
+  else
+    db=1;
+
+  eos_initialize_directory(ds,db,nb,v);
+
+  memset(response,0,sizeof(response));
   response[0]=0xC3;
   response[1]=0xE7;
   response[2]=0xFC;
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
-  eos_write_block(ds,0,&response[0]);
 
-  // Write directory
-  eos_initialize_directory(ds, 1, nb, v);
-  eos_initialize_directory(ds, 1, nb, v);
+  eos_write_block(ds,0UL,&response[0]);
 }
 
 bool io_get_device_enabled_status(unsigned char d)
