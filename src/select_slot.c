@@ -170,6 +170,9 @@ void select_slot_done()
       screen_select_slot_build_eos_directory_creating();
       io_build_directory(selected_device_slot,selected_size,filename);
     }
+
+    state=HOSTS_AND_DEVICES;
+    goto adam_bypass;
 #endif
   }
   else
@@ -211,6 +214,9 @@ void select_slot_done()
     {
       state=HOSTS_AND_DEVICES;
     }
+
+ adam_bypass:
+  return;
 }
 
 void select_slot(void)
