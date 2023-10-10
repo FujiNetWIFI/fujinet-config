@@ -24,6 +24,7 @@
 #include "apple2/screen.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
+#include <conio.h>
 // #include <stdio.h> // for debugging using sprintf
 #endif /* BUILD_APPLE2 */
 
@@ -203,10 +204,20 @@ void hosts_and_devices_done(void)
 {
   char i;
   // char *msg[40];
+#ifdef BUILD_APPLE2
+  // Display Loading message since TNFS Disk II images can take some time
+  char s;
+  clrscr();
+  cprintf("MOUNTING DISKS...\r\n\r\n");
+#endif
   for (i = 0; i < NUM_DEVICE_SLOTS; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
+#ifdef BUILD_APPLE2
+      s = i + 1;
+      cprintf("                SLOT %d\r\n", s);
+#endif
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);
     }

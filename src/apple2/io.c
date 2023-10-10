@@ -424,8 +424,8 @@ void io_boot(void)
   int i;
 
   ostype = get_ostype() & 0xF0;
-  clrscr();
-  cprintf("BOOTING...");
+  //clrscr();
+  cprintf("\r\nRESTARTING...");
 
   if (ostype == APPLE_II ||
     ostype == APPLE_IIPLUS ||
