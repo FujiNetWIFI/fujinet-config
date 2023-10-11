@@ -273,6 +273,20 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
   // Adjust device slot to EOS device #
   ds += 4;
 
+  memset(response,0,sizeof(response));
+  
+  for (unsigned long i=0;i<db;i++)
+    {
+      eos_write_block(ds,i+1,&response[0]);
+    }
+    
+  memset(response,0,sizeof(response));
+  response[0]=0xC3;
+  response[1]=0xE7;
+  response[2]=0xFC;
+
+  eos_write_block(ds,0UL,&response[0]);
+
   if (numBlocks>719)
     db=6;
   else if (numBlocks>319)
@@ -283,13 +297,7 @@ void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
     db=1;
 
   eos_initialize_directory(ds,db,nb,v);
-
-  memset(response,0,sizeof(response));
-  response[0]=0xC3;
-  response[1]=0xE7;
-  response[2]=0xFC;
-
-  eos_write_block(ds,0UL,&response[0]);
+  
 }
 
 bool io_get_device_enabled_status(unsigned char d)

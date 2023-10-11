@@ -399,7 +399,7 @@ void screen_select_file_new_size(unsigned char k)
   if (k==1) // DDP
     smartkeys_display(NULL,NULL," 128K", " 256K", " 320K", " CUSTOM");
   else if (k==2) // DSK
-    smartkeys_display(NULL,NULL," 160K"," 320K","8192K"," CUSTOM");
+    smartkeys_display(NULL," 160K"," 320K"," 720K","1440K"," CUSTOM");
   smartkeys_status("  SIZE?");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }

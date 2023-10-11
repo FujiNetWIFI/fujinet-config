@@ -494,12 +494,14 @@ unsigned long input_select_file_new_size(unsigned char t)
     case 2: // DSK
       switch(cgetc())
 	{
-	case KEY_SMART_III:
+	case KEY_SMART_II:
 	  return 160;
-	case KEY_SMART_IV:
+	case KEY_SMART_III:
 	  return 320;
+	case KEY_SMART_IV:
+	  return 720;
 	case KEY_SMART_V:
-	  return 8192;
+	  return 1440;
 	case KEY_SMART_VI:
 	  return 1; // CUSTOM
 	}
