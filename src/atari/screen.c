@@ -262,7 +262,7 @@ void screen_select_slot(char *e)
   // Show file details if it's an existing file only.
   if ( create == false )
   {
-    // Modified time 
+    // Modified time
     // sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
 
     // Remove for now (wasn't in original config, not really all that important and removng sprintf usage), so skip over the 6 bytes for the file date/time info.
@@ -273,8 +273,8 @@ void screen_select_slot(char *e)
     // Result is unreliable since if the file was < 65535 bytes it will be ok, but if it was more we don't
     // know how to interpret the 2 bytes we have available to us.
     //s = (unsigned int *)e;
-    //sprintf(d, "%8s %u bytes", "SIZE:", *s); 
-    //sprintf(d, "%8s %u K", "SIZE:", *s >> 10); 
+    //sprintf(d, "%8s %u bytes", "SIZE:", *s);
+    //sprintf(d, "%8s %u K", "SIZE:", *s >> 10);
     //screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
     // Skip next 4 bytes to get to the filename (2 for the size, 2 for flags we don't care about)
@@ -418,7 +418,7 @@ void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryTy
 /*
   if (e[strlen(e)-1]=='/')
     screen_puts(0,FILES_START_Y+y,CH_FOLDER);
-  else if (e[0]=='=') 
+  else if (e[0]=='=')
     screen_puts(0,FILES_START_Y+y,CH_SERVER);
   else
   */
@@ -427,11 +427,11 @@ void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryTy
   {
     screen_puts(0,FILES_START_Y+y,CH_FOLDER);
   }
-  else if (e[0]=='=') 
+  else if (e[0]=='=')
   {
     screen_puts(0,FILES_START_Y+y,CH_SERVER);
   }
-  
+
   screen_puts(3, FILES_START_Y + y, e);
 
 }
@@ -617,7 +617,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
   tmp[0] = ds + '1';
 
-  if ( mounting ) 
+  if ( mounting )
   {
     y = DEVICES_START_MOUNT_Y;
   }

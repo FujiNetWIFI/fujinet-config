@@ -110,9 +110,9 @@ void select_file_init(void)
   memset(path, 0, 224);
   path[0] = '/';
   memset(filter, 0, 32);
-  screen_select_file();
   sf_subState = SF_DISPLAY;
   quick_boot = dir_eof = false;
+  screen_select_file();
 }
 
 unsigned char select_file_display(void)
@@ -442,8 +442,6 @@ void select_file(void)
     backToFiles = false;
     select_file_init();
     strncpy(path, source_path, 224);
-    pos = 0;
-    screen_select_file();
   }
   else if (backFromCopy)
   {
