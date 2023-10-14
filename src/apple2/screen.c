@@ -472,10 +472,19 @@ void screen_select_file_choose(char visibleEntries)
   bar_set(3,2,visibleEntries,0); // TODO: Handle previous
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
-  screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
-  screen_print_menu("ESC",":ABORT  ");
-  screen_print_menu("F","ILTER  ");
-  screen_print_menu("N","EW  ");
+  if (copy_mode == true)
+  {
+    screen_print_menu("RETURN",":SELECT DIRECTORY\r\n");
+    screen_print_menu("ESC",":ABORT  ");
+    screen_print_menu("C","DO IT!  ");
+  }
+  else
+  {
+    screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
+    screen_print_menu("ESC",":ABORT  ");
+    screen_print_menu("F","ILTER  ");
+    screen_print_menu("N","EW  ");
+  }
 }
 
 void screen_select_file_filter(void)

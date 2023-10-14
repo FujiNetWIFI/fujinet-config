@@ -25,6 +25,7 @@ extern HostSlot hostSlots[8];
 extern char mode;
 
 extern DirectoryPosition pos;
+extern DirectoryPosition old_pos;
 extern char path[224];
 extern bool create;
 extern char filter[32];

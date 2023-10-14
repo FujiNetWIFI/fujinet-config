@@ -83,6 +83,7 @@ char source_path[224];
 char source_filter[32];
 char source_filename[128];
 DirectoryPosition pos = 0;
+DirectoryPosition old_pos = 0;
 bool dir_eof = false;
 bool quick_boot = false;
 unsigned long selected_size = 0;
@@ -207,7 +208,7 @@ void select_display_long_filename(void)
     if (long_entry_displayed == false)
     {
       io_open_directory(selected_host_slot, path, filter);
-#ifdef BUILD_ATARI      
+#ifdef BUILD_ATARI
       io_set_directory_position(pos + bar_get() - FILES_START_Y);
 #else
       io_set_directory_position(pos + bar_get());
@@ -415,6 +416,7 @@ void select_file_new(void)
 void select_file_copy(void)
 {
   sf_subState = SF_DONE;
+  old_pos = pos;
   state = DESTINATION_HOST_SLOT;
 }
 
@@ -455,6 +457,8 @@ void select_file(void)
     }
     strncpy(path, source_path, sizeof(path));
     selected_host_slot = copy_host_slot;
+    //pos = old_pos; // Get back to the dir position pre copy
+    pos = 0;
     screen_select_file();
   }
   else

@@ -497,7 +497,7 @@ SFSubState input_select_file_choose(void)
     pos += bar_get() - FILES_START_Y;
     screen_select_file_clear_long_filename();
     entryType = select_file_entry_type();
-    
+
     if (entryType == ENTRY_TYPE_FOLDER)
       return SF_ADVANCE_FOLDER;
     else if (entryType == ENTRY_TYPE_LINK)
@@ -518,7 +518,7 @@ SFSubState input_select_file_choose(void)
     }
     if ( pos > 0 )
       return SF_PREV_PAGE;
-    else 
+    else
       return SF_DEVANCE_FOLDER;
     return SF_CHOOSE;
   case '>':
@@ -760,7 +760,7 @@ void set_device_slot_mode(unsigned char slot, unsigned char mode)
   // If we couldn't mount read/write, then re-mount again as read-only
   /*
   in original config, this repeated same log (using same mode..)
-  if ( io_error() )  
+  if ( io_error() )
   {
     io_umount_disk_image(slot);
 

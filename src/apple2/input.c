@@ -226,9 +226,16 @@ SFSubState input_select_file_choose(void)
   //   return SF_NEW;
   case 'C':
   case 'c':
-    pos += bar_get();
-    select_file_set_source_filename();
-    return SF_COPY;
+    if (copy_mode == true)
+    {
+      return SF_DONE;
+    }
+    else
+    {
+      pos += bar_get();
+      select_file_set_source_filename();
+      return SF_COPY;
+    }
   case KEY_UP_ARROW:
     if ((bar_get() == 0) && (pos > 0))
       return SF_PREV_PAGE;

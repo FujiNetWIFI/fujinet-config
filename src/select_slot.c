@@ -204,7 +204,7 @@ void select_slot_done()
     io_close_directory();
 
   }
-  
+
   if (!quick_boot)
     {
       state=SELECT_FILE;
