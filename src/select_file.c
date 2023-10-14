@@ -439,8 +439,9 @@ void select_file(void)
   if (backToFiles)
   {
     // Return to the previous dir
-    sf_subState = SF_DISPLAY;
     backToFiles = false;
+    select_file_init();
+    strncpy(path, source_path, 224);
     pos = 0;
     screen_select_file();
   }

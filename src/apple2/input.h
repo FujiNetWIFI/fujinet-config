@@ -40,7 +40,7 @@ unsigned long input_select_file_new_custom(void);
 void input_select_file_new_name(char *c);
 
 SSSubState input_select_slot_choose(void);
-
+unsigned char input_select_slot_mode(char *mode);
 SISubState input_show_info(void);
 
 HDSubState input_hosts_and_devices_hosts(void);

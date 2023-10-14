@@ -504,6 +504,8 @@ SFSubState input_select_file_choose(void)
       return SF_LINK;
     else
     {
+      strncpy(source_path, path, 224);
+      old_pos = pos;
       return SF_DONE;
     }
   case KCODE_BACKSP:

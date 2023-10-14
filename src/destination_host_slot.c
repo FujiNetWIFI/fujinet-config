@@ -110,21 +110,21 @@ void destination_host_slot(void)
   while (state==DESTINATION_HOST_SLOT)
     {
       switch(dh_subState)
-	{
-	case DH_INIT:
-	  destination_host_slot_init();
-	  break;
-	case DH_DISPLAY:
-	  destination_host_slot_display();
-	  break;
-	case DH_CHOOSE:
-	  destination_host_slot_choose();
-	  break;
-	case DH_DONE:
-	  destination_host_slot_done();
-	  break;
-	case DH_ABORT:
-	  break;
-	}
+      {
+      case DH_INIT:
+        destination_host_slot_init();
+        break;
+      case DH_DISPLAY:
+        destination_host_slot_display();
+        break;
+      case DH_CHOOSE:
+        destination_host_slot_choose();
+        break;
+      case DH_DONE:
+        destination_host_slot_done();
+        break;
+      case DH_ABORT:
+        break;
+      }
     }
 }

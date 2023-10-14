@@ -154,6 +154,7 @@ DHSubState input_destination_host_slot_choose(void)
     case KEY_RETURN:
       selected_host_slot=bar_get();
       copy_mode=true;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
       return DH_DONE;
     case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
@@ -196,6 +197,8 @@ SFSubState input_select_file_choose(void)
       return SF_LINK;
     else
     {
+      strncpy(source_path, path, 224);
+      old_pos = pos;
       return SF_DONE;
     }
   case KEY_ESCAPE:
@@ -214,16 +217,6 @@ SFSubState input_select_file_choose(void)
   case 'N':
   case 'n':
     return SF_NEW;
-  // case KEY_RETURN: // KEY_SMART_VI:
-  //   if (copy_mode == false)
-  //   {
-  //     quick_boot = true;
-  //     pos += bar_get();
-  //     state = SELECT_SLOT; // should not change here? ... gets picked in SF_DONE state
-  //   }
-  //   return SF_DONE;
-  // case KEY_INSERT:
-  //   return SF_NEW;
   case 'C':
   case 'c':
     if (copy_mode == true)
@@ -234,6 +227,7 @@ SFSubState input_select_file_choose(void)
     {
       pos += bar_get();
       select_file_set_source_filename();
+      copy_host_slot = selected_host_slot;
       return SF_COPY;
     }
   case KEY_UP_ARROW:
@@ -331,15 +325,16 @@ void input_select_file_new_name(char *c)
 SSSubState input_select_slot_choose(void)
 {
   // cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
-   unsigned char k;
+  unsigned char k;
 
-   k=cgetc();
+  k=cgetc();
 
   switch(k)
     {
     case KEY_ESCAPE:
-      state=HOSTS_AND_DEVICES;
-      return SS_ABORT;
+      state = SELECT_FILE;
+      backToFiles = true;
+      return SS_DONE;
     case KEY_1:
     case KEY_2:
     case KEY_3:
@@ -359,6 +354,16 @@ SSSubState input_select_slot_choose(void)
       selected_device_slot=bar_get();
       mode=0; // ?? read/write mode?
       return SS_DONE;
+      // Ask for mode.
+      screen_select_slot_mode();
+      k = input_select_slot_mode(&mode);
+
+      if (!k)
+      {
+        state = SELECT_FILE;
+        backToFiles = true;
+      }
+      return SS_DONE;
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
@@ -375,6 +380,32 @@ SSSubState input_select_slot_choose(void)
     default:
       return SS_CHOOSE;
     }
+}
+
+unsigned char input_select_slot_mode(char *mode)
+{
+  unsigned char k = 0;
+
+  while (k == 0)
+  {
+    k = input_ucase();
+
+    if (k == KEY_ESCAPE)
+    {
+      return 0;
+    }
+
+    switch(k)
+    {
+      case 'W':
+      case 'w':
+        mode[0] = 2;
+        break;
+      default:
+        mode[0] = 1;
+    }
+  }
+  return 1;
 }
 
 SISubState input_show_info(void)
