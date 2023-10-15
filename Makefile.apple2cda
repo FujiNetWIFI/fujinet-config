@@ -318,10 +318,9 @@ test: $(PROGRAM)
 	$(POSTEMUCMD)
 
 dist: $(PROGRAM)
-	     cp dist.apple2/bootable.po dist.apple2/dist.po
-#	     java -jar dist.apple2/ac.jar -as dist.apple2/dist.po config.system sys <config
-	     java -jar dist.apple2/ac.jar -p dist.apple2/dist.po fuji.da cda <config
-#	     cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po
+	cp dist.apple2/bootable.po dist.apple2/dist.po
+	./dist.apple2/add-file.sh dist.apple2/dist.po config fuji.da cda
+#	cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po
 
 clean:
 	$(call RMFILES,$(OBJECTS))

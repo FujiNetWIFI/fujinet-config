@@ -53,3 +53,7 @@ dist/rlisten.com
 dist/rsniff.com
 Makefile.options
 obj
+
+# apple distribution
+dist.apple2/*.jar
+dist.apple2/*.dsk
