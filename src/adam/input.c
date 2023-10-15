@@ -295,9 +295,6 @@ HDSubState input_hosts_and_devices_hosts(void)
       }
       else
         return HD_HOSTS;
-    case KEY_ESCAPE: // ESC
-      quit();
-      break;
     case KEY_SMART_IV:
       state=SHOW_INFO;
       return HD_DONE;
