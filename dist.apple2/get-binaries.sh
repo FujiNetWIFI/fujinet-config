@@ -1,17 +1,21 @@
 #!/bin/bash
-#
-# Copies ProDos2.4.2 and AppleCommander binaries into script dir.
-# Only copies prodos if "-p" arg is given.
+# Source this file, e.g.
+# source ../dist.apple2/get-binaries.sh
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if [[ $# -eq 1 && "$1" == "-p" ]]; then
-  if [ ! -f ${SCRIPT_DIR}/ProDOS_2_4_2.dsk ]; then
-    curl -s -L -o ${SCRIPT_DIR}/ProDOS_2_4_2.dsk https://mirrors.apple2.org.za/ftp.apple.asimov.net/images/masters/prodos/ProDOS_2_4_2.dsk
-  fi
+OLD_VER="1.8.0"
+if [ -f "${SCRIPT_DIR}/AppleCommander-ac-${OLD_VER}.jar" ] ; then
+  rm ${SCRIPT_DIR}/AppleCommander-ac-${OLD_VER}.jar
+  rm ${SCRIPT_DIR}/AppleCommander-acx-${OLD_VER}.jar
 fi
 
-if [ ! -f ${SCRIPT_DIR}/AppleCommander-ac-1.8.0.jar ]; then
-  curl -s -L -o ${SCRIPT_DIR}/AppleCommander-ac-1.8.0.jar https://github.com/AppleCommander/AppleCommander/releases/download/1.8.0/AppleCommander-ac-1.8.0.jar
-  curl -s -L -o ${SCRIPT_DIR}/AppleCommander-acx-1.8.0.jar https://github.com/AppleCommander/AppleCommander/releases/download/1.8.0/AppleCommander-acx-1.8.0.jar
+AC_VER="1.9.0"
+AC="java -jar ${SCRIPT_DIR}/AppleCommander-ac-${AC_VER}.jar"
+ACX="java -jar ${SCRIPT_DIR}/AppleCommander-acx-${AC_VER}.jar"
+
+
+if [ ! -f ${SCRIPT_DIR}/AppleCommander-ac-${AC_VER}.jar ]; then
+  curl -s -L -o ${SCRIPT_DIR}/AppleCommander-ac-${AC_VER}.jar https://github.com/AppleCommander/AppleCommander/releases/download/${AC_VER}/AppleCommander-ac-${AC_VER}.jar
+  curl -s -L -o ${SCRIPT_DIR}/AppleCommander-acx-${AC_VER}.jar https://github.com/AppleCommander/AppleCommander/releases/download/${AC_VER}/AppleCommander-acx-${AC_VER}.jar
 fi
