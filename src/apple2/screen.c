@@ -336,7 +336,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  bar_set(1,1,8,0);
+  bar_set(1, 1, 8, selected_host_slot);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8", ":HOST  ");
@@ -382,7 +382,7 @@ void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.",i);
+  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.", i + 1);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
