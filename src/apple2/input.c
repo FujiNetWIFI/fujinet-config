@@ -352,7 +352,7 @@ SSSubState input_select_slot_choose(void)
     case 'r':
     case KEY_RETURN:
       selected_device_slot=bar_get();
-      mode=0; // ?? read/write mode?
+      mode = MODE_READ;
       return SS_DONE;
       // Ask for mode.
       screen_select_slot_mode();
@@ -367,7 +367,7 @@ SSSubState input_select_slot_choose(void)
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
-      mode=2;
+      mode = MODE_WRITE;
       return SS_DONE;
     case KEY_UP_ARROW:
     case KEY_LEFT_ARROW:
@@ -516,13 +516,13 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'R':
     case 'r':
       selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(0);
+      hosts_and_devices_devices_set_mode(MODE_READ);
       return HD_DEVICES;
       break;
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
-      hosts_and_devices_devices_set_mode(2);
+      hosts_and_devices_devices_set_mode(MODE_WRITE);
       return HD_DEVICES;
       break;
     // case KEY_CLEAR:
