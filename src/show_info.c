@@ -6,6 +6,14 @@
 
 #include "show_info.h"
 
+#ifdef _CMOC_VERSION_
+#include "coco/screen.h"
+#include "coco/input.h"
+#include "coco/globals.h"
+#include "coco/io.h"
+#define PRINTER 2 // ?
+#endif /* BUILD_ATARI */
+
 #ifdef BUILD_ADAM
 #include "adam/screen.h"
 #include "adam/input.h"
@@ -29,7 +37,6 @@
 #include "atari/io.h"
 #define PRINTER 2 // ?
 #endif /* BUILD_ATARI */
-
 
 #ifdef BUILD_C64
 #include "c64/screen.h"

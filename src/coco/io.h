@@ -7,11 +7,7 @@
 #ifndef IO_H
 #define IO_H
 
-#define true 1
-#define false 0
-
-typedef unsigned char bool;
-
+#include "stdbool.h"
 #include "../fuji_typedefs.h"
 
 bool io_error(void);
@@ -29,11 +25,11 @@ void io_put_host_slots(HostSlot *h);
 void io_put_device_slots(DeviceSlot *d);
 void io_mount_host_slot(unsigned char hs);
 void io_open_directory(unsigned char hs, char *p, char *f);
-char *io_read_directory(unsigned char l, unsigned char a);
+const char *io_read_directory(unsigned char l, unsigned char a);
 void io_close_directory(void);
 void io_set_directory_position(DirectoryPosition pos);
-void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mode, char* e);
-char *io_get_device_filename(unsigned char ds);
+void io_set_device_filename(unsigned char ds, char* e);
+const char *io_get_device_filename(unsigned char ds);
 void io_mount_disk_image(unsigned char ds, unsigned char mode);
 void io_set_boot_config(unsigned char toggle);
 void io_set_boot_mode(unsigned char mode);

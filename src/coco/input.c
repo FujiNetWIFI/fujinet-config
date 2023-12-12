@@ -26,14 +26,17 @@ extern unsigned short entry_timer;
 
 unsigned char input()
 {
+  return 0;
 }
 
 unsigned char input_ucase()
 {
+  return 0;
 }
 
 unsigned char input_handle_joystick(void)
 {
+  return 0;
 }
 
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
@@ -94,6 +97,7 @@ WSSubState input_set_wifi_select(void)
  */
 unsigned char input_handle_console_keys(void)
 {
+  return 0;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)

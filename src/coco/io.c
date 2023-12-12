@@ -8,7 +8,7 @@
 #include "screen.h"
 #include "bar.h"
 
-static NetConfig nc;
+extern NetConfig nc;
 static AdapterConfigExtended adapterConfig;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
@@ -23,10 +23,12 @@ void set_sio_defaults(void)
 
 bool io_error(void)
 {
+  return false;
 }
 
 unsigned char io_status(void)
 {
+  return 0;
 }
 
 void io_init(void)
@@ -92,7 +94,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 {
 }
 
-char *io_read_directory(unsigned char maxlen, unsigned char a)
+const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
   return "DIR ENTRY";
 }
@@ -105,11 +107,11 @@ void io_set_directory_position(DirectoryPosition pos)
 {
 }
 
-void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mode, char* e)
+void io_set_device_filename(unsigned char ds, char* e)
 {
 }
 
-char *io_get_device_filename(unsigned char slot)
+const char *io_get_device_filename(unsigned char slot)
 {
   return "DEVICE FILENAME";
 }
@@ -170,6 +172,7 @@ void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 
 unsigned char io_device_slot_to_device(unsigned char ds)
 {
+  return 0;
 }
 
 /**

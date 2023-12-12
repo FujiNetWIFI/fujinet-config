@@ -3,7 +3,9 @@
  *
  */
 
-#ifndef _CMOC_VERSION_
+#ifdef _CMOC_VERSION_
+#include "coco/stdbool.h"
+#else
 #include <stdlib.h>
 #endif /* CMOC_VERSION */
 
@@ -57,6 +59,8 @@
 #endif /* BUILD_RC2014 */
 
 State state=HOSTS_AND_DEVICES;
+bool backToFiles=false;
+bool backFromCopy=false;
 
 #ifdef _CMOC_VERSION_
 extern void io_init();

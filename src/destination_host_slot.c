@@ -4,8 +4,18 @@
  * Select a Destination Host Slot
  */
 
+#ifdef _CMOC_VERSION_
+#include <cmoc.h>
+#include "coco/stdbool.h"
+#include "coco/screen.h"
+#include "coco/input.h"
+#include "coco/globals.h"
+#include "coco/io.h"
+#include "coco/bar.h"
+#else
 #include <stdlib.h>
 #include <string.h>
+#endif /* CMOC_VERSION */
 #include "select_slot.h"
 
 #ifdef BUILD_ADAM

@@ -6,7 +6,8 @@
 #ifndef BAR_H
 #define BAR_H
 
-#include <stdbool.h>
+#define true 1
+#define false 0
 
 #include "globals.h"
 
@@ -56,7 +57,7 @@ void bar_color(unsigned char f,unsigned char b);
 
 void bar_update(void);
 
-void fastcall bar_show(unsigned char y);
+void bar_show(unsigned char y);
 void bar_set_color(unsigned char c);
 
 void bar_up();

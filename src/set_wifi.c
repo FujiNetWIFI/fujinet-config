@@ -4,8 +4,18 @@
  * Set new WiFi connection
  */
 
+#ifdef _CMOC_VERSION_
+#include <cmoc.h>
+#include "coco/io.h"
+#include "coco/screen.h"
+#include "coco/bar.h"
+#include "coco/input.h"
+#include "coco/globals.h"
+#else
 #include <string.h>
 #include <conio.h>
+#endif /* _CMOC_VERSION_ */
+
 #include "set_wifi.h"
 #include "die.h"
 #include "fuji_typedefs.h"

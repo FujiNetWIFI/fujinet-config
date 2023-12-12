@@ -1,10 +1,12 @@
-#ifdef _CMOC_VERSION__
+#ifdef _CMOC_VERSION_
 
 /**
  * Functions to display a selection bar
  */
 
 #include "bar.h"
+
+unsigned char bar_y=0;
 
 /**
  * Clear bar from screen

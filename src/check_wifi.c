@@ -40,6 +40,7 @@
 #endif /* BUILD_RC2014 */
 
 #ifdef _CMOC_VERSION_
+#include "coco/stdbool.h"
 #include "coco/io.h"
 #include "coco/globals.h"
 #endif /* CMOC_VERSION */

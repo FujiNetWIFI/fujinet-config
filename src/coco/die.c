@@ -1,4 +1,4 @@
-#ifdef _CMOC_VERSION__
+#ifdef _CMOC_VERSION_
 /**
  * FujiNet Configurator
  *

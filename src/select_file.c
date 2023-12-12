@@ -4,8 +4,22 @@
  * Select file from Host Slot
  */
 
+#ifdef _CMOC_VERSION_
+#include <cmoc.h>
+#include "coco/strrchr.h"
+#include "coco/stdbool.h"
+#include "coco/screen.h"
+#include "coco/io.h"
+#include "coco/globals.h"
+#include "coco/input.h"
+#include "coco/bar.h"
+#define DIR_MAX_LEN 31
+#define ENTRIES_PER_PAGE 8
+#else
 #include <conio.h>
 #include <string.h>
+#endif /* CMOC_VERSION */
+
 #include "select_file.h"
 #include "fuji_typedefs.h"
 
@@ -93,8 +107,8 @@ bool long_entry_displayed = false;
 bool copy_mode = false;
 
 extern unsigned char copy_host_slot;
-extern bool backToFiles = false;
-extern bool backFromCopy = false;
+extern bool backToFiles;
+extern bool backFromCopy;
 
 void select_file_init(void)
 {

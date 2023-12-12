@@ -4,7 +4,17 @@
  * Hosts and Devices
  */
 
+#ifdef _CMOC_VERSION_
+#include <cmoc.h>
+#include "coco/stdbool.h"
+#include "coco/globals.h"
+#include "coco/io.h"
+#include "coco/screen.h"
+#include "coco/input.h"
+#include "coco/bar.h"
+#else
 #include <string.h>
+#endif /* _CMOC_VERSION_ */
 #include "hosts_and_devices.h"
 #include "die.h"
 #include "typedefs.h"
