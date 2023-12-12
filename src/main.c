@@ -3,7 +3,10 @@
  *
  */
 
+#ifndef _CMOC_VERSION_
 #include <stdlib.h>
+#endif /* CMOC_VERSION */
+
 #include "typedefs.h"
 #include "check_wifi.h"
 #include "connect_wifi.h"
@@ -54,6 +57,15 @@
 #endif /* BUILD_RC2014 */
 
 State state=HOSTS_AND_DEVICES;
+
+#ifdef _CMOC_VERSION_
+extern void io_init();
+extern void screen_init();
+extern void io_set_boot_config();
+extern void io_boot();
+#define true 1
+#define false 0
+#endif /* CMOC_VERSION */
 
 void setup(void)
 {
@@ -116,11 +128,12 @@ void run(void)
   }
 }
 
-void main(void)
+int main(void)
 {
 	setup();
 	state = CHECK_WIFI;
 	run();
+	return 0;
 }
 
 #ifdef BUILD_A2CDA

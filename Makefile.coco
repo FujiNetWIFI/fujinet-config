@@ -1,0 +1,59 @@
+# Makefile for Building CoCo Config with CMOC
+
+CC=cmoc
+AS=lwasm
+
+config.bin: src/check_wifi.o src/connect_wifi.o src/destination_host_slot.o src/hosts_and_devices.o src/main.o src/perform_copy.o src/select_file.o src/select_slot.o src/set_wifi.o src/show_info.o src/coco/bar.o src/coco/die.o src/coco/input.o src/coco/io.o src/coco/mount_and_boot.o src/coco/screen.o
+	$(CC) -o config.bin src/check_wifi.o src/connect_wifi.o src/destination_host_slot.o src/hosts_and_devices.o src/main.o src/perform_copy.o src/select_file.o src/select_slot.o src/set_wifi.o src/show_info.o src/coco/bar.o src/coco/die.o src/coco/input.o src/coco/io.o src/coco/mount_and_boot.o src/coco/screen.o
+
+src/check_wifi.o: src/check_wifi.c
+	$(CC) -c src/check_wifi.c
+
+src/connect_wifi.o: src/connect_wifi.c
+	$(CC) -c src/connect_wifi.c
+
+src/destination_host_slot.o: src/destination_host_slot.c
+	$(CC) -c src/destination_host_slot.c
+
+src/hosts_and_devices.o: src/hosts_and_devices.c
+	$(CC) -c src/hosts_and_devices.c
+
+src/main.o: src/main.c
+	$(CC) -c src/main.c
+
+src/perform_copy.o: src/perform_copy.c
+	$(CC) -c src/perform_copy.c
+
+src/select_file.o: src/select_file.c
+	$(CC) -c src/select_file.c
+
+src/select_slot.o: src/select_slot.c
+	$(CC) -c src/select_slot.c
+
+src/set_wifi.o: src/set_wifi.c
+	$(CC) -c src/set_wifi.c
+
+src/show_info.o: src/show_info.c
+	$(CC) -c src/show_info.c
+
+src/coco/bar.o: src/coco/bar.c
+	$(CC) -c src/coco/bar.c
+
+src/coco/die.o: src/coco/die.c
+	$(CC) -c src/coco/die.c
+
+src/coco/input.o: src/coco/input.c
+	$(CC) -c src/coco/input.c
+
+src/coco/io.o: src/coco/io.c
+	$(CC) -c src/coco/io.c
+
+src/coco/mount_and_boot.o: src/coco/mount_and_boot.c
+	$(CC) -c src/coco/mount_and_boot.c
+
+src/coco/screen.o: src/coco/screen.c
+	$(CC) -c src/coco/screen.c
+
+
+clean:
+	$(RM) -rf *.o
