@@ -3,6 +3,7 @@
  * #FujiNet Drivewire calls
  */
 
+#include <cmoc.h>
 #include "io.h"
 #include "globals.h"
 #include "screen.h"
@@ -17,8 +18,40 @@ unsigned char wifiEnabled=true;
 // variable to hold various responses that we just need to return a char*.
 char response[256];
 
-void set_sio_defaults(void)
+/**
+ * @brief Read string to s from DriveWire with expected length l
+ * @param s pointer to string buffer
+ * @param l expected length of string (0-65535 bytes)
+ * @return # of bytes actually read
+ */
+int dwread(char *s, int l)
 {
+  asm
+    {
+    pshs x,y
+    ldx :s
+    ldy :l
+    jsr [0xD93F]
+    puls y,x
+    }
+}
+
+/**
+ * @brief Write string at s to DriveWire with length l
+ * @param s pointer to string buffer
+ * @param l length of string (0-65535 bytes)
+ * @return # of bytes actually written
+ */
+int dwwrite(const char *s, int l)
+{
+  asm
+    {
+        pshs x,y
+        ldx :s
+	ldy :l
+        jsr [0xD941]
+	puls y,x
+    }
 }
 
 bool io_error(void)
@@ -37,12 +70,26 @@ void io_init(void)
 
 bool io_get_wifi_enabled(void)
 {
-  return false;
+  const char *s="\xE2\xEA";
+  int l = 2;
+  bool r=0;
+
+  dwwrite(s,l);
+  dwread(&r,1);
+
+  return r;
 }
 
 unsigned char io_get_wifi_status(void)
 {
-  return false;
+  const char *s="\xE2\xFA";
+  int l = 2;
+  char r;
+  
+  dwwrite(s,l);
+  dwread(&r,1);
+  
+  return r;
 }
 
 NetConfig *io_get_ssid(void)
@@ -72,10 +119,20 @@ int io_set_ssid(NetConfig *nc)
 
 void io_get_device_slots(DeviceSlot *d)
 {
+  const char *s="\xE2\xF2";
+
+  dwwrite(s,2);
+  dwread((unsigned char *)d,304);
 }
 
 void io_get_host_slots(HostSlot *h)
 {
+  const char *s="\xE2\xF4";
+
+  memset(h,0,256);
+  
+  dwwrite(s,2);
+  dwread(h,256);
 }
 
 void io_put_host_slots(HostSlot *h)

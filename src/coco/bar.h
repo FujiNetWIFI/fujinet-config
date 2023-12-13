@@ -9,7 +9,13 @@
 #define true 1
 #define false 0
 
+#include "stdbool.h"
 #include "globals.h"
+
+/**
+ * Draw bar at y
+ */
+void bar_draw(int y, bool clear);
 
 /**
  * Clear the currently displayed bar from screen

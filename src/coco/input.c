@@ -5,6 +5,7 @@
  */
 
 #include <cmoc.h>
+#include <coco.h>
 #include "input.h"
 #include "io.h"
 #include "bar.h"
@@ -23,10 +24,11 @@ unsigned short custom_sectorSize;
 extern char fn[256];
 bool mounting = false;
 extern unsigned short entry_timer;
+extern HDSubState hd_subState;
 
 unsigned char input()
 {
-  return 0;
+  return waitkey(true);
 }
 
 unsigned char input_ucase()
@@ -102,11 +104,67 @@ unsigned char input_handle_console_keys(void)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
+  locate(31,15);
+  
+  char k=input();
+
+  switch(k)
+    {
+    case 0x03:
+      exit(0);
+      break;
+    case 0x5E: // up
+      bar_up();
+      break;
+    case 0x0A: // down
+      bar_down();
+      break;
+    case 0x08:
+    case 0x09:
+      return HD_DEVICES;
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x34:
+    case 0x35:
+    case 0x36:
+    case 0x37:
+    case 0x38:
+      break;
+    }
   return HD_HOSTS;
 }
 
 HDSubState input_hosts_and_devices_devices(void)
 {
+  locate(31,15);
+  
+  char k=input();
+
+  switch(k)
+    {
+    case 0x03:
+      exit(0);
+      break;
+    case 0x5E: // up
+      bar_up();
+      break;
+    case 0x0A: // down
+      bar_down();
+      break;
+    case 0x08:
+    case 0x09:
+      return HD_HOSTS;
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x34:
+    case 0x35:
+    case 0x36:
+    case 0x37:
+    case 0x38:
+      break;
+    }
   return HD_DEVICES;
 }
 

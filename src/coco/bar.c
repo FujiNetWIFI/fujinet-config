@@ -5,21 +5,35 @@
  */
 
 #include "bar.h"
+#include "stdbool.h"
 
 unsigned char bar_y=0;
 
-/**
- * Clear bar from screen
- */
 void bar_clear(bool old)
 {
 }
 
 /**
- * Set bar color
+ * Draw bar at y
  */
-void bar_set_color(unsigned char c)
+void bar_draw(int y, bool clear)
 {
+  char *sp = (unsigned char *)0x400;
+  int o = y << 5;
+
+  sp += o;
+
+  for (int i=0;i<32;i++)
+    {
+      if (clear)
+	{
+	  sp |= 0x40; // Set bit 6
+	}
+      else
+	{
+	  sp &= 0xBF; // Clear bit 6
+	}
+    }
 }
 
 /**

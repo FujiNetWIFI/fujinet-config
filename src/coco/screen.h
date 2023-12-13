@@ -61,8 +61,8 @@ void screen_set_wifi_password(void);
 void screen_connect_wifi(NetConfig *nc);
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e);
-void screen_hosts_and_devices_hosts(void);
-void screen_hosts_and_devices_devices(void);
+void screen_hosts_and_devices_hosts();
+void screen_hosts_and_devices_devices();
 void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, unsigned char *e);
 
