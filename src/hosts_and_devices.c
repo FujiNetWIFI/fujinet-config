@@ -78,7 +78,7 @@
 #include "rc2014/bar.h"
 #endif /* BUILD_RC2014 */
 
-HDSubState hd_subState;
+HDSubState hd_subState=HD_HOSTS;
 DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[8];
@@ -243,13 +243,13 @@ void hosts_and_devices(void)
   else
     hd_subState = HD_HOSTS;
 
-  io_get_host_slots(&hostSlots[0]);
-  io_get_device_slots(&deviceSlots[0]);
-  io_update_devices_enabled(&deviceEnabled[0]);
-  screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
-
   while (state == HOSTS_AND_DEVICES)
   {
+    io_get_host_slots(&hostSlots[0]);
+    io_get_device_slots(&deviceSlots[0]);
+    io_update_devices_enabled(&deviceEnabled[0]);
+    screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
+
     switch (hd_subState)
     {
     case HD_HOSTS:
@@ -266,6 +266,7 @@ void hosts_and_devices(void)
       break;
     }
   }
+  
   if (state == DONE)
     hosts_and_devices_done();
 }
