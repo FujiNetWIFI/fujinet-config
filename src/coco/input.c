@@ -104,13 +104,14 @@ unsigned char input_handle_console_keys(void)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  locate(31,15);
+  locate(31,14);
   
   char k=input();
 
   switch(k)
     {
     case 0x03:
+      locate(0,10);
       exit(0);
       break;
     case 0x5E: // up
@@ -144,6 +145,7 @@ HDSubState input_hosts_and_devices_devices(void)
   switch(k)
     {
     case 0x03:
+      locate(0,10);
       exit(0);
       break;
     case 0x5E: // up

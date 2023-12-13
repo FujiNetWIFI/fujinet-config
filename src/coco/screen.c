@@ -27,6 +27,8 @@ extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
 extern HDSubState hd_subState;
+extern DeviceSlot deviceSlots[8];
+extern HostSlot hostSlots[8];
 
 void set_active_screen(unsigned char screen)
 {
@@ -180,23 +182,17 @@ void screen_error(const char *msg)
   printf("%s",msg);
 }
 
-void screen_hosts_and_devices_hosts_print(HostSlot *h)
-{
-}
-
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
   switch(hd_subState)
     {
     case HD_HOSTS:
-      /* screen_hosts_and_devices_hosts(); */
-      screen_hosts_and_devices_host_slots(h);
+      screen_hosts_and_devices_hosts();
       break;
     case HD_DEVICES:
-      /* screen_hosts_and_devices_devices(); */
-      screen_hosts_and_devices_device_slots(1,d,NULL);
+      screen_hosts_and_devices_devices();
       break;
-    }  
+    }
 }
 
 void screen_clear()
@@ -212,20 +208,48 @@ void screen_hosts_and_devices_hosts()
   memset(0x400,0x20,22);
   (*(unsigned char *)0x041a) = 0x20;
 
-  locate(0,14);
-  printf("\x80\x80\x80\x31-8slotEditENTERbrowseLobby\x80\x80\x80\x80\x80\x80\x43onfigTABdrivesBREAKboot\x80\x80\x80");
+  locate(0,13);
+  printf("1-8 slot Edit ENTER browse Lobby");
+  printf("  Config  -> drives  BREAK quit");
+
+  // Add line
+  (*(unsigned char *)0x5E0) = 0xAB;
+  memset(0x5E1,0xA3,31);
+
+  // Add line.
+  (*(unsigned char *)0x520) = 0xAB;
+  memset(0x521,0xA3,31);
+  
+  screen_hosts_and_devices_host_slots(&hostSlots[0]);
 }
 
 // Show the keys that are applicable when we are on the Devices portion of the screen.
 void screen_hosts_and_devices_devices()
 {
-  memset(0x400,0x20,32);
   cls(4);
   locate(0,0); 
-  printf("%32s","device\x80\slots");
-
+  printf("%32s","device""\x80""slots");
+  memset(0x400,0x20,20);
+  (*(unsigned char *)0x041a) = 0x20;
+  
   locate(0,14);
-  printf("\x80\x80\x80\x31-8slotEditENTERbrowseLobby\x80\x80\x80\x80\x80\x80\x43onfigTABdrivesBREAKboot\x80\x80\x80");  
+  printf("\x80\x80\x80\x31-8slotEditENTERbrowseLobby\x80\x80\x80\x80\x80\x80\x43onfigTABdrivesBREAKboot\x80\x80\x80");
+
+  locate(0,13);
+  printf("1-8 slot Eject  CLEAR  all slots");
+  printf("<- hosts Read Write Config Lobby");
+
+  // Add line
+  (*(unsigned char *)0x5E0) = 0xBB;
+  memset(0x5E1,0xB3,31);
+
+  // Add line.
+  (*(unsigned char *)0x520) = 0xBB;
+  memset(0x521,0xB3,31);
+  
+  screen_hosts_and_devices_host_slots(&hostSlots[0]);
+
+  screen_hosts_and_devices_device_slots(1,&deviceSlots[0],NULL);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -236,6 +260,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   sp += 32;  // start one line down. 
   locate(0,1); 
 
+  // Color the first column
   for (int i=0;i<8;i++)
     {
       printf("%u%-31s",i+1,p);
@@ -245,8 +270,27 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
     }
 }
 
-// Since 'deviceSlots' is a global, do we need to access the input parameter at all?
-// Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
+const char host_slot_char(unsigned char hostSlot)
+{
+  if (hostSlot==0xff)
+    return ' ';
+  else
+    return hostSlot+'0';
+}
+
+const char device_slot_mode(unsigned char mode)
+{
+  switch(mode)
+    {
+    case 0:
+      return 0x80;
+    case 1:
+      return 0xAF;
+    case 2:
+      return 0x9F;
+    }
+}
+
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
 {
   char *sp = (unsigned char *)SCREEN_RAM_TOP;
@@ -256,10 +300,14 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
   for (int i=0;i<8;i++)
     {
       locate(0,i+1);
-      printf("%u%u",i+1,dslot->hostSlot);
-      printf("%c",dslot->mode == 0x02 ? 0x9A : 0xAA);
-      printf("%s",dslot->file);
+      printf("%u%c",i+1,host_slot_char(dslot->hostSlot));
+      printf("%c",device_slot_mode(dslot->mode));
+      printf("%-29s",dslot->file);
       dslot++;
+      *sp &= 0xBF;
+      sp++;
+      *sp &= 0xBF;
+      sp += 31;
     }
 }
 
