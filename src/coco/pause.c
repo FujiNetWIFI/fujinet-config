@@ -2,7 +2,10 @@
  * @brief Pause
  */
 
+#include <cmoc.h>
+#include <coco.h>
+
 void pause(unsigned char delay)
 {
-  // TODO: implement.
+  sleep(delay/60);
 }

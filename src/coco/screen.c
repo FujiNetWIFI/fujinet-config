@@ -30,47 +30,51 @@ extern HDSubState hd_subState;
 extern DeviceSlot deviceSlots[8];
 extern HostSlot hostSlots[8];
 
-void set_active_screen(unsigned char screen)
-{
-}
-
-/**********************
- * Print ATASCII string to display memory.  Note: ATASCII is not a 1:1 mapping for ASCII.  It is a ven diagram with significant overlap.
- */
-void put_char(char c)
-{
-}
-
-void screen_append(char *s)
-{
-}
-
-void screen_puts(unsigned char x, unsigned char y, char *s)
-{
-}
-
-void font_init()
-{
-}
-
 void screen_mount_and_boot()
 {
 }
 
 void screen_set_wifi(AdapterConfigExtended *ac)
 {
-}
-
-void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
-{
+  cls(4);
+  locate(0,0);
+  printf("%32s","WELCOME TO #FUJINET");
+  printf("%17s%02x:%02x:%02x:%02x:%02x:%02x","MAC:",
+	 ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  printf("SCANNING FOR NETWORKS, PLEASE WAIT.");
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
+  char meter[4]={0x20,0x20,0x20,0x00};
+  char ds[32];
+
+  memset(ds,0x20,32);
+  strncpy(ds,s->ssid,32);
+
+  if (s->rssi > -50)
+    {
+      meter[0] = '*';
+      meter[1] = '*';
+      meter[2] = '*';
+    }
+  else if (s->rssi > -70)
+    {
+      meter[0] = '*';
+      meter[1] = '*';
+    }
+  else
+    {
+      meter[0] = '*';
+    }
+
+  locate(0,n+4);  printf("%s",ds);
+  locate(28,n+4); printf("%s",meter);
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
 {
+  
 }
 
 void screen_set_wifi_custom(void)
@@ -315,8 +319,8 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-  screen_clear_line(11);
-  screen_puts(0, 11, "EJECTING ALL.. WAIT");
+  /* screen_clear_line(11); */
+  /* screen_puts(0, 11, "EJECTING ALL.. WAIT"); */
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -357,28 +361,11 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
 }
 
-void screen_dlist_select_file(void)
-{
-}
-
-void screen_dlist_select_slot(void)
-{
-}
-
-void screen_dlist_show_info(void)
-{
-}
-
-void screen_dlist_set_wifi(void)
-{
-}
-
-void screen_dlist_mount_and_boot(void)
-{
-}
-
 void screen_connect_wifi(NetConfig *nc)
 {
+  cls(3);
+  locate(0,7);
+  printf("     CONNECTING TO NETWORK:     %32s",nc->ssid);
 }
 
 void screen_dlist_hosts_and_devices(void)

@@ -94,16 +94,30 @@ unsigned char io_get_wifi_status(void)
 
 NetConfig *io_get_ssid(void)
 {
+  dwwrite("\xE2\xFE",2);
+  dwread((unsigned char *)&nc,sizeof(NetConfig));
+  
   return &nc;
 }
 
 unsigned char io_scan_for_networks(void)
 {
-  return 0;
+  unsigned char r=0;
+  
+  dwwrite("\xE2\xFD",2);
+  dwread(&r,2);
+  return r;
 }
 
 SSIDInfo *io_get_scan_result(unsigned char n)
 {
+  unsigned char s[3]={0xE2,0xFC,0x00};
+
+  s[2] = n;
+
+  dwwrite((char *)s,3);
+  dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
+
   return &ssidInfo;
 }
 
