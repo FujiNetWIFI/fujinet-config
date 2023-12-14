@@ -221,6 +221,7 @@ void screen_hosts_and_devices_hosts()
   memset(0x521,0xA3,31);
   
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
+  bar_set(1,1,8,selected_host_slot);
 }
 
 // Show the keys that are applicable when we are on the Devices portion of the screen.
@@ -250,6 +251,7 @@ void screen_hosts_and_devices_devices()
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
 
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0],NULL);
+  bar_set(1,1,8,selected_device_slot);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
