@@ -36,12 +36,12 @@ void screen_mount_and_boot()
 
 void screen_set_wifi(AdapterConfigExtended *ac)
 {
-  cls(4);
+  cls(6);
   locate(0,0);
   printf("%32s","WELCOME TO #FUJINET");
-  printf("%17s%02x:%02x:%02x:%02x:%02x:%02x","MAC:",
+  printf("%15s%02x:%02x:%02x:%02x:%02x:%02x","MAC:",
 	 ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  printf("SCANNING FOR NETWORKS, PLEASE WAIT.");
+  printf("%32s","SCANNING FOR NETWORKS...");
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -68,17 +68,28 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
       meter[0] = '*';
     }
 
-  locate(0,n+4);  printf("%s",ds);
-  locate(28,n+4); printf("%s",meter);
+  locate(0,n+2);  printf("%-32s",ds);
+  locate(28,n+2); printf("%s",meter);
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
 {
-  
+  locate(0,14);
+  printf("        up/down TO SELECT       ");
+  printf("hIDDEN SSID rESCAN enter SELECT");
+  bar_draw(0,false);
+  bar_set(2,0,nn,0);
+
+  // Add line.
+  (*(unsigned char *)0x5A0) = 0xDB;
+  memset(0x5A1,0xD3,31);
 }
 
 void screen_set_wifi_custom(void)
 {
+  locate(0,14);
+  printf("  ENTER NAME OF HIDDEN NETWORK  ");
+  printf("%31s","");
 }
 
 void screen_set_wifi_password(void)

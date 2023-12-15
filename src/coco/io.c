@@ -4,6 +4,7 @@
  */
 
 #include <cmoc.h>
+#include "stdbool.h"
 #include "io.h"
 #include "globals.h"
 #include "screen.h"
@@ -24,7 +25,7 @@ char response[256];
  * @param l expected length of string (0-65535 bytes)
  * @return # of bytes actually read
  */
-int dwread(char *s, int l)
+unsigned char dwread(char *s, int l)
 {
   asm
     {
@@ -33,6 +34,10 @@ int dwread(char *s, int l)
     ldy :l
     jsr [0xD93F]
     puls y,x
+    tfr cc,b
+    lsrb
+    lsrb
+    andb #$01
     }
 }
 
@@ -50,6 +55,7 @@ int dwwrite(const char *s, int l)
         ldx :s
 	ldy :l
         jsr [0xD941]
+	tfr cc,d
 	puls y,x
     }
 }
@@ -104,8 +110,16 @@ unsigned char io_scan_for_networks(void)
 {
   unsigned char r=0;
   
-  dwwrite("\xE2\xFD",2);
-  dwread(&r,2);
+  while (true)
+    {
+      dwwrite("\xE2\xFD",2);
+      if (dwread(&r,1))
+	break;
+    }
+
+  if (r > 11)
+    r=11;
+  
   return r;
 }
 
@@ -123,6 +137,8 @@ SSIDInfo *io_get_scan_result(unsigned char n)
 
 AdapterConfigExtended *io_get_adapter_config(void)
 {
+  dwwrite("\xE2\xE8",2);
+  dwread((unsigned char *)&adapterConfig,sizeof(AdapterConfigExtended));
   return &adapterConfig;
 }
 

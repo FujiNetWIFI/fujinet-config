@@ -91,6 +91,7 @@ void input_select_slot_build_eos_directory_label(char *c)
 
 WSSubState input_set_wifi_select(void)
 {
+  waitkey(true);
   return WS_SELECT;
 }
 
