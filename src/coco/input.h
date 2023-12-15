@@ -13,7 +13,7 @@
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-unsigned char input();
+char input();
 
 /**
  * Get input from keyboard/joystick, translating lowercase presses to uppercase
@@ -25,12 +25,11 @@ unsigned char input_ucase();
  * Get line of input into c
  * @param x X position
  * @param y Y position
- * @param o start at character offset
  * @param c target buffer
  * @param l Length
  * @param password echoes characters.
  */
-void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password);
+void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool password);
 
 void input_line_set_wifi_custom(char *c);
 void input_line_set_wifi_password(char *c);

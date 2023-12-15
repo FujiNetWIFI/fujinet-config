@@ -30,6 +30,31 @@ extern HDSubState hd_subState;
 extern DeviceSlot deviceSlots[8];
 extern HostSlot hostSlots[8];
 
+int screen_offset(int x, int y)
+{
+  return (y * 32) + x;
+}
+
+byte screen_get(int x, int y)
+{
+  int o = screen_offset(x,y);
+  unsigned char *p = (unsigned char *)SCREEN_RAM_TOP;
+
+  p += o;
+
+  return *p;
+}
+
+void screen_put(int x, int y, byte c)
+{
+  int o = screen_offset(x,y);
+  byte *p = (unsigned char *)SCREEN_RAM_TOP;
+
+  p += o;
+
+  *p = c;
+}
+
 void screen_mount_and_boot()
 {
 }
@@ -42,6 +67,10 @@ void screen_set_wifi(AdapterConfigExtended *ac)
   printf("%15s%02x:%02x:%02x:%02x:%02x:%02x","MAC:",
 	 ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   printf("%32s","SCANNING FOR NETWORKS...");
+
+  // Add line.
+  (*(unsigned char *)0x460) = 0xDB;
+  memset(0x461,0xD3,31);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -78,7 +107,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   printf("        up/down TO SELECT       ");
   printf("hIDDEN SSID rESCAN enter SELECT");
   bar_draw(0,false);
-  bar_set(2,0,nn,0);
+  bar_set(2,1,nn,0);
 
   // Add line.
   (*(unsigned char *)0x5A0) = 0xDB;
@@ -94,6 +123,9 @@ void screen_set_wifi_custom(void)
 
 void screen_set_wifi_password(void)
 {
+  locate (0,14);
+  printf("ENTER NET PASSWORD, PRESS enter.");
+  printf("%31s","");
 }
 
 

@@ -3,6 +3,8 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <cmoc.h>
+#include <coco.h>
 #include "../fuji_typedefs.h"
 
 #define FONT_MEMORY 0x7800
@@ -21,10 +23,8 @@ typedef enum
    SCREEN_CONNECT_WIFI
 } _screen;
 
-#ifdef DEBUG
-void show_line_nums(void);
-void screen_debug(char *message);
-#endif // DEBUG
+byte screen_get(int x, int y);
+void screen_put(int x, int y, byte c);
 
 void set_cursor(unsigned char x, unsigned char y);
 int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen);

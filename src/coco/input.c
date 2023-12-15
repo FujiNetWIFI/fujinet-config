@@ -26,9 +26,32 @@ bool mounting = false;
 extern unsigned short entry_timer;
 extern HDSubState hd_subState;
 
-unsigned char input()
+/**
+ * @brief this routine is needed because waitkey() and readline()
+ *        always emit uppercase. argh!
+ */
+char input()
 {
-  return waitkey(true);
+  char shift=false;
+  char k;
+  
+  while (true)
+    {
+      k=inkey();
+      
+      if (isKeyPressed(KEY_PROBE_SHIFT,KEY_BIT_SHIFT))
+	{
+	  shift=0x00;
+	}
+      else
+	{
+	  if (k>'@' && k<'[')
+	    shift=0x20;
+	}
+
+      if (k)
+	return k+shift;
+    }  
 }
 
 unsigned char input_ucase()
@@ -41,24 +64,114 @@ unsigned char input_handle_joystick(void)
   return 0;
 }
 
-void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
+// Old cursor position
+char ox=-1;
+char oy=-1;
+char oc=0;
+
+void input_cursor(char x, char y)
 {
+  if (ox > -1)
+    {
+      // Replace character at old position
+      screen_put(ox,oy,oc);
+    }
+
+  ox=x;
+  oy=y;
+  oc=screen_get(x,y);
+  screen_put(x,y,0xAF); // Blue cursor
+}
+
+void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool password)
+{
+  int o = strlen(c);
+  char k = 0;
+  char *b = c;
+  
+  // Print existing string
+  locate(x,y);
+  printf(c);
+
+  // Place string pointer at end of string
+  while (*c)
+    {
+      c++;
+      x++;
+      if (x>31)
+	{
+	  y++;
+	  x=0;
+	}
+    }
+
+  input_cursor(x,y);
+  
+  while (k!=0x0D) // ENTER
+    {
+      k=input();
+
+      switch (k)
+	{
+	case 0x08:
+	  putchar(0x08);
+	  if (c>b)
+	    {
+	      c--;
+	      x--;
+	      *c = 0;
+	    }
+	  break;
+	case 0x09:
+	  if (*c)
+	    {
+	      c++;
+	      x++;
+	    }
+	  break;
+	default:
+	  if (password)
+	    {
+	      putchar('*');
+	    }
+	  else
+	    {
+	      putchar(k);
+	    }
+	  
+	  input_cursor(x,y);
+	  x++;
+
+	  if (x > 31)
+	    {
+	      x=0;
+	      y++;
+	    }
+	  *c = k;
+	  c++;  
+	}
+    }
 }
 
 void input_line_set_wifi_custom(char *c)
 {
+  c=readline();
 }
 
 void input_line_set_wifi_password(char *c)
 {
+  input_line(0,15,c,64,true);
 }
 
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
+  // This needs to use input_line
 }
 
 void input_line_filter(char *c)
 {
+  while (true)
+    printf("%c",inkey());
 }
 
 unsigned char input_select_file_new_type(void)
@@ -91,7 +204,29 @@ void input_select_slot_build_eos_directory_label(char *c)
 
 WSSubState input_set_wifi_select(void)
 {
-  waitkey(true);
+  char k = waitkey(true);
+
+  switch(k)
+    {
+    case 0x0d:
+      set_wifi_set_ssid(bar_get());
+      return WS_PASSWORD;
+    case 'H':
+    case 'h':
+      return WS_CUSTOM;
+    case 'R':
+    case 'r':
+      return WS_SCAN;
+    case 0x5E:
+      bar_up();
+      break;
+    case 0x0A:
+      bar_down();
+      break;
+    default:
+      return WS_SELECT;
+    }
+
   return WS_SELECT;
 }
 
