@@ -16,16 +16,13 @@ static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
 
-// variable to hold various responses that we just need to return a char*.
-char response[256];
-
 /**
  * @brief Read string to s from DriveWire with expected length l
  * @param s pointer to string buffer
  * @param l expected length of string (0-65535 bytes)
  * @return # of bytes actually read
  */
-unsigned char dwread(char *s, int l)
+int dwread(byte *s, int l)
 {
   asm
     {
@@ -47,7 +44,7 @@ unsigned char dwread(char *s, int l)
  * @param l length of string (0-65535 bytes)
  * @return # of bytes actually written
  */
-int dwwrite(const char *s, int l)
+int dwwrite(byte *s, int l)
 {
   asm
     {
@@ -76,7 +73,7 @@ void io_init(void)
 
 bool io_get_wifi_enabled(void)
 {
-  const char *s="\xE2\xEA";
+  byte *s="\xE2\xEA";
   int l = 2;
   bool r=0;
 
@@ -88,9 +85,9 @@ bool io_get_wifi_enabled(void)
 
 unsigned char io_get_wifi_status(void)
 {
-  const char *s="\xE2\xFA";
+  byte *s="\xE2\xFA";
   int l = 2;
-  char r;
+  byte r;
 
   sleep(1);
   
@@ -102,7 +99,7 @@ unsigned char io_get_wifi_status(void)
 
 NetConfig *io_get_ssid(void)
 {
-  dwwrite("\xE2\xFE",2);
+  dwwrite((byte *)"\xE2\xFE",2);
   dwread((unsigned char *)&nc,sizeof(nc));
   
   return &nc;
@@ -114,7 +111,7 @@ unsigned char io_scan_for_networks(void)
   
   while (true)
     {
-      dwwrite("\xE2\xFD",2);
+      dwwrite((byte *)"\xE2\xFD",2);
       if (dwread(&r,1))
 	break;
     }
@@ -127,11 +124,11 @@ unsigned char io_scan_for_networks(void)
 
 SSIDInfo *io_get_scan_result(unsigned char n)
 {
-  unsigned char s[3]={0xE2,0xFC,0x00};
+  byte s[3]={0xE2,0xFC,0x00};
 
   s[2] = n;
 
-  dwwrite((char *)s,3);
+  dwwrite((byte *)s,3);
   dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
 
   return &ssidInfo;
@@ -139,7 +136,7 @@ SSIDInfo *io_get_scan_result(unsigned char n)
 
 AdapterConfigExtended *io_get_adapter_config(void)
 {
-  dwwrite("\xE2\xE8",2);
+  dwwrite((byte *)"\xE2\xE8",2);
   dwread((unsigned char *)&adapterConfig,sizeof(AdapterConfigExtended));
   return &adapterConfig;
 }
@@ -159,14 +156,14 @@ int io_set_ssid(NetConfig *nc)
   memcpy(s.ssid,nc->ssid,33);
   memcpy(s.password,nc->password,64);
 
-  dwwrite((const char *)&s,sizeof(s));
+  dwwrite((byte *)&s,sizeof(s));
   
   return false;
 }
 
 void io_get_device_slots(DeviceSlot *d)
 {
-  const char *s="\xE2\xF2";
+  byte *s="\xE2\xF2";
 
   dwwrite(s,2);
   dwread((unsigned char *)d,304);
@@ -174,7 +171,7 @@ void io_get_device_slots(DeviceSlot *d)
 
 void io_get_host_slots(HostSlot *h)
 {
-  const char *s="\xE2\xF4";
+  byte *s="\xE2\xF4";
 
   memset(h,0,256);
   
@@ -184,6 +181,19 @@ void io_get_host_slots(HostSlot *h)
 
 void io_put_host_slots(HostSlot *h)
 {
+  struct _puthostslots
+  {
+    unsigned char fuji;
+    unsigned char cmd;
+    HostSlot hostSlots[8];
+  } s;
+
+  memset(h,0,sizeof(s));
+  s.fuji=0xE2;
+  s.cmd=0xF3;
+  memcpy(&s.hostSlots[0],&h[0],256);
+
+  dwwrite((char *)&s,sizeof(s));
 }
 
 void io_put_device_slots(DeviceSlot *d)
