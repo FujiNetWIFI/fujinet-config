@@ -91,7 +91,7 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
   
   // Print existing string
   locate(x,y);
-  printf(c);
+  printf("%s",c);
 
   // Place string pointer at end of string
   while (*c)

@@ -103,7 +103,7 @@ void connect_wifi(void)
 			return;
 		default:
 			screen_error("Unknown error. Retrying.");
- 			pause(1);
+ 			pause(150);
 			retries--;
 			break;
 		}

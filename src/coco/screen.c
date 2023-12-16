@@ -226,7 +226,8 @@ void screen_clear_line(unsigned char y)
 
 void screen_error(const char *msg)
 {
-  printf("%s",msg);
+  locate(0,15);
+  printf("%-31s",msg);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
@@ -409,6 +410,7 @@ void screen_connect_wifi(NetConfig *nc)
   cls(3);
   locate(0,7);
   printf("     CONNECTING TO NETWORK:     %32s",nc->ssid);
+  
 }
 
 void screen_dlist_hosts_and_devices(void)

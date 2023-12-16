@@ -91,6 +91,8 @@ unsigned char io_get_wifi_status(void)
   const char *s="\xE2\xFA";
   int l = 2;
   char r;
+
+  sleep(1);
   
   dwwrite(s,l);
   dwread(&r,1);
@@ -101,7 +103,7 @@ unsigned char io_get_wifi_status(void)
 NetConfig *io_get_ssid(void)
 {
   dwwrite("\xE2\xFE",2);
-  dwread((unsigned char *)&nc,sizeof(NetConfig));
+  dwread((unsigned char *)&nc,sizeof(nc));
   
   return &nc;
 }
@@ -144,6 +146,21 @@ AdapterConfigExtended *io_get_adapter_config(void)
 
 int io_set_ssid(NetConfig *nc)
 {
+  struct _setssid
+  {
+    char fuji;
+    char cmd;
+    char ssid[33];
+    char password[64];
+  } s;
+
+  s.fuji=0xE2;
+  s.cmd=0xFB;
+  memcpy(s.ssid,nc->ssid,33);
+  memcpy(s.password,nc->password,64);
+
+  dwwrite((const char *)&s,sizeof(s));
+  
   return false;
 }
 

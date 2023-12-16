@@ -79,7 +79,7 @@ void bar_draw(int y, bool clear)
  */
 unsigned char bar_get()
 {
-  return bar_y;
+  return bar_i;
 }
 
 /**
