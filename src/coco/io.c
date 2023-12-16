@@ -122,11 +122,11 @@ unsigned char io_scan_for_networks(void)
   return r;
 }
 
-SSIDInfo *io_get_scan_result(unsigned char n)
+SSIDInfo *io_get_scan_result(int n)
 {
   byte s[3]={0xE2,0xFC,0x00};
 
-  s[2] = n;
+  s[2] = (unsigned char)n;
 
   dwwrite((byte *)s,3);
   dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
@@ -181,19 +181,19 @@ void io_get_host_slots(HostSlot *h)
 
 void io_put_host_slots(HostSlot *h)
 {
-  struct _puthostslots
-  {
-    unsigned char fuji;
-    unsigned char cmd;
-    HostSlot hostSlots[8];
-  } s;
+  /* struct _puthostslots */
+  /* { */
+  /*   unsigned char fuji; */
+  /*   unsigned char cmd; */
+  /*   HostSlot hostSlots[8]; */
+  /* } s; */
 
-  memset(h,0,sizeof(s));
-  s.fuji=0xE2;
-  s.cmd=0xF3;
-  memcpy(&s.hostSlots[0],&h[0],256);
+  /* memset(h,0,sizeof(s)); */
+  /* s.fuji=0xE2; */
+  /* s.cmd=0xF3; */
+  /* memcpy(&s.hostSlots[0],&h[0],256); */
 
-  dwwrite((char *)&s,sizeof(s));
+  /* dwwrite((char *)&s,sizeof(s)); */
 }
 
 void io_put_device_slots(DeviceSlot *d)

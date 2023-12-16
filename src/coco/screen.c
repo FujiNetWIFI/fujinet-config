@@ -134,9 +134,35 @@ void screen_set_wifi_password(void)
  */
 void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 {
+  cls(7);
+  printf("     #FUJINET CONFIGURATION     ");
+  printf("%32s","SSID:");
+  printf("%32s",ac->ssid);
+  printf("%32s","HOSTNAME:");
+  printf("%32s",ac->hostname);
+  printf("%10s%u.%u.%u.%u\n","IP: ",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
+  printf("%10s%u.%u.%u.%u\n","NETMASK: ",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
+  printf("%10s%u.%u.%u.%u\n","DNS: ",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
+  printf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  printf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  printf("%10s%s","FNVER: ",ac->fn_version);
+  printf("\n\n\n");
+  printf(" cHANGE SSID          rECONNECT ");
+  printf("OR  ANY KEY  TO RETURN TO HOSTS");
+
+  bar_draw(1,false);
+  bar_draw(3,false);
+  
+  // Add line.
+  (*(unsigned char *)0x580) = 0xEB;
+  memset(0x581,0xe3,31);
+
+  // Add line.
+  (*(unsigned char *)0x5E0) = 0xEB;
+  memset(0x5E1,0xe3,31);
 }
 
-void screen_select_slot(char *e)
+void screen_select_slot(const char *e)
 {
 }
 
@@ -172,7 +198,7 @@ void screen_select_file_display(char *p, char *f)
 {
 }
 
-void screen_select_file_display_long_filename(char *e)
+void screen_select_file_display_long_filename(const char *e)
 {
 }
 
@@ -192,7 +218,7 @@ void screen_select_file_prev(void)
 {
 }
 
-void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
+void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
 }
 
@@ -304,8 +330,8 @@ void screen_hosts_and_devices_devices()
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
-  char *p = &h[0]; // We need this because cmoc doesn't like untangling multi-dimensional typedefs
-  char *sp = (unsigned char *)SCREEN_RAM_TOP;
+  byte *p = &h[0]; // We need this because cmoc doesn't like untangling multi-dimensional typedefs
+  byte *sp = (unsigned char *)SCREEN_RAM_TOP;
 
   sp += 32;  // start one line down. 
   locate(0,1); 
@@ -343,13 +369,13 @@ const char device_slot_mode(unsigned char mode)
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
 {
-  char *sp = (unsigned char *)SCREEN_RAM_TOP;
+  byte *sp = (unsigned char *)SCREEN_RAM_TOP;
 
   sp += 32;  // start one line down. 
 
   for (int i=0;i<8;i++)
     {
-      locate(0,i+1);
+      locate(0,(unsigned char)i+1);
       printf("%u%c",i+1,host_slot_char(dslot->hostSlot));
       printf("%c",device_slot_mode(dslot->mode));
       printf("%-29s",dslot->file);
@@ -367,12 +393,12 @@ void screen_hosts_and_devices_devices_clear_all(void)
   /* screen_puts(0, 11, "EJECTING ALL.. WAIT"); */
 }
 
-void screen_hosts_and_devices_clear_host_slot(unsigned char i)
+void screen_hosts_and_devices_clear_host_slot(int i)
 {
   // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
-void screen_hosts_and_devices_edit_host_slot(unsigned char i)
+void screen_hosts_and_devices_edit_host_slot(int i)
 {
   // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
@@ -381,11 +407,11 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 {
 }
 
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+void screen_hosts_and_devices_host_slot_empty(int hs)
 {
 }
 
-void screen_hosts_and_devices_long_filename(char *f)
+void screen_hosts_and_devices_long_filename(const char *f)
 {
 }
 

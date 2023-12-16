@@ -46,13 +46,13 @@ void bar_down();
  * Jump to location 
  * @param i new y offset
  */
-void bar_jump(unsigned char i);
+void bar_jump(int i);
 
 /**
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get();
+int bar_get();
 
 /**
  * Set Bar Color

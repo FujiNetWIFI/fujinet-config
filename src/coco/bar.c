@@ -4,13 +4,14 @@
  * Functions to display a selection bar
  */
 
+#include <cmoc.h>
 #include "bar.h"
 #include "stdbool.h"
 
 /**
  * static local variables for bar y, max, and index.
  */
-static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
+static int bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
 /**
  * Set up bar and start display on row
@@ -31,7 +32,7 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 
 void bar_clear(bool old)
 {
-  char *sp = (unsigned char *)0x400;
+  unsigned char *sp = (unsigned char *)0x400;
   int yo = bar_y * 32;
   int io = (old ? bar_oldi*32 : bar_i*32);
   
@@ -53,7 +54,7 @@ void bar_clear(bool old)
  */
 void bar_draw(int y, bool clear)
 {
-  char *sp = (unsigned char *)0x400;
+  unsigned char *sp = (unsigned char *)0x400;
   int o = y << 5;
 
   sp += o;
@@ -77,7 +78,7 @@ void bar_draw(int y, bool clear)
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get()
+int bar_get()
 {
   return bar_i;
 }
@@ -108,6 +109,15 @@ void bar_down()
       bar_i++;
       bar_update();
     }
+}
+
+/**
+ * @brief jump to bar position
+ */
+void bar_jump(int i)
+{
+  bar_i=i;
+  bar_update();
 }
 
 /**

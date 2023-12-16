@@ -7,7 +7,11 @@
 #ifndef HOSTS_AND_DEVICES_H
 #define HOSTS_AND_DEVICES_H
 
+#ifdef _CMOC_VERSION_
+void hosts_and_devices_edit_host_slot(int i);
+#else
 void hosts_and_devices_edit_host_slot(unsigned char i);
+#endif
 void hosts_and_devices(void);
 void hosts_and_devices_devices_set_mode(unsigned char m);
 void hosts_and_devices_long_filename(void);

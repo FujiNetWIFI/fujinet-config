@@ -82,7 +82,11 @@ NetConfig nc;
 
 unsigned char numNetworks;
 
+#ifdef _CMOC_VERSION_
+void set_wifi_set_ssid(int i)
+#else
 void set_wifi_set_ssid(unsigned char i)
+#endif
 {
   SSIDInfo *s = io_get_scan_result(i);
   memcpy(nc.ssid,s->ssid,32);

@@ -133,7 +133,7 @@ unsigned char select_file_display(void)
 {
   char visibleEntries = 0;
   char i;
-  char *e;
+  const char *e;
 
   io_mount_host_slot(selected_host_slot);
 
@@ -175,7 +175,7 @@ unsigned char select_file_display(void)
     }
     else
     {
-      entry_size[i] = strlen(e);
+      entry_size[i] = (unsigned char)strlen(e);
       visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
       screen_select_file_display_entry(i, e, 0);
     }
@@ -211,7 +211,7 @@ void select_file_set_source_filename(void)
 
 void select_display_long_filename(void)
 {
-  char *e;
+  const char *e;
 
 #ifdef BUILD_ATARI
   if ((entry_size[bar_get() - FILES_START_Y] > 30) && (entry_timer == 0))
@@ -280,7 +280,7 @@ void select_file_choose(char visibleEntries)
 
 void select_file_link(void)
 {
-  char *e;
+  const char *e;
   char tnfsHostname[128];
   bar_clear(false);
 
@@ -312,7 +312,7 @@ void select_file_link(void)
 
 void select_file_advance(void)
 {
-  char *e;
+  const char *e;
 
   bar_clear(false);
 
@@ -359,7 +359,7 @@ void select_file_devance(void)
 
 unsigned select_file_entry_type(void)
 {
-  char *e;
+  const char *e;
   unsigned result;
 
   io_open_directory(selected_host_slot, path, filter);

@@ -194,7 +194,7 @@ void select_slot_done()
 
     io_set_directory_position(pos);
 
-    strcat(filename,io_read_directory(255-strlen(path),0));
+    strcat(filename,io_read_directory(255-(unsigned char)strlen(path),0));
 
 #ifdef BUILD_ATARI
     io_set_device_filename(selected_device_slot, selected_host_slot, mode, filename);

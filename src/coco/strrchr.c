@@ -47,7 +47,7 @@ char *strrchr(const char *p, int ch)
 	char *save;
 	char c;
 
-	c = ch;
+	c = (char)ch;
 	for (save = NULL;; ++p) {
 		if (*p == c)
 			save = (char *)p;

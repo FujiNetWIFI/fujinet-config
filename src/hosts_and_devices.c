@@ -90,9 +90,17 @@ char temp_filename[256];
 
 extern bool quick_boot;
 
+#ifdef _CMOC_VERSION_
+void hosts_and_devices_edit_host_slot(int i)
+#else
 void hosts_and_devices_edit_host_slot(unsigned char i)
+#endif
 {
+#ifdef _CMOC_VERSION_
+  unsigned int o;
+#else
   unsigned char o;
+#endif
 
   if (strlen((const char *)hostSlots[i]) == 0)
   {
@@ -126,7 +134,7 @@ void hosts_and_devices_hosts(void)
 
 void hosts_and_devices_long_filename(void)
 {
-  char *f = io_get_device_filename(selected_device_slot);
+  const char *f = io_get_device_filename(selected_device_slot);
 
   screen_hosts_and_devices_long_filename(f);
 }

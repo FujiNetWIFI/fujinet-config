@@ -96,6 +96,7 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
   // Place string pointer at end of string
   while (*c)
     {
+      putchar(*c);
       c++;
       x++;
       if (x>31)
@@ -129,6 +130,8 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
 	      x++;
 	    }
 	  break;
+	case 0x0d: // Ignore it.
+	  break;
 	default:
 	  if (password)
 	    {
@@ -155,7 +158,7 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
 
 void input_line_set_wifi_custom(char *c)
 {
-  c=readline();
+  input_line(0,15,c,32,false);
 }
 
 void input_line_set_wifi_password(char *c)
@@ -163,9 +166,10 @@ void input_line_set_wifi_password(char *c)
   input_line(0,15,c,64,true);
 }
 
-void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
+void input_line_hosts_and_devices_host_slot(int i, unsigned int o, char *c)
 {
-  // This needs to use input_line
+  bar_clear(true);
+  input_line(1,(unsigned char)i+1,c,32,false);
 }
 
 void input_line_filter(char *c)
@@ -242,7 +246,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 {
   locate(31,14);
   
-  char k=input();
+  char k=waitkey(true);
 
   switch(k)
     {
@@ -259,14 +263,23 @@ HDSubState input_hosts_and_devices_hosts(void)
     case 0x08:
     case 0x09:
       return HD_DEVICES;
-    case 0x31:
-    case 0x32:
-    case 0x33:
-    case 0x34:
-    case 0x35:
-    case 0x36:
-    case 0x37:
-    case 0x38:
+    case 'C':
+      state = SHOW_INFO;
+      return HD_DONE;
+    case 'E':
+      hosts_and_devices_edit_host_slot(bar_get());
+      bar_clear(true);
+      bar_jump(selected_host_slot);
+      k = 0;
+      return HD_HOSTS;
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
       break;
     }
   return HD_HOSTS;
@@ -276,7 +289,7 @@ HDSubState input_hosts_and_devices_devices(void)
 {
   locate(31,15);
   
-  char k=input();
+  char k=waitkey(true);
 
   switch(k)
     {
@@ -301,6 +314,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 0x36:
     case 0x37:
     case 0x38:
+      bar_jump(k-'1');
       break;
     }
   return HD_DEVICES;
@@ -331,7 +345,23 @@ unsigned char input_select_slot_mode(char *mode)
  */
 SISubState input_show_info(void)
 {
-  return SI_DONE;
+  char c = waitkey(true);
+  switch (c)
+    {
+    case 'c':
+    case 'C':
+      state = SET_WIFI;
+      return SI_DONE;
+    case 'r':
+    case 'R':
+      state = CONNECT_WIFI;
+      return SI_DONE;
+    default:
+      state = HOSTS_AND_DEVICES;
+      return SI_DONE;
+    }
+
+  return SI_SHOWINFO;
 }
 
 DHSubState input_destination_host_slot_choose(void)
