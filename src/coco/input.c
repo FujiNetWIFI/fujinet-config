@@ -260,6 +260,16 @@ HDSubState input_hosts_and_devices_hosts(void)
     case 0x0A: // down
       bar_down();
       break;
+    case 0x0d: // enter
+      selected_host_slot=(unsigned char)bar_get();
+      if (hostSlots[selected_host_slot][0] != 0)
+	{
+	  strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+	  state = SELECT_FILE;
+	  return HD_DONE;
+	}
+      else
+	return HD_HOSTS;
     case 0x08:
     case 0x09:
       return HD_DEVICES;

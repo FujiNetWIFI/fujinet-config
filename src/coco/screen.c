@@ -192,10 +192,24 @@ void screen_select_slot_build_eos_directory_creating(void)
 
 void screen_select_file(void)
 {
+  cls(8);
+  printf("%32s","OPENING");
+
+  // Add line.
+  (*(unsigned char *)0x420) = 0xFB;
+  memset(0x420,0xF3,31);  
 }
 
 void screen_select_file_display(char *p, char *f)
 {
+  cls(8);
+  locate(0,0); printf("%-32s",selected_host_name);
+  locate(0,1);
+
+  if (f[0]==0x00)
+    printf("%-32s",p);
+  else
+    printf("%-24s%8s",p,f);
 }
 
 void screen_select_file_display_long_filename(const char *e)
@@ -216,10 +230,12 @@ void screen_select_file_next(void)
 
 void screen_select_file_prev(void)
 {
+
 }
 
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
+  
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -246,10 +262,6 @@ void screen_select_file_new_creating(void)
 {
 }
 
-void screen_clear_line(unsigned char y)
-{
-}
-
 void screen_error(const char *msg)
 {
   locate(0,15);
@@ -267,10 +279,6 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
       screen_hosts_and_devices_devices();
       break;
     }
-}
-
-void screen_clear()
-{
 }
 
 // Show the keys that are applicable when we are on the Hosts portion of the screen.
@@ -436,11 +444,10 @@ void screen_connect_wifi(NetConfig *nc)
   cls(3);
   locate(0,7);
   printf("     CONNECTING TO NETWORK:     %32s",nc->ssid);
-  
-}
 
-void screen_dlist_hosts_and_devices(void)
-{
+  // Add line.
+  (*(unsigned char *)0x520) = 0xAB;
+  memset(0x521,0xA3,31);
 }
 
 #endif

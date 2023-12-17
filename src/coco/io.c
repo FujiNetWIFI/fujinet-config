@@ -15,6 +15,7 @@ static AdapterConfigExtended adapterConfig;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
+byte response[256];
 
 /**
  * @brief Read string to s from DriveWire with expected length l
@@ -107,12 +108,15 @@ NetConfig *io_get_ssid(void)
 
 unsigned char io_scan_for_networks(void)
 {
-  unsigned char r=0;
+  char r=-1;
   
   while (true)
     {
       dwwrite((byte *)"\xE2\xFD",2);
-      if (dwread(&r,1))
+      dwread((byte *)&r,1);
+      if (r<0)
+	continue;
+      else
 	break;
     }
 
@@ -193,19 +197,55 @@ void io_put_device_slots(DeviceSlot *d)
 
 void io_mount_host_slot(unsigned char hs)
 {
+  dwwrite((byte *)"\xE2\xF9",2);
+  dwwrite(&hs,1);
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
+  char fp[256];
+  char *fpp;
+
+  memset(fp,0,sizeof(fp));
+  
+  fpp = &fp[0];
+  
+  strcpy(fp,p);
+
+  while (*fpp)
+    fpp++;
+
+  fpp++;
+
+  strcpy(fpp,f);
+
+  dwwrite((byte *)"\xE2\xF7",2);  
+  dwwrite((byte *)&fp,256);
 }
 
 const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
-  return "DIR ENTRY";
+  unsigned char alen;
+
+  memset(response,0,sizeof(response));
+	 
+  alen = maxlen;
+
+  if (a)
+    maxlen += 10;
+  
+  dwwrite((byte *)"\xE2\xF6",2);
+  dwwrite((byte *)&maxlen,1);
+  dwwrite((byte *)&a,1);
+
+  dwread((byte *)response,alen);
+  
+  return (const char *)response;
 }
 
 void io_close_directory(void)
 {
+  dwwrite((byte *)"\xE2\xF5",2);
 }
 
 void io_set_directory_position(DirectoryPosition pos)
