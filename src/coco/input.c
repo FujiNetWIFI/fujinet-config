@@ -333,6 +333,7 @@ HDSubState input_hosts_and_devices_devices(void)
 SFSubState input_select_file_choose(void)
 {
   char k;
+  unsigned entryType=0;
   
   locate(31,15);
 
@@ -345,6 +346,18 @@ SFSubState input_select_file_choose(void)
 	case 0x03: // BREAK
 	  state = HOSTS_AND_DEVICES;
 	  return SF_DONE;
+	case 0x08: // LEFT
+	  return strcmp(path,"/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
+	case 0x09: // RIGHT
+	case 0x0d: // ENTER
+	  pos+=bar_get();
+	  entryType = select_file_entry_type();
+	  if (entryType == ENTRY_TYPE_FOLDER)
+	    return SF_ADVANCE_FOLDER;
+	  else if (entryType == ENTRY_TYPE_LINK)
+	    return SF_LINK;
+	  else
+	    return SF_DONE;
 	case 0x5E:
 	  if ((bar_get() == 0) && (pos > 0))
 	    return SF_PREV_PAGE;
