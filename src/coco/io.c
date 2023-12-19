@@ -203,24 +203,17 @@ void io_mount_host_slot(unsigned char hs)
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
-  char fp[256];
-  char *fpp;
-
+  byte fp[259];
+  
   memset(fp,0,sizeof(fp));
+
+  fp[0]=0xE2;
+  fp[1]=0xF7;
+  fp[2]=hs;
   
-  fpp = &fp[0];
-  
-  strcpy(fp,p);
+  strcpy((char *)&fp[3],p);
 
-  while (*fpp)
-    fpp++;
-
-  fpp++;
-
-  strcpy(fpp,f);
-
-  dwwrite((byte *)"\xE2\xF7",2);  
-  dwwrite((byte *)&fp,256);
+  dwwrite(fp,sizeof(fp));
 }
 
 const char *io_read_directory(unsigned char maxlen, unsigned char a)

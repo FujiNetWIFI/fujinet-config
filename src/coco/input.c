@@ -332,6 +332,47 @@ HDSubState input_hosts_and_devices_devices(void)
 
 SFSubState input_select_file_choose(void)
 {
+  char k;
+  
+  locate(31,15);
+
+  while (true)
+    {
+      k = waitkey(true);
+
+      switch(k)
+	{
+	case 0x03: // BREAK
+	  state = HOSTS_AND_DEVICES;
+	  return SF_DONE;
+	case 0x5E:
+	  if ((bar_get() == 0) && (pos > 0))
+	    return SF_PREV_PAGE;
+	  else
+	    {
+	      /* long_entry_displayed=false; */
+	      entry_timer=ENTRY_TIMER_DUR;
+	      bar_up();
+	      select_display_long_filename();
+	      return SF_CHOOSE;
+	    }
+	case 0x0A:
+	  if ((bar_get() == 9) && (dir_eof==false))
+	    return SF_NEXT_PAGE;
+	  else
+	    {
+	      /* long_entry_displayed=false; */
+	      entry_timer=ENTRY_TIMER_DUR;
+	      bar_down();
+	      select_display_long_filename();
+	      return SF_CHOOSE;
+	    }
+	  break;
+	default:
+	  return SF_CHOOSE;
+	}
+    }
+  
   return SF_CHOOSE;
 }
 

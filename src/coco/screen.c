@@ -210,6 +210,16 @@ void screen_select_file_display(char *p, char *f)
     printf("%-32s",p);
   else
     printf("%-24s%8s",p,f);
+
+  // Add line.
+  (*(unsigned char *)0x440) = 0xFB;
+  memset(0x441,0xF3,31);  
+
+  // Add line.
+  (*(unsigned char *)0x5a0) = 0xFB;
+  memset(0x5a1,0xF3,31);  
+
+
 }
 
 void screen_select_file_display_long_filename(const char *e)
@@ -226,20 +236,36 @@ void screen_select_file_filter(void)
 
 void screen_select_file_next(void)
 {
+  locate(12,13); printf("[...]");
 }
 
 void screen_select_file_prev(void)
 {
-
+  locate(12,2); printf("[...]");
 }
 
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
-  
+  locate(0,y+3);
+  printf("%-32s",e); // skip the first two chars from FN (hold over from Adam)
 }
 
 void screen_select_file_choose(char visibleEntries)
 {
+  locate(0,14);
+  printf("%-32s","left PARENT DIR up/down MOVE");
+  
+  if (copy_mode==true)
+    {
+      printf("%-31s","enter OR break ABORT cOPY");
+    }
+  else
+    {
+      printf("%-31s","enter OR break fILTER nEW cOPY");
+    }
+
+  bar_set(3,1,visibleEntries,0);
+  
 }
 
 void screen_select_file_new_type(void)
@@ -359,7 +385,7 @@ const char host_slot_char(unsigned char hostSlot)
   if (hostSlot==0xff)
     return ' ';
   else
-    return hostSlot+'0';
+    return hostSlot+'1';
 }
 
 const char device_slot_mode(unsigned char mode)
