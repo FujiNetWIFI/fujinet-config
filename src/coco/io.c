@@ -243,6 +243,8 @@ void io_close_directory(void)
 
 void io_set_directory_position(DirectoryPosition pos)
 {
+  dwwrite((byte *)"\xE2\xE4",2);
+  dwwrite((byte *)&pos,sizeof(pos));
 }
 
 void io_set_device_filename(unsigned char ds, char* e)
