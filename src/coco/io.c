@@ -249,6 +249,7 @@ void io_set_directory_position(DirectoryPosition pos)
 
 void io_set_device_filename(unsigned char ds, char* e)
 {
+  
 }
 
 const char *io_get_device_filename(unsigned char slot)

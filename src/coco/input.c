@@ -15,6 +15,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../set_wifi.h"
+#include "../select_slot.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -391,6 +392,36 @@ SFSubState input_select_file_choose(void)
 
 SSSubState input_select_slot_choose(void)
 {
+  locate (31,14);
+  char c = waitkey(true);
+  switch(c)
+    {
+    case 0x03: // BREAK
+      state=HOSTS_AND_DEVICES;
+      return SS_ABORT;
+    case 'E':
+      select_slot_eject((char)bar_get());
+      break;
+    case 0x0d: // ENTER
+    case 'R':
+      mode=0;
+      selected_device_slot=(char)bar_get();
+      strncpy(source_path,path,224);
+      old_pos = pos;
+      return SS_DONE;
+    case 'W':
+      mode=2;
+      selected_device_slot=(char)bar_get();
+      return SS_DONE;
+    case 0x5E:
+      bar_up();
+      return SS_CHOOSE;
+    case 0x0A:
+      bar_down();
+      return SS_CHOOSE;      
+    default:
+      return SS_CHOOSE;
+    }
   return SS_CHOOSE;
 }
 

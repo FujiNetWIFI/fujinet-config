@@ -164,6 +164,37 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 
 void screen_select_slot(const char *e)
 {
+  unsigned long *s;
+  
+  cls(3);
+
+  printf("%32s","PLACE IN DEVICE SLOT:");
+  bar_draw(0,false);
+
+  screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
+
+  locate(0,10);
+  printf("%32s","FILE DETAILS");
+  bar_draw(10,false);
+
+  printf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",(byte *)*e++,*e++,*e++,*e++,*e++,*e++);
+
+  s=(unsigned long *)e; // Cast the next four bytes as a long integer.
+  printf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+
+  e += sizeof(unsigned long);
+
+  printf("%64s",e);
+
+  // Add line.
+  (*(unsigned char *)0x520) = 0xBB;
+  memset(0x521,0xB3,31);
+
+  // Add line.
+  (*(unsigned char *)0x5E0) = 0xBB;
+  memset(0x5E1,0xB3,31);
+
+  bar_set(1,1,8,0);
 }
 
 void screen_select_slot_mode(void)
@@ -451,6 +482,7 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_init(void)
 {
+  // TODO: figure out lowercase.
 }
 
 void screen_destination_host_slot(char *h, char *p)
