@@ -260,6 +260,8 @@ void io_set_device_filename(unsigned char ds, char* e)
 
 const char *io_get_device_filename(unsigned char slot)
 {
+  memset(response,0,sizeof(response));
+  
   dwwrite((byte *)"\xE2\xDA",2);
   dwwrite((byte *)slot,1);
   dwread((byte *)response,256);
