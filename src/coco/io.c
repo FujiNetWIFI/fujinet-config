@@ -249,12 +249,22 @@ void io_set_directory_position(DirectoryPosition pos)
 
 void io_set_device_filename(unsigned char ds, char* e)
 {
+  char fn[256];
+
+  strcpy(fn,e);
   
+  dwwrite((byte *)"\xE2\xE2",2);
+  dwwrite((byte *)ds,1);
+  dwwrite((byte *)fn,256);
 }
 
 const char *io_get_device_filename(unsigned char slot)
 {
-  return "DEVICE FILENAME";
+  dwwrite((byte *)"\xE2\xDA",2);
+  dwwrite((byte *)slot,1);
+  dwread((byte *)response,256);
+
+  return (const char *)response;
 }
 
 void io_set_boot_config(unsigned char toggle)
