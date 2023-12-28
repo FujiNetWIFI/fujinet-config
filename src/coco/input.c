@@ -252,8 +252,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   switch(k)
     {
     case 0x03:
-      locate(0,10);
-      exit(0);
+      return HD_DONE;
       break;
     case 0x5E: // up
       bar_up();
@@ -304,10 +303,12 @@ HDSubState input_hosts_and_devices_devices(void)
 
   switch(k)
     {
-    case 0x03:
-      locate(0,10);
-      exit(0);
+    case 'E':
+    case 'e':
+      hosts_and_devices_eject((byte)bar_get());
       break;
+    case 0x03:
+      return HD_DONE;
     case 0x5E: // up
       bar_up();
       break;

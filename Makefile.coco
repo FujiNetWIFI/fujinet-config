@@ -9,6 +9,7 @@ config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_device
 	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
 	$(RM) autorun.dsk
 	decb dskini autorun.dsk
+	decb copy -0 coco.dist/autoexec.bas autorun.dsk,AUTOEXEC.BAS
 	writecocofile autorun.dsk config.bin
 	$(CP) autorun.dsk ~/Workspace/fujinet-platformio/data/webui/device_specific/BUILD_COCO/
 	$(CP) autorun.dsk ~/Workspace/tnfs/

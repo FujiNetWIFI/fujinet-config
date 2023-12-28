@@ -57,6 +57,8 @@ void screen_put(int x, int y, byte c)
 
 void screen_mount_and_boot()
 {
+  cls(1);
+  printf("MOUNTING ALL SLOTS...\n");
 }
 
 void screen_set_wifi(AdapterConfigExtended *ac)
@@ -470,6 +472,7 @@ void screen_hosts_and_devices_edit_host_slot(int i)
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
+  screen_hosts_and_devices_devices();
 }
 
 void screen_hosts_and_devices_host_slot_empty(int hs)

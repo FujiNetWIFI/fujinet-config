@@ -254,7 +254,9 @@ void io_set_device_filename(unsigned char ds, char* e)
   strcpy(fn,e);
   
   dwwrite((byte *)"\xE2\xE2",2);
-  dwwrite((byte *)ds,1);
+  dwwrite((byte *)&ds,1);
+  dwwrite((byte *)&selected_host_slot,1);
+  dwwrite((byte *)&mode,1); 
   dwwrite((byte *)fn,256);
 }
 
@@ -280,14 +282,20 @@ void io_set_boot_mode(unsigned char mode)
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
+  dwwrite((byte *)"\xE2\xF8",2);
+  dwwrite((byte *)&ds,1);
+  dwwrite((byte *)&mode,1);
 }
 
 void io_umount_disk_image(unsigned char ds)
 {
+  dwwrite((byte *)"\xE2\xE9",2);
+  dwwrite((byte *)&ds,1);
 }
 
 void io_boot(void)
 {
+  exit(0);
 }
 
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)

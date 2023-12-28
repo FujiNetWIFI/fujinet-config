@@ -12,6 +12,9 @@ void mount_and_boot_lobby(void)
 
 void mount_and_boot(void)
 {
+  
+  io_mount_all();
+  exit(1);
 }
 
 #endif

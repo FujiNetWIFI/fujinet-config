@@ -222,6 +222,12 @@ void hosts_and_devices_done(void)
 {
   char i;
   // char *msg[40];
+#ifdef _CMOC_VERSION_
+  cls(1);
+  printf("MOUNTING DISKS...\n\n");
+  
+#endif
+
 #ifdef BUILD_APPLE2
   // Display Loading message since TNFS Disk II images can take some time
   char s;
@@ -232,6 +238,9 @@ void hosts_and_devices_done(void)
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
+#ifdef _CMOC_VERSION_
+      printf("%d:%s\n",i+1,deviceSlots[i].file);
+#endif
 #ifdef BUILD_APPLE2
       s = i + 1;
       cprintf("                SLOT %d\r\n", s);
