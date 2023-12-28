@@ -309,12 +309,12 @@ HDSubState input_hosts_and_devices_devices(void)
       break;
     case 'R':
     case 'r':
-      selected_device_slot=bar_get();
+      selected_device_slot=(byte)bar_get();
       hosts_and_devices_devices_set_mode(0);
       return HD_DEVICES;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
+      selected_device_slot=(byte)bar_get();
       hosts_and_devices_devices_set_mode(2);
       return HD_DEVICES;
     case 0x03:
