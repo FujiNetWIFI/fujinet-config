@@ -239,7 +239,7 @@ void hosts_and_devices_done(void)
     if (deviceSlots[i].hostSlot != 0xFF)
     {
 #ifdef _CMOC_VERSION_
-      printf("%d:%s\n",i+1,deviceSlots[i].file);
+      printf("%d:%s\n",i,deviceSlots[i].file);
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;

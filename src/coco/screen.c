@@ -443,7 +443,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
   for (int i=0;i<8;i++)
     {
       locate(0,(unsigned char)i+1);
-      printf("%u%c",i+1,host_slot_char(dslot->hostSlot));
+      printf("%u%c",i,host_slot_char(dslot->hostSlot));
       printf("%c",device_slot_mode(dslot->mode));
       printf("%-29s",dslot->file);
       dslot++;
