@@ -458,6 +458,9 @@ void screen_hosts_and_devices_devices_clear_all(void)
 {
   /* screen_clear_line(11); */
   /* screen_puts(0, 11, "EJECTING ALL.. WAIT"); */
+
+  locate(0,11);
+  printf("EJECTING ALL... PLEASE WAIT.");
 }
 
 void screen_hosts_and_devices_clear_host_slot(int i)

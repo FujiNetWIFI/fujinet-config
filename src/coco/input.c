@@ -303,6 +303,10 @@ HDSubState input_hosts_and_devices_devices(void)
 
   switch(k)
     {
+    case 'C':
+    case 'c':
+      state = SHOW_INFO;
+      return HD_DONE;
     case 'E':
     case 'e':
       hosts_and_devices_eject((byte)bar_get());
@@ -325,6 +329,8 @@ HDSubState input_hosts_and_devices_devices(void)
     case 0x0A: // down
       bar_down();
       break;
+    case 0x0c: // CLEAR
+      return HD_CLEAR_ALL_DEVICES;
     case 0x08:
     case 0x09:
       return HD_HOSTS;
@@ -338,6 +344,10 @@ HDSubState input_hosts_and_devices_devices(void)
     case 0x38:
       bar_jump(k-'1');
       break;
+    /* default: */
+    /*   locate(0,10); */
+    /*   printf("%02x",k); */
+    /*   break; */
     }
   return HD_DEVICES;
 }
