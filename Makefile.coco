@@ -74,4 +74,4 @@ clean:
 	$(RM) coco/*.o
 	$(RM) config.bin
 	$(RM) autorun.dsk
-
+	$(RM) -rf coco.dist
