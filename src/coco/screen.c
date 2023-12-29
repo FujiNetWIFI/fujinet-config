@@ -27,12 +27,21 @@ extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
 extern HDSubState hd_subState;
-extern DeviceSlot deviceSlots[8];
+extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 extern HostSlot hostSlots[8];
+
 
 int screen_offset(int x, int y)
 {
   return (y * 32) + x;
+}
+
+void screen_add_shadow(int y, int c)
+{
+  unsigned char *p = (unsigned char *)SCREEN_RAM_TOP + screen_offset(0,y);
+
+  *p = (unsigned char)c | 0x0b;  
+  memset(p+1,c | 0x03, 31);
 }
 
 byte screen_get(int x, int y)
@@ -70,9 +79,7 @@ void screen_set_wifi(AdapterConfigExtended *ac)
 	 ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   printf("%32s","SCANNING FOR NETWORKS...");
 
-  // Add line.
-  (*(unsigned char *)0x460) = 0xDB;
-  memset(0x461,0xD3,31);
+  screen_add_shadow(3,CYAN);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -111,9 +118,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   bar_draw(0,false);
   bar_set(2,1,nn,0);
 
-  // Add line.
-  (*(unsigned char *)0x5A0) = 0xDB;
-  memset(0x5A1,0xD3,31);
+  screen_add_shadow(nn+2,CYAN);
 }
 
 void screen_set_wifi_custom(void)
@@ -154,14 +159,9 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 
   bar_draw(1,false);
   bar_draw(3,false);
-  
-  // Add line.
-  (*(unsigned char *)0x580) = 0xEB;
-  memset(0x581,0xe3,31);
 
-  // Add line.
-  (*(unsigned char *)0x5E0) = 0xEB;
-  memset(0x5E1,0xe3,31);
+  screen_add_shadow(12,PURPLE);
+  screen_add_shadow(15,PURPLE);
 }
 
 void screen_select_slot(const char *e)
@@ -188,15 +188,10 @@ void screen_select_slot(const char *e)
 
   printf("%64s",e);
 
-  // Add line.
-  (*(unsigned char *)0x520) = 0xBB;
-  memset(0x521,0xB3,31);
-
-  // Add line.
-  (*(unsigned char *)0x5E0) = 0xBB;
-  memset(0x5E1,0xB3,31);
-
-  bar_set(1,1,8,0);
+  screen_add_shadow(5,RED);
+  screen_add_shadow(15,RED);
+  
+  bar_set(1,1,NUM_DEVICE_SLOTS,0);
 }
 
 void screen_select_slot_mode(void)
@@ -228,9 +223,7 @@ void screen_select_file(void)
   cls(8);
   printf("%32s","OPENING");
 
-  // Add line.
-  (*(unsigned char *)0x420) = 0xFB;
-  memset(0x420,0xF3,31);  
+  screen_add_shadow(2,ORANGE);  
 }
 
 void screen_select_file_display(char *p, char *f)
@@ -244,15 +237,7 @@ void screen_select_file_display(char *p, char *f)
   else
     printf("%-24s%8s",p,f);
 
-  // Add line.
-  (*(unsigned char *)0x440) = 0xFB;
-  memset(0x441,0xF3,31);  
-
-  // Add line.
-  (*(unsigned char *)0x5a0) = 0xFB;
-  memset(0x5a1,0xF3,31);  
-
-
+  screen_add_shadow(2,ORANGE);
 }
 
 void screen_select_file_display_long_filename(const char *e)
@@ -269,11 +254,13 @@ void screen_select_file_filter(void)
 
 void screen_select_file_next(void)
 {
+  screen_add_shadow(13,ORANGE);
   locate(12,13); printf("[...]");
 }
 
 void screen_select_file_prev(void)
 {
+  screen_add_shadow(2,ORANGE);
   locate(12,2); printf("[...]");
 }
 
@@ -298,7 +285,9 @@ void screen_select_file_choose(char visibleEntries)
     }
 
   bar_set(3,1,visibleEntries,0);
-  
+
+  if (visibleEntries<10)
+    screen_add_shadow(3+visibleEntries,ORANGE);
 }
 
 void screen_select_file_new_type(void)
@@ -353,14 +342,9 @@ void screen_hosts_and_devices_hosts()
   printf("1-8 slot Edit ENTER browse Lobby");
   printf("  Config  -> drives  BREAK quit");
 
-  // Add line
-  (*(unsigned char *)0x5E0) = 0xAB;
-  memset(0x5E1,0xA3,31);
-
-  // Add line.
-  (*(unsigned char *)0x520) = 0xAB;
-  memset(0x521,0xA3,31);
-  
+  screen_add_shadow(9,BLUE);
+  screen_add_shadow(15,BLUE);
+    
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
   bar_set(1,1,8,selected_host_slot);
 }
@@ -381,18 +365,11 @@ void screen_hosts_and_devices_devices()
   printf("1-8 slot Eject  CLEAR  all slots");
   printf("<- hosts Read Write Config Lobby");
 
-  // Add line
-  (*(unsigned char *)0x5E0) = 0xBB;
-  memset(0x5E1,0xB3,31);
-
-  // Add line.
-  (*(unsigned char *)0x520) = 0xBB;
-  memset(0x521,0xB3,31);
-  
-  screen_hosts_and_devices_host_slots(&hostSlots[0]);
-
+  screen_add_shadow(15,RED);
+  screen_add_shadow(5,RED);
+    
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0],NULL);
-  bar_set(1,1,8,selected_device_slot);
+  bar_set(1,1,NUM_DEVICE_SLOTS,selected_device_slot);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -440,7 +417,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
 
   sp += 32;  // start one line down. 
 
-  for (int i=0;i<8;i++)
+  for (int i=0;i<NUM_DEVICE_SLOTS;i++)
     {
       locate(0,(unsigned char)i+1);
       printf("%u%c",i,host_slot_char(dslot->hostSlot));
@@ -456,9 +433,6 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-  /* screen_clear_line(11); */
-  /* screen_puts(0, 11, "EJECTING ALL.. WAIT"); */
-
   locate(0,11);
   printf("EJECTING ALL... PLEASE WAIT.");
 }
@@ -509,9 +483,7 @@ void screen_connect_wifi(NetConfig *nc)
   locate(0,7);
   printf("     CONNECTING TO NETWORK:     %32s",nc->ssid);
 
-  // Add line.
-  (*(unsigned char *)0x520) = 0xAB;
-  memset(0x521,0xA3,31);
+  screen_add_shadow(9,BLUE); // change to CYAN
 }
 
 #endif

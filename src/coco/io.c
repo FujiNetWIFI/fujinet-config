@@ -170,7 +170,7 @@ void io_get_device_slots(DeviceSlot *d)
   byte *s="\xE2\xF2";
 
   dwwrite(s,2);
-  dwread((unsigned char *)d,304);
+  dwread((unsigned char *)d,152);
 }
 
 void io_get_host_slots(HostSlot *h)

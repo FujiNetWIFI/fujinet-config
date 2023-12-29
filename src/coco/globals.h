@@ -11,7 +11,7 @@
 
 #define bool unsigned char
 
-#define NUM_DEVICE_SLOTS    8
+#define NUM_DEVICE_SLOTS    4
 
 // # of files to display on the page. Moved from select_file.c to here, for Atari.
 #ifndef _CMOC_VERSION_
@@ -67,7 +67,7 @@ extern char filter[32];
 extern bool create;
 extern bool dir_eof;
 extern bool quick_boot;
-extern bool deviceEnabled[8];
+extern bool deviceEnabled[NUM_DEVICE_SLOTS];
 extern bool backToFiles;
 extern bool backFromCopy;
 extern char _visibleEntries;

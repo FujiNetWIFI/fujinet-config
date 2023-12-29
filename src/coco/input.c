@@ -334,15 +334,11 @@ HDSubState input_hosts_and_devices_devices(void)
     case 0x08:
     case 0x09:
       return HD_HOSTS;
+    case 0x30:
     case 0x31:
     case 0x32:
     case 0x33:
-    case 0x34:
-    case 0x35:
-    case 0x36:
-    case 0x37:
-    case 0x38:
-      bar_jump(k-'1');
+      bar_jump(k-'0');
       break;
     /* default: */
     /*   locate(0,10); */
