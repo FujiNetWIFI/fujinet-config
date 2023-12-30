@@ -72,15 +72,6 @@ char oc=0;
 
 void input_cursor(char x, char y)
 {
-  if (ox > -1)
-    {
-      // Replace character at old position
-      screen_put(ox,oy,oc);
-    }
-
-  ox=x;
-  oy=y;
-  oc=screen_get(x,y);
   screen_put(x,y,0xAF); // Blue cursor
 }
 
@@ -90,10 +81,6 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
   char k = 0;
   char *b = c;
   
-  // Print existing string
-  locate(x,y);
-  printf("%s",c);
-
   // Place string pointer at end of string
   while (*c)
     {
@@ -111,14 +98,16 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
   
   while (k!=0x0D) // ENTER
     {
+      locate(x,y);
+      input_cursor(x,y);
       k=input();
 
       switch (k)
 	{
 	case 0x08:
-	  putchar(0x08);
 	  if (c>b)
 	    {
+	      putchar(0x08);
 	      c--;
 	      x--;
 	      *c = 0;
@@ -143,17 +132,19 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
 	      putchar(k);
 	    }
 	  
-	  input_cursor(x,y);
-	  x++;
-
 	  if (x > 31)
 	    {
 	      x=0;
 	      y++;
 	    }
+	  else
+	    x++;
+	  
 	  *c = k;
-	  c++;  
+	  c++;
 	}
+
+      input_cursor(x,y);
     }
 }
 

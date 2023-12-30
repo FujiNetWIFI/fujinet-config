@@ -167,28 +167,45 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 void screen_select_slot(const char *e)
 {
   unsigned long *s;
+
+  struct _additl_info
+  {
+    byte year;
+    byte month;
+    byte day;
+    byte hour;
+    byte min;
+    byte sec;
+    unsigned long size;
+    byte isdir;
+    byte trunc;
+    byte type;
+    byte *filename;
+  } *i = (struct _additl_info *)e;
   
-  cls(3);
+  cls(4);
 
   printf("%32s","PLACE IN DEVICE SLOT:");
   bar_draw(0,false);
 
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
 
-  locate(0,10);
+  locate(0,6);
   printf("%32s","FILE DETAILS");
-  bar_draw(10,false);
+  bar_draw(6,false);
 
-  printf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",(byte *)*e++,*e++,*e++,*e++,*e++,*e++);
+  printf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",i->year,i->month,i->day,i->hour,i->min,i->sec);
 
-  s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  printf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+  printf("%8s %lu K\n","SIZE:",i->size >> 10); // Quickly divide by 1024
 
-  e += sizeof(unsigned long);
+  printf("%96s",(char *)&e[13]);
 
-  printf("%64s",e);
+  locate(0,13);
+  printf("   arrow keys  TO SELECT SLOT   ");
+  printf(" enter R/O w R/W OR break ABORT ");
 
   screen_add_shadow(5,RED);
+  screen_add_shadow(12,RED);
   screen_add_shadow(15,RED);
   
   bar_set(1,1,NUM_DEVICE_SLOTS,0);
