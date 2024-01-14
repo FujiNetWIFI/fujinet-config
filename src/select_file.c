@@ -455,7 +455,7 @@ void select_file(void)
     // Return to the previous dir
     backToFiles = false;
     select_file_init();
-    strncpy(path, source_path, 224);
+    strncpy(path, source_path, sizeof(path));
   }
   else if (backFromCopy)
   {
@@ -470,7 +470,7 @@ void select_file(void)
     }
     strncpy(path, source_path, sizeof(path));
     selected_host_slot = copy_host_slot;
-    //pos = old_pos; // Get back to the dir position pre copy
+    strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
     pos = 0;
     screen_select_file();
   }

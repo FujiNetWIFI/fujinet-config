@@ -1,14 +1,9 @@
 #!/bin/bash
-#
-# This script ensures the applecommander jar file is present from source
-# rather than having it in the project
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 if [ $# -lt 3 ]; then
   echo "Usage: $(basename $0) DISK.po FILE_TO_ADD NAME [TYPE]"
   echo "  Copies FILE_TO_ADD to DISK.po giving it name NAME"
-  echo "  If TYPE is given, it will be used, othwerwise, AppleSingle type is assumed"
+  echo "  If TYPE is given, it will be used, othwerwise, AppleSingle (as) type is assumed"
   exit 1
 fi
 
@@ -30,6 +25,9 @@ if [ ! -f $INFILE ]; then
   exit 1
 fi
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source ${SCRIPT_DIR}/get-binaries.sh
+
 NAME=$3
 
 # Types are listed in https://github.com/AppleCommander/AppleCommander/blob/main/lib/ac-api/src/main/resources/com/webcodepro/applecommander/storage/os/prodos/ProdosFileTypes.properties
@@ -38,11 +36,6 @@ TYPE="as"
 if [ $# -eq 4 ]; then
   TYPE=$4
 fi
-
-${SCRIPT_DIR}/get-binaries.sh
-
-AC="java -jar ${SCRIPT_DIR}/AppleCommander-ac-1.8.0.jar"
-ACX="java -jar ${SCRIPT_DIR}/AppleCommander-acx-1.8.0.jar"
 
 if [ "$TYPE" == "as" ]; then
   ${AC} -as ${DISKFILE} ${NAME} < ${INFILE}

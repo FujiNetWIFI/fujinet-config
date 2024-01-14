@@ -269,16 +269,44 @@ char* screen_hosts_and_devices_slot(char *c)
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   char i;
+  unsigned char line;
+  char rw_mode;
+  char host_slot;
+  char separator;
 
-  for (i=0;i<4;i++) // smartport
-    {
-      gotoxy(0,i+y); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
+  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  {
+    line = y + i;
+    if (i > 3) {
+      // skip over diskII heading
+      line++; 
     }
 
-  for (i=4;i<6;i++) // diskII
-    {
-      gotoxy(0,i+y+1); cprintf("%d %s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],(char *)d[i].file));
+    if (d[i].file[0]) {
+        switch (d[i].mode) {
+          case MODE_READ:
+            rw_mode = 'R';
+            break;
+          case MODE_WRITE:
+            rw_mode = 'W';
+            break;
+          default:
+            // should not happen ... but we've got bugs
+            rw_mode = '?';
+            break;
+        }
+        host_slot = '1' + d[i].hostSlot;
+        separator = ':';
+    } else {
+        rw_mode = ' ';
+        host_slot = ' ';
+        separator = ' ';
     }
+
+    gotoxy(0, line);
+    cprintf("%d%c %c%c%s", i+1, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+  }
+
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
@@ -308,7 +336,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  bar_set(1,1,8,0);
+  bar_set(1, 1, 8, selected_host_slot);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8", ":HOST  ");
@@ -342,7 +370,7 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("E","JECT  ");
   screen_print_menu("R","EAD ONLY  ");
   screen_print_menu("W","RITE\r\n");
-  screen_print_menu("TAB",":HOST SLOTS");
+  screen_print_menu("TAB",":HOST SLOTS  ");
   screen_print_menu("ESC", ":BOOT");
 }
 
@@ -354,7 +382,7 @@ void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
   cclearxy(0,STATUS_BAR,120);
-  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.",i);
+  gotoxy(0,STATUS_BAR); cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.", i + 1);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
@@ -588,12 +616,12 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   if (ds > 3) // diskII split
   {
 	  cclearxy(1,12+ds,39);
-      gotoxy(2,12+ds); cprintf("Empty");
+      gotoxy(5,12+ds); cprintf("Empty");
   }
   else
   {
 	  cclearxy(1,11+ds,39);
-      gotoxy(2,11+ds); cprintf("Empty");
+      gotoxy(5,11+ds); cprintf("Empty");
   }
   bar_jump(bar_get());
 }

@@ -316,7 +316,7 @@ test: $(PROGRAM)
 
 dist: $(PROGRAM)
 	cp dist.apple2/bootable.po dist.apple2/dist.po
-	./dist.apple2/add-file.sh dist.apple2/dist.po config config
+	./dist.apple2/add-file.sh dist.apple2/dist.po config config.system
 	cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po
 
 clean:
