@@ -11,7 +11,7 @@
 #include "bar.h"
 
 extern NetConfig nc;
-static AdapterConfigExtended adapterConfig;
+static AdapterConfig adapterConfig;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
@@ -21,9 +21,9 @@ byte response[256];
  * @brief Read string to s from DriveWire with expected length l
  * @param s pointer to string buffer
  * @param l expected length of string (0-65535 bytes)
- * @return # of bytes actually read
+ * @return 1 = read successful, 0 = not successful
  */
-int dwread(byte *s, int l)
+byte dwread(byte *s, int l)
 {
   asm
     {
@@ -77,10 +77,13 @@ bool io_get_wifi_enabled(void)
   byte *s="\xE2\xEA";
   int l = 2;
   bool r=0;
+  bool z=0;
 
-  dwwrite(s,l);
-  dwread(&r,1);
-
+  while (!z)
+    {
+      dwwrite(s,l);
+      z = dwread(&r,1);
+    }
   return r;
 }
 
@@ -89,19 +92,28 @@ unsigned char io_get_wifi_status(void)
   byte *s="\xE2\xFA";
   int l = 2;
   byte r;
+  bool z=false;
 
-  sleep(1);
-  
-  dwwrite(s,l);
-  dwread(&r,1);
+  while (!z)
+    {
+      sleep(1);
+      
+      dwwrite(s,l);
+      z = dwread(&r,1);
+    }
   
   return r;
 }
 
 NetConfig *io_get_ssid(void)
 {
-  dwwrite((byte *)"\xE2\xFE",2);
-  dwread((unsigned char *)&nc,sizeof(nc));
+  bool z=false;
+
+  while (!z)
+    {
+      dwwrite((byte *)"\xE2\xFE",2);
+      z = dwread((unsigned char *)&nc,sizeof(nc));
+    }
   
   return &nc;
 }
@@ -129,19 +141,30 @@ unsigned char io_scan_for_networks(void)
 SSIDInfo *io_get_scan_result(int n)
 {
   byte s[3]={0xE2,0xFC,0x00};
-
+  bool z = false;
+  
   s[2] = (unsigned char)n;
 
-  dwwrite((byte *)s,3);
-  dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
-
+  while (!z)
+    {
+      dwwrite((byte *)s,3);
+      z = dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
+    }
+  
   return &ssidInfo;
 }
 
-AdapterConfigExtended *io_get_adapter_config(void)
+AdapterConfig *io_get_adapter_config(void)
 {
-  dwwrite((byte *)"\xE2\xE8",2);
-  dwread((unsigned char *)&adapterConfig,sizeof(AdapterConfigExtended));
+  bool z = false;
+
+  while (!z)
+    {
+      dwwrite((byte *)"\xE2\xE8",2);
+      z = dwread((unsigned char *)&adapterConfig,sizeof(AdapterConfig));
+      printf("Z: %02x - S: %u\n",z,sizeof(AdapterConfig));
+    }
+  
   return &adapterConfig;
 }
 
@@ -168,19 +191,27 @@ int io_set_ssid(NetConfig *nc)
 void io_get_device_slots(DeviceSlot *d)
 {
   byte *s="\xE2\xF2";
+  bool z = false;
 
-  dwwrite(s,2);
-  dwread((unsigned char *)d,152);
+  while (!z)
+    {
+      dwwrite(s,2);
+      z = dwread((unsigned char *)d,152);
+    }
 }
 
 void io_get_host_slots(HostSlot *h)
 {
   byte *s="\xE2\xF4";
-
-  memset(h,0,256);
+  bool z = false;
   
-  dwwrite(s,2);
-  dwread(h,256);
+  memset(h,0,256);
+
+  while (!z)
+    {
+      dwwrite(s,2);
+      z = dwread(h,256);
+    }
 }
 
 void io_put_host_slots(HostSlot *h)
@@ -219,19 +250,23 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
   unsigned char alen;
-
+  bool z = false;
+  
   memset(response,0,sizeof(response));
 	 
   alen = maxlen;
 
   if (a)
     maxlen += 10;
-  
-  dwwrite((byte *)"\xE2\xF6",2);
-  dwwrite((byte *)&maxlen,1);
-  dwwrite((byte *)&a,1);
 
-  dwread((byte *)response,alen);
+  while (!z)
+    {
+      dwwrite((byte *)"\xE2\xF6",2);
+      dwwrite((byte *)&maxlen,1);
+      dwwrite((byte *)&a,1);
+      
+      z = dwread((byte *)response,alen);
+    }
   
   return (const char *)response;
 }
@@ -262,12 +297,17 @@ void io_set_device_filename(unsigned char ds, char* e)
 
 const char *io_get_device_filename(unsigned char slot)
 {
-  memset(response,0,sizeof(response));
+  bool z = false;
   
-  dwwrite((byte *)"\xE2\xDA",2);
-  dwwrite((byte *)slot,1);
-  dwread((byte *)response,256);
+  memset(response,0,sizeof(response));
 
+  while (!z)
+    {
+      dwwrite((byte *)"\xE2\xDA",2);
+      dwwrite((byte *)slot,1);
+      z = dwread((byte *)response,256);
+    }
+  
   return (const char *)response;
 }
 
