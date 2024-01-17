@@ -565,7 +565,8 @@ WSSubState input_set_wifi_select(void)
     case KEY_RETURN:
       set_wifi_set_ssid(bar_get());
       return WS_PASSWORD;
-    case 0x84:
+    case 'H':
+    case 'h':
       return WS_CUSTOM;
     case 'R':
     case 'r':
