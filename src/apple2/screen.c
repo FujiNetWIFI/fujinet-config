@@ -30,6 +30,7 @@ extern char copySpec[256];
 
 void screen_init(void)
 {
+  __asm__ volatile  ("sta $C00C"); // Set 40 column mode
   #ifdef __ORCAC__
     TextStartUp();
     SetInGlobals(0x7f, 0x00);
