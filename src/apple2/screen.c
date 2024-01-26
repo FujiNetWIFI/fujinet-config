@@ -8,11 +8,14 @@
 #include "screen.h"
 #include "globals.h"
 #include "bar.h"
+#include "sp.h"
 #include <conio.h>
 #include <string.h>
 #include <apple2.h>
 #ifdef __ORCAC__
 #include <texttool.h>
+#else
+#include <6502.h>
 #endif
 
 
@@ -30,7 +33,6 @@ extern char copySpec[256];
 
 void screen_init(void)
 {
-  __asm__ volatile  ("sta $C00C"); // Set 40 column mode
   #ifdef __ORCAC__
     TextStartUp();
     SetInGlobals(0x7f, 0x00);
@@ -40,8 +42,14 @@ void screen_init(void)
     InitTextDev(input);
     InitTextDev(output);
     WriteChar(0x91);  // Set 40 col
+  #else
+    struct regs r;
+    r.a = 0x91;     // Set 40 column mode, for IIgs startup in 80 col
+    r.pc = 0xFDF0;  // COUT1
+    _sys(&r);
   #endif
   clrscr();
+  sp_init(); // moved here so we do after screen is setup, and before logo
  #ifndef BUILD_A2CDA
   screen_fujinetlogo();
  #endif
