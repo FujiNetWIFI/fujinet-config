@@ -83,8 +83,7 @@ unsigned char io_create_type;
 
 void io_init(void)
 {
-  clrscr();
-  sp_init();
+  // moved sp_init over to screen_init to re order, so we don't affect the other platforms
 }
 
 uint8_t io_status(void)
