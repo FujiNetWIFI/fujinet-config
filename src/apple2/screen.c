@@ -43,7 +43,14 @@ void screen_init(void)
     InitTextDev(output);
     WriteChar(0x91);  // Set 40 col
   #else
+    // init canonical video mode like the ROM RESET code, which starts with
+    //   JSR SETNORM
+    //   JSR INIT
     struct regs r;
+    r.pc = 0xFE84;	// SETNORM: set normal (not inverse) text mode
+    _sys(&r);
+    r.pc = 0xFB2f;	// INIT: set GR/HGR off, Text page 1
+    _sys(&r);
     r.a = 0x91;     // Set 40 column mode, for IIgs startup in 80 col
     r.pc = 0xFDF0;  // COUT1
     _sys(&r);
