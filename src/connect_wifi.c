@@ -92,7 +92,7 @@ void connect_wifi(void)
 			pause(150);
 			return;
 		default:
-			screen_error("Unknown error. Retrying.");
+			screen_error("CONNECTION RETRYING");
  			pause(1);
 			retries--;
 			break;

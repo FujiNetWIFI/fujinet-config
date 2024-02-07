@@ -216,7 +216,7 @@ void hosts_and_devices_done(void)
     {
 #ifdef BUILD_APPLE2
       s = i + 1;
-      cprintf("                SLOT %d\r\n", s);
+      cprintf("                DISK %d\r\n", s);
 #endif
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);
