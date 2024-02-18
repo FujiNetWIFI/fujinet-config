@@ -295,7 +295,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     line = y + i;
     if (i > 3) {
       // skip over diskII heading
-      line++; 
+      line++;
     }
 
     if (d[i].file[0]) {
@@ -320,7 +320,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
 
     gotoxy(0, line);
-    cprintf("%d%c %c%c%s", i+1, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+    cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
 
 }
@@ -336,8 +336,11 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   gotoxy(0,0);  cprintf("%40s",hl);
   chlinexy(0,0,40 - sizeof(hl));
 
-  gotoxy(0,10); cprintf("%40s",ss);
-  chlinexy(0,10,40 - sizeof(ss));
+  gotoxy(0,10);
+  cprintf("%40s", "DR-H------------------- SMARTPORT DRIVES");
+/*  chlinexy(5,10,40 - sizeof(ss) - sizeof(hdr));
+  gotoxy(0,10); cprintf("%40s",hdr);
+  gotoxy(40-sizeof(ss),10); cprintf("%40s",ss);*/
 
   gotoxy(0,15); cprintf("%40s",ds);
   chlinexy(0,15,40 - sizeof(ds));
@@ -360,7 +363,7 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("RETURN",":SELECT FILES\r\n");
   screen_print_menu("C","ONFIG ");
   screen_print_menu("TAB",":DRIVES ");
-  screen_print_menu("D","EVICES ");
+  screen_print_menu("S","PDEVS ");
   #ifdef __ORCAC__
     screen_print_menu("ESC",":EXIT");
   #else
@@ -381,6 +384,18 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 void screen_hosts_and_devices_devices(void)
 {
   bar_set_split(11,1,6,0,1);
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR);
+  screen_print_menu("E","JECT  ");
+  screen_print_menu("R","EAD ONLY  ");
+  screen_print_menu("W","RITE\r\n");
+  screen_print_menu("TAB",":HOST SLOTS  ");
+  screen_print_menu("ESC", ":BOOT");
+}
+
+void screen_hosts_and_devices_devices_selected(char selected_slot)
+{
+  bar_set_split(11,1,6,selected_slot,1);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("E","JECT  ");

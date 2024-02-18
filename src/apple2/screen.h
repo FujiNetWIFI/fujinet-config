@@ -36,6 +36,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_devices(void);
+void screen_hosts_and_devices_devices_selected(char selected_slot);
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e);
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);

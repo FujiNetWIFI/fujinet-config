@@ -193,10 +193,11 @@ int io_set_ssid(NetConfig *nc)
 
 char *io_get_device_filename(uint8_t ds)
 {
+  int stat = ds+160;
   sp_payload[0] = 1; // 1 byte, device slot.
   sp_payload[1] = 0;
   sp_payload[2] = ds; // the device slot.
-  sp_error = sp_status(sp_dest, FUJICMD_GET_DEVICE_FULLPATH);
+  sp_error = sp_status(sp_dest, stat);
   if (!sp_error)
     return (char *)&sp_payload[0];
   else
@@ -317,7 +318,7 @@ void io_set_device_filename(uint8_t ds, char* e)
   sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
 }
 
-void io_mount_disk_image(uint8_t ds, uint8_t mode)
+bool io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
   sp_payload[0] = 2;
   sp_payload[1] = 0;
@@ -325,6 +326,10 @@ void io_mount_disk_image(uint8_t ds, uint8_t mode)
   sp_payload[3] = mode;
 
   sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
+  if (sp_error == 0x28)
+    return 1; // error
+  else
+    return 0; // success
 }
 
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
