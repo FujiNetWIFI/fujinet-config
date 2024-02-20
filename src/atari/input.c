@@ -632,24 +632,30 @@ unsigned char input_select_slot_mode(char *mode)
 {
   unsigned char k = 0;
 
-  while (k == 0)
+  while (1)
   {
     k = input_ucase();
 
-    if (k == KCODE_ESCAPE)
+    switch (k)
     {
+    case KCODE_ESCAPE:
       return 0;
-    }
-
-    if (k == 'W')
-    {
+      break;
+    case 'W':
       mode[0] = 2;
-    }
-    else
+      return 1;
+      break;
+    case KCODE_RETURN:
+    case 'R':
       mode[0] = 1;
+      return 1;
+      break;
+    default:
+      break;
+    }
   }
-  return 1;
 }
+
 /*
  *  Handle inupt for the "show info" screen.
  *
