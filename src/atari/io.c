@@ -13,7 +13,6 @@
 #include "globals.h"
 #include "screen.h"
 #include "bar.h"
-#include "fn_io.h"
 
 static NetConfig nc;
 static AdapterConfigExtended adapterConfig;

@@ -11,6 +11,10 @@
 # Default: c64 (lowercase!)
 TARGETS := atari
 
+FUJINET_LIB_VERSION = 2.2.0
+FUJINET_LIB = fujinet-lib
+FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)
+
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
 PROGRAM := config
@@ -235,6 +239,9 @@ TARGETLIST := $(subst $(COMMA),$(SPACE),$(TARGETS))
 
 ifeq ($(words $(TARGETLIST)),1)
 
+FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).zip
+
 # Set PROGRAM to something like 'myprog.c64'.
 override PROGRAM := $(PROGRAM).com
 
@@ -261,6 +268,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 # Add to LIBS something like 'src/foo.lib src/c64/bar.lib'.
 LIBS += $(wildcard $(SRCDIR)/*.lib)
 LIBS += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.lib)
+LIBS += $(FUJINET_LIB_VERSION_DIR)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).lib
 
 # Add to CONFIG something like 'src/c64/bar.cfg src/foo.cfg'.
 CONFIG += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.cfg)
@@ -272,12 +280,13 @@ ifneq ($(word 2,$(CONFIG)),)
   $(info Using config file $(CONFIG) for linking)
 endif
 
-ASFLAGS += --asm-include-dir src/atari/asminc
+ASFLAGS += --asm-include-dir src/atari/asminc --asm-include-dir $(FUJINET_LIB_VERSION_DIR)
+CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
 .SUFFIXES:
-.PHONY: all test clean zap love
+.PHONY: all test clean get_fujinet_lib zap love
 
-all: $(PROGRAM)
+all: get_fujinet_lib $(PROGRAM)
 
 -include $(DEPENDS)
 -include $(STATEFILE)
@@ -311,6 +320,20 @@ $(foreach o,$(subst $(COMMA),$(SPACE),$(OPTIONS)),$(eval $(_$o_)))
 
 # Strip potential variant suffix from the actual cc65 target.
 CC65TARGET := $(firstword $(subst .,$(SPACE),$(TARGETLIST)))
+
+get_fujinet_lib:
+	@if [ ! -f "$(FUJINET_LIB_DOWNLOAD_FILE)" ]; then \
+		if [ -d "$(FUJINET_LIB_VERSION_DIR)" ]; then \
+		  echo "A directory already exists with version $(FUJINET_LIB_VERSION) - please remove it first"; \
+			exit 1; \
+		fi; \
+		echo "Downloading fujinet-lib for $(TARGETLIST) version $(FUJINET_LIB_VERSION)"; \
+		mkdir -p $(FUJINET_LIB); \
+		curl -L $(FUJINET_LIB_DOWNLOAD_URL) -o $(FUJINET_LIB_DOWNLOAD_FILE); \
+		echo "Unzipping to $(FUJINET_LIB)"; \
+		unzip -o $(FUJINET_LIB_DOWNLOAD_FILE) -d $(FUJINET_LIB_VERSION_DIR); \
+		echo "Unzip complete."; \
+	fi
 
 # The remaining targets.
 $(TARGETOBJDIR):
