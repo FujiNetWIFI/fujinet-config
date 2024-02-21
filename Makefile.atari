@@ -11,7 +11,7 @@
 # Default: c64 (lowercase!)
 TARGETS := atari
 
-FUJINET_LIB_VERSION = 2.2.0
+FUJINET_LIB_VERSION = 2.2.1
 FUJINET_LIB = fujinet-lib
 FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)
 
@@ -239,8 +239,8 @@ TARGETLIST := $(subst $(COMMA),$(SPACE),$(TARGETS))
 
 ifeq ($(words $(TARGETLIST)),1)
 
-FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).zip
-FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
 
 # Set PROGRAM to something like 'myprog.c64'.
 override PROGRAM := $(PROGRAM).com
@@ -268,7 +268,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 # Add to LIBS something like 'src/foo.lib src/c64/bar.lib'.
 LIBS += $(wildcard $(SRCDIR)/*.lib)
 LIBS += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.lib)
-LIBS += $(FUJINET_LIB_VERSION_DIR)/fujinet-network-$(TARGETLIST)_$(FUJINET_LIB_VERSION).lib
+LIBS += $(FUJINET_LIB_VERSION_DIR)/fujinet-$(TARGETLIST)-$(FUJINET_LIB_VERSION).lib
 
 # Add to CONFIG something like 'src/c64/bar.cfg src/foo.cfg'.
 CONFIG += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.cfg)
