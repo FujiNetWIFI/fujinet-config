@@ -137,10 +137,10 @@ void io_put_device_slots(DeviceSlot *d)
   fn_io_put_device_slots(d);
 }
 
-void io_mount_host_slot(unsigned char hs)
+uint8_t io_mount_host_slot(unsigned char hs)
 {
-  if (hostSlots[hs][0] == 0) return;
-  fn_io_mount_host_slot(hs);
+  if (hostSlots[hs][0] == 0) return 2;
+  return fn_io_mount_host_slot(hs);
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
@@ -195,9 +195,9 @@ void io_set_boot_mode(unsigned char mode)
 }
 
 
-void io_mount_disk_image(unsigned char ds, unsigned char mode)
+uint8_t io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
-  fn_io_mount_disk_image(ds, mode);
+  return fn_io_mount_disk_image(ds, mode);
 }
 
 void io_umount_disk_image(unsigned char ds)

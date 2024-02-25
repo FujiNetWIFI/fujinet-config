@@ -164,7 +164,11 @@ void hosts_and_devices_devices(void)
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
   int i;
-#ifdef BUILD_APPLE2
+#if defined(BUILD_ATARI)
+  uint8_t mnt;
+  char err_msg[64];
+  char num;
+#elif defined(BUILD_APPLE2)
   bool mnt = false;
 
   if (selected_device_slot == 4 || selected_device_slot == 5)
@@ -203,7 +207,28 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   io_mount_host_slot(deviceSlots[selected_device_slot].hostSlot);
 
   // Remount
-#ifdef BUILD_APPLE2
+#if defined(BUILD_ATARI)
+  mnt = io_mount_disk_image(selected_device_slot, m);
+
+  // Check for error
+  if (mnt > 1)
+  {
+    // Display error for a moment then redraw menu after
+    strcpy(err_msg, "ERROR SETTING DISK MODE: ");
+    itoa(mnt, num, 10);
+    strcat(err_msg, num);
+    screen_error(err_msg);
+    for (i = 0; i < 6000; i++)
+      // Do nothing to let the message display
+
+    // likely failed on setting write mode, make it read only
+    temp_deviceSlot.mode = MODE_READ;
+    memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+    io_put_device_slots(&deviceSlots[0]);
+    screen_error(""); // clear the error msg
+  }
+  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+#elif defined(BUILD_APPLE2)
   mnt = io_mount_disk_image(selected_device_slot, m);
 
   // Check for error
@@ -216,8 +241,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    //io_set_device_filename(selected_device_slot, temp_filename);
-    //io_put_device_slots(&deviceSlots[0]);
+    io_put_device_slots(&deviceSlots[0]);
   }
   screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
   screen_hosts_and_devices_devices_selected(selected_device_slot); // redraw bottom half of screen
