@@ -83,9 +83,9 @@ extern uint8_t sp_error;
 #endif /* BUILD_RC2014 */
 
 HDSubState hd_subState=HD_HOSTS;
-DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
+DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
-bool deviceEnabled[NUM_DEVICE_SLOTS];
+bool deviceEnabled[8];
 HostSlot hostSlots[8];
 char selected_host_slot;
 char selected_device_slot;
