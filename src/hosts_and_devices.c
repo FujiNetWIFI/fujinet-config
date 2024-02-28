@@ -14,6 +14,8 @@
 #include "coco/bar.h"
 #else
 #include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
 #endif /* _CMOC_VERSION_ */
 #include "hosts_and_devices.h"
 #include "die.h"
@@ -36,6 +38,8 @@
 #include "apple2/bar.h"
 #include <conio.h>
 // #include <stdio.h> // for debugging using sprintf
+
+extern uint8_t sp_error;
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_ATARI
@@ -177,6 +181,25 @@ void hosts_and_devices_devices(void)
 
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
+  int i;
+#if defined(BUILD_ATARI)
+  uint8_t mnt;
+  char err_msg[64];
+  char num;
+#elif defined(BUILD_APPLE2)
+  bool mnt = false;
+
+  if (selected_device_slot == 4 || selected_device_slot == 5)
+  {
+    screen_error("DISKII DRIVES ARE READ ONLY");
+    for (i = 0; i < 4000; i++)
+      mnt = true; // Do nothing to let the message display
+    screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+    screen_hosts_and_devices_devices_selected(selected_device_slot); // redraw bottom half of screen
+    return;
+  }
+#endif
+
   memset(temp_filename, 0, sizeof(temp_filename));
 
   // Stow device slot temporarily
@@ -198,8 +221,51 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   io_put_device_slots(&deviceSlots[0]);
 
+  // Make sure host slot is mounted or it will fail mounting disk
+  io_mount_host_slot(deviceSlots[selected_device_slot].hostSlot);
+
   // Remount
-  io_mount_disk_image(selected_device_slot, m);
+#if defined(BUILD_ATARI)
+  mnt = io_mount_disk_image(selected_device_slot, m);
+
+  // Check for error
+  if (mnt > 1)
+  {
+    // Display error for a moment then redraw menu after
+    strcpy(err_msg, "ERROR SETTING DISK MODE: ");
+    itoa(mnt, num, 10);
+    strcat(err_msg, num);
+    screen_error(err_msg);
+    for (i = 0; i < 6000; i++)
+      // Do nothing to let the message display
+
+    // likely failed on setting write mode, make it read only
+    temp_deviceSlot.mode = MODE_READ;
+    memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+    io_put_device_slots(&deviceSlots[0]);
+    screen_error(""); // clear the error msg
+  }
+  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+#elif defined(BUILD_APPLE2)
+  mnt = io_mount_disk_image(selected_device_slot, m);
+
+  // Check for error
+  if (mnt)
+  {
+    // Display error for a moment then redraw menu after
+    screen_error("ERROR SETTING DISK MODE");
+    for (i = 0; i < 4000; i++)
+      mnt = true; // Do nothing to let the message display
+    // likely failed on setting write mode, make it read only
+    temp_deviceSlot.mode = MODE_READ;
+    memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
+    io_put_device_slots(&deviceSlots[0]);
+  }
+  screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+  screen_hosts_and_devices_devices_selected(selected_device_slot); // redraw bottom half of screen
+#else
+    io_mount_disk_image(selected_device_slot, m);
+#endif
 }
 
 void hosts_and_devices_devices_enable_toggle(unsigned char ds)
@@ -243,7 +309,7 @@ void hosts_and_devices_done(void)
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;
-      cprintf("                SLOT %d\r\n", s);
+      cprintf("                DISK %d\r\n", s);
 #endif
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);

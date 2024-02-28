@@ -413,13 +413,13 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'R':
     // set device mode to read
     selected_device_slot = bar_get() - DEVICES_START_Y;
-    set_device_slot_mode(selected_device_slot, 1);
+    hosts_and_devices_devices_set_mode(MODE_READ);
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
     return HD_DEVICES;
   case 'W':
     // set device mode to write
     selected_device_slot = bar_get() - DEVICES_START_Y;
-    set_device_slot_mode(selected_device_slot, 2);
+    hosts_and_devices_devices_set_mode(MODE_WRITE);
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
     return HD_DEVICES;
   case 'C':
@@ -632,24 +632,30 @@ unsigned char input_select_slot_mode(char *mode)
 {
   unsigned char k = 0;
 
-  while (k == 0)
+  while (1)
   {
     k = input_ucase();
 
-    if (k == KCODE_ESCAPE)
+    switch (k)
     {
+    case KCODE_ESCAPE:
       return 0;
-    }
-
-    if (k == 'W')
-    {
+      break;
+    case 'W':
       mode[0] = 2;
-    }
-    else
+      return 1;
+      break;
+    case KCODE_RETURN:
+    case 'R':
       mode[0] = 1;
+      return 1;
+      break;
+    default:
+      break;
+    }
   }
-  return 1;
 }
+
 /*
  *  Handle inupt for the "show info" screen.
  *
@@ -735,38 +741,4 @@ DHSubState input_destination_host_slot_choose(void)
   }
 }
 
-void set_device_slot_mode(unsigned char slot, unsigned char mode)
-{
-  unsigned char tmp_hostSlot;
-  unsigned char tmp_file[FILE_MAXLEN];
-
-  if ( deviceSlots[slot].hostSlot == 0xFF )
-  {
-    return;
-  }
-
-  tmp_hostSlot = deviceSlots[slot].hostSlot;
-  memcpy(tmp_file, deviceSlots[slot].file, FILE_MAXLEN);
-  io_get_filename_for_device_slot(slot, fn);
-
-  io_umount_disk_image(slot);
-
-  deviceSlots[slot].hostSlot = tmp_hostSlot;
-  deviceSlots[slot].mode = mode;
-  memcpy(deviceSlots[slot].file, tmp_file, FILE_MAXLEN);
-
-  io_set_device_filename(slot, tmp_hostSlot, mode, fn);
-  io_put_device_slots(&deviceSlots[0]);
-  io_mount_disk_image(slot, mode);
-
-  // If we couldn't mount read/write, then re-mount again as read-only
-  /*
-  in original config, this repeated same log (using same mode..)
-  if ( io_error() )
-  {
-    io_umount_disk_image(slot);
-
-  }
-  */
-}
 #endif

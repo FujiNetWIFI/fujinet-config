@@ -146,11 +146,16 @@ void select_slot_choose()
 
 void select_slot_done()
 {
-  #ifdef __ORCAC__
+#ifdef __ORCAC__
   static char filename[256];
-  #else
+#else
   char filename[256];
-  #endif
+#endif
+
+#ifdef BUILD_APPLE2
+  bool mnt = false;
+  int i;
+#endif
 
   memset(filename,0,sizeof(filename));
 
@@ -205,15 +210,42 @@ void select_slot_done()
     io_set_directory_position(pos);
 
     memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
+#ifdef BUILD_APPLE2
+    // DiskII is read only so force it for those slots
+    if (selected_device_slot == 4 || selected_device_slot == 5)
+      deviceSlots[selected_device_slot].mode=MODE_READ;
+    else
+      deviceSlots[selected_device_slot].mode=mode;
+#else
     deviceSlots[selected_device_slot].mode=mode;
+#endif // BUILD_APPLE2
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #ifndef BUILD_ATARI
     io_put_device_slots(&deviceSlots[0]);
 #endif
 
-    io_close_directory();
+#ifdef BUILD_APPLE2
+    // Try to mount the disk and error on failure
+    /* Disabled for now because it ends up mounting now and during
+       mount and boot phase which could mean extra looong time to
+       wait. Maybe add a new fuji command to check if disk is
+       already mounted for use during mount and boot?
+    mnt = io_mount_disk_image(selected_device_slot, mode);
 
+    if (mnt)
+    {
+      // Display error for a moment
+      screen_error("ERROR MOUNTING DISK");
+      for (i = 0; i < 4000; i++)
+        mnt = true; // Do nothing to let the message display
+      io_umount_disk_image(selected_device_slot);
+      memset(deviceSlots[selected_device_slot].file,0,FILE_MAXLEN);
+      deviceSlots[selected_device_slot].hostSlot=0xFF;
+      io_put_device_slots(&deviceSlots[0]);
+    }*/
+#endif
+    io_close_directory();
   }
 
   if (!quick_boot)

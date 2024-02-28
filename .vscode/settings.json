@@ -1,5 +1,11 @@
 {
   "files.associations": {
+    "*.asm": "cc65",
+    "*.inc": "cc65",
+    "*.lst": "cc65",
+    "*.cfg": "cc65",
+    "*.src": "atasm",
+    "*.macro": "feature",
     "stdlib.h": "c",
     "string.h": "c",
     "fuji_typedefs.h": "c",
@@ -24,6 +30,7 @@
     "sstream": "c",
     "streambuf": "c",
     "select_file.h": "c",
-    "cstdlib": "c"
+    "cstdlib": "c",
+    "fuji_typedefs_io.h": "c"
   },
 }

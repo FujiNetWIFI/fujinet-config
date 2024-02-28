@@ -464,10 +464,6 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'c':
     state = SHOW_INFO;
     return HD_DONE;
-  case 'D':
-  case 'd':
-    state = SHOW_DEVICES;
-    return HD_DONE;
   case 'E':
   case 'e':
     // smartkeys_sound_play(SOUND_POSITIVE_CHIME);
@@ -476,6 +472,10 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_jump(selected_host_slot);
     k = 0;
     return HD_HOSTS;
+  case 'S':
+  case 's':
+    state = SHOW_DEVICES;
+    return HD_DONE;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
     bar_up();
@@ -565,7 +565,8 @@ WSSubState input_set_wifi_select(void)
     case KEY_RETURN:
       set_wifi_set_ssid(bar_get());
       return WS_PASSWORD;
-    case 0x84:
+    case 'H':
+    case 'h':
       return WS_CUSTOM;
     case 'R':
     case 'r':
