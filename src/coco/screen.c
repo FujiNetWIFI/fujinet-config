@@ -70,7 +70,7 @@ void screen_mount_and_boot()
   printf("MOUNTING ALL SLOTS...\n");
 }
 
-void screen_set_wifi(AdapterConfigExtended *ac)
+void screen_set_wifi(AdapterConfig *ac)
 {
   cls(6);
   locate(0,0);
@@ -139,7 +139,7 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
+void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
   cls(7);
   printf("     #FUJINET CONFIGURATION     ");

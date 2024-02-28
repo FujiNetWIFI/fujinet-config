@@ -62,7 +62,7 @@ void screen_error(const char *msg);
 void screen_init(void);
 void screen_error(const char *c);
 
-void screen_set_wifi(AdapterConfigExtended *ac);
+void screen_set_wifi(AdapterConfig *ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
 void screen_set_wifi_select_network(unsigned char nn);
 void screen_set_wifi_custom(void);
@@ -85,7 +85,7 @@ void screen_hosts_and_devices_host_slot_empty(int hs);
 
 void screen_hosts_and_devices_long_filename(const char *f);
 
-void screen_show_info(int printerEnabled, AdapterConfigExtended *ac);
+void screen_show_info(int printerEnabled, AdapterConfig *ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);
