@@ -16,6 +16,7 @@ static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
 byte response[256];
+int _dirpos=0;
 
 /**
  * @brief Read string to s from DriveWire with expected length l
@@ -266,6 +267,13 @@ const char *io_read_directory(unsigned char maxlen, unsigned char a)
       dwwrite((byte *)&a,1);
       
       z = dwread((byte *)response,alen);
+
+      if (!z)
+	{
+	  io_set_directory_position(_dirpos);
+	}
+      else
+	_dirpos++;
     }
   
   return (const char *)response;
@@ -280,6 +288,7 @@ void io_set_directory_position(DirectoryPosition pos)
 {
   dwwrite((byte *)"\xE2\xE4",2);
   dwwrite((byte *)&pos,sizeof(pos));
+  _dirpos = pos;
 }
 
 void io_set_device_filename(unsigned char ds, char* e)
