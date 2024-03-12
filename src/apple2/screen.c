@@ -542,6 +542,7 @@ void screen_select_file_choose(char visibleEntries)
   else
   {
     screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
+    screen_print_menu("<-","UPDIR  ");
     screen_print_menu("ESC",":ABORT  ");
     screen_print_menu("F","ILTER  ");
     screen_print_menu("N","EW  ");
