@@ -20,7 +20,7 @@ void screen_print_inverse(const char *s);
 void screen_print_menu(const char *si, const char *sc);
 void screen_fujinetlogo(void);
 
-void screen_set_wifi(AdapterConfig* ac);
+void screen_set_wifi(AdapterConfigExtended* acx);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
 void screen_set_wifi_select_network(unsigned char nn);
 void screen_set_wifi_custom(void);
@@ -47,7 +47,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
-void screen_show_info(bool printerEnabled, AdapterConfig* ac);
+void screen_show_info(bool printerEnabled, AdapterConfigExtended* acx);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);

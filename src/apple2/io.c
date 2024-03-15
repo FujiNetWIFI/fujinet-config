@@ -63,6 +63,7 @@
 static NetConfig nc;
 static SSIDInfo ssid_response;
 static AdapterConfig ac;
+static AdapterConfigExtended acx;
 
 unsigned char io_create_type;
 
@@ -154,6 +155,7 @@ SSIDInfo *io_get_scan_result(uint8_t n)
 AdapterConfig *io_get_adapter_config(void)
 {
   uint16_t idx = 0;
+  sp_payload[0] = 0; // adapter_config status uses first byte to decide if this is normal or extended request
   sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
   if (!sp_error)
   {
@@ -177,6 +179,49 @@ AdapterConfig *io_get_adapter_config(void)
     memcpy(ac.fn_version, &sp_payload[idx], 15);
   }
   return &ac;
+}
+
+AdapterConfigExtended *io_get_adapter_config_extended(void)
+{
+  uint16_t idx = 0;
+  sp_payload[0] = 1; // adapter_config status uses first byte to decide if this is normal(0) or extended(1) request
+  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
+  if (!sp_error)
+  {
+    memset(&acx,0,sizeof(acx));
+    memcpy(acx.ssid, sp_payload, sizeof(ac.ssid));
+    idx += sizeof(ac.ssid);
+    memcpy(acx.hostname, &sp_payload[idx], sizeof(acx.hostname));
+    idx += sizeof(acx.hostname);
+    memcpy(acx.localIP, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(acx.gateway, &sp_payload[idx],4);
+    idx += 4;
+    memcpy(acx.netmask, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(acx.dnsIP, &sp_payload[idx], 4);
+    idx += 4;
+    memcpy(acx.macAddress, &sp_payload[idx], 6);
+    idx += 6;
+    memcpy(acx.bssid, &sp_payload[idx], 6);
+    idx += 6;
+    memcpy(acx.fn_version, &sp_payload[idx], 15);
+    idx += 15;
+
+    // extended versions (pre-built strings to save the poor host)
+    memcpy(acx.sLocalIP, &sp_payload[idx], 16);
+    idx += 16;
+    memcpy(acx.sGateway, &sp_payload[idx], 16);
+    idx += 16;
+    memcpy(acx.sNetmask, &sp_payload[idx], 16);
+    idx += 16;
+    memcpy(acx.sDnsIP, &sp_payload[idx], 16);
+    idx += 16;
+    memcpy(acx.sMacAddress, &sp_payload[idx], 18);
+    idx += 18;
+    memcpy(acx.sBssid, &sp_payload[idx], 18);
+  }
+  return &acx;
 }
 
 int io_set_ssid(NetConfig *nc)

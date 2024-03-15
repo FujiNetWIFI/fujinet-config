@@ -154,7 +154,7 @@ void select_slot_done()
 
 #ifdef BUILD_APPLE2
   bool mnt = false;
-  int i;
+  // int i;
 #endif
 
   memset(filename,0,sizeof(filename));
@@ -258,7 +258,9 @@ void select_slot_done()
       state=HOSTS_AND_DEVICES;
     }
 
+#ifdef BUILD_ADAM
  adam_bypass:
+#endif
   return;
 }
 

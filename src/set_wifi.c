@@ -119,7 +119,7 @@ void set_wifi_password(void)
 void set_wifi_scan(void)
 {
   char i;
-  screen_set_wifi(io_get_adapter_config());
+  screen_set_wifi(io_get_adapter_config_extended());
 
 
   numNetworks = io_scan_for_networks();

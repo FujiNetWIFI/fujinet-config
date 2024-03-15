@@ -317,8 +317,20 @@ test: $(PROGRAM)
 dist: $(PROGRAM)
 	cp dist.apple2/bootable.po dist.apple2/dist.po
 	./dist.apple2/add-file.sh dist.apple2/dist.po config config.system
-	cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po
-
+	@( \
+    echo "Attempting to copy autorun.po to firmware folder outside of project" ; \
+    if [ -d ../fujinet-firmware/ ] ; then \
+      echo "Copying into ../fujinet-firmware" ; \
+      cp dist.apple2/dist.po ../fujinet-firmware/data/webui/device_specific/BUILD_APPLE/autorun.po ; \
+    elif [ -d ../fujinet-platformio/ ] ; then \
+      echo "Copying into ../fujinet-platformio (NOTE: please consider renaming to updated fujinet-firmware name)" ; \
+      cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po ; \
+    else \
+      echo "ERROR: Could not find fujinet firmware folder to copy autorun.po to." ; \
+      echo "Tried ../fujinet-firmware, and ../fujinet-platformio" ; \
+      exit 1 ; \
+    fi ; \
+	)
 clean:
 	$(call RMFILES,$(OBJECTS))
 	$(call RMFILES,$(DEPENDS))
