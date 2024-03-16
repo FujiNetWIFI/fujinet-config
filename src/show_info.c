@@ -74,7 +74,7 @@ void show_info(void)
 {
   si_subState=SI_SHOWINFO;
   
-  screen_show_info(io_get_device_enabled_status(PRINTER),io_get_adapter_config);
+  screen_show_info(io_get_device_enabled_status(PRINTER),io_get_adapter_config());
 
   while (si_subState==SI_SHOWINFO)
     si_subState=input_show_info();
