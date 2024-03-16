@@ -50,6 +50,7 @@
 #define FUJICMD_ENABLE_DEVICE 0xD5
 #define FUJICMD_DISABLE_DEVICE 0xD4
 #define FUJICMD_DEVICE_STATUS 0xD1
+#define FUJICMD_GET_ADAPTERCONFIG_EXTENDED 0xC4
 #define FUJICMD_STATUS 0x53
 
 #define UNUSED(x) (void)(x);
@@ -185,7 +186,7 @@ AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
   uint16_t idx = 0;
   sp_payload[0] = 1; // adapter_config status uses first byte to decide if this is normal(0) or extended(1) request
-  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
+  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG_EXTENDED);
   if (!sp_error)
   {
     memset(&acx,0,sizeof(acx));
