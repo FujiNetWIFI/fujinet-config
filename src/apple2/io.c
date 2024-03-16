@@ -153,36 +153,7 @@ SSIDInfo *io_get_scan_result(uint8_t n)
   return &ssid_response;
 }
 
-AdapterConfig *io_get_adapter_config(void)
-{
-  uint16_t idx = 0;
-  sp_payload[0] = 0; // adapter_config status uses first byte to decide if this is normal or extended request
-  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG);
-  if (!sp_error)
-  {
-    memset(&ac,0,sizeof(ac));
-    memcpy(ac.ssid, sp_payload, sizeof(ac.ssid));
-    idx += sizeof(ac.ssid);
-    memcpy(ac.hostname, &sp_payload[idx], sizeof(ac.hostname));
-    idx += sizeof(ac.hostname);
-    memcpy(ac.localIP, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(ac.gateway, &sp_payload[idx],4);
-    idx += 4;
-    memcpy(ac.netmask, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(ac.dnsIP, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(ac.macAddress, &sp_payload[idx], 6);
-    idx += 6;
-    memcpy(ac.bssid, &sp_payload[idx], 6);
-    idx += 6;
-    memcpy(ac.fn_version, &sp_payload[idx], 15);
-  }
-  return &ac;
-}
-
-AdapterConfigExtended *io_get_adapter_config_extended(void)
+AdapterConfigExtended *io_get_adapter_config(void)
 {
   uint16_t idx = 0;
   sp_payload[0] = 1; // adapter_config status uses first byte to decide if this is normal(0) or extended(1) request
