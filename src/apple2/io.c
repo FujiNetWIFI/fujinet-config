@@ -324,13 +324,15 @@ void io_set_directory_position(DirectoryPosition pos)
   sp_error = sp_control(sp_dest, FUJICMD_SET_DIRECTORY_POSITION);
 }
 
-void io_set_device_filename(uint8_t ds, char* e)
+void io_set_device_filename(uint8_t ds, uint8_t hs, uint8_t mode, char* e)
 {
-  sp_payload[0] = strlen(e) + 1 + 1;
+  sp_payload[0] = strlen(e) + 3 + 1;
   sp_payload[1] = 0;
   sp_payload[2] = ds;
+  sp_payload[3] = hs;
+  sp_payload[4] = mode;
 
-  strcpy((char *)&sp_payload[3],e);
+  strcpy((char *)&sp_payload[5],e);
 
   sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
 }

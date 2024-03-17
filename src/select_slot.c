@@ -168,7 +168,7 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
-#ifdef BUILD_ATARI
+#if defined(BUILD_ATARI) || defined(BUILD_APPLE2)
     // why hardcoded to 2 here?
     io_set_device_filename(selected_device_slot, selected_host_slot, 2, path);
 #else
@@ -201,7 +201,7 @@ void select_slot_done()
 
     strcat(filename,io_read_directory(255-(unsigned char)strlen(path),0));
 
-#ifdef BUILD_ATARI
+#if defined(BUILD_ATARI) || defined(BUILD_APPLE2)
     io_set_device_filename(selected_device_slot, selected_host_slot, mode, filename);
 #else
     io_set_device_filename(selected_device_slot,filename);
