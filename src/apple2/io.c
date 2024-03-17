@@ -12,6 +12,13 @@
 #include <peekpoke.h> // For the insanity in io_boot()
 #include "globals.h"
 
+// TODO: replace this with fujinet-fuji.h when it's being used
+typedef struct
+{
+    unsigned char value[4];
+} FNStatus;
+
+
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
 #define FUJICMD_SCAN_NETWORKS 0xFD
@@ -156,7 +163,6 @@ SSIDInfo *io_get_scan_result(uint8_t n)
 AdapterConfigExtended *io_get_adapter_config(void)
 {
   uint16_t idx = 0;
-  sp_payload[0] = 1; // adapter_config status uses first byte to decide if this is normal(0) or extended(1) request
   sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG_EXTENDED);
   if (!sp_error)
   {
@@ -211,9 +217,6 @@ int io_set_ssid(NetConfig *nc)
 char *io_get_device_filename(uint8_t ds)
 {
   int stat = ds+160;
-  sp_payload[0] = 1; // 1 byte, device slot.
-  sp_payload[1] = 0;
-  sp_payload[2] = ds; // the device slot.
   sp_error = sp_status(sp_dest, stat);
   if (!sp_error)
     return (char *)&sp_payload[0];
@@ -426,9 +429,6 @@ void io_disable_device(unsigned char d)
 
 bool io_get_device_enabled_status(unsigned char d)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = d;
   sp_error = sp_status(sp_dest,FUJICMD_DEVICE_STATUS);
   if (!sp_error)
     return (bool)sp_payload[0];
@@ -522,6 +522,18 @@ void io_list_devs(void)
 {
     sp_list_devs();
     state = HOSTS_AND_DEVICES;
+}
+
+FNStatus io_get_fuji_status(void)
+{
+  FNStatus status;
+  sp_error = sp_status(sp_dest, FUJICMD_STATUS);
+  if (!sp_error) {
+      memcpy(&status, &sp_payload[0], sizeof(FNStatus));
+  }
+
+  return status;
+
 }
 
 #endif /* BUILD_APPLE2 */
