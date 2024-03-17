@@ -377,6 +377,17 @@ void io_set_boot_config(uint8_t toggle)
   #endif
 }
 
+void io_set_boot_mode(uint8_t mode)
+{
+  sp_payload[0] = 1;
+  sp_payload[1] = 0;
+  sp_payload[2] = mode;
+
+  sp_error = sp_control(sp_dest, FUJICMD_SET_BOOT_MODE);
+}
+
+
+
 void io_umount_disk_image(uint8_t ds)
 {
   sp_payload[0] = 1;
