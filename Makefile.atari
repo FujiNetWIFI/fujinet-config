@@ -11,7 +11,7 @@
 # Default: c64 (lowercase!)
 TARGETS := atari
 
-FUJINET_LIB_VERSION = 2.2.1
+FUJINET_LIB_VERSION = 3.0.0
 FUJINET_LIB = fujinet-lib
 FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)
 
@@ -189,7 +189,7 @@ ALTIRRA ?= $(ALTIRRA_HOME)/Altirra64.exe \
   $(XS)/portable $(XS)/portablealt:altirra-debug.ini \
   $(XS)/debug \
   $(LBL_SYM) \
-  $(XS)/debugcmd: "bp _cfg_debug"
+  $(XS)/debugcmd: "bp _debug"
 
 # Add any additional break points by copying last line
 
@@ -367,6 +367,10 @@ test: $(PROGRAM)
 	$(EMUCMD) $<
 	$(POSTEMUCMD)
 
+test-atr: $(PROGRAM) dist
+	$(PREEMUCMD) \
+  $(EMUCMD) //disk autorun.atr \
+	$(POSTEMUCMD)
 
 dist: $(PROGRAM)
 	mkdir -p dist
@@ -374,6 +378,21 @@ dist: $(PROGRAM)
 	cp ../fujinet-config-tools/atari/dist/*.com dist/ || true
 	cp $(PROGRAM) dist/
 	dir2atr -m -S -B picoboot.bin autorun.atr dist/
+
+dist-z: $(PROGRAM)
+	@if [ -d "../fujinet-config-loader" ] ; then \
+    echo "Found fujinet-config-loader, creating compressed autorun.atr"; \
+    $(MAKE) -C ../fujinet-config-loader clean dist > /dev/null 2>&1 ; \
+    if [ $$? -ne 0 ] ; then \
+      echo "ERROR running compressor"; \
+      exit 1; \
+    fi; \
+    cp ../fujinet-config-loader/autorun-zx0.atr ./autorun.atr; \
+    echo "Compressed file saved as autorun.atr"; \
+  else \
+    echo "ERROR: Could not find fujinet-config-loader in sibling directory to current."; \
+    exit 1; \
+  fi
 
 clean:
 	$(call RMFILES,$(OBJECTS))

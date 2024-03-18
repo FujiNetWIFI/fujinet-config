@@ -4,6 +4,8 @@
  * Hosts and Devices
  */
 
+#include "debug.h"
+
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
 #include "coco/stdbool.h"
@@ -183,7 +185,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 {
   int i;
 #if defined(BUILD_ATARI)
-  uint8_t mnt;
+  bool mnt;
   char err_msg[64];
   char num;
 #elif defined(BUILD_APPLE2)
@@ -229,12 +231,10 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   mnt = io_mount_disk_image(selected_device_slot, m);
 
   // Check for error
-  if (mnt > 1)
+  if (!mnt)
   {
     // Display error for a moment then redraw menu after
     strcpy(err_msg, "ERROR SETTING DISK MODE: ");
-    itoa(mnt, num, 10);
-    strcat(err_msg, num);
     screen_error(err_msg);
     for (i = 0; i < 6000; i++)
       // Do nothing to let the message display
@@ -250,7 +250,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   mnt = io_mount_disk_image(selected_device_slot, m);
 
   // Check for error
-  if (mnt)
+  if (!mnt)
   {
     // Display error for a moment then redraw menu after
     screen_error("ERROR SETTING DISK MODE");
@@ -326,6 +326,7 @@ void hosts_and_devices(void)
   else
     hd_subState = HD_HOSTS;
 
+  debug();
   while (state == HOSTS_AND_DEVICES)
   {
     io_get_host_slots(&hostSlots[0]);
@@ -350,6 +351,8 @@ void hosts_and_devices(void)
     }
   }
   
-  if (state == DONE)
+  if (state == DONE) {
+		debug();
     hosts_and_devices_done();
+  }
 }
