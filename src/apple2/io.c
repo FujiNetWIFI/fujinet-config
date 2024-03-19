@@ -12,12 +12,7 @@
 #include <peekpoke.h> // For the insanity in io_boot()
 #include "globals.h"
 
-// TODO: replace this with fujinet-fuji.h when it's being used
-typedef struct
-{
-    unsigned char value[4];
-} FNStatus;
-
+#include "fujinet-fuji.h"
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE
@@ -69,30 +64,17 @@ typedef struct
 #endif
 
 static NetConfig nc;
-static SSIDInfo ssid_response;
-static AdapterConfig ac;
-static AdapterConfigExtended acx;
+static AdapterConfigExtended adapterConfig;
+static SSIDInfo ssidInfo;
+NewDisk newDisk;
+
+// variable to hold various responses that we just need to return a char*.
+char response[256];
 
 unsigned char io_create_type;
 
-/* Test Fixtures, remove when actual I/O present */
-// static DeviceSlot _ds[8];
-// static HostSlot _hs[8];
-// static char de[36][8]={
-//   {"Entry 1"},
-//   {"Entry 2"},
-//   {"Entry 3"},
-//   {"Entry 4"},
-//   {"Entry 5"},
-//   {"Entry 6"},
-//   {"Entry 7"},
-//   {"\x7F"}
-// };
-// static char dc=0;
-
 void io_init(void)
 {
-  // moved sp_init over to screen_init to re order, so we don't affect the other platforms
 }
 
 uint8_t io_status(void)
@@ -102,303 +84,152 @@ uint8_t io_status(void)
 
 bool io_error(void)
 {
-  return sp_error;
+  return fuji_error();
 }
 
 uint8_t io_get_wifi_status(void)
 {
-  // call the SP status command and get the returned byte
-
+  unsigned char status = 0;
   unsigned long l = 0;
-
   for (l=0;l<4096;l++);
-
-  sp_error = sp_status(sp_dest, FUJICMD_GET_WIFISTATUS);
-  if (sp_error)
-      return 0;
-
-  return sp_payload[0];
+  fuji_get_wifi_status(&status);
+  return status;
 }
 
 NetConfig* io_get_ssid(void)
 {
-  memset(&nc, 0, sizeof(nc));
-  sp_error = sp_status(sp_dest, FUJICMD_GET_SSID);
-  if (!sp_error)
-  {
-    memcpy(&nc.ssid, sp_payload, sizeof(nc.ssid));
-    memcpy(&nc.password, &sp_payload[sizeof(nc.ssid)], sizeof(nc.password));
-  }
-  sp_error = sp_error;
+  fuji_get_ssid(&nc);
   return &nc;
 }
 
 uint8_t io_scan_for_networks(void)
 {
-  sp_error = sp_status(sp_dest, FUJICMD_SCAN_NETWORKS);
-  if (!sp_error)
-    return sp_payload[0];
-  return 0;
+  uint8_t count;
+  fuji_scan_for_networks(&count);
+  return count;
 }
 
 SSIDInfo *io_get_scan_result(uint8_t n)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = n;
-  memset(ssid_response.ssid, 0, sizeof(ssid_response.ssid));
-  sp_error = sp_control(sp_dest, FUJICMD_GET_SCAN_RESULT);
-  if (!sp_error)
-  {
-    sp_error = sp_status(sp_dest, FUJICMD_GET_SCAN_RESULT);
-    if (!sp_error)
-    {
-      memcpy(ssid_response.ssid,sp_payload,sizeof(ssid_response.ssid));
-      ssid_response.rssi = sp_payload[sizeof(ssid_response.ssid)];
-    }
-  }
-  return &ssid_response;
+  fuji_get_scan_result(n, &ssidInfo);
+  return &ssidInfo;
 }
 
 AdapterConfigExtended *io_get_adapter_config(void)
 {
-  uint16_t idx = 0;
-  sp_error = sp_status(sp_dest, FUJICMD_GET_ADAPTERCONFIG_EXTENDED);
-  if (!sp_error)
-  {
-    memset(&acx,0,sizeof(acx));
-    memcpy(acx.ssid, sp_payload, sizeof(ac.ssid));
-    idx += sizeof(ac.ssid);
-    memcpy(acx.hostname, &sp_payload[idx], sizeof(acx.hostname));
-    idx += sizeof(acx.hostname);
-    memcpy(acx.localIP, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(acx.gateway, &sp_payload[idx],4);
-    idx += 4;
-    memcpy(acx.netmask, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(acx.dnsIP, &sp_payload[idx], 4);
-    idx += 4;
-    memcpy(acx.macAddress, &sp_payload[idx], 6);
-    idx += 6;
-    memcpy(acx.bssid, &sp_payload[idx], 6);
-    idx += 6;
-    memcpy(acx.fn_version, &sp_payload[idx], 15);
-    idx += 15;
-
-    // extended versions (pre-built strings to save the poor host)
-    memcpy(acx.sLocalIP, &sp_payload[idx], 16);
-    idx += 16;
-    memcpy(acx.sGateway, &sp_payload[idx], 16);
-    idx += 16;
-    memcpy(acx.sNetmask, &sp_payload[idx], 16);
-    idx += 16;
-    memcpy(acx.sDnsIP, &sp_payload[idx], 16);
-    idx += 16;
-    memcpy(acx.sMacAddress, &sp_payload[idx], 18);
-    idx += 18;
-    memcpy(acx.sBssid, &sp_payload[idx], 18);
-  }
-  return &acx;
+  fuji_get_adapter_config_extended(&adapterConfig);
+  return &adapterConfig;
 }
 
 int io_set_ssid(NetConfig *nc)
 {
-  char idx = 0;
-  sp_payload[idx++] = sizeof(*nc);
-  sp_payload[idx++] = 0;
-  memcpy(&sp_payload[idx], nc->ssid, sizeof(nc->ssid));
-  idx += sizeof(nc->ssid);
-  memcpy(&sp_payload[idx], nc->password, sizeof(nc->password));
-  sp_error = sp_control(sp_dest, FUJICMD_SET_SSID);
-  return 0;
+  fuji_set_ssid(nc);
+  return 0; // ??? TODO, should this reflect the results?
 }
 
-char *io_get_device_filename(uint8_t ds)
+char *io_get_device_filename(uint8_t slot)
 {
-  int stat = ds+160;
-  sp_error = sp_status(sp_dest, stat);
-  if (!sp_error)
-    return (char *)&sp_payload[0];
-  else
-    return 0;
+  fuji_get_device_filename(slot, &response[0]);
+  return &response[0];
 }
 
 void io_create_new(uint8_t selected_host_slot,uint8_t selected_device_slot,unsigned long selected_size,char *path)
 {
-  sp_payload[0] = 0x07; // 263 bytes
-  sp_payload[1] = 0x01;
-  sp_payload[2] = selected_host_slot;
-  sp_payload[3] = selected_device_slot;
-  sp_payload[4] = io_create_type;
-  sp_payload[5] = selected_size & 0xFF;
-  sp_payload[6] = (selected_size >> 8) & 0xFF;
-  sp_payload[7] = (selected_size >> 16) & 0xFF;
-  sp_payload[8] = (selected_size >> 24) & 0xFF;
-  strncpy((char *)&sp_payload[9],path,256);
-  sp_error = sp_control(sp_dest,FUJICMD_NEW_DISK);
+  newDisk.createType = io_create_type;
+  newDisk.deviceSlot = selected_device_slot;
+  newDisk.hostSlot = selected_host_slot;
+  newDisk.numBlocks = selected_size;
+  strcpy(&newDisk.filename[0], path);
+  fuji_create_new(&newDisk);
 }
 
-void io_get_device_slots(DeviceSlot *d)
+bool io_get_device_slots(DeviceSlot *d)
 {
-  sp_status(sp_dest, FUJICMD_READ_DEVICE_SLOTS);
-  memcpy(d,sp_payload,sp_count); // 38x8 = 304 bytes
+  return fuji_get_device_slots(d, 6);
 }
 
-void io_get_host_slots(HostSlot *h)
+bool io_get_host_slots(HostSlot *h)
 {
-  sp_status(sp_dest, FUJICMD_READ_HOST_SLOTS);
-  memcpy(h, sp_payload, sp_count); // 32x8 = 256 bytes
+  return fuji_get_host_slots(h, 8);
 }
 
 void io_put_host_slots(HostSlot *h)
 {
-  sp_payload[0] = 0;
-  sp_payload[1] = 1; // 256 bytes
-  memcpy(&sp_payload[2], h, 256);
-  sp_error = sp_control(sp_dest, FUJICMD_WRITE_HOST_SLOTS);
+  fuji_put_host_slots(h, 8);
 }
 
 void io_put_device_slots(DeviceSlot *d)
 {
-  sp_payload[0] = 304 & 0xFF;
-  sp_payload[1] = 304 >> 8;
-  memcpy(&sp_payload[2],d,304);
-
-  sp_error = sp_control(sp_dest, FUJICMD_WRITE_DEVICE_SLOTS);
-  // sleep(1);
+  fuji_put_device_slots(d, 6);
 }
 
 void io_mount_host_slot(uint8_t hs)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = hs;
-  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_HOST);
+  fuji_mount_host_slot(hs);
 }
 
 void io_open_directory(uint8_t hs, char *p, char *f)
 {
-  // char *e;
-  unsigned char idx = 0;
-  uint16_t s;
-
-  // to do - copy strings into payload and figure out length
-  s = 1 + strlen(p) + 1 + strlen(f) + 1;
-  sp_payload[idx++] = (uint8_t)(s & 0xFF);
-  sp_payload[idx++] = (uint8_t)(s >> 8);
-  sp_payload[idx++] = hs;
-
-  strcpy((char *)&sp_payload[idx++], p);
-  idx += strlen(p);
-  strcpy((char *)&sp_payload[idx], f);
-
-  sp_error = sp_control(sp_dest, FUJICMD_OPEN_DIRECTORY);
+  char *_p = p;
+  if (f[0] != 0x00)
+  {
+    // We have a filter, create a directory+filter string
+    memset(response, 0, 256);
+    strcpy(response, p);
+    strcpy(&response[strlen(response) + 1], f);
+    _p = &response[0];
+  }
+  fuji_open_directory(hs, _p);
 }
 
-char *io_read_directory(uint8_t l, uint8_t a)
+char *io_read_directory(uint8_t maxlen, uint8_t a)
 {
-  sp_payload[0] = 2;
-  sp_payload[1] = 0;
-  sp_payload[2] = l;
-  sp_payload[3] = a;
-
-  sp_error = sp_control(sp_dest, FUJICMD_READ_DIR_ENTRY);
-
-  sp_payload[0] = 0; // null string
-  if (!sp_error)
-    sp_error = sp_status(sp_dest, FUJICMD_READ_DIR_ENTRY);
-
-  return (char *)sp_payload;
+  memset(&response[0], 0, maxlen);
+  fuji_read_directory(maxlen, a, &response[0]);
+  
+  return &response[0];
 }
 
 void io_close_directory(void)
 {
-  sp_payload[0] = 0;
-  sp_payload[1] = 0;
-  sp_error = sp_control(sp_dest, FUJICMD_CLOSE_DIRECTORY);
+  fuji_close_directory();
 }
 
 void io_set_directory_position(DirectoryPosition pos)
 {
-  sp_payload[0] = 2;
-  sp_payload[1] = 0;
-  memcpy((uint8_t *)&sp_payload[2], (uint8_t *)&pos, sizeof(uint16_t));
-  sp_error = sp_control(sp_dest, FUJICMD_SET_DIRECTORY_POSITION);
+  fuji_set_directory_position(pos);
 }
 
 void io_set_device_filename(uint8_t ds, uint8_t hs, uint8_t mode, char* e)
 {
-  sp_payload[0] = strlen(e) + 3 + 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = ds;
-  sp_payload[3] = hs;
-  sp_payload[4] = mode;
-
-  strcpy((char *)&sp_payload[5],e);
-
-  sp_error = sp_control(sp_dest, FUJICMD_SET_DEVICE_FULLPATH);
+  fuji_set_device_filename(mode, hs, ds, e);
 }
 
 bool io_mount_disk_image(uint8_t ds, uint8_t mode)
 {
-  sp_payload[0] = 2;
-  sp_payload[1] = 0;
-  sp_payload[2] = ds;
-  sp_payload[3] = mode;
-
-  sp_error = sp_control(sp_dest, FUJICMD_MOUNT_IMAGE);
-  if (sp_error == 0x28)
-    return 1; // error
-  else
-    return 0; // success
+  return fuji_mount_disk_image(ds, mode);
 }
 
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
-  unsigned short idx;
-  idx = 2;
-  sp_payload[idx++] = source_slot;
-  sp_payload[idx++] = destination_slot;
-  strcpy((char *)&sp_payload[idx], copySpec);
-
-  idx += strlen(copySpec);
-  idx++;
-
-  sp_payload[0] = idx & 0xff;
-  sp_payload[1] = idx >> 8;
-
-  sp_error = sp_control(sp_dest, FUJICMD_COPY_FILE);
+  fuji_copy_file(source_slot, destination_slot, &copySpec[0]);
 }
 
 void io_set_boot_config(uint8_t toggle)
 {
   #ifndef __ORCAC__
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = toggle;
-
-  sp_error = sp_control(sp_dest, FUJICMD_CONFIG_BOOT);
+  fuji_set_boot_config(toggle);
   #endif
 }
 
 void io_set_boot_mode(uint8_t mode)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = mode;
-
-  sp_error = sp_control(sp_dest, FUJICMD_SET_BOOT_MODE);
+  fuji_set_boot_mode(mode);
 }
-
-
 
 void io_umount_disk_image(uint8_t ds)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = ds;
-  sp_error = sp_control(sp_dest, FUJICMD_UNMOUNT_IMAGE);
+  fuji_unmount_disk_image(ds);
 }
 
 void io_update_devices_enabled(bool *e)
@@ -413,27 +244,19 @@ void io_update_devices_enabled(bool *e)
 
 void io_enable_device(unsigned char d)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = d;
-  sp_error = sp_control(sp_dest,FUJICMD_ENABLE_DEVICE);
+  fuji_enable_device(d);
 }
 
 void io_disable_device(unsigned char d)
 {
-  sp_payload[0] = 1;
-  sp_payload[1] = 0;
-  sp_payload[2] = d;
-  sp_error = sp_control(sp_dest,FUJICMD_DISABLE_DEVICE);
+  fuji_disable_device(d);
 }
 
+// The enabled status area needs visiting. this requires a LOT of status codes to send to FN, as there's no payload to specify which device.
+// And in FN it always returns true anyway, so this functionality is pretty broken at the moment.
 bool io_get_device_enabled_status(unsigned char d)
 {
-  sp_error = sp_status(sp_dest,FUJICMD_DEVICE_STATUS);
-  if (!sp_error)
-    return (bool)sp_payload[0];
-
-  return false;
+  return true;
 }
 
 unsigned char io_device_slot_to_device(unsigned char ds)
@@ -527,13 +350,8 @@ void io_list_devs(void)
 FNStatus io_get_fuji_status(void)
 {
   FNStatus status;
-  sp_error = sp_status(sp_dest, FUJICMD_STATUS);
-  if (!sp_error) {
-      memcpy(&status, &sp_payload[0], sizeof(FNStatus));
-  }
-
+  fuji_status(&status);
   return status;
-
 }
 
 #endif /* BUILD_APPLE2 */

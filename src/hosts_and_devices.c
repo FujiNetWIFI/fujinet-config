@@ -326,7 +326,6 @@ void hosts_and_devices(void)
   else
     hd_subState = HD_HOSTS;
 
-  debug();
   while (state == HOSTS_AND_DEVICES)
   {
     io_get_host_slots(&hostSlots[0]);
@@ -352,7 +351,6 @@ void hosts_and_devices(void)
   }
   
   if (state == DONE) {
-		debug();
     hosts_and_devices_done();
   }
 }
