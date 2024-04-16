@@ -92,7 +92,7 @@
 
 SFSubState sf_subState;
 char path[224];
-char filter[32];
+char filter[32] = {0};
 char source_path[224];
 char source_filter[32];
 char source_filename[128];
@@ -123,7 +123,10 @@ void select_file_init(void)
   memset(entry_size, 0, ENTRIES_PER_PAGE);
   memset(path, 0, 224);
   path[0] = '/';
-  memset(filter, 0, 32);
+  if ( !backToFiles ) {
+    memset(filter, 0, 32);
+  }
+
   sf_subState = SF_DISPLAY;
   quick_boot = dir_eof = false;
   screen_select_file();
@@ -453,8 +456,8 @@ void select_file(void)
   if (backToFiles)
   {
     // Return to the previous dir
-    backToFiles = false;
     select_file_init();
+    backToFiles = false;
     strncpy(path, source_path, sizeof(path));
   }
   else if (backFromCopy)

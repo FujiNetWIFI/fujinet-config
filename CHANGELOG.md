@@ -1,5 +1,10 @@
 # Change Log
 
+## 2024-04-16
+
+* [All] - Preserve file filter after mounting an image to a slot and returning to the file browser.
+* [Atari] - Upgrade fujinet-lib to 3.0.3
+
 ## 2023-07-15
 
 * [Atari] - Added new FujiNet command 0xD6 - `io_set_boot_mode(unsigned char mode)`, needed to boot directly into the Lobby client.
