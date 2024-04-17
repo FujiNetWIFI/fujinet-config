@@ -97,9 +97,11 @@ void input_line_set_wifi_custom(char *c)
 
 void input_line_set_wifi_password(char *c)
 {
-  char stars[64];
+  char stars[65];
   int l = strlen(c);
+  memset(stars, 0, 65);
   memset(stars, '*', l);
+  if (l > 64) l = 64;
   stars[l] = '\0';
   screen_puts(0, 21, stars);
   edit_line(0, 21, c, 64, true);
