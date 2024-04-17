@@ -27,7 +27,7 @@ void screen_debug(char *message);
 #endif // DEBUG
 
 void set_cursor(unsigned char x, unsigned char y);
-int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen);
+int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen, bool is_password);
 
 void set_active_screen(unsigned char screen);
 void screen_mount_and_boot();
