@@ -10,6 +10,9 @@
 # Space or comma separated list of cc65 supported target platforms to build for.
 # Default: c64 (lowercase!)
 TARGETS := apple2
+FUJINET_LIB_VERSION = 3.0.1
+FUJINET_LIB = fujinet-lib
+FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
@@ -36,6 +39,7 @@ ASFLAGS =
 # Additional linker flags and options.
 # Default: none
 LDFLAGS = $(LDFLAGS.$(TARGETS))
+LDFLAGS.apple2 = --mapfile config.map
 
 # Path to the directory containing C and ASM sources.
 # Default: src
@@ -207,6 +211,9 @@ TARGETLIST := $(subst $(COMMA),$(SPACE),$(TARGETS))
 
 ifeq ($(words $(TARGETLIST)),1)
 
+FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
+
 # Set PROGRAM to something like 'myprog.c64'.
 override PROGRAM := $(PROGRAM)
 
@@ -233,6 +240,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 # Add to LIBS something like 'src/foo.lib src/c64/bar.lib'.
 LIBS += $(wildcard $(SRCDIR)/*.lib)
 LIBS += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.lib)
+LIBS += $(FUJINET_LIB_VERSION_DIR)/fujinet-$(TARGETLIST)-$(FUJINET_LIB_VERSION).lib
 
 # Add to CONFIG something like 'src/c64/bar.cfg src/foo.cfg'.
 CONFIG += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.cfg)
@@ -244,10 +252,13 @@ ifneq ($(word 2,$(CONFIG)),)
   $(info Using config file $(CONFIG) for linking)
 endif
 
-.SUFFIXES:
-.PHONY: all test clean zap love
+ASFLAGS += --asm-include-dir src/$(TARGETLIST)/asminc --asm-include-dir $(FUJINET_LIB_VERSION_DIR)
+CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
-all: $(PROGRAM)
+.SUFFIXES:
+.PHONY: all test clean get_fujinet_lib zap love
+
+all: get_fujinet_lib $(PROGRAM)
 
 -include $(DEPENDS)
 -include $(STATEFILE)
@@ -281,6 +292,25 @@ $(foreach o,$(subst $(COMMA),$(SPACE),$(OPTIONS)),$(eval $(_$o_)))
 
 # Strip potential variant suffix from the actual cc65 target.
 CC65TARGET := $(firstword $(subst .,$(SPACE),$(TARGETLIST)))
+
+get_fujinet_lib:
+	@if [ ! -f "$(FUJINET_LIB_DOWNLOAD_FILE)" ]; then \
+		if [ -d "$(FUJINET_LIB_VERSION_DIR)" ]; then \
+		  echo "A directory already exists with version $(FUJINET_LIB_VERSION) - please remove it first"; \
+			exit 1; \
+		fi; \
+		HTTPSTATUS=$$(curl -Is $(FUJINET_LIB_DOWNLOAD_URL) | head -n 1 | awk '{print $$2}'); \
+		if [ "$${HTTPSTATUS}" == "404" ]; then \
+			echo "ERROR: Unable to find file $(FUJINET_LIB_DOWNLOAD_URL)"; \
+			exit 1; \
+		fi; \
+		echo "Downloading fujinet-lib for $(TARGETLIST) version $(FUJINET_LIB_VERSION) from $(FUJINET_LIB_DOWNLOAD_URL)"; \
+		mkdir -p $(FUJINET_LIB); \
+		curl -L $(FUJINET_LIB_DOWNLOAD_URL) -o $(FUJINET_LIB_DOWNLOAD_FILE); \
+		echo "Unzipping to $(FUJINET_LIB)"; \
+		unzip -o $(FUJINET_LIB_DOWNLOAD_FILE) -d $(FUJINET_LIB_VERSION_DIR); \
+		echo "Unzip complete."; \
+	fi
 
 # The remaining targets.
 $(TARGETOBJDIR):
@@ -331,12 +361,21 @@ dist: $(PROGRAM)
       exit 1 ; \
     fi ; \
 	)
+
+gendebug: $(PROGRAM)
+	@echo "Generating debug.scr script for AppleWin"
+	@echo 'echo "Loading symbols"' > debug.scr
+	@awk '{printf("sym %s = %s\n", substr($$3, 2), $$2)}' < $(PROGRAM).lbl >> debug.scr
+	@echo 'bpx _main' >> debug.scr
+	@echo 'bpx _fuji_close_directory' >> debug.scr
+
 clean:
 	$(call RMFILES,$(OBJECTS))
 	$(call RMFILES,$(DEPENDS))
 	$(call RMFILES,$(REMOVES))
 	$(call RMFILES,$(PROGRAM))
 	$(call RMFILES,*.map)
+	rm -rf dist/
 
 else # $(words $(TARGETLIST)),1
 

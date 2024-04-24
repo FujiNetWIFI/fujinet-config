@@ -20,12 +20,12 @@
         .include    "cfg-macros.inc"
         .include    "cfg-constants.inc"
 
-; int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen)
+; int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen, bool is_password)
 
-; re-implementation of edit_line
 ; returns 1 if there was an edit, 0 if there was none.
 .proc _edit_line
-        sta     el_max_len          ; max length for editing
+        sta     el_is_password      ; is this a password field?
+        popa    el_max_len          ; max length for editing
         popax   el_str              ; the original string being edit
         popa    el_y
         popa    el_x
@@ -380,9 +380,14 @@ not_eol:
 l1:
         lda     (ptr1), y
         beq     out
+        ldx     el_is_password  ; can't trash A as it holds current char to print
+        beq     :+
 
-        ; convert ascii to screen code, from cputc
-        asl     a               ; shift out the inverse bit
+        ; this is a password field, so set a to the "*" ascii and let it print as normal
+        lda     #'*'
+
+        ; convert ascii to screen code. This routine is copied from cputc
+:       asl     a               ; shift out the inverse bit
         adc     #$c0            ; grab the inverse bit; convert ATASCII to screen code
         bpl     codeok          ; screen code ok?
         eor     #$40            ; needs correction
@@ -434,3 +439,4 @@ el_x:               .res 1
 el_y:               .res 1
 el_crs_idx:         .res 1  ; index in the string of the cursor position
 el_buf_len:         .res 1  ; buffer length, keep track as we make edits so don't have to redo strlen
+el_is_password:     .res 1  ; should we display the char or a * because this is a password

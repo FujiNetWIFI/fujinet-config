@@ -24,15 +24,13 @@ void mount_and_boot(void)
     screen_mount_and_boot();
     set_active_screen(SCREEN_MOUNT_AND_BOOT);
 
-    io_get_device_slots(&deviceSlots[0]);
-    if (io_error())
+    if (!io_get_device_slots(&deviceSlots[0]))
     {
         screen_error("ERROR READING DEVICE SLOTS");
         die();
     }
 
-    io_get_host_slots(&hostSlots[0]);
-    if (io_error())
+    if (!io_get_host_slots(&hostSlots[0]))
     {
         screen_error("ERROR READING HOST SLOTS");
         die();
@@ -43,7 +41,7 @@ void mount_and_boot(void)
 
     screen_puts(0, 3, "Mounting all Host and Device Slots");
 
-    if ( !io_mount_all() )
+    if (!io_mount_all())
     {
         screen_error("ERROR MOUNTING ALL");
         wait_a_moment();

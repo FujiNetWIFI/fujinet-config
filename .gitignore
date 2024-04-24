@@ -8,7 +8,7 @@
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 a.out
-altirra-debug.ini
+altirra*.ini
 autorun
 autorun.atr
 build
@@ -51,6 +51,7 @@ dist/rautoans.com
 dist/rbaudlok.com
 dist/rlisten.com
 dist/rsniff.com
+debug.scr
 Makefile.options
 obj
 

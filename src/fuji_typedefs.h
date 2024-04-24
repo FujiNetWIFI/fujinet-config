@@ -6,9 +6,9 @@
 #define FUJI_TYPEDEFS_H
 
 #ifdef USING_FUJINET_LIB
-#include "fujinet-io.h"
+#include "fujinet-fuji.h"
 #else
-// Source the types in fujinet-io.h for platforms that are not yet using fujinet-lib
+// Source the types in fujinet-fuji.h for platforms that are not yet using fujinet-lib
 #include "fuji_typedefs_io.h"
 #endif
 

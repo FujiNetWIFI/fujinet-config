@@ -11,9 +11,9 @@
 # Default: c64 (lowercase!)
 TARGETS := atari
 
-FUJINET_LIB_VERSION = 2.2.1
+FUJINET_LIB_VERSION = 3.0.3
 FUJINET_LIB = fujinet-lib
-FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)
+FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
@@ -189,7 +189,7 @@ ALTIRRA ?= $(ALTIRRA_HOME)/Altirra64.exe \
   $(XS)/portable $(XS)/portablealt:altirra-debug.ini \
   $(XS)/debug \
   $(LBL_SYM) \
-  $(XS)/debugcmd: "bp _cfg_debug"
+  $(XS)/debugcmd: "bp _debug"
 
 # Add any additional break points by copying last line
 
@@ -280,7 +280,7 @@ ifneq ($(word 2,$(CONFIG)),)
   $(info Using config file $(CONFIG) for linking)
 endif
 
-ASFLAGS += --asm-include-dir src/atari/asminc --asm-include-dir $(FUJINET_LIB_VERSION_DIR)
+ASFLAGS += --asm-include-dir src/$(TARGETLIST)/asminc --asm-include-dir $(FUJINET_LIB_VERSION_DIR)
 CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
 .SUFFIXES:
@@ -327,7 +327,12 @@ get_fujinet_lib:
 		  echo "A directory already exists with version $(FUJINET_LIB_VERSION) - please remove it first"; \
 			exit 1; \
 		fi; \
-		echo "Downloading fujinet-lib for $(TARGETLIST) version $(FUJINET_LIB_VERSION)"; \
+		HTTPSTATUS=$$(curl -Is $(FUJINET_LIB_DOWNLOAD_URL) | head -n 1 | awk '{print $$2}'); \
+		if [ "$${HTTPSTATUS}" == "404" ]; then \
+			echo "ERROR: Unable to find file $(FUJINET_LIB_DOWNLOAD_URL)"; \
+			exit 1; \
+		fi; \
+		echo "Downloading fujinet-lib for $(TARGETLIST) version $(FUJINET_LIB_VERSION) from $(FUJINET_LIB_DOWNLOAD_URL)"; \
 		mkdir -p $(FUJINET_LIB); \
 		curl -L $(FUJINET_LIB_DOWNLOAD_URL) -o $(FUJINET_LIB_DOWNLOAD_FILE); \
 		echo "Unzipping to $(FUJINET_LIB)"; \
@@ -367,6 +372,10 @@ test: $(PROGRAM)
 	$(EMUCMD) $<
 	$(POSTEMUCMD)
 
+test-atr: $(PROGRAM) dist
+	$(PREEMUCMD) \
+  $(EMUCMD) //disk autorun.atr \
+	$(POSTEMUCMD)
 
 dist: $(PROGRAM)
 	mkdir -p dist
@@ -374,6 +383,21 @@ dist: $(PROGRAM)
 	cp ../fujinet-config-tools/atari/dist/*.com dist/ || true
 	cp $(PROGRAM) dist/
 	dir2atr -m -S -B picoboot.bin autorun.atr dist/
+
+dist-z: $(PROGRAM)
+	@if [ -d "../fujinet-config-loader" ] ; then \
+    echo "Found fujinet-config-loader, creating compressed autorun.atr"; \
+    $(MAKE) -C ../fujinet-config-loader clean dist > /dev/null 2>&1 ; \
+    if [ $$? -ne 0 ] ; then \
+      echo "ERROR running compressor"; \
+      exit 1; \
+    fi; \
+    cp ../fujinet-config-loader/autorun-zx0.atr ./autorun.atr; \
+    echo "Compressed file saved as autorun.atr"; \
+  else \
+    echo "ERROR: Could not find fujinet-config-loader in sibling directory to current."; \
+    exit 1; \
+  fi
 
 clean:
 	$(call RMFILES,$(OBJECTS))

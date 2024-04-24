@@ -26,20 +26,20 @@ extern bool deviceEnabled[8];
 // unsigned char nn;
 
 static char udg[] =
-  {
-   0,0,0,0,0,0,3,51,                               // WIFI 1
-   0,0,3,3,51,51,51,51,                            // WIFI 2
-   48,48,48,48,48,48,48,48,                        // WIFI 3
-   0x00,0x07,0x08,0x0F,0x0F,0x0F,0x0F,0x00,        // FOLDER 1 0x83
-   0x00,0x80,0x70,0xF0,0xF0,0xF0,0xF0,0x00,        // FOLDER 2 0x84
-   0x0F,0x08,0x08,0x0A,0x08,0x08,0x0F,0x00,        // DDP 1    0x85
-   0xF0,0x10,0x10,0x50,0x10,0x10,0xF0,0x00,        // DDP 2    0x86
-   0x0F,0x08,0x08,0x08,0x0A,0x08,0x0F,0x00,        // DSK 1    0x87
-   0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // DSK 2    0x88
-   0x0F,0x08,0x0B,0x0B,0x0B,0x08,0x0F,0x00,        // ROM 1    0x89
-   0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // ROM 2    0x8a
-   0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55  // Password smudge 0x8b
-  };
+{
+  0,0,0,0,0,0,3,51,                               // WIFI 1
+  0,0,3,3,51,51,51,51,                            // WIFI 2
+  48,48,48,48,48,48,48,48,                        // WIFI 3
+  0x00,0x07,0x08,0x0F,0x0F,0x0F,0x0F,0x00,        // FOLDER 1 0x83
+  0x00,0x80,0x70,0xF0,0xF0,0xF0,0xF0,0x00,        // FOLDER 2 0x84
+  0x0F,0x08,0x08,0x0A,0x08,0x08,0x0F,0x00,        // DDP 1    0x85
+  0xF0,0x10,0x10,0x50,0x10,0x10,0xF0,0x00,        // DDP 2    0x86
+  0x0F,0x08,0x08,0x08,0x0A,0x08,0x0F,0x00,        // DSK 1    0x87
+  0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // DSK 2    0x88
+  0x0F,0x08,0x0B,0x0B,0x0B,0x08,0x0F,0x00,        // ROM 1    0x89
+  0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // ROM 2    0x8a
+  0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55  // Password smudge 0x8b
+};
 
 static const char *empty="EMPTY";
 static const char *off="OFF";
@@ -58,7 +58,7 @@ void screen_init(void)
 
 void screen_debug(char *message)
 {
-  gotoxy(0,0); cprintf(message); 
+  gotoxy(0,0); cprintf(message);
 }
 
 void screen_error(const char *c)
@@ -89,23 +89,23 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 
   memset(ds,0x20,28);
   strncpy(ds,s->ssid,28);
-  
+
   if (s->rssi > -40)
-    {
-      meter[0] = 0x80;
-      meter[1] = 0x81;
-      meter[2] = 0x82;
-    }
+  {
+    meter[0] = 0x80;
+    meter[1] = 0x81;
+    meter[2] = 0x82;
+  }
   else if (s->rssi > -60)
-    {
-      meter[0] = 0x80;
-      meter[1] = 0x81;
-    }
+  {
+    meter[0] = 0x80;
+    meter[1] = 0x81;
+  }
   else
-    {
-      meter[0] = 0x80;
-    }
-  
+  {
+    meter[0] = 0x80;
+  }
+
   vdp_color(15,5,7);
   gotoxy(0,n+1); cprintf("%s",meter);
   vdp_color(1,15,7);
@@ -141,7 +141,7 @@ void screen_set_wifi_password(void)
 void screen_connect_wifi(NetConfig *nc)
 {
   smartkeys_set_mode();
-  
+
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   sprintf(response,"  CONNECTING TO NETWORK\n  %s",nc->ssid);
   smartkeys_status(response);
@@ -166,14 +166,16 @@ char* screen_hosts_and_devices_host_slot(char *hs)
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   unsigned short y2 = y << 8;
-  
+
   gotoxy(0,y); cprintf("%32s","DISK SLOTS");
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
-    {
-      gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-    }
-  
+  {
+    gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+  }
+  // Clear the next line since last print isn't truncated to 31 chars :shrug:
+  gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
+
   vdp_vfill(MODE2_ATTR+y2,0xF4,256);
   vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024);
   vdp_vfill_v(MODE2_ATTR+y2+256,0xF4,32);
@@ -184,10 +186,10 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   gotoxy(0,0);  cprintf("%32s","HOST SLOTS");
 
   for (char i=0;i<8;i++)
-    {
-      gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_host_slot(h[i])); 
-    }
-  
+  {
+    gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_host_slot(h[i]));
+  }
+
   vdp_vfill(MODE2_ATTR,0xF4,256);
   vdp_vfill(MODE2_ATTR+0x0100,0x1F,2048);
   vdp_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
@@ -200,7 +202,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
   screen_hosts_and_devices_host_slots(h);
   screen_hosts_and_devices_device_slots(11,d,e);
-  
+
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
@@ -254,13 +256,12 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 
 void screen_hosts_and_devices_long_filename(char *f)
 {
+  vdp_vfill(0x1100,0x00,1024); // Clear area first
   if (strlen(f)>31)
-    {
-      gotoxy(0,17);
-      cprintf("%s",f);
-    }
-  else
-    vdp_vfill(0x1100,0x00,1024);
+  {
+    gotoxy(0,17);
+    cprintf("%s",f);
+  }
 }
 
 void screen_show_info(bool printerEnabled, AdapterConfig* ac)
@@ -268,7 +269,7 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   smartkeys_set_mode();
 
   gotoxy(0,7);
-  
+
   cprintf("%32s","SSID");
   cprintf("%32s",ac->ssid);
   cprintf("%10s%s\n","HOSTNAME:",ac->hostname);
@@ -281,14 +282,14 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 
   vdp_vfill(MODE2_ATTR+0x0700,0xF4,256);
   vdp_vfill(MODE2_ATTR+0x0800,0x1F,256);
-  
+
   for (char i=0;i<7;i++)
-    {
-      vdp_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
-      vdp_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
-    }
-  
-  smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");    
+  {
+    vdp_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
+    vdp_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
+  }
+
+  smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
@@ -313,7 +314,7 @@ void screen_select_file_display(char *p, char *f)
   vdp_vfill(MODE2_ATTR+0x1200,0xF5,256);
   vdp_vfill_v(MODE2_ATTR+0x0200,0xF5,136);
   vdp_vfill_v(MODE2_ATTR+0x0200+8,0xF5,136);
-  
+
   // Update content area
   vdp_color(15,4,7);
   gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
@@ -367,16 +368,16 @@ void screen_select_file_choose(char visibleEntries)
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
 
   if (copy_mode==true)
-    {
-      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", " PERFORM\n  COPY");
-      smartkeys_status("  SELECT DESTINATION\n  [ESC] ABORT");
-    }
+  {
+    smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", " PERFORM\n  COPY");
+    smartkeys_status("  SELECT DESTINATION\n  [ESC] ABORT");
+  }
   else
-    {
-      smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? "  BOOT" : "  QUICK\n  BOOT");
-      smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
-    }
-  
+  {
+    smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? "  BOOT" : "  QUICK\n  BOOT");
+    smartkeys_status("  SELECT FILE TO MOUNT\n  [INSERT] CREATE NEW\n  [ESC] ABORT");
+  }
+
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
@@ -428,24 +429,24 @@ void screen_select_file_new_creating(void)
 void screen_select_slot(char *e)
 {
   unsigned long *s;
-  
+
   smartkeys_set_mode();
 
   gotoxy(0,7);
   cprintf("%32s","FILE DETAILS");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
-  
+
   s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  
+
   cprintf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
 
   e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
-  
+
   gotoxy(0,0);
   cprintf("%32s",e);
 
   screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
-  
+
   vdp_vfill(MODE2_ATTR,0xF4,256);
   vdp_vfill(MODE2_ATTR+0x100,0x1F,0x400);
   vdp_vfill_v(MODE2_ATTR,0xF4,40);
@@ -454,7 +455,7 @@ void screen_select_slot(char *e)
   vdp_vfill(MODE2_ATTR+0x800+64,0x1F,192);
   vdp_vfill(MODE2_ATTR+0x900,0xF6,64);
   vdp_vfill(MODE2_ATTR+0x900+64,0x1F,192);
-  
+
   bar_set(0,1,4,0);
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
@@ -485,7 +486,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
   gotoxy(1,1+hs); cprintf(empty);
-}  
+}
 
 void screen_select_slot_build_eos_directory(void)
 {

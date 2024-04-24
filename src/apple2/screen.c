@@ -56,7 +56,7 @@ void screen_init(void)
     _sys(&r);
   #endif
   clrscr();
-  sp_init(); // moved here so we do after screen is setup, and before logo
+  // sp_init(); // moved here so we do after screen is setup, and before logo
  #ifndef BUILD_A2CDA
   screen_fujinetlogo();
  #endif
