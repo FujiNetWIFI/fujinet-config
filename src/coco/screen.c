@@ -352,7 +352,8 @@ void screen_hosts_and_devices_hosts()
   cls(3);
   locate(0,0);
   printf("%32s","host\x80slots");
-  memset(0x400,0x20,22);
+  
+  memset(0x400,0xAF,22);
   (*(unsigned char *)0x041a) = 0x20;
 
   locate(0,13);
@@ -371,8 +372,8 @@ void screen_hosts_and_devices_devices()
 {
   cls(4);
   locate(0,0); 
-  printf("%32s","device""\x80""slots");
-  memset(0x400,0x20,20);
+  printf("%32s","drive""\x80""slots");
+  memset(0x400,0xBF,21);
   (*(unsigned char *)0x041a) = 0x20;
   
   locate(0,14);
