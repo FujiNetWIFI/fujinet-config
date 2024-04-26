@@ -12,7 +12,7 @@ config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_device
 	decb copy -t -0 dist.coco/autoexec.bas autorun.dsk,AUTOEXEC.BAS
 	writecocofile autorun.dsk config.bin
 	$(CP) autorun.dsk ~/Workspace/fujinet-firmware/data/webui/device_specific/BUILD_COCO/
-	$(CP) autorun.dsk ~/Workspace/tnfs/
+	$(CP) autorun.dsk ~/tnfs/
 	$(ECHO) Now, Do a Upload Filesystem task.
 
 pause.o: src/coco/pause.c
