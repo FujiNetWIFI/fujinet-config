@@ -311,7 +311,7 @@ void screen_select_file_choose(char visibleEntries)
       printf("%-31s","enter OR break fILTER nEW cOPY");
     }
 
-  bar_set(3,1,visibleEntries,0);
+  bar_set(3,0,visibleEntries,0);
 
   if (visibleEntries<10)
     screen_add_shadow(3+visibleEntries,ORANGE);

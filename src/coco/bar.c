@@ -45,8 +45,12 @@ void bar_clear(bool old)
       bar_draw(bar_y+bar_i,true);
     }
 
-  sp += yo+io;
-  *sp &= 0xBF;
+  if (bar_c != 0)
+  {
+      sp += yo+io;
+      *sp &= 0xBF;
+  }
+  
 }
 
 /**
