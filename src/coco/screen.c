@@ -30,6 +30,16 @@ extern HDSubState hd_subState;
 extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 extern HostSlot hostSlots[8];
 
+static char uppercase_tmp[32]; // temp space for strupr(s) output.
+                               // so original strings doesn't get changed.
+
+char *screen_upper(char *s)
+{
+    memset(uppercase_tmp,0,sizeof(uppercase_tmp));
+    strcpy(uppercase_tmp,s);
+
+    return strupr(uppercase_tmp);
+}
 
 int screen_offset(int x, int y)
 {
@@ -106,7 +116,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
       meter[0] = '*';
     }
 
-  locate(0,n+2);  printf("%-32s",ds);
+  locate(0,n+2);  printf("%-32s",screen_upper(ds));
   locate(28,n+2); printf("%s",meter);
 }
 
@@ -144,15 +154,15 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
   cls(7);
   printf("     #FUJINET CONFIGURATION     ");
   printf("%32s","SSID:");
-  printf("%32s",ac->ssid);
+  printf("%32s",screen_upper(ac->ssid));
   printf("%32s","HOSTNAME:");
-  printf("%32s",ac->hostname);
+  printf("%32s",screen_upper(ac->hostname));
   printf("%10s%u.%u.%u.%u\n","IP: ",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
   printf("%10s%u.%u.%u.%u\n","NETMASK: ",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
   printf("%10s%u.%u.%u.%u\n","DNS: ",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
-  printf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  printf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
-  printf("%10s%s","FNVER: ",ac->fn_version);
+  printf("%10s%02X:%02X:%02X:%02X:%02X:%02X\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  printf("%10s%02X:%02X:%02X:%02X:%02X:%02X\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  printf("%10s%s","FNVER: ",screen_upper(ac->fn_version));
   printf("\n\n\n");
   printf(" cHANGE SSID          rECONNECT ");
   printf("OR  ANY KEY  TO RETURN TO HOSTS");
@@ -198,7 +208,7 @@ void screen_select_slot(const char *e)
 
   printf("%8s %lu K\n","SIZE:",i->size >> 10); // Quickly divide by 1024
 
-  printf("%96s",(char *)&e[13]);
+  printf("%96s",screen_upper((char *)&e[13]));
 
   locate(0,13);
   printf("   arrow keys  TO SELECT SLOT   ");
@@ -246,13 +256,13 @@ void screen_select_file(void)
 void screen_select_file_display(char *p, char *f)
 {
   cls(8);
-  locate(0,0); printf("%-32s",selected_host_name);
+  locate(0,0); printf("%-32s",screen_upper(selected_host_name));
   locate(0,1);
 
   if (f[0]==0x00)
-    printf("%-32s",p);
+      printf("%-32s",screen_upper(p));
   else
-    printf("%-24s%8s",p,f);
+      printf("%-24s%8s",screen_upper(p),screen_upper(f));
 
   screen_add_shadow(2,ORANGE);
 }
@@ -284,7 +294,7 @@ void screen_select_file_prev(void)
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
   locate(0,y+3);
-  printf("%-32s",e); // skip the first two chars from FN (hold over from Adam)
+  printf("%-32s",screen_upper((char *)e)); // skip the first two chars from FN (hold over from Adam)
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -401,7 +411,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   // Color the first column
   for (int i=0;i<8;i++)
     {
-      printf("%u%-31s",i+1,p);
+        printf("%u%-31s",i+1,screen_upper((char *)p));
       p += 32;  // Next entry
       *sp &= INVERSE_MASK;
       sp += 32; // next line
@@ -440,7 +450,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
       locate(0,(unsigned char)i+1);
       printf("%u%c",i,host_slot_char(dslot->hostSlot));
       printf("%c",device_slot_mode(dslot->mode));
-      printf("%-29s",dslot->file);
+      printf("%-29s",screen_upper((char *)dslot->file));
       dslot++;
       *sp &= 0xBF;
       sp++;
@@ -499,7 +509,7 @@ void screen_connect_wifi(NetConfig *nc)
 {
   cls(3);
   locate(0,7);
-  printf("     CONNECTING TO NETWORK:     %32s",nc->ssid);
+  printf("     CONNECTING TO NETWORK:     %32s",screen_upper(nc->ssid));
 
   screen_add_shadow(9,BLUE); // change to CYAN
 }
