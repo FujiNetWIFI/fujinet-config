@@ -174,14 +174,21 @@ unsigned char io_get_wifi_status(void)
 
 NetConfig *io_get_ssid(void)
 {
-  bool z=false;
+  struct _get_ssid
+  {
+      byte opcode;
+      byte cmd;
+  } gsc;
 
-  while (!z)
-    {
-      dwwrite((byte *)"\xE2\xFE",2);
-      z = dwread((unsigned char *)&nc,sizeof(nc));
-    }
-  
+  gsc.opcode = OP_FUJI;
+  gsc.cmd = 0xFE;
+
+  io_ready();
+  dwwrite((byte *)&gsc,sizeof(gsc));
+
+  io_ready();
+  io_get_response((byte *)&nc, sizeof(nc));
+    
   return &nc;
 }
 
