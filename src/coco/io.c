@@ -152,19 +152,23 @@ bool io_get_wifi_enabled(void)
 
 unsigned char io_get_wifi_status(void)
 {
-  byte *s="\xE2\xFA";
-  int l = 2;
   byte r;
-  bool z=false;
 
-  while (!z)
-    {
-      sleep(1);
-      
-      dwwrite(s,l);
-      z = dwread(&r,1);
-    }
-  
+  struct _get_wifi_status
+  {
+      byte opcode;
+      byte cmd;
+  } gwsc;
+
+  gwsc.opcode = OP_FUJI;
+  gwsc.cmd = 0xFA;
+
+  io_ready();
+  dwwrite((byte *)&gwsc, sizeof(gwsc));
+
+  io_ready();
+  io_get_response(&r, 1);
+    
   return r;
 }
 
