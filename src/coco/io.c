@@ -130,16 +130,23 @@ void io_init(void)
 
 bool io_get_wifi_enabled(void)
 {
-  byte *s="\xE2\xEA";
-  int l = 2;
   bool r=0;
-  bool z=0;
 
-  while (!z)
-    {
-      dwwrite(s,l);
-      z = dwread(&r,1);
-    }
+  struct _get_wifi_enabled
+  {
+      byte opcode;
+      byte cmd;
+  } gwec;
+
+  gwec.opcode = OP_FUJI;
+  gwec.cmd = 0xEA;
+  
+  io_ready();
+  dwwrite((byte *)&gwec, sizeof(gwec));
+
+  io_ready();
+  io_get_response(&r,1);
+  
   return r;
 }
 
