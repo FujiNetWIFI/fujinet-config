@@ -209,7 +209,7 @@ unsigned char io_scan_for_networks(void)
   dwwrite((byte *)&sfnc, sizeof(sfnc));
 
   io_ready();
-  io_get_response(&r,1);
+  io_get_response((byte *)&r,1);
   
   if (r > 11)
     r=11;
@@ -219,18 +219,24 @@ unsigned char io_scan_for_networks(void)
 
 SSIDInfo *io_get_scan_result(int n)
 {
-  byte s[3]={0xE2,0xFC,0x00};
-  bool z = false;
-  
-  s[2] = (unsigned char)n;
-
-  while (!z)
+    struct _get_scan_result
     {
-      dwwrite((byte *)s,3);
-      z = dwread((unsigned char *)&ssidInfo,sizeof(SSIDInfo));
-    }
-  
-  return &ssidInfo;
+        byte opcode;
+        byte cmd;
+        byte n;
+    } gsrc;
+
+    gsrc.opcode = OP_FUJI;
+    gsrc.cmd = 0xFC;
+    gsrc.n = (byte)n;
+
+    io_ready();
+    dwwrite((byte *)&gsrc,sizeof(gsrc));
+
+    io_ready();
+    io_get_response((byte *)&ssidInfo, sizeof(SSIDInfo));
+    
+    return &ssidInfo;
 }
 
 AdapterConfig *io_get_adapter_config(void)
