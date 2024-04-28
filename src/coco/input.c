@@ -172,12 +172,18 @@ void input_line_filter(char *c)
 
 unsigned char input_select_file_new_type(void)
 {
-  return 1;
+    return 1; // We always wanna make a DSK
 }
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
-  return 0;
+    char c[16];
+
+    memset(c,0,sizeof(c));
+
+    input_line(0,15,c,16,false);
+
+    return (long)atol(c);
 }
 
 unsigned long input_select_file_new_custom(void)
@@ -187,6 +193,7 @@ unsigned long input_select_file_new_custom(void)
 
 void input_select_file_new_name(char *c)
 {
+    input_line(0,15,c,255,false);
 }
 
 bool input_select_slot_build_eos_directory(void)
@@ -352,6 +359,9 @@ SFSubState input_select_file_choose(void)
 
       switch(k)
 	{
+        case 'N':
+        case 'n':
+            return SF_NEW;
 	case 0x03: // BREAK
 	  state = HOSTS_AND_DEVICES;
 	  return SF_DONE;

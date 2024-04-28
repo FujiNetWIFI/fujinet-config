@@ -10,6 +10,10 @@
 #include "screen.h"
 #include "bar.h"
 
+#define OP_FUJI 0xE2
+#define CMD_READY 0x00
+#define CMD_RESPONSE 0x01
+
 extern NetConfig nc;
 static AdapterConfig adapterConfig;
 static SSIDInfo ssidInfo;
@@ -57,6 +61,57 @@ int dwwrite(byte *s, int l)
 	tfr cc,d
 	puls y,x
     }
+}
+
+/**
+ * @brief wait for FujiNet device ready
+ */
+void io_ready(void)
+{
+    struct _readycmd
+    {
+        byte opcode;
+        byte command;
+    } rc;
+
+    byte z=0, r=0;
+    
+    rc.opcode = OP_FUJI;
+    rc.command = CMD_READY;
+    
+    while (!z)
+    {
+        dwwrite((byte *)&rc,sizeof(rc));
+        z = dwread((byte *)&r,sizeof(r));
+    }
+}
+
+/**
+ * @brief Get response data from last command
+ * @param devid The device ID (0-255) 
+ * @param buf Target buffer 
+ * @param len Length 
+ */
+byte io_get_response(byte *buf, int len)
+{
+    struct _getresponsecmd
+    {
+        byte opcode;
+        byte command;
+        int len;
+    } grc;
+
+    byte z=0;
+    
+    grc.opcode = OP_FUJI;
+    grc.command = CMD_RESPONSE;
+    grc.len = len;
+
+    io_ready();
+    dwwrite((byte *)&grc, sizeof(grc));
+    dwread((byte *)buf, len);
+    
+    return z;
 }
 
 bool io_error(void)
@@ -157,16 +212,19 @@ SSIDInfo *io_get_scan_result(int n)
 
 AdapterConfig *io_get_adapter_config(void)
 {
-  bool z = false;
+    // Wait for adapter ready
+    io_ready();
+                  
+    // Send Get Adapter Config command
+    dwwrite((byte *)"\xE2\xE8",2);
 
-  while (!z)
-    {
-      dwwrite((byte *)"\xE2\xE8",2);
-      z = dwread((unsigned char *)&adapterConfig,sizeof(AdapterConfig));
-      printf("Z: %02x - S: %u\n",z,sizeof(AdapterConfig));
-    }
-  
-  return &adapterConfig;
+    // Check again for adapter ready
+    io_ready();
+
+    // Retrieve response.
+    io_get_response((byte *)&adapterConfig,sizeof(AdapterConfig));
+    
+    return &adapterConfig;
 }
 
 int io_set_ssid(NetConfig *nc)
@@ -349,6 +407,24 @@ void io_boot(void)
 
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)
 {
+    struct _newdisk
+    {
+        byte fuji;
+        byte cmd;
+        byte numDisks;
+        byte host_slot;
+        byte device_slot;
+        char filename[256];
+    } nd;
+
+    nd.fuji = 0xE2;
+    nd.cmd = 0xE7;
+    nd.numDisks = (byte)selected_size;
+    nd.host_slot = selected_host_slot;
+    nd.device_slot = selected_device_slot;
+    strcpy(nd.filename,path);
+
+    dwwrite((byte *)&nd,sizeof(nd));
 }
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)

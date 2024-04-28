@@ -323,6 +323,9 @@ void screen_select_file_new_type(void)
 
 void screen_select_file_new_size(unsigned char k)
 {
+    locate(0,14);
+    printf("%-63s","ENTER # OF DRIVES TO CREATE");
+    locate(0,15);
 }
 
 void screen_select_file_new_custom(void)
@@ -331,10 +334,16 @@ void screen_select_file_new_custom(void)
 
 void screen_select_file_new_name(void)
 {
+    locate(0,14);
+    printf("%-63s","ENTER FILENAME:");
+    locate(0,15);
 }
 
 void screen_select_file_new_creating(void)
 {
+    locate(0,13);
+    printf("%-63s","CREATING IMAGE. PLEASE WAIT.");
+    locate(0,14);
 }
 
 void screen_error(const char *msg)
