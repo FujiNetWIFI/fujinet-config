@@ -195,17 +195,22 @@ NetConfig *io_get_ssid(void)
 unsigned char io_scan_for_networks(void)
 {
   char r=-1;
-  
-  while (true)
-    {
-      dwwrite((byte *)"\xE2\xFD",2);
-      dwread((byte *)&r,1);
-      if (r<0)
-	continue;
-      else
-	break;
-    }
 
+  struct _scan_for_networks
+  {
+      byte opcode;
+      byte cmd;
+  } sfnc;
+
+  sfnc.opcode = OP_FUJI;
+  sfnc.cmd = 0xFD;
+
+  io_ready();
+  dwwrite((byte *)&sfnc, sizeof(sfnc));
+
+  io_ready();
+  io_get_response(&r,1);
+  
   if (r > 11)
     r=11;
   
