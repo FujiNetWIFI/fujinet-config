@@ -276,14 +276,20 @@ int io_set_ssid(NetConfig *nc)
 
 void io_get_device_slots(DeviceSlot *d)
 {
-  byte *s="\xE2\xF2";
-  bool z = false;
-
-  while (!z)
+    struct _get_device_slots
     {
-      dwwrite(s,2);
-      z = dwread((unsigned char *)d,152);
-    }
+        byte opcode;
+        byte cmd;
+    } gdsc;
+
+    gdsc.opcode = OP_FUJI;
+    gdsc.cmd = 0xF2;
+
+    io_ready();
+    dwwrite((byte *)&gdsc, sizeof(gdsc));
+
+    io_ready();
+    io_get_response((byte *)d, 152);    
 }
 
 void io_get_host_slots(HostSlot *h)
