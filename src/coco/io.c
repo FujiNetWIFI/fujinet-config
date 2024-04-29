@@ -333,47 +333,54 @@ void io_mount_host_slot(unsigned char hs)
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
-  byte fp[259];
-  
-  memset(fp,0,sizeof(fp));
+    // TODO: Add Filter from f!
+    struct _open_directory
+    {
+        byte opcode;
+        byte cmd;
+        byte hs;
+        char p[256];
+    } odc;
 
-  fp[0]=0xE2;
-  fp[1]=0xF7;
-  fp[2]=hs;
-  
-  strcpy((char *)&fp[3],p);
+    odc.opcode = OP_FUJI;
+    odc.cmd = 0xF7;
+    odc.hs = hs;
 
-  dwwrite(fp,sizeof(fp));
+    memset(odc.p,0,sizeof(odc.p));
+    strcpy(odc.p,p);
+
+    io_ready();
+    dwwrite((byte *)&odc, sizeof(odc));
+
+    io_ready();
 }
 
 const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
-  unsigned char alen;
-  bool z = false;
+    struct _read_directory
+    {
+        byte opcode;
+        byte cmd;
+        byte maxlen;
+        byte a;
+    } rdc;
+
+    if (a)
+        maxlen += 10;
+
+    rdc.opcode = OP_FUJI;
+    rdc.cmd = 0xF6;
+    rdc.maxlen = maxlen;
+    rdc.a = a;
   
   memset(response,0,sizeof(response));
-	 
-  alen = maxlen;
 
-  if (a)
-    maxlen += 10;
+  io_ready();
+  dwwrite((byte *)&rdc, sizeof(rdc));
 
-  while (!z)
-    {
-      dwwrite((byte *)"\xE2\xF6",2);
-      dwwrite((byte *)&maxlen,1);
-      dwwrite((byte *)&a,1);
-      
-      z = dwread((byte *)response,alen);
-
-      if (!z)
-	{
-	  io_set_directory_position(_dirpos);
-	}
-      else
-	_dirpos++;
-    }
-  
+  io_ready();
+  io_get_response(response, maxlen);
+    
   return (const char *)response;
 }
 
