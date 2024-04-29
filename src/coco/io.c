@@ -483,6 +483,8 @@ void io_create_new(unsigned char selected_host_slot, unsigned char selected_devi
     nd.device_slot = selected_device_slot;
     strcpy(nd.filename,path);
 
+    io_ready();
+
     dwwrite((byte *)&nd,sizeof(nd));
     io_ready(); // Temporary, make new disk status command!
 }
