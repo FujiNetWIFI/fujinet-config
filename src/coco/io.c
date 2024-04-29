@@ -386,14 +386,16 @@ const char *io_read_directory(unsigned char maxlen, unsigned char a)
 
 void io_close_directory(void)
 {
-  dwwrite((byte *)"\xE2\xF5",2);
+    io_ready();
+    dwwrite((byte *)"\xE2\xF5",2);
 }
 
 void io_set_directory_position(DirectoryPosition pos)
 {
-  dwwrite((byte *)"\xE2\xE4",2);
-  dwwrite((byte *)&pos,sizeof(pos));
-  _dirpos = pos;
+    io_ready();
+    dwwrite((byte *)"\xE2\xE4",2);
+    dwwrite((byte *)&pos,sizeof(pos));
+    _dirpos = pos;
 }
 
 void io_set_device_filename(unsigned char ds, char* e)
