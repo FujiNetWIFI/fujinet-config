@@ -326,8 +326,9 @@ void io_put_device_slots(DeviceSlot *d)
 
 void io_mount_host_slot(unsigned char hs)
 {
-  dwwrite((byte *)"\xE2\xF9",2);
-  dwwrite(&hs,1);
+    io_ready();
+    dwwrite((byte *)"\xE2\xF9",2);
+    dwwrite(&hs,1);
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
