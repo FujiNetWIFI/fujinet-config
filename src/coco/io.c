@@ -446,15 +446,17 @@ void io_set_boot_mode(unsigned char mode)
 
 void io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
-  dwwrite((byte *)"\xE2\xF8",2);
-  dwwrite((byte *)&ds,1);
-  dwwrite((byte *)&mode,1);
+    io_ready();
+    dwwrite((byte *)"\xE2\xF8",2);
+    dwwrite((byte *)&ds,1);
+    dwwrite((byte *)&mode,1);
 }
 
 void io_umount_disk_image(unsigned char ds)
 {
-  dwwrite((byte *)"\xE2\xE9",2);
-  dwwrite((byte *)&ds,1);
+    io_ready();
+    dwwrite((byte *)"\xE2\xE9",2);
+    dwwrite((byte *)&ds,1);
 }
 
 void io_boot(void)
