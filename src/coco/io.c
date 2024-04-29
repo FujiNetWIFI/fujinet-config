@@ -294,16 +294,20 @@ void io_get_device_slots(DeviceSlot *d)
 
 void io_get_host_slots(HostSlot *h)
 {
-  byte *s="\xE2\xF4";
-  bool z = false;
-  
-  memset(h,0,256);
-
-  while (!z)
+    struct _get_host_slots
     {
-      dwwrite(s,2);
-      z = dwread(h,256);
-    }
+        byte opcode;
+        byte cmd;
+    } ghsc;
+
+    ghsc.opcode = OP_FUJI;
+    ghsc.cmd = 0xF4;
+
+    io_ready();
+    dwwrite((byte *)&ghsc, sizeof(ghsc));
+
+    io_ready();
+    io_get_response(h, 256);
 }
 
 void io_put_host_slots(HostSlot *h)
