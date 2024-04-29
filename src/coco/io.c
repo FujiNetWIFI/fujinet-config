@@ -312,14 +312,16 @@ void io_get_host_slots(HostSlot *h)
 
 void io_put_host_slots(HostSlot *h)
 {
-  dwwrite((byte *)"\xE2\xF3",2);
-  dwwrite((byte *)h,256);
+    io_ready();
+    dwwrite((byte *)"\xE2\xF3",2);
+    dwwrite((byte *)h,256);
 }
 
 void io_put_device_slots(DeviceSlot *d)
 {
-  dwwrite((byte *)"\xE2\xF1",2);
-  dwwrite((byte *)d,304);
+    io_ready();
+    dwwrite((byte *)"\xE2\xF1",2);
+    dwwrite((byte *)d,304);
 }
 
 void io_mount_host_slot(unsigned char hs)
