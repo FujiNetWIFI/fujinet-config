@@ -98,14 +98,12 @@ byte io_get_response(byte *buf, int len)
     {
         byte opcode;
         byte command;
-        int len;
     } grc;
 
     byte z=0;
     
     grc.opcode = OP_FUJI;
     grc.command = CMD_RESPONSE;
-    grc.len = len;
 
     io_ready();
     dwwrite((byte *)&grc, sizeof(grc));
