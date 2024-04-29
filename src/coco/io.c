@@ -484,6 +484,7 @@ void io_create_new(unsigned char selected_host_slot, unsigned char selected_devi
     strcpy(nd.filename,path);
 
     dwwrite((byte *)&nd,sizeof(nd));
+    io_ready(); // Temporary, make new disk status command!
 }
 
 void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
