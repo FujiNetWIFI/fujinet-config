@@ -414,18 +414,25 @@ void io_set_device_filename(unsigned char ds, char* e)
 
 const char *io_get_device_filename(unsigned char slot)
 {
-  bool z = false;
-  
-  memset(response,0,sizeof(response));
-
-  while (!z)
+    struct _get_device_filename
     {
-      dwwrite((byte *)"\xE2\xDA",2);
-      dwwrite((byte *)slot,1);
-      z = dwread((byte *)response,256);
-    }
-  
-  return (const char *)response;
+        byte opcode;
+        byte cmd;
+        byte slot;
+    } gdfc;
+
+    gdfc.opcode = OP_FUJI;
+    gdfc.cmd = 0xDA;
+    gdfc.slot = slot;
+
+    io_ready();
+    dwwrite((byte *)&gdfc, sizeof(gdfc));
+
+    io_ready();
+    memset(response,0,sizeof(response));
+    io_get_response(response, 256);
+    
+    return (const char *)response;
 }
 
 void io_set_boot_config(unsigned char toggle)
