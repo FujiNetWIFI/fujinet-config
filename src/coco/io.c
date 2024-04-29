@@ -403,7 +403,8 @@ void io_set_device_filename(unsigned char ds, char* e)
   char fn[256];
 
   strcpy(fn,e);
-  
+
+  io_ready();
   dwwrite((byte *)"\xE2\xE2",2);
   dwwrite((byte *)&ds,1);
   dwwrite((byte *)&selected_host_slot,1);
