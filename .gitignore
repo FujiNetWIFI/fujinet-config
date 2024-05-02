@@ -61,3 +61,6 @@ dist.apple2/*.dsk
 
 # fujinet-lib will be downloaded by makefiles that use it
 fujinet-lib/*
+
+# IDE files
+.vscode/*
