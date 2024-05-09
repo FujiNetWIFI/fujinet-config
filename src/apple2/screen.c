@@ -283,6 +283,9 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   char rw_mode;
   char host_slot;
   char separator;
+  char ostype;
+  ostype = get_ostype() & 0xF0;
+
 
   for (i = 0; i < NUM_DEVICE_SLOTS; i++)
   {
@@ -314,7 +317,11 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
 
     gotoxy(0, line);
-    cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+    // If running on IIC and DISKII Drive1 is empty, display a special note
+    if (ostype == APPLE_IIC && i == 4 && d[i].file[0] == 0x00 && e[i] == true)
+      cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, "IIC INTERNAL FLOPPY");
+    else
+      cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
 
 }
@@ -559,6 +566,8 @@ void screen_select_slot(char *e)
   unsigned long *s;
   static const char ss[] = "SMARTPORT DRIVES";
   static const char ds[] = "DISKII DRIVES";
+  char ostype;
+  ostype = get_ostype() & 0xF0;
 
   clrscr();
 
@@ -567,6 +576,13 @@ void screen_select_slot(char *e)
 
   gotoxy(0,6); cprintf("%40s",ds);
   chlinexy(0,6,40 - sizeof(ds));
+
+  // Display message about Disk II Drive 1 being internal drive on IIc
+  if (ostype == APPLE_IIC)
+  {
+    gotoxy(0,10);
+    cprintf("%s","NOTE DISKII DRIVE1 = IIC INTERNAL DRIVE");
+  }
 
   gotoxy(0,12);
   cprintf("%-40s","FILE DETAILS");
