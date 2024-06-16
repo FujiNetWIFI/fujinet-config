@@ -284,7 +284,7 @@ ASFLAGS += --asm-include-dir src/$(TARGETLIST)/asminc --asm-include-dir $(FUJINE
 CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
 .SUFFIXES:
-.PHONY: all test clean get_fujinet_lib zap love
+.PHONY: all test clean get_fujinet_lib zap
 
 all: get_fujinet_lib $(PROGRAM)
 
@@ -354,16 +354,6 @@ vpath %.s $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
 $(TARGETOBJDIR)/%.o: %.s | $(TARGETOBJDIR)
 	$(CC) -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
 
-vpath %.asm $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
-
-$(TARGETOBJDIR)/%.o: %.asm | $(TARGETOBJDIR)
-	$(CC) -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
-
-vpath %.a65 $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
-
-$(TARGETOBJDIR)/%.o: %.a65 | $(TARGETOBJDIR)
-	$(CC) -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
-
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
 	$(CC) -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^)
 
@@ -421,9 +411,6 @@ zap:
 	$(foreach o,$(OBJDIRLIST),-$(call RMDIR,$o)$(NEWLINE))
 	-$(call RMDIR,$(OBJDIR))
 	-$(call RMFILES,$(basename $(PROGRAM)).* $(STATEFILE))
-
-love:
-	@echo "Not war, eh?"
 
 ###################################################################
 ###  Place your additional targets in the additional Makefiles  ###

@@ -214,7 +214,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-#if defined(BUILD_ATARI) || defined(BUILD_APPLE2)
+#if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
   io_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
 #else
   // i promise to implement in all cases.
