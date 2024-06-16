@@ -14,31 +14,31 @@
 /**
  * static local variables for bar y, max, and index.
  */
-static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
+static unsigned char bar_y = 3, bar_c = 1, bar_m = 1, bar_i = 0, bar_oldi = 0;
 
 unsigned short bar_coord(unsigned char x, unsigned char y)
 {
-  return (y*40)+x;
+	return (y * 40) + x;
 }
 
 void bar_clear(bool oldRow)
 {
-  char i;
-  char by;
-  unsigned short o;
+	char i;
+	char by;
+	unsigned short o;
 
-  if (oldRow)
-    by = bar_y + bar_oldi;
-  else
-    by = bar_y + bar_i;
+	if (oldRow)
+		by = bar_y + bar_oldi;
+	else
+		by = bar_y + bar_i;
 
-  o = bar_coord(0,by);
+	o = bar_coord(0, by);
 
-  for (i=0;i<40;i++)
-    {
-      COLOR_RAM[o+i] = COLOR_DESELECT;
-      TEXT_RAM[o+i] &= 0x7F;
-    }
+	for (i = 0; i < 40; i++)
+	{
+		COLOR_RAM[o + i] = COLOR_DESELECT;
+		TEXT_RAM[o + i] &= 0x7F;
+	}
 }
 
 /**
@@ -46,16 +46,16 @@ void bar_clear(bool oldRow)
  */
 void bar_update(void)
 {
-  unsigned short o;
-  unsigned char i;
+	unsigned short o;
+	unsigned char i;
 
-  o = bar_coord(0,bar_y+i);
+	o = bar_coord(0, bar_y + i);
 
-  for (i=0;i<40;i++)
-    {
-      COLOR_RAM[o+i] = COLOR_SELECT;
-      TEXT_RAM[o+i] |= 0x80;
-    }
+	for (i = 0; i < 40; i++)
+	{
+		COLOR_RAM[o + i] = COLOR_SELECT;
+		TEXT_RAM[o + i] |= 0x80;
+	}
 }
 
 /**
@@ -67,12 +67,12 @@ void bar_update(void)
  */
 void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 {
-  bar_y = y;
-  bar_c = c;
-  bar_m = m-1;
-  bar_i = i;
-  bar_oldi = bar_i;
-  bar_update();
+	bar_y = y;
+	bar_c = c;
+	bar_m = m - 1;
+	bar_i = i;
+	bar_oldi = bar_i;
+	bar_update();
 }
 
 /**
@@ -80,13 +80,13 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
  */
 void bar_up()
 {
-  bar_oldi=bar_i;
-  
-  if (bar_i > 0)
-    {
-      bar_i--;
-      bar_update();
-    }
+	bar_oldi = bar_i;
+
+	if (bar_i > 0)
+	{
+		bar_i--;
+		bar_update();
+	}
 }
 
 /**
@@ -94,13 +94,13 @@ void bar_up()
  */
 void bar_down()
 {
-  bar_oldi=bar_i;
+	bar_oldi = bar_i;
 
-  if (bar_i < bar_m)
-    {
-      bar_i++;
-      bar_update();
-    }
+	if (bar_i < bar_m)
+	{
+		bar_i++;
+		bar_update();
+	}
 }
 
 /**
@@ -108,9 +108,9 @@ void bar_down()
  */
 void bar_jump(unsigned char i)
 {
-  bar_oldi=bar_i;
-  bar_i=i;
-  bar_update();
+	bar_oldi = bar_i;
+	bar_i = i;
+	bar_update();
 }
 
 /**
@@ -119,7 +119,7 @@ void bar_jump(unsigned char i)
  */
 unsigned char bar_get()
 {
-  return bar_i;
+	return bar_i;
 }
 
 #endif /* BUILD_C64 */

@@ -1,6 +1,6 @@
 /**
  * FujiNet for Coleco #Adam
- * 
+ *
  * Die function
  */
 #ifdef BUILD_C64
@@ -8,10 +8,10 @@
 
 void die(void)
 {
-  while(1) {}
+	while (1)
+	{
+	}
 }
 
-void quit(void)
-{
-}
+void quit(void) {}
 #endif

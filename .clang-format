@@ -1,0 +1,33 @@
+BasedOnStyle: LLVM
+ColumnLimit: 140
+AllowShortBlocksOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AllowShortFunctionsOnASingleLine: Empty
+IncludeBlocks: Preserve
+SortIncludes: false
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+AccessModifierOffset: -4
+AlignConsecutiveMacros: true
+AlwaysBreakTemplateDeclarations: Yes
+BreakInheritanceList: AfterColon
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: false
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+  SplitEmptyFunction: false
+IndentPPDirectives: None

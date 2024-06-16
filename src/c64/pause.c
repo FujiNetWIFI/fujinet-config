@@ -2,7 +2,7 @@
 
 void pause(unsigned char delay)
 {
-    // TODO implement
+	// TODO implement
 }
 
 #endif

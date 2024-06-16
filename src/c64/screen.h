@@ -1,7 +1,7 @@
 #ifdef BUILD_C64
 /**
  * FujiNet Config for #C64
- * 
+ *
  * Screen routines
  */
 
@@ -20,7 +20,7 @@ void screen_put_inverse(const char c);
 void screen_print_inverse(const char *s);
 void screen_print_menu(const char *si, const char *sc);
 
-void screen_set_wifi(AdapterConfig* ac);
+void screen_set_wifi(AdapterConfig *ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
 void screen_set_wifi_select_network(unsigned char nn);
 void screen_set_wifi_custom(void);
@@ -31,13 +31,13 @@ void screen_connect_wifi(NetConfig *nc);
 void screen_destination_host_slot(char *h, char *p);
 void screen_destination_host_slot_choose(void);
 
-const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn);
+const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn);
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_devices(void);
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e);
- 
+
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
 void screen_hosts_and_devices_edit_host_slot(unsigned char i);
 
@@ -46,7 +46,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
-void screen_show_info(bool printerEnabled, AdapterConfig* ac);
+void screen_show_info(bool printerEnabled, AdapterConfig *ac);
 
 void screen_select_file(void);
 void screen_select_file_display(char *p, char *f);
@@ -55,7 +55,7 @@ void screen_select_file_next(void);
 void screen_select_file_new_type(void);
 void screen_select_file_prev(void);
 void screen_select_file_display_long_filename(char *e);
-void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType);
+void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType);
 void screen_select_file_clear_long_filename(void);
 void screen_select_file_choose(char visibleEntries);
 void screen_select_file_new_size(unsigned char k);
