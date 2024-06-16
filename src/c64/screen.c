@@ -80,14 +80,13 @@ void screen_putlcc(char c)
 	// REMOVE
 }
 
-void screen_set_wifi(AdapterConfig *ac)
+void screen_set_wifi(AdapterConfigExtended *ac)
 {
 	clrscr();
 	gotoxy(9, 0);
 	cprintf("WELCOME TO #FUJINET!");
 	gotoxy(0, 2);
-	cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X", ac->macAddress[0], ac->macAddress[1], ac->macAddress[2], ac->macAddress[3],
-			ac->macAddress[4], ac->macAddress[5]);
+	cprintf("MAC Address: %s", ac->sMacAddress);
 	gotoxy(7, STATUS_BAR);
 	cprintf("SCANNING FOR NETWORKS...");
 }
@@ -302,7 +301,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 	cprintf("%-128s", dp);
 }
 
-void screen_show_info(bool printerEnabled, AdapterConfig *ac)
+void screen_show_info(bool printerEnabled, AdapterConfigExtended *ac)
 {
 	clrscr();
 
@@ -313,13 +312,11 @@ void screen_show_info(bool printerEnabled, AdapterConfig *ac)
 	gotoxy(0, 8);
 	cprintf("%10s%s\r\n", "SSID: ", ac->ssid);
 	cprintf("%10s%s\r\n", "HOSTNAME: ", ac->hostname);
-	cprintf("%10s%u.%u.%u.%u\r\n", "IP: ", ac->localIP[0], ac->localIP[1], ac->localIP[2], ac->localIP[3]);
-	cprintf("%10s%u.%u.%u.%u\r\n", "NETMASK: ", ac->netmask[0], ac->netmask[1], ac->netmask[2], ac->netmask[3]);
-	cprintf("%10s%u.%u.%u.%u\r\n", "DNS: ", ac->dnsIP[0], ac->dnsIP[1], ac->dnsIP[2], ac->dnsIP[3]);
-	cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n", "MAC: ", ac->macAddress[0], ac->macAddress[1], ac->macAddress[2], ac->macAddress[3],
-			ac->macAddress[4], ac->macAddress[5]);
-	cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\r\n", "BSSID: ", ac->bssid[0], ac->bssid[1], ac->bssid[2], ac->bssid[3], ac->bssid[4],
-			ac->bssid[5]);
+	cprintf("%10s%s\r\n", "IP: ", ac->sLocalIP);
+	cprintf("%10s%s\r\n", "NETMASK: ", ac->sNetmask);
+	cprintf("%10s%s\r\n", "DNS: ", ac->sDnsIP);
+	cprintf("%10s%s\r\n", "MAC: ", ac->sMacAddress);
+	cprintf("%10s%s\r\n", "BSSID: ", ac->sBssid);
 	cprintf("%10s%s\r\n", "FNVER: ", ac->fn_version);
 
 	gotoxy(6, STATUS_BAR);

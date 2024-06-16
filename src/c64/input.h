@@ -15,6 +15,8 @@
  */
 unsigned char input();
 
+char kb_get_c();
+
 /**
  * Get input from keyboard/joystick, translating lowercase presses to uppercase
  * @return keycode (or synthesized keycode if joystick)

@@ -19,24 +19,8 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
-
-#define KEY_RETURN		0x0D
-#define KEY_ESCAPE		0x1B
-#define KEY_SPACE		0x20
-#define KEY_1			0x31
-#define KEY_2			0x32
-#define KEY_3			0x33
-#define KEY_4			0x34
-#define KEY_5			0x35
-#define KEY_6			0x36
-#define KEY_7			0x37
-#define KEY_8			0x38
-#define KEY_TAB			9
-#define KEY_DELETE		127
-#define KEY_UP_ARROW	11
-#define KEY_DOWN_ARROW	10
-#define KEY_LEFT_ARROW	8
-#define KEY_RIGHT_ARROW 21
+#include "../key_codes.h"
+#include "../edit_string.h"
 
 #define STATUS_BAR 21 // defined in screen.c
 
@@ -55,6 +39,14 @@ extern unsigned char io_create_type;
 unsigned char input()
 {
 	return cgetc();
+}
+
+char kb_get_c() {
+    char c = 0;
+    c = kbhit();
+    if (c == 0) return 0;
+
+    return cgetc();
 }
 
 unsigned char input_ucase(void)
@@ -76,64 +68,8 @@ unsigned char input_ucase(void)
  */
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
 {
-	char i;
-	char a;
-	char uc;
-	char ostype;
-
-	uc = 0;
-	ostype = get_ostype() & 0xF0;
-
-	i = o; // index into array and y-coordinate
-	// x += o;
-
-	gotoy(y);
-
-	while (1)
-	{
-		gotox(x + i);
-		cputc('_'); // turn on cursor - does not have effect on Apple IIc
-		gotox(x + i);
-		a = cgetc();
-
-		switch (a)
-		{
-		case KEY_ESCAPE:
-			break;
-		case KEY_LEFT_ARROW:
-		case KEY_DELETE:
-			if (i > 0)
-			{
-				c[--i] = 0;
-				cputc(' ');
-				gotox(x + i);
-				cputc(' ');
-				gotox(x + i);
-			}
-			break;
-		case KEY_RIGHT_ARROW:
-			break;
-		case KEY_RETURN:
-			cputc(' ');
-			c[i] = 0;
-			cursor(0); // turn off cursor
-			return;	   // done
-			break;
-		default:
-			if (i < len)
-			{
-				if (a > 64 && a < 91)
-					a += uc;
-				gotox(x + i);
-				if (password)
-					screen_putlcc('*');
-				else
-					screen_putlcc(a);
-				c[i++] = a;
-			}
-			break;
-		}
-	}
+	// currently not using o, not many places used it, but may need to change edit_string if it proves to be required
+	edit_string(c, len, x, y, 36, password);
 }
 
 DHSubState input_destination_host_slot_choose(void)

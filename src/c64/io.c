@@ -4,60 +4,18 @@
  *
  * I/O Routines
  */
-#include "io.h"
+#include <c64.h>
+#include <cbm.h>
+#include <peekpoke.h> // For the insanity in io_boot()
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <peekpoke.h> // For the insanity in io_boot()
-#include <c64.h>
-#include <cbm.h>
+#include <string.h>
+
 #include "globals.h"
+#include "io.h"
 
 #define UNUSED(x) (void)(x);
-
-// #define FUJICMD_RESET "\xFF"
-// #define FUJICMD_GET_SSID "\xFE"
-// #define FUJICMD_SCAN_NETWORKS "\xFD"
-// #define FUJICMD_GET_SCAN_RESULT "\xFC"
-// #define FUJICMD_SET_SSID "\xFB"
-// #define FUJICMD_GET_WIFISTATUS "\xFA"
-// #define FUJICMD_MOUNT_HOST "\xF9"
-// #define FUJICMD_MOUNT_IMAGE "\xF8"
-// #define FUJICMD_OPEN_DIRECTORY "\xF7"
-// #define FUJICMD_READ_DIR_ENTRY "\xF6"
-// #define FUJICMD_CLOSE_DIRECTORY "\xF5"
-// #define FUJICMD_READ_HOST_SLOTS "\xF4"
-// #define FUJICMD_WRITE_HOST_SLOTS "\xF3"
-// #define FUJICMD_READ_DEVICE_SLOTS "\xF2"
-// #define FUJICMD_WRITE_DEVICE_SLOTS "\xF1"
-// #define FUJICMD_UNMOUNT_IMAGE "\xE9"
-// #define FUJICMD_GET_ADAPTERCONFIG "\xE8"
-// #define FUJICMD_NEW_DISK "\xE7"
-// #define FUJICMD_UNMOUNT_HOST "\xE6"
-// #define FUJICMD_GET_DIRECTORY_POSITION "\xE5"
-// #define FUJICMD_SET_DIRECTORY_POSITION "\xE4"
-// #define FUJICMD_SET_DEVICE_FULLPATH "\xE2"
-// #define FUJICMD_SET_HOST_PREFIX "\xE1"
-// #define FUJICMD_GET_HOST_PREFIX "\xE0"
-// #define FUJICMD_WRITE_APPKEY "\xDE"
-// #define FUJICMD_READ_APPKEY "\xDD"
-// #define FUJICMD_OPEN_APPKEY "\xDC"
-// #define FUJICMD_CLOSE_APPKEY "\xDB"
-// #define FUJICMD_GET_DEVICE_FULLPATH "\xDA"
-// #define FUJICMD_CONFIG_BOOT "\xD9"
-// #define FUJICMD_COPY_FILE "\xD8"
-// #define FUJICMD_MOUNT_ALL "\xD7"
-// #define FUJICMD_SET_BOOT_MODE "\xD6"
-// #define FUJICMD_ENABLE_DEVICE "\xD5"
-// #define FUJICMD_DISABLE_DEVICE "\xD4"
-// #define FUJICMD_DEVICE_STATUS "\xD1"
-// #define FUJICMD_STATUS "\x53"
-
-#define LFN 15
-#define DEV 15
-#define SAN 15
-
-#include <string.h>
 
 static NetConfig nc;
 static AdapterConfigExtended adapterConfig;
@@ -124,8 +82,8 @@ int io_set_ssid(NetConfig *nc)
 
 char *io_get_device_filename(uint8_t slot)
 {
-	fuji_get_device_filename(slot, &response);
-	return &response;
+	fuji_get_device_filename(slot, &response[0]);
+	return (char *) &response[0];
 }
 
 void io_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot, unsigned long selected_size, char *path)
@@ -169,8 +127,8 @@ void io_open_directory(uint8_t hs, char *p, char *f)
 char *io_read_directory(uint8_t maxlen, uint8_t a)
 {
 	memset(response, 0, maxlen);
-	fuji_read_directory(maxlen, a, &response);
-	return &response;
+	fuji_read_directory(maxlen, a, &response[0]);
+	return (char *) &response[0];
 }
 
 void io_close_directory(void)
@@ -191,7 +149,7 @@ void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mo
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
 	// incrementing is handled in function, we keep everything 0 based
-	fuji_copy_file(source_slot, destination_slot, &copySpec);
+	fuji_copy_file(source_slot, destination_slot, &copySpec[0]);
 }
 
 void io_set_boot_config(uint8_t toggle)
@@ -240,7 +198,7 @@ bool io_get_wifi_enabled(void)
 
 void io_get_filename_for_device_slot(unsigned char slot, const char *filename)
 {
-	fuji_get_device_filename(slot, filename);
+	fuji_get_device_filename(slot, (char *) filename);
 }
 
 bool io_mount_all(void)
