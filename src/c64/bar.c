@@ -4,6 +4,8 @@
  */
 
 #include <c64.h>
+#include <conio.h>
+#include <stdint.h>
 #include "bar.h"
 
 #define TEXT_RAM ((unsigned char *)0x0400)
@@ -48,9 +50,12 @@ void bar_update(void)
 {
 	unsigned short o;
 	unsigned char i;
+	o = bar_coord(0, bar_y + bar_i);
 
-	o = bar_coord(0, bar_y + i);
+	// remove the old bar
+	bar_clear(true);
 
+	// paint the new one
 	for (i = 0; i < 40; i++)
 	{
 		COLOR_RAM[o + i] = COLOR_SELECT;
@@ -108,6 +113,13 @@ void bar_down()
  */
 void bar_jump(unsigned char i)
 {
+	uint8_t old_x; 
+	uint8_t old_y;
+	old_x = wherex();
+	old_y = wherey();
+	gotoxy(14, 23);
+	cprintf("j:%d bi:%d bo:%d    ", i, bar_i, bar_oldi);
+	gotoxy(old_x, old_y);
 	bar_oldi = bar_i;
 	bar_i = i;
 	bar_update();

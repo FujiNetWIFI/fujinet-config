@@ -369,7 +369,7 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
 {
 	gotoxy(0, y + 3);
-	cprintf("%-40s", &e[2]); // skip the first two chars from FN (hold over from Adam)
+	cprintf("%-40s", &e[0]);
 }
 
 void screen_select_file_clear_long_filename(void)
@@ -427,18 +427,23 @@ void screen_select_file_filter(void)
 
 void screen_select_slot(char *e)
 {
-	unsigned long *s;
+	unsigned int s;
+	unsigned char low;
+	unsigned char high;
 
 	clrscr();
 
 	gotoxy(0, 7);
-	cprintf("%-40s", "FILE DETAILS");
-	cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n", "MTIME:", *e++, *e++, *e++, *e++, *e++, *e++);
+	cprintf("%-40s", "File Details");
+	cprintf("%8s %u-%02u-%02u %02u:%02u:%02u\r\n", "MTIME:", (unsigned char)(*e++) + 1900, *e++, *e++, *e++, *e++, *e++);
 
-	s = (unsigned long *)e;							 // Cast the next four bytes as a long integer.
-	cprintf("%8s %lu K\r\n\r\n", "SIZE:", *s >> 10); // Quickly divide by 1024
+	low = *e++;
+	high = *e++;
+	s = low + (high << 8);
+	cprintf("%8s %u\r\n\r\n", "SIZE:", s);
 
-	e += sizeof(unsigned long) + 2; // I do not need the next two bytes.
+	e += 2; // skip is_dir, media_type
+	// Filename is next
 	cprintf("%-40s", e);
 
 	screen_hosts_and_devices_device_slots(1, &deviceSlots[0], &deviceEnabled[0]);
