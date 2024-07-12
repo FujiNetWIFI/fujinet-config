@@ -1,3 +1,5 @@
+#ifdef USE_EDITSTRING
+
 #include <conio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -89,3 +91,5 @@ bool edit_string(char* initial_str, int max_length, uint8_t x, uint8_t y, uint8_
         display_string_in_viewport(x, y, buffer, current_length, viewport_width, cursor_pos, is_password);
     }
 }
+
+#endif /* USE_EDITSTRING */

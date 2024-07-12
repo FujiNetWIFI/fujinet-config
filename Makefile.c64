@@ -31,7 +31,7 @@ CONFIG  :=
 
 # Additional C compiler flags and options.
 # Default: none
-CFLAGS  = -Os -DBUILD_C64
+CFLAGS  = -Os -DBUILD_C64 -DUSE_EDITSTRING
 
 # Additional assembler flags and options.
 # Default: none
