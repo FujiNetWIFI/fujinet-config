@@ -1,3 +1,4 @@
+#ifdef BUILD_ADAM
 /**
  * Cursor routines
  */
@@ -20,3 +21,5 @@ void cursor_pos(unsigned char x, unsigned char y)
 {
   vdp_put_sprite_8(0,x<<3,y<<3,0,VDP_INK_DARK_BLUE);
 }
+
+#endif /* BUILD_ADAM */
