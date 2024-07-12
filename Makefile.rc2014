@@ -9,7 +9,7 @@ LIB_PROJECT_INC := ../fujinet-rc2014/lib/include
 CC=zcc
 AS=zcc
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.asm)
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *_rc2014.asm)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
