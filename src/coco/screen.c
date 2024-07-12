@@ -30,7 +30,7 @@ extern HDSubState hd_subState;
 extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 extern HostSlot hostSlots[8];
 
-static char uppercase_tmp[32]; // temp space for strupr(s) output.
+char uppercase_tmp[32]; // temp space for strupr(s) output.
                                // so original strings doesn't get changed.
 
 char *screen_upper(char *s)
@@ -261,9 +261,11 @@ void screen_select_file_display(char *p, char *f)
 
   if (f[0]==0x00)
       printf("%-32s",screen_upper(p));
-  else
-      printf("%-24s%8s",screen_upper(p),screen_upper(f));
-
+  else {
+      printf("%-24s",screen_upper(p));
+	  locate(24,1);
+	  printf ("%8s",screen_upper(f));
+  }
   screen_add_shadow(2,ORANGE);
 }
 
@@ -277,6 +279,9 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_filter(void)
 {
+    locate(0,14);
+    printf("%-63s","ENTER FILTER:");
+    locate(0,15);
 }
 
 void screen_select_file_next(void)
@@ -300,7 +305,16 @@ void screen_select_file_display_entry(unsigned char y, const char *e, unsigned e
 void screen_select_file_choose(char visibleEntries)
 {
   locate(0,14);
-  printf("%-32s","left PARENT DIR up/down MOVE");
+  printf("%-32s","_ ../ up/dn MOVE ^up/^dn PAGE");
+  asm {
+	PSHS	B
+	LDB		#$1F
+	STB		$5C0
+	DECB
+	STB		$5D1
+	STB		$5D5
+	PULS	B
+  }
   
   if (copy_mode==true)
     {

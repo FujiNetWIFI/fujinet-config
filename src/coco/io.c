@@ -348,6 +348,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 
     memset(odc.p,0,sizeof(odc.p));
     strcpy(odc.p,p);
+    strcpy(&odc.p[strlen(odc.p)+1],filter);
 
     io_ready();
     dwwrite((byte *)&odc, sizeof(odc));
