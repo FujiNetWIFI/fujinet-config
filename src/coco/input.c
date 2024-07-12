@@ -166,8 +166,7 @@ void input_line_hosts_and_devices_host_slot(int i, unsigned int o, char *c)
 
 void input_line_filter(char *c)
 {
-  while (true)
-    printf("%c",inkey());
+	input_line(0,15,c,31,false);
 }
 
 unsigned char input_select_file_new_type(void)
@@ -359,9 +358,12 @@ SFSubState input_select_file_choose(void)
 
       switch(k)
 	{
-        case 'N':
-        case 'n':
-            return SF_NEW;
+	case 'F':
+	case 'f':
+	  return SF_FILTER;
+    case 'N':
+    case 'n':
+      return SF_NEW;
 	case 0x03: // BREAK
 	  state = HOSTS_AND_DEVICES;
 	  return SF_DONE;
@@ -377,7 +379,7 @@ SFSubState input_select_file_choose(void)
 	    return SF_LINK;
 	  else
 	    return SF_DONE;
-	case 0x5E:
+	case 0x5E: // up arrow
 	  if ((bar_get() == 0) && (pos > 0))
 	    return SF_PREV_PAGE;
 	  else
@@ -388,9 +390,13 @@ SFSubState input_select_file_choose(void)
 	      select_display_long_filename();
 	      return SF_CHOOSE;
 	    }
-	case 0x0A:
+	case 0x5F: // shifted up arrow
+	  if (pos > 0)
+		return SF_PREV_PAGE;
+	  break;
+	case 0x0A: // down arrow
 	  if ((bar_get() == 9) && (dir_eof==false))
-	    return SF_NEXT_PAGE;
+		return SF_NEXT_PAGE;
 	  else
 	    {
 	      /* long_entry_displayed=false; */
@@ -399,6 +405,10 @@ SFSubState input_select_file_choose(void)
 	      select_display_long_filename();
 	      return SF_CHOOSE;
 	    }
+	  break;
+	case 0x5B: // shifted down arrow
+	  if (dir_eof == false)
+		return SF_NEXT_PAGE;
 	  break;
 	default:
 	  return SF_CHOOSE;
