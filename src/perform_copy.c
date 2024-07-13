@@ -65,6 +65,14 @@
 #include "pc6001/bar.h"
 #endif /* BUILD_Pc6001 */
 
+#ifdef BUILD_PMD85
+#include "pmd85/screen.h"
+#include "pmd85/io.h"
+#include "pmd85/globals.h"
+#include "pmd85/input.h"
+#include "pmd85/bar.h"
+#endif /* BUILD_Pmd85 */
+
 #ifdef BUILD_RC2014
 #include "rc2014/screen.h"
 #include "rc2014/io.h"

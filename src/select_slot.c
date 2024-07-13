@@ -73,6 +73,15 @@
 #include "pc6001/bar.h"
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_PMD85
+#include "pmd85/screen.h"
+#include "pmd85/input.h"
+#include "pmd85/globals.h"
+#include "pmd85/io.h"
+#include "pmd85/bar.h"
+#define DIR_MAX_LEN 36
+#endif /* BUILD_PMD85 */
+
 #ifdef BUILD_RC2014
 #include "rc2014/screen.h"
 #include "rc2014/input.h"

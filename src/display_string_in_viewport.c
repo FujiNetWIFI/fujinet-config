@@ -1,3 +1,5 @@
+#ifdef USE_EDITSTRING
+
 #include <conio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -40,3 +42,5 @@ void display_string_in_viewport(uint8_t x, uint8_t y, char* str, int current_len
         }
     }
 }
+
+#endif /* USE_EDITSTRING */

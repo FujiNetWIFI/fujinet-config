@@ -76,6 +76,14 @@ extern uint8_t sp_error;
 #include "pc6001/bar.h"
 #endif /* BUILD_PC6001 */
 
+#ifdef BUILD_PMD85
+#include "pmd85/globals.h"
+#include "pmd85/io.h"
+#include "pmd85/screen.h"
+#include "pmd85/input.h"
+#include "pmd85/bar.h"
+#endif /* BUILD_PMD85 */
+
 #ifdef BUILD_RC2014
 #include "rc2014/globals.h"
 #include "rc2014/io.h"
@@ -89,8 +97,8 @@ DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[8];
 HostSlot hostSlots[8];
-char selected_host_slot;
-char selected_device_slot;
+char selected_host_slot = 0;
+char selected_device_slot = 0;
 char selected_host_name[32];
 char temp_filename[256];
 
@@ -326,12 +334,21 @@ void hosts_and_devices(void)
   else
     hd_subState = HD_HOSTS;
 
-  while (state == HOSTS_AND_DEVICES)
-  {
+#ifdef BUILD_PMD85
     io_get_host_slots(&hostSlots[0]);
     io_get_device_slots(&deviceSlots[0]);
     io_update_devices_enabled(&deviceEnabled[0]);
     screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
+#endif
+
+  while (state == HOSTS_AND_DEVICES)
+  {
+#ifndef BUILD_PMD85
+    io_get_host_slots(&hostSlots[0]);
+    io_get_device_slots(&deviceSlots[0]);
+    io_update_devices_enabled(&deviceEnabled[0]);
+    screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
+#endif
 
     switch (hd_subState)
     {
