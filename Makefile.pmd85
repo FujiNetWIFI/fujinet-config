@@ -32,7 +32,7 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 
 # ROM Module boot code
 romload.bin:
-	printf '\xcd\x00\x8c\x00\x00\xff\x7f\x00\x00' > romload.bin
+	printf '\xcd\x00\x8c\x00\x00\xff\x6f\x00\x00' > romload.bin
 
 # c source to asm, for debug
 $(BUILD_DIR)/%.c.asm: %.c
