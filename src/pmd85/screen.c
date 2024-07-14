@@ -32,6 +32,32 @@ char *strshort(const char *s, unsigned char l)
 	return tmp_str;
 }
 
+unsigned char strcut(char *d, char *s, unsigned char l)
+{
+	strncpy(d, s, ++l);
+	if (d[--l])
+	{
+		d[l] = '\0';
+		return l;
+	}
+	return 0;
+}
+
+screen_print_multiline(ypos, const char *longstr)
+{
+	char *s = longstr;
+	unsigned char n;
+	unsigned char y = ypos;
+	do 
+	{
+		gotoxy(SCR_X0, y);
+		n = strcut(tmp_str, s, 40);
+		cprintf("%s", tmp_str);
+		if (y < SCR_Y0 + 29) y++;
+		s += n;
+	} while (n);
+}
+
 /* Enable/disable reverse character display.
 */
 unsigned char revers(unsigned char onoff)
@@ -504,8 +530,8 @@ void screen_select_file_display(char *p, char *f)
 	screen_print_menu("EOL", ":CHOOSE  ");
     screen_print_menu("K0",":ABORT  ");
     screen_print_menu("F","ILTER  ");
-    screen_print_menu("N","EW  ");
-    screen_print_menu("C","OPY");
+    screen_print_menu("","NEW  "); // TODO
+    screen_print_menu("","COPY");  // TODO
 	if (l > 1)
 	{
 		gotoxy(SCR_X0 + 15, STATUS_BAR+1);
@@ -530,9 +556,9 @@ void screen_select_file_prev(void)
 
 void screen_select_file_display_long_filename(char *e)
 {
-	// it wasn't this.
-	/* gotoxy(0,19); */
-	/* cprintf("%-40s",e); */
+	// gotoxy(SCR_X0 + 1, SCR_Y0 + 18);
+	// textcolor(WHITE); revers(0);
+	// screen_print_multiline(SCR_Y0 + 18, e);
 }
 
 void screen_select_file_next(void)
@@ -551,8 +577,8 @@ void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryTy
 
 void screen_select_file_clear_long_filename(void)
 {
-	// Is it this?
-	// cclearxy(0,13,80);
+	// screen_set_region(SCR_X0, SCR_Y0 + 19, 40, 1);
+	// screen_fill_region(BACKGROUND_PATTERN);
 }
 
 void screen_select_file_new_type(void)
@@ -608,20 +634,6 @@ void screen_select_file_filter(void)
 	cprintf("ENTER A WILDCARD FILTER. e.g. *PoMiDor*");
 }
 
-unsigned char strcut(char *d, char *s, unsigned char l)
-{
-	// if (++l >= sizeof(tmp_str))
-	// 	l = sizeof(tmp_str);
-	// strncpy(tmp_str, s, l);
-	strncpy(d, s, ++l);
-	if (d[--l])
-	{
-		d[l] = '\0';
-		return l;
-	}
-	return 0;
-}
-
 void screen_select_slot(char *e)
 {
 	struct _additl_info
@@ -656,16 +668,7 @@ void screen_select_slot(char *e)
   	cprintf("    SIZE: %lu", info->size);
 
 	// handle long filename
-	char *s = info->filename;
-	unsigned char n;
-	unsigned char y = SCR_Y0 + 13;
-	do 
-	{
-		gotoxy(SCR_X0, ++y);
-		n = strcut(tmp_str, s, 40);
-		cprintf("%s\n", tmp_str);
-		s += n;
-	} while (n);
+	screen_print_multiline(SCR_Y0 + 13, info->filename);
 
 	bar_set(SCR_Y0 + 1, SCR_X0 + 2, NUM_DEVICE_SLOTS, 0);
 }

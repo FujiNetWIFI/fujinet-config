@@ -68,9 +68,6 @@ extern bool copy_mode;
 unsigned char input()
 {
   return cgetc();
-  // unsigned char c = cgetc();
-  // gotoxy(0,29); cprintf("KEY: %02X", c);
-  // return c;
 }
 
 unsigned char input_ucase(void)
