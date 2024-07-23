@@ -21,6 +21,7 @@ NewDisk newDisk;
 unsigned char wifiEnabled=true;
 byte response[256];
 int _dirpos=0;
+byte orig_casflag;
 
 /**
  * @brief Read string to s from DriveWire with expected length l
@@ -124,6 +125,13 @@ unsigned char io_status(void)
 
 void io_init(void)
 {
+	// There's no partnering exit function for screen_init, so we'll set up
+	//   how casing is being handled here.  We default to lowercase.
+	asm {
+		lda $011A
+		sta orig_casflag
+		clr $011A
+	}
 }
 
 bool io_get_wifi_enabled(void)
@@ -333,7 +341,6 @@ void io_mount_host_slot(unsigned char hs)
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
-    // TODO: Add Filter from f!
     struct _open_directory
     {
         byte opcode;
@@ -462,7 +469,12 @@ void io_umount_disk_image(unsigned char ds)
 
 void io_boot(void)
 {
-  exit(0);
+	// Restore the original casing flag.
+	asm {
+		lda orig_casflag
+		sta $A11A
+	}
+	exit(0);
 }
 
 void io_create_new(unsigned char selected_host_slot, unsigned char selected_device_slot, unsigned long selected_size, char *path)
