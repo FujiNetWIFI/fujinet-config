@@ -88,10 +88,10 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
       c++;
       x++;
       if (x>31)
-	{
-	  y++;
-	  x=0;
-	}
+		{
+		y++;
+		x=0;
+		}
     }
 
   input_cursor(x,y);
@@ -100,7 +100,7 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
     {
       locate(x,y);
       input_cursor(x,y);
-      k=input();
+      k=(char)waitkey (false);
 
       switch (k)
 	{
