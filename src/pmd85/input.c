@@ -68,9 +68,6 @@ extern bool copy_mode;
 unsigned char input()
 {
   return cgetc();
-  // unsigned char c = cgetc();
-  // gotoxy(0,29); cprintf("KEY: %02X", c);
-  // return c;
 }
 
 unsigned char input_ucase(void)
@@ -330,25 +327,18 @@ SFSubState input_select_file_choose(void)
 	case KEY_LEFT_ARROW:
 		if ((bar_get() == 0) && (pos > 0))
 			return SF_PREV_PAGE;
-		else
-		{
-			long_entry_displayed = false;
-			bar_up();
-			select_display_long_filename();
-			return SF_CHOOSE;
-		}
+    long_entry_displayed = false;
+    bar_up();
+    select_display_long_filename();
+    break;
 	case KEY_DOWN_ARROW:
 	case KEY_RIGHT_ARROW:
 		if ((bar_get() == 14) && (dir_eof == false))
 			return SF_NEXT_PAGE;
-		else
-		{
-			long_entry_displayed = false;
-			bar_down();
-			select_display_long_filename();
-			return SF_CHOOSE;
-		}
-		break;
+    long_entry_displayed = false;
+    bar_down();
+    select_display_long_filename();
+    break;
 	case KEY_RETURN:
 		pos += bar_get();
 		entryType = select_file_entry_type();
@@ -356,10 +346,9 @@ SFSubState input_select_file_choose(void)
 			return SF_ADVANCE_FOLDER;
 		else if (entryType == ENTRY_TYPE_LINK)
 			return SF_LINK;
-		else
-		{
-			return SF_DONE;
-		}
+    // strncpy(source_path, path, 224);
+    // old_pos = pos;
+    return SF_DONE;
 	case KEY_ESCAPE:
 		copy_mode = false;
 		state = HOSTS_AND_DEVICES;
@@ -381,13 +370,14 @@ SFSubState input_select_file_choose(void)
 	case '<':
 		if (pos > 0)
 			return SF_PREV_PAGE;
+    break;
 	case '.':
 	case '>':
 		if (dir_eof == false)
 			return SF_NEXT_PAGE;
-	default:
-		return SF_CHOOSE;
+    break;
 	}
+  return SF_CHOOSE;
 }
 
 unsigned char input_select_file_new_type(void)
