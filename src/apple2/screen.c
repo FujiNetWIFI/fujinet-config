@@ -356,8 +356,16 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
+  char ostype;
+  ostype = get_ostype() & 0xF0;
+
   bar_set(1, 1, 8, selected_host_slot);
   cclearxy(0,STATUS_BAR,120);
+  gotoxy(0,STATUS_BAR-1);
+  if (ostype == 0x10) // Show for II/II+ only
+  {
+    cprintf("USE I J K M FOR NAVIGATION, T FOR TAB");
+  }
   gotoxy(0,STATUS_BAR);
   screen_print_menu("1-8", ":HOST  ");
   screen_print_menu("E","DIT  ");
