@@ -110,8 +110,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       }
       break;
     case KEY_LEFT_ARROW:
-    case 'j':
-    case 'J':
     case KEY_DELETE:
       if (i>0)
       {
@@ -123,8 +121,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       }
       break;
     case KEY_RIGHT_ARROW:
-    case 'k':
-    case 'K':
       break;
     case KEY_RETURN:
       cputc(' ');
