@@ -34,8 +34,8 @@ char *strshort(const char *s, unsigned char l)
 
 unsigned char strcut(char *d, char *s, unsigned char l)
 {
-	strncpy(d, s, ++l);
-	if (d[--l])
+	strncpy(d, s, l+1);
+	if (d[l])
 	{
 		d[l] = '\0';
 		return l;
@@ -638,14 +638,16 @@ void screen_select_slot(char *e)
 {
 	struct _additl_info
 	{
-		unsigned char year;
+		char year;
 		unsigned char month;
 		unsigned char day;
 		unsigned char hour;
 		unsigned char min;
 		unsigned char sec;
 		unsigned long size;
-		unsigned char flags;
+		//unsigned char flags;
+    	unsigned char isdir;
+    	unsigned char trunc;
 		unsigned char type;
 		char filename[0];
 	} *info = (struct _additl_info *)e;
@@ -662,7 +664,7 @@ void screen_select_slot(char *e)
 
   	gotoxy(SCR_X0, SCR_Y0 + 10); textcolor(WHITE);
   	cprintf("MODIFIED: %u-%02u-%02u %02u:%02u:%02u",
-		info->year + 1900, info->month, info->day, info->hour, info->min, info->sec);
+		2000 + info->year, info->month, info->day, info->hour, info->min, info->sec);
 
   	gotoxy(SCR_X0, SCR_Y0 + 11);
   	cprintf("    SIZE: %lu", info->size);

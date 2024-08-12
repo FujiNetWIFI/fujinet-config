@@ -346,7 +346,7 @@ SFSubState input_select_file_choose(void)
 			return SF_ADVANCE_FOLDER;
 		else if (entryType == ENTRY_TYPE_LINK)
 			return SF_LINK;
-    // strncpy(source_path, path, 224);
+    // strncpy(source_path, path, 224); // makes mess :-(
     // old_pos = pos;
     return SF_DONE;
 	case KEY_ESCAPE:
@@ -411,6 +411,7 @@ SSSubState input_select_slot_choose(void)
     case KEY_ESCAPE:
       state = SELECT_FILE;
       backToFiles = true;
+      // state = HOSTS_AND_DEVICES;
       return SS_DONE;
     case KEY_UP_ARROW:
     case KEY_LEFT_ARROW:
@@ -445,23 +446,13 @@ SSSubState input_select_slot_choose(void)
     case 'R':
     case 'r':
     case KEY_RETURN:
-      selected_device_slot=bar_get();
       mode = MODE_READ;
-      return SS_DONE;
-      // Ask for mode.
-      screen_select_slot_mode();
-      k = input_select_slot_mode(&mode);
-
-      if (!k)
-      {
-        state = SELECT_FILE;
-        backToFiles = true;
-      }
+      selected_device_slot=bar_get();
       return SS_DONE;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
       mode = MODE_WRITE;
+      selected_device_slot=bar_get();
       return SS_DONE;
     default:
       return SS_CHOOSE;
@@ -470,27 +461,27 @@ SSSubState input_select_slot_choose(void)
 
 unsigned char input_select_slot_mode(char *mode)
 {
-  unsigned char k = 0;
+  // unsigned char k = 0;
 
-  while (k == 0)
-  {
-    k = input_ucase();
+  // while (k == 0)
+  // {
+  //   k = input_ucase();
 
-    if (k == KEY_ESCAPE)
-    {
-      return 0;
-    }
+  //   if (k == KEY_ESCAPE)
+  //   {
+  //     return 0;
+  //   }
 
-    switch(k)
-    {
-      case 'W':
-      case 'w':
-        mode[0] = 2;
-        break;
-      default:
-        mode[0] = 1;
-    }
-  }
+  //   switch(k)
+  //   {
+  //     case 'W':
+  //     case 'w':
+  //       mode[0] = 2;
+  //       break;
+  //     default:
+  //       mode[0] = 1;
+  //   }
+  // }
   return 1;
 }
 
