@@ -128,7 +128,11 @@ void select_slot_display()
 
       io_get_device_slots(&deviceSlots[0]);
 
+#ifdef BUILD_PMD85
+      screen_select_slot(io_read_directory(120,0x80)); // up to 3 lines of 40 chars each
+#else
       screen_select_slot(io_read_directory(49,0x80));
+#endif
 
       io_close_directory();
     }
@@ -259,8 +263,13 @@ void select_slot_done()
 
   if (!quick_boot)
     {
+#ifdef BUILD_PMD85
+      // go back to hosts and devices
+      state=HOSTS_AND_DEVICES;
+#else
       state=SELECT_FILE;
       backToFiles = true;
+#endif
     }
   else
     {

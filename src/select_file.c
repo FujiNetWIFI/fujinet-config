@@ -131,11 +131,21 @@ void select_file_init(void)
   io_close_directory();
   pos = 0;
   memset(entry_size, 0, ENTRIES_PER_PAGE);
+
+  // clear path and filter
+#ifdef BUILD_PMD85
+  if ( !backToFiles ) {
+    memset(path, 0, 224);
+    path[0] = '/';
+    memset(filter, 0, 32);
+  }
+#else
   memset(path, 0, 224);
   path[0] = '/';
   if ( !backToFiles ) {
     memset(filter, 0, 32);
   }
+#endif
 
   sf_subState = SF_DISPLAY;
   quick_boot = dir_eof = false;
@@ -470,7 +480,9 @@ void select_file(void)
     // Return to the previous dir
     select_file_init();
     backToFiles = false;
+#ifndef BUILD_PMD85
     strncpy(path, source_path, sizeof(path));
+#endif
   }
   else if (backFromCopy)
   {
