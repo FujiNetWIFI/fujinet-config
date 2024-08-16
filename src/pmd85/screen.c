@@ -89,7 +89,7 @@ void screen_clear()
 	// fill the "background area" with pattern
 	screen_set_region(SCR_X0 - 2, SCR_Y0 - 1, 44, 26);
 	screen_fill_region(BACKGROUND_PATTERN);
-	revers(0); textcolor(WHITE);
+	revers(0); textcolor(TEXT_COLOR);
 }
 
 void screen_clear_status()
@@ -102,7 +102,7 @@ void screen_clear_status()
 void screen_init(void)
 {
 	clrscr(); // erase the whole screen area
-	revers(0); textcolor(WHITE);
+	revers(0); textcolor(TEXT_COLOR);
   	//screen_fujinetlogo();
 }
 
@@ -122,9 +122,9 @@ void screen_print_inverse(const char *s)
 
 void screen_print_menu(const char *si, const char *sc)
 {
-	revers(0); textcolor(RED);
+	revers(0); textcolor(MENU_HOTKEY_COLOR);
 	cputs(si);
-	textcolor(WHITE);
+	textcolor(MENU_ITEM_COLOR);
 	cputs(sc);
 }
 
@@ -193,7 +193,7 @@ void screen_error(const char *c)
 {
 	//cclearxy(SCR_X0, STATUS_BAR + 2, 40);
   	gotoxy(SCR_X0, STATUS_BAR + 2);
-  	revers(0); textcolor(MAGENTA);
+  	revers(0); textcolor(ERROR_COLOR);
   	cputs(c);
 }
 
@@ -201,18 +201,15 @@ void screen_set_wifi(AdapterConfigExtended *acx)
 {
 	// screen_clear();
 	// make full screen clear here, in case we need to clear some rubbish
-	clrscr(); 
-	revers(0); textcolor(WHITE);
-
-
+	clrscr();
 	gotoxy(SCR_X0 + 10, SCR_Y0);
-	textcolor(WHITE);
+	revers(0); textcolor(TITLE1_COLOR);
 	cprintf("WELCOME TO #FUJINET!");
 
 	// screen_set_region(SCR_X0, SCR_Y0 + 2, 40, 1);
 	// screen_fill_region(PATTERN_SOLID | ACE_CYAN);
 	gotoxy(SCR_X0 + 4, SCR_Y0 + 2);
-	textcolor(BLUE);
+	textcolor(TITLE2_COLOR);
 	cprintf("MAC Address: %s", acx->sMacAddress);
 
 	screen_clear_status();
@@ -237,7 +234,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     // screen_fill_region(PATTERN_BLANK);
 
 	gotoxy(SCR_X0 + 1, SCR_Y0 + 4 + n);
-	textcolor(WHITE); cprintf("%s", ds);
+	textcolor(TEXT_COLOR); cprintf("%s", ds);
 
 	if (s->rssi > -50)
 	{
@@ -457,9 +454,9 @@ void screen_show_info(bool printerEnabled, AdapterConfigExtended *acx)
 	screen_clear();
 
 	gotoxy(SCR_X0 + 5, SCR_Y0 + 2);
-	textcolor(MAGENTA);
+	textcolor(TITLE3_COLOR);
 	cprintf("F U J I N E T      C O N F I G");
-	textcolor(WHITE);
+	textcolor(TEXT_COLOR);
 	gotoxy(SCR_X0 + 8, SCR_Y0 + 6);
 	cprintf(       "SSID: %s", _info_str(acx->ssid));
 	gotoxy(SCR_X0 + 4, SCR_Y0 + 7);
@@ -514,13 +511,13 @@ void screen_select_file_display(char *p, char *f)
 	screen_fill_region(EDITLINE_PATTERN_ON);
 	// path
 	gotoxy(SCR_X0 + 39 - l, SCR_Y0 + 1);
-	textcolor(EDITLINE_COLOR);
+	textcolor(PATH_COLOR);
 	cprintf("%s", tmp_str);
 	// filter
 	if (f[0] != '\0')
 	{
 		gotoxy(SCR_X0 + 39 - strlen(f), SCR_Y0 + 2);
-		textcolor(BLUE); 
+		textcolor(FILTER_COLOR); 
 		cprintf("%s", f);
 	}
 	//revers(1);
@@ -541,9 +538,9 @@ void screen_select_file_display(char *p, char *f)
 
 void screen_print_bracket_dots()
 {
-	textcolor(CYAN); cputc('[');
-	textcolor(WHITE); cputs("...");
-	textcolor(CYAN); cputc(']');
+	textcolor(LIST_VBAR_COLOR); cputc('[');
+	textcolor(TEXT_COLOR); cputs("...");
+	textcolor(LIST_VBAR_COLOR); cputc(']');
 }
 
 void screen_select_file_prev(void)
@@ -659,10 +656,10 @@ void screen_select_slot(char *e)
 	screen_hosts_and_devices_device_slots(SCR_Y0 + 1, &deviceSlots[0], &deviceEnabled[0]);
 
   	gotoxy(SCR_X0, SCR_Y0 + 8);
-	revers(0); textcolor(BLUE);
+	revers(0); textcolor(TITLE4_COLOR);
   	cputs("FILE DETAILS");
 
-  	gotoxy(SCR_X0, SCR_Y0 + 10); textcolor(WHITE);
+  	gotoxy(SCR_X0, SCR_Y0 + 10); textcolor(TEXT_COLOR);
   	cprintf("MODIFIED: %u-%02u-%02u %02u:%02u:%02u",
 		2000 + info->year, info->month, info->day, info->hour, info->min, info->sec);
 
