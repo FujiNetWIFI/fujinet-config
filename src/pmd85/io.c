@@ -521,7 +521,9 @@ char *io_read_directory(unsigned char maxlen, unsigned char a)
       info->min = 15;
       info->sec = 4;
       info->size = ((unsigned long)(mock_files) << 12) | mock_files;
-      info->flags = 0;
+      //info->flags = 0;
+      info->isdir = 0;
+      info->trunc = 0;
       info->type = 0;
     }
     // test some long file names
@@ -534,7 +536,7 @@ char *io_read_directory(unsigned char maxlen, unsigned char a)
       {
         fn[maxlen] = '\0';
         if (a &0x80)
-          info->flags |= 0x02;
+          info->trunc |= 0x02;
       }
     }
     else
@@ -688,6 +690,7 @@ void io_mount_disk_image(unsigned char ds, unsigned char mode)
     dwwrite((char *)"\xE2\xF8",2);
     dwwrite((char *)&ds,1);
     dwwrite((char *)&mode,1);
+    io_ready(); // make sure mount completed (before reboot)
 #endif
 }
 
@@ -715,9 +718,9 @@ void io_umount_disk_image(unsigned char ds)
 
 void io_boot(void)
 {
-  // last_rc = FUJINET_RC_NOT_IMPLEMENTED;
-
-  // TODO
+#asm
+    jmp 0x8000
+#endasm
 }
 
 // The enabled status area needs visiting. this requires a LOT of status codes to send to FN, as there's no payload to specify which device.
