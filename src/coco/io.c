@@ -472,7 +472,7 @@ void io_boot(void)
 	// Restore the original casing flag.
 	asm {
 		lda orig_casflag
-		sta $A11A
+		sta $011A
 	}
 	exit(0);
 }
