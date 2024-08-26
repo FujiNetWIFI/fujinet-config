@@ -170,9 +170,13 @@ DHSubState input_destination_host_slot_choose(void)
       bar_jump(k-KEY_1);
       return DH_CHOOSE;
     case KEY_UP_ARROW:
+    case 'i':
+    case 'I':
       bar_up();
       return DH_CHOOSE;
     case KEY_DOWN_ARROW:
+    case 'm':
+    case 'M':
       bar_down();
       return DH_CHOOSE;
     default:
@@ -188,6 +192,8 @@ SFSubState input_select_file_choose(void)
   switch (k)
   {
   case KEY_RIGHT_ARROW:
+  case 'k':
+  case 'K':
   case KEY_RETURN:
     pos += bar_get();
     entryType = select_file_entry_type();
@@ -231,6 +237,8 @@ SFSubState input_select_file_choose(void)
       return SF_COPY;
     }
   case KEY_UP_ARROW:
+  case 'i':
+  case 'I':
     if ((bar_get() == 0) && (pos > 0))
       return SF_PREV_PAGE;
     else
@@ -241,6 +249,8 @@ SFSubState input_select_file_choose(void)
       return SF_CHOOSE;
     }
   case KEY_LEFT_ARROW:
+  case 'j':
+  case 'J':
     if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
     {
       state = HOSTS_AND_DEVICES;
@@ -252,6 +262,8 @@ SFSubState input_select_file_choose(void)
       return SF_DEVANCE_FOLDER;
     return SF_CHOOSE;
   case KEY_DOWN_ARROW:
+  case 'm':
+  case 'M':
     if ((bar_get() == 14) && (dir_eof == false))
       return SF_NEXT_PAGE;
     else
@@ -370,11 +382,19 @@ SSSubState input_select_slot_choose(void)
       mode = MODE_WRITE;
       return SS_DONE;
     case KEY_UP_ARROW:
+    case 'i':
+    case 'I':
     case KEY_LEFT_ARROW:
+    case 'j':
+    case 'J':
       bar_up();
       return SS_CHOOSE;
     case KEY_DOWN_ARROW:
+    case 'm':
+    case 'M':
     case KEY_RIGHT_ARROW:
+    case 'k':
+    case 'K':
       bar_down();
       return SS_CHOOSE;
     default:
@@ -446,6 +466,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_jump(k-KEY_1);
     return HD_HOSTS;
   case KEY_TAB:
+  case 'T':
     bar_clear(false);
     return HD_DEVICES;
   case KEY_RETURN:
@@ -477,12 +498,20 @@ HDSubState input_hosts_and_devices_hosts(void)
     state = SHOW_DEVICES;
     return HD_DONE;
   case KEY_UP_ARROW:
+  case 'i':
+  case 'I':
   case KEY_LEFT_ARROW:
+  case 'j':
+  case 'J':
     bar_up();
     selected_host_slot = bar_get();
     return HD_HOSTS;
   case KEY_DOWN_ARROW:
+  case 'm':
+  case 'M':
   case KEY_RIGHT_ARROW:
+  case 'k':
+  case 'K':
     bar_down();
     selected_host_slot = bar_get();
     return HD_HOSTS;
@@ -507,6 +536,7 @@ HDSubState input_hosts_and_devices_devices(void)
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_TAB:
+    case 'T':
       bar_clear(false);
       return HD_HOSTS;
     case 'E':
@@ -528,13 +558,21 @@ HDSubState input_hosts_and_devices_devices(void)
     // case KEY_CLEAR:
     //   return HD_CLEAR_ALL_DEVICES;
     case KEY_UP_ARROW:
+    case 'i':
+    case 'I':
     case KEY_LEFT_ARROW:
+    case 'j':
+    case 'J':
       bar_up();
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_DOWN_ARROW:
+    case 'm':
+    case 'M':
     case KEY_RIGHT_ARROW:
+    case 'k':
+    case 'K':
       bar_down();
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
@@ -575,12 +613,20 @@ WSSubState input_set_wifi_select(void)
     case 's':
       state=HOSTS_AND_DEVICES;
       return WS_DONE;
-    case KEY_UP_ARROW: // up arrow
+    case KEY_UP_ARROW:
+    case 'i':
+    case 'I':
     case KEY_LEFT_ARROW:
+    case 'j':
+    case 'J':
       bar_up();
       return WS_SELECT;
-    case KEY_DOWN_ARROW: // down arrow
+    case KEY_DOWN_ARROW:
+    case 'm':
+    case 'M':
     case KEY_RIGHT_ARROW:
+    case 'k':
+    case 'K':
       bar_down();
       return WS_SELECT;
     default:

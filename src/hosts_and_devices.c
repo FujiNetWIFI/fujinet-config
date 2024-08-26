@@ -82,6 +82,8 @@ extern uint8_t sp_error;
 #include "pmd85/screen.h"
 #include "pmd85/input.h"
 #include "pmd85/bar.h"
+#include "pmd85/colors.h"
+#include <conio.h>
 #endif /* BUILD_PMD85 */
 
 #ifdef BUILD_RC2014
@@ -308,6 +310,13 @@ void hosts_and_devices_done(void)
   clrscr();
   cprintf("MOUNTING DISKS...\r\n\r\n");
 #endif
+#ifdef BUILD_PMD85
+  char y = 1;
+  char s = '0';
+  clrscr();
+  gotoxy(SCR_X0, SCR_Y0);
+  textcolor(LIST_TITLE_COLOR); cprintf("MOUNTING DEVICES...");
+#endif
   for (i = 0; i < NUM_DEVICE_SLOTS; i++) // 4 for apple for now, what about adam? 8 for atari?
   {
     if (deviceSlots[i].hostSlot != 0xFF)
@@ -318,6 +327,15 @@ void hosts_and_devices_done(void)
 #ifdef BUILD_APPLE2
       s = i + 1;
       cprintf("                DISK %d\r\n", s);
+#endif
+#ifdef BUILD_PMD85
+      if (i == 2) s = 'T';
+      else if (i == 3) s = 'M';
+      else s++;
+      y++;
+      gotoxy(SCR_X0, SCR_Y0 + y);
+      textcolor(LIST_VBAR_COLOR); cprintf("%c:", s);
+      textcolor(TEXT_COLOR); cprintf("%s", deviceSlots[i].file);
 #endif
       io_mount_host_slot(deviceSlots[i].hostSlot);
       io_mount_disk_image(i, deviceSlots[i].mode);
