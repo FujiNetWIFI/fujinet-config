@@ -78,6 +78,9 @@ extern void io_boot();
 
 void setup(void)
 {
+#ifdef BUILD_APPLE2
+  screen_fujinetlogo();
+#endif
   io_init();
   screen_init();
 }
