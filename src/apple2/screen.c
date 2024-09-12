@@ -12,6 +12,7 @@
 #include <conio.h>
 #include <string.h>
 #include <apple2.h>
+#include <peekpoke.h>
 #ifdef __ORCAC__
 #include <texttool.h>
 #else
@@ -31,7 +32,7 @@ extern unsigned char copy_host_slot;
 extern bool deviceEnabled[8];
 extern char copySpec[256];
 
-void screen_init(void)
+void screen_fujinetlogo(void)
 {
   #ifdef __ORCAC__
     TextStartUp();
@@ -49,17 +50,40 @@ void screen_init(void)
     struct regs r;
     r.pc = 0xFE84;	// SETNORM: set normal (not inverse) text mode
     _sys(&r);
-    r.pc = 0xFB2f;	// INIT: set GR/HGR off, Text page 1
+    r.pc = 0xFB2F;	// INIT: set GR/HGR off, Text page 1
     _sys(&r);
     r.a = 0x91;     // Set 40 column mode, for IIgs startup in 80 col
     r.pc = 0xFDF0;  // COUT1
     _sys(&r);
   #endif
   clrscr();
+  #ifndef BUILD_A2CDA
+    POKE(0x2000,0x80); // \
+    POKE(0x2001,0x80); //  > Overwrite JMP
+    POKE(0x2002,0x80); // /
+    POKE(0xC057,0); // HIRES
+    POKE(0xC053,0); // MIXED
+    POKE(0xC050,0); // GRAPH
+    cputsxy(13,23,"Initializing");
+    {
+      unsigned char dots;
+      unsigned int delay;
+      for (dots = 0; dots < 3; dots++)
+      {
+        for(delay = 0; delay < 5000; delay++);
+        cputc('.');
+      }
+    }
+  #endif  
   // sp_init(); // moved here so we do after screen is setup, and before logo
- #ifndef BUILD_A2CDA
-  screen_fujinetlogo();
- #endif
+}
+
+void screen_init(void)
+{
+  #ifndef BUILD_A2CDA
+    cclearxy(13,23,15);
+    POKE(0xC051,0); // TEXT
+  #endif
 }
 
 void screen_put_inverse(const char c)
@@ -80,35 +104,6 @@ void screen_print_menu(const char *si, const char *sc)
 {
   screen_print_inverse(si);
   cprintf(sc);
-}
-
-void screen_fujinetlogo(void)
-{
-  unsigned char i, j;
-
-  gotoxy(20,12);
-  cprintf("O");
-
-  for (i = 0; i < 11; i++)
-  {
-      gotoxy(i+4,12);    // fuji scrolling across left to centre
-      cprintf(" FUJI*");
-      gotoxy(31-i,12);   // net scrolling back right to centre
-      cprintf("*NET ");
-      gotoxy(20,i);      // * coming down from the top
-      cprintf(" ");
-      gotoxy(20,i+1);
-      cprintf("*");
-      gotoxy(21,23-i);   // * coming up from bottom
-      cprintf("*");
-      gotoxy(21,23-i+1);
-      cprintf(" ");
-      for(j = 0; j < 255; j++);
-   }
-   for(i = 0; i < 127; i++) // delay a bit
-   {
-      for(j = 0; j < 255; j++);
-   }
 }
 
 void screen_error(const char *c)
