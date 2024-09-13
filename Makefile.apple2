@@ -10,7 +10,7 @@
 # Space or comma separated list of cc65 supported target platforms to build for.
 # Default: c64 (lowercase!)
 TARGETS := apple2
-FUJINET_LIB_VERSION = 3.0.1
+FUJINET_LIB_VERSION = 4.6.0
 FUJINET_LIB = fujinet-lib
 FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 

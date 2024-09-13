@@ -22,7 +22,7 @@ void sp_list_devs(void)
   {
     err = sp_status(i, 0x03);
     if (err == 0){
-      cprintf("UNIT #%d NAME: ", i);
+      cprintf("UNIT #%-2d NAME: ", i);
       for (j = 0; j < sp_payload[4]; j++)
         cputc(sp_payload[5 + j]);
       cputs("\r\n");

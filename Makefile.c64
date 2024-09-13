@@ -11,7 +11,7 @@
 # Default: c64 (lowercase!)
 TARGETS := c64
 
-FUJINET_LIB_VERSION = 4.3.1
+FUJINET_LIB_VERSION = 4.6.0
 FUJINET_LIB = fujinet-lib
 FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 
@@ -46,7 +46,7 @@ LDFLAGS = $(LDFLAGS.$(TARGETS))
 SRCDIR :=
 
 # Path to the directory to output binary to 
-# Default: ~/Workspace/tnfs 
+# Default: ~/Workspace/tnfs
 DESTDIR := 
 
 # Path to the directory where object files are to be stored (inside respective target subdirectories).
@@ -146,7 +146,7 @@ endif
 # Presume the destination for the binary in the subdirectory '/Workspace/tnfs'.
 # Set DESTDIR to override.
 ifeq ($(DESTDIR),)
-  DESTDIR := ~/Workspace/tnfs 
+  DESTDIR := ~/Workspace/tnfs
 endif
 
 # Presume the object and dependency files to be located in the subdirectory
