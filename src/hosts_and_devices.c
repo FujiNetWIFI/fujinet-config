@@ -203,7 +203,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   if (selected_device_slot == 4 || selected_device_slot == 5)
   {
-    screen_error("DISKII DRIVES ARE READ ONLY");
+    screen_error("DiskII drives are read only");
     for (i = 0; i < 4000; i++)
       mnt = true; // Do nothing to let the message display
     screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
@@ -263,7 +263,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   if (!mnt)
   {
     // Display error for a moment then redraw menu after
-    screen_error("ERROR SETTING DISK MODE");
+    screen_error("Error setting disk mode");
     for (i = 0; i < 4000; i++)
       mnt = true; // Do nothing to let the message display
     // likely failed on setting write mode, make it read only
