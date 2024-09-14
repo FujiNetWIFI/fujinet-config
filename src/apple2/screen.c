@@ -47,6 +47,7 @@ static const char *empty="Empty";
 static const char *off="Off";
 
 static bool lowercase;
+static bool mousetext;
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
@@ -68,11 +69,11 @@ static void iputc(char c)
 
 static void hline(unsigned char l)
 {
-  if (lowercase)
+  if (mousetext)
   {
     while (l--)
     {
-      cputc(0xD3);
+      cputc(0xD3); // ─
     }
   }
   else
@@ -104,11 +105,15 @@ void screen_init(void)
     r.a = 0x91;     // Set 40 column mode, for IIgs startup in 80 col
     r.pc = 0xFDF0;  // COUT1
     _sys(&r);
-    if (get_ostype() >= APPLE_IIE)
+    if (get_ostype() >= APPLE_IIIEM)
     {
-      POKE(0xC00F,0); // ALTCHAR
       allow_lowercase(true);
       lowercase = true;
+      if (get_ostype() >= APPLE_IIE)
+      {
+        POKE(0xC00F,0); // ALTCHAR
+        mousetext = true;
+      }
     }
   #endif
   clrscr();
@@ -116,8 +121,11 @@ void screen_init(void)
     POKE(0x2000,0x80); // \
     POKE(0x2001,0x80); //  > Overwrite JMP
     POKE(0x2002,0x80); // /
+    if (get_ostype() != APPLE_IIIEM) // No MIX in Satan Mode
+    {
+      POKE(0xC053,0); // MIXED
+    }
     POKE(0xC057,0); // HIRES
-    POKE(0xC053,0); // MIXED
     POKE(0xC050,0); // GRAPH
     cputsxy(13,23,"Initializing");
     {
@@ -129,7 +137,7 @@ void screen_init(void)
         cputc('.');
       }
     }
-    clrscr();
+    cclearxy(13,23,16);
     POKE(0xC051,0); // TEXT
   #endif  
 }
