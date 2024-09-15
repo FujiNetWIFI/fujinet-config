@@ -139,6 +139,7 @@ void screen_init(void)
     }
     cclearxy(13,23,16);
     POKE(0xC051,0); // TEXT
+    POKE(0xC056,0); // LORES for Satan Mode
   #endif  
 }
 
