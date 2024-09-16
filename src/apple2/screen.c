@@ -121,12 +121,16 @@ void screen_init(void)
     POKE(0x2000,0x80); // \
     POKE(0x2001,0x80); //  > Overwrite JMP
     POKE(0x2002,0x80); // /
-    if (get_ostype() != APPLE_IIIEM) // No MIX in Satan Mode
+    if (get_ostype() == APPLE_IIIEM) // Satan Mode
     {
-      POKE(0xC053,0); // MIXED
+      POKE(0xC057,0); // GRAPH
     }
-    POKE(0xC057,0); // HIRES
-    POKE(0xC050,0); // GRAPH
+    else
+    {
+      POKE(0xC057,0); // HIRES
+      POKE(0xC053,0); // MIXED
+      POKE(0xC050,0); // GRAPH
+    }
     cputsxy(13,23,"Initializing");
     {
       unsigned char dots;
@@ -138,8 +142,14 @@ void screen_init(void)
       }
     }
     cclearxy(13,23,16);
-    POKE(0xC051,0); // TEXT
-    POKE(0xC056,0); // LORES for Satan Mode
+    if (get_ostype() == APPLE_IIIEM) // Satan Mode
+    {
+      POKE(0xC056,0); // TEXT
+    }
+    else
+    {
+      POKE(0xC051,0); // TEXT
+    }
   #endif  
 }
 
