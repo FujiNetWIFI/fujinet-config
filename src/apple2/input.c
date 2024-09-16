@@ -91,7 +91,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   while(1)
   {
     gotox(x + i);
-    cputc('_'); // turn on cursor - does not have effect on Apple IIc
+    cputc('_');
     gotox(x + i);
     a = cgetc();
     if (ostype == APPLE_IIIEM)   // check for Apple3 lowercase
@@ -125,7 +125,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     case KEY_RETURN:
       cputc(' ');
       c[i] = 0;
-      cursor(0); // turn off cursor
       return; // done
       break;
     default:
