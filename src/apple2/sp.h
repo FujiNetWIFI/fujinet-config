@@ -10,11 +10,7 @@
 
 #include <stdint.h>
 
-#ifdef __ORCAC__
-extern uint8_t *sp_payload;
-#else
 extern uint8_t sp_payload[1024];
-#endif
 
 int8_t sp_status(uint8_t dest, uint8_t statcode);
 void sp_list_devs(void);

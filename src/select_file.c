@@ -402,11 +402,7 @@ unsigned select_file_entry_type(void)
 
 void select_file_new(void)
 {
-#ifdef __ORCAC__
-  static char f[128];
-#else
   char f[128];
-#endif
   char k;
 
   memset(f, 0, 128);

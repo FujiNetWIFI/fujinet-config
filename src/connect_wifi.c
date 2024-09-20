@@ -71,11 +71,7 @@
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
-#ifdef __ORCAC__
-	static NetConfig nc;
-#else
 	NetConfig nc;
-#endif
 	unsigned char s;
 
 	memcpy(&nc, io_get_ssid(), sizeof(NetConfig));

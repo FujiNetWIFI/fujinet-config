@@ -71,10 +71,18 @@ static void hline(unsigned char l)
 {
   if (mousetext)
   {
+  #ifdef __ORCAC__
+    WriteChar(0x9b);  // Mousetext on
+    WriteChar(0x8f);  // Inverse
+  #endif
     while (l--)
     {
       cputc(0xD3); // ─
     }
+  #ifdef __ORCAC__
+    WriteChar(0x98);  // Mousetext off
+    WriteChar(0x8e);  // Normal
+  #endif
   }
   else
   {
@@ -93,6 +101,7 @@ void screen_init(void)
     InitTextDev(input);
     InitTextDev(output);
     WriteChar(0x91);  // Set 40 col
+    mousetext = true;
   #else
     // init canonical video mode like the ROM RESET code, which starts with
     //   JSR SETNORM
@@ -117,7 +126,7 @@ void screen_init(void)
     }
   #endif
   clrscr();
-  #ifndef BUILD_A2CDA
+  #ifndef __ORCAC__
     POKE(0x2000,0x80); // \
     POKE(0x2001,0x80); //  > Overwrite JMP
     POKE(0x2002,0x80); // /
@@ -410,7 +419,7 @@ void screen_hosts_and_devices_hosts(void)
 {
   bar_set(1, 1, 8, selected_host_slot);
   cclearxy(0,STATUS_BAR,120);
-  if (!lowercase) // Show for II/II+ only
+  if (!lowercase && get_ostype() != APPLE_IIGS) // Show for II/II+ only
   {
     cputsxy(0,STATUS_BAR-1,"Use I J K M for navigation, T for TAB");
   }

@@ -10,13 +10,13 @@
 
 /* Enforce strict type compatibility checks */
 /* Allow // comments */
-#pragma ignore 0x0008
+/*#pragma ignore 0x0008*/
 
 /* Perform all lint checks but treat them as warnings */
-#pragma lint -1;0
+/* #pragma lint -1;0 */
 
 #ifdef BUILD_A2CDA
-#pragma cda "FujiNet Config" Start ShutDown
+#pragma cda "FujiNet Config" CDAentry CDAshutdown
 #endif /* BUILD_A2CDA */
 
 #endif /* ORCAC_H */

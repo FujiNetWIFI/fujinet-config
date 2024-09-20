@@ -144,14 +144,3 @@ int main(void)
 	run();
 	return 0;
 }
-
-#ifdef BUILD_A2CDA
-void Start(void)
-{
-	main();
-}
-
-void ShutDown(void)
-{
-}
-#endif /* BUILD_A2CDA */
