@@ -131,14 +131,15 @@ A copy of the Byte Works ORCA/C and its libraries is also required. You can get 
 Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
 
 ### CC65 headers installed in GoldenGate
-In addition, cc65 headers `conio.h`, `apple2.h` and `peekpoke.h` are necessary and should be present in ORCA/C include search path. You may copy them under ~/GoldenGate/Libraries/cc65. These are available here: https://github.com/cc65/cc65/tree/master/include.
+In addition, cc65 headers `conio.h`, `apple2.h`, `apple2_filetype.h`, `target.h` and `peekpoke.h` are necessary and should be present in ORCA/C include search path. You may copy them under ~/GoldenGate/Libraries/cc65. These are available here: https://github.com/cc65/cc65/tree/master/include.
 
 Now with those prerequisites out of the way:
 
 To build the ORCA shell EXE:
 ```
-cd fujinet-config-adam.git
-$ make -f Makefile.apple2gs clean dist
+$ cd fujinet-config
+$ make -f Makefile.apple2gs
+$ make -f Makefile.apple2gs dist
 ```
 
 Check for any errors. If successful there will be logs that say: 
@@ -156,8 +157,9 @@ Restart ORCA shell or issue a `commands 15:syscmnd` and you're ready.
 
 To build the CDA:
 ```
-cd fujinet-config-adam.git
-$ make -f Makefile.apple2cda clean dist
+cd fujinet-config
+$ make -f Makefile.apple2cda
+$ make -f Makefile.apple2cda dist
 ```
 
 Check for any errors. If successful there will be logs that say: 

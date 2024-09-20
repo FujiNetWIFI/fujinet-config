@@ -67,6 +67,14 @@ void cputc (char c)
   WriteChar(c);
 }
 
+void cputcxy (unsigned char x, unsigned char y, char c)
+/* Same as "gotoxy (x, y); cputc (c);" */
+{
+  gotoxy(x, y);
+  WriteChar(c);
+}
+
+
 void cputs (const char* s)
 /* Output a NUL-terminated string at the current cursor position */
 {
@@ -83,6 +91,13 @@ void cputs (const char* s)
     if (*++s == '\n' && x == '\r')
       s++;
   }
+}
+
+void cputsxy (unsigned char x, unsigned char y, const char* s)
+/* Same as "gotoxy (x, y); puts (s);" */
+{
+  gotoxy(x, y);
+  cputs(s);
 }
 
 int cprintf (const char* format, ...)
@@ -162,6 +177,10 @@ unsigned char get_ostype (void)
 /* Get the machine type. Returns one of the APPLE_xxx codes. */
 {
   return APPLE_IIGS;
+}
+
+unsigned char allow_lowercase (unsigned char onoff)
+{
 }
 
 #endif /* __ORCAC__ */
