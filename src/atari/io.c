@@ -1,6 +1,6 @@
 #ifdef BUILD_ATARI
 /**
- * #FujiNet SIO calls
+ * FujiNet SIO calls
  */
 
 #include <atari.h>

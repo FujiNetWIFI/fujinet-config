@@ -1,6 +1,6 @@
 #ifdef BUILD_PC6001
 /**
- * #FujiNet CONFIG FOR #adam
+ * FujiNet CONFIG FOR #adam
  *
  * Screen Routines
  */

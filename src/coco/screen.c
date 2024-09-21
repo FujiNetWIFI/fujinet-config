@@ -84,7 +84,7 @@ void screen_set_wifi(AdapterConfig *ac)
 {
   cls(6);
   locate(0,0);
-  printf("%32s","WELCOME TO #FUJINET");
+  printf("%32s","WELCOME TO FUJINET");
   printf("%15s%02x:%02x:%02x:%02x:%02x:%02x","MAC:",
 	 ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   printf("%32s","SCANNING FOR NETWORKS...");
@@ -152,7 +152,7 @@ void screen_set_wifi_password(void)
 void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
   cls(7);
-  printf("     #FUJINET CONFIGURATION     ");
+  printf("     FUJINET CONFIGURATION      ");
   printf("%32s","SSID:");
   printf("%32s",screen_upper(ac->ssid));
   printf("%32s","HOSTNAME:");

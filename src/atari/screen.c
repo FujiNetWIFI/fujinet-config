@@ -152,7 +152,7 @@ void screen_set_wifi(AdapterConfigExtended *ac)
   set_active_screen(SCREEN_SET_WIFI);
   screen_clear();
   bar_clear(false);
-  screen_puts(0, 0, "WELCOME TO #FUJINET!");
+  screen_puts(0, 0, "WELCOME TO FUJINET!");
   screen_puts(0, 22, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
   screen_puts(13, 2, ac->sMacAddress);
@@ -222,7 +222,7 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
   screen_clear();
   bar_clear(false);
 
-  screen_puts(3, 5, "#FUJINET CONFIG");
+  screen_puts(3, 5, "FUJINET CONFIG");
   screen_puts(7, 17,
               CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "RECONNECT " CH_KEY_LABEL_L CH_INV_S CH_KEY_LABEL_R "CHANGE SSID");
   screen_puts(9, 19, "Any other key to return");
@@ -736,7 +736,7 @@ void screen_connect_wifi(NetConfig *nc)
   screen_clear();
   bar_clear(false);
 
-  screen_puts(0, 0, "WELCOME TO #FUJINET! CONNECTING TO NET");
+  screen_puts(0, 0, "WELCOME TO FUJINET! CONNECTING TO NET");
   screen_puts(2, 3, nc->ssid);
   bar_show(3);
 }

@@ -1,6 +1,6 @@
 #ifdef _CMOC_VERSION_
 /**
- * #FujiNet Drivewire calls
+ * FujiNet Drivewire calls
  */
 
 #include <cmoc.h>

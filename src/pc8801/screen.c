@@ -1,6 +1,6 @@
 #ifdef BUILD_PC8801
 /**
- * #FujiNet CONFIG FOR #adam
+ * FujiNet CONFIG FOR #adam
  *
  * Screen Routines
  */

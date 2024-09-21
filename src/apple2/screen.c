@@ -1,6 +1,6 @@
 #ifdef BUILD_APPLE2
 /**
- * #FujiNet CONFIG FOR Apple2
+ * FujiNet CONFIG FOR Apple2
  *
  * Screen Routines
  */
@@ -225,7 +225,7 @@ void screen_putlcc(char c)
 void screen_set_wifi(AdapterConfigExtended *acx)
 {
   clrscr();
-  cputsxy(9,0,"Welcome to #FujiNet!");
+  cputsxy(9,0,"Welcome to FujiNet!");
   gotoxy(0,2); cprintf("MAC Address: %18s", acx->sMacAddress);
   cputsxy(7,STATUS_BAR,"Scanning for networks...");
 }
