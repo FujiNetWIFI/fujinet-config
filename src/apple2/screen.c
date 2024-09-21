@@ -120,7 +120,7 @@ void screen_init(void)
       lowercase = true;
       if (get_ostype() >= APPLE_IIE)
       {
-        POKE(0xC00F,0); // ALTCHAR
+        POKE(0xC00F,0); // SETALTCHAR
         mousetext = true;
       }
     }
