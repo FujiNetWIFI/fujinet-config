@@ -391,8 +391,8 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
   static const char hl[] = " Host List";
-  static const char sd[] = " Smartport Drives";
-  static const char dd[] = " DiskII Drives";
+  static const char sd[] = " SmartPort Drives";
+  static const char dd[] = " Disk II Drives";
   char i;
 
   clrscr();
@@ -627,8 +627,8 @@ void screen_select_file_filter(void)
 void screen_select_slot(char *e)
 {
   unsigned long *s;
-  static const char ss[] = " Smartport Drives";
-  static const char ds[] = " DiskII Drives";
+  static const char ss[] = " SmartPort Drives";
+  static const char ds[] = " Disk II Drives";
   char ostype;
   ostype = get_ostype() & 0xF0;
 
