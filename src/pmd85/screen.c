@@ -1,6 +1,6 @@
 #ifdef BUILD_PMD85
 /**
- * #FujiNet CONFIG FOR PMD85
+ * FujiNet CONFIG FOR PMD85
  *
  * Screen Routines
  */
@@ -204,7 +204,7 @@ void screen_set_wifi(AdapterConfigExtended *acx)
 	clrscr();
 	gotoxy(SCR_X0 + 10, SCR_Y0);
 	revers(0); textcolor(TITLE1_COLOR);
-	cprintf("WELCOME TO #FUJINET!");
+	cprintf("WELCOME TO FUJINET!");
 
 	// screen_set_region(SCR_X0, SCR_Y0 + 2, 40, 1);
 	// screen_fill_region(PATTERN_SOLID | ACE_CYAN);

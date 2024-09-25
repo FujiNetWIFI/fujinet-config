@@ -1,5 +1,5 @@
 /**
- * #FujiNet for ADAM Configuration Tool
+ * FujiNet for ADAM Configuration Tool
  *
  */
 

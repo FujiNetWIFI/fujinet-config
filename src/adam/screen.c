@@ -1,6 +1,6 @@
 #ifdef BUILD_ADAM
 /**
- * #FujiNet CONFIG FOR #adam
+ * FujiNet CONFIG FOR #adam
  *
  * Screen Routines
  */
@@ -51,7 +51,7 @@ void screen_init(void)
   console_ioctl(IOCTL_GENCON_SET_UDGS,&param);
   smartkeys_set_mode();
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-  smartkeys_status("  WELCOME TO #FUJINET");
+  smartkeys_status("  WELCOME TO FUJINET");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
   eos_start_read_keyboard();
 }
@@ -117,7 +117,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 void screen_set_wifi_select_network(unsigned char nn)
 {
   smartkeys_display(NULL,NULL,NULL," HIDDEN\n  SSID"," RESCAN","  SKIP");
-  sprintf(response,"  WELCOME TO #FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);
+  sprintf(response,"  WELCOME TO FUJINET!\n  %u NETWORKS FOUND\n  SELECT A NETWORK.",nn);
   bar_set(0,3,nn,0);
 
   smartkeys_status(response);

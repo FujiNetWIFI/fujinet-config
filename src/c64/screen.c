@@ -1,6 +1,6 @@
 #ifdef BUILD_C64
 /**
- * #FujiNet CONFIG FOR C64
+ * FujiNet CONFIG FOR C64
  *
  * Screen Routines
  */
@@ -84,7 +84,7 @@ void screen_set_wifi(AdapterConfigExtended *ac)
 {
 	clrscr();
 	gotoxy(9, 0);
-	cprintf("WELCOME TO #FUJINET!");
+	cprintf("WELCOME TO FUJINET!");
 	gotoxy(0, 2);
 	cprintf("MAC Address: %s", ac->sMacAddress);
 	gotoxy(7, STATUS_BAR);

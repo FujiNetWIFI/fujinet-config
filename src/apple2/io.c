@@ -308,6 +308,8 @@ void io_boot(void)
   }
   else  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
   {
+    POKE(0xC00E,0); // CLRALTCHAR
+
     // Make the simulated 6502 RESET result in a cold start.
     // INC $03F4
     POKE(0x100,0xEE);

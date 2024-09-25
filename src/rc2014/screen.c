@@ -1,6 +1,6 @@
 #ifdef BUILD_RC2014
 /**
- * #FujiNet CONFIG FOR #adam
+ * FujiNet CONFIG FOR #adam
  *
  * Screen Routines
  */
@@ -112,7 +112,7 @@ void screen_init(void)
 void screen_set_wifi(AdapterConfig *ac)
 {
   screen_clrscr();
-  screen_gotoxy(9,0); cprintf("WELCOME TO #FUJINET!");
+  screen_gotoxy(9,0); cprintf("WELCOME TO FUJINET!");
   screen_gotoxy(0,2); cprintf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
     ac->macAddress[0],
     ac->macAddress[1],
