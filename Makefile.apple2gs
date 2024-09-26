@@ -32,7 +32,7 @@ CONFIG  :=
 
 # Additional C compiler flags and options.
 # Default: none
-CFLAGS = -I -P +F cc=-p\"src:apple2:orcac.h\" cc=-isrc cc=-isrc:apple2 cc=-i13:cc65 cc=-ifujinet-lib cc=-dBUILD_APPLE2 cc=-d__APPLE2__ cc=-d__fastcall__=
+CFLAGS = -I -P +F cc=-p\"src:apple2:orcac.h\" cc=-isrc cc=-isrc:apple2 cc=-ifujinet-lib cc=-dBUILD_APPLE2 cc=-d__APPLE2__
 
 # Additional assembler flags and options.
 # Default: none

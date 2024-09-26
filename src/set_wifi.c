@@ -13,7 +13,6 @@
 #include "coco/globals.h"
 #else
 #include <string.h>
-#include <conio.h>
 #endif /* _CMOC_VERSION_ */
 
 #include "set_wifi.h"

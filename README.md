@@ -130,9 +130,6 @@ A copy of the Byte Works ORCA/C and its libraries is also required. You can get 
 #### Build GoldenGate:
 Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
 
-### CC65 headers installed in GoldenGate
-In addition, cc65 headers `conio.h`, `apple2.h`, `apple2_filetype.h`, `target.h` and `peekpoke.h` are necessary and should be present in ORCA/C include search path. You may copy them under ~/GoldenGate/Libraries/cc65. These are available here: https://github.com/cc65/cc65/tree/master/include.
-
 Now with those prerequisites out of the way:
 
 To build the ORCA shell EXE:

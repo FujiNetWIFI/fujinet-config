@@ -7,9 +7,16 @@
 
 #include "io.h"
 #include <stdint.h>
+#ifdef __ORCAC__
+#include <coniogs.h>
+#include <apple2gs.h>
+#include <texttool.h>
+#else
 #include <conio.h>
-#include <stdlib.h>
+#include <apple2.h>
 #include <peekpoke.h> // For the insanity in io_boot()
+#endif
+#include <stdlib.h>
 #include "globals.h"
 
 #include "fujinet-fuji.h"
@@ -59,9 +66,6 @@
 
 #include <string.h>
 #include "sp.h"
-#ifdef __ORCAC__
-#include <texttool.h>
-#endif
 
 static NetConfig nc;
 static AdapterConfigExtended adapterConfig;
