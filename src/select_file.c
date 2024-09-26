@@ -16,7 +16,6 @@
 #define DIR_MAX_LEN 31
 #define ENTRIES_PER_PAGE 10
 #else
-#include <conio.h>
 #include <string.h>
 #endif /* CMOC_VERSION */
 

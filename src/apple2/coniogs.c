@@ -10,9 +10,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <texttool.h>
-#include <peekpoke.h>
-#include <conio.h>
-#include <apple2.h>
+#include <coniogs.h>
+#include <apple2gs.h>
 
 static char buffer[121];
 static unsigned char x;
@@ -47,18 +46,6 @@ void gotoxy (unsigned char x, unsigned char y)
   POKE(0x25, y-1);
   WriteChar(0x8d);
   gotox(x);
-}
-
-unsigned char wherex (void)
-/* Return the X position of the cursor */
-{
-  return PEEK(0x57b);
-}
-
-unsigned char wherey (void)
-/* Return the Y position of the cursor */
-{
-  return PEEK(0x25);
 }
 
 void cputc (char c)
@@ -169,18 +156,6 @@ void cclearxy (unsigned char x, unsigned char y, unsigned char length)
   POKE(0x24, x);
   POKE(0x57b, x);
   cclear(length);
-}
-
-/* Functions from apple2 */
-
-unsigned char get_ostype (void)
-/* Get the machine type. Returns one of the APPLE_xxx codes. */
-{
-  return APPLE_IIGS;
-}
-
-unsigned char allow_lowercase (unsigned char onoff)
-{
 }
 
 #endif /* __ORCAC__ */

@@ -3,11 +3,16 @@
  * Input routines
  */
 
+#ifdef __ORCAC__
+#include <coniogs.h>
+#include <apple2gs.h>
+#else
 #include <conio.h>
-#include <string.h>
-#include <stdbool.h>
 #include <apple2.h>
 #include <peekpoke.h>
+#endif
+#include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "globals.h"

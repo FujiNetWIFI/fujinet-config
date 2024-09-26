@@ -2,8 +2,11 @@
 
 #include "sp.h"
 #include "screen.h"
+#ifdef __ORCAC__
+#include <coniogs.h>
+#else
 #include <conio.h>
-#include <apple2.h>
+#endif
 
 /* Theoretical maximum # of SmartPort devices is 127
  * Call out to each device and if they respond (err = 0),

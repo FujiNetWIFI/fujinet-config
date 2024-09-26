@@ -9,15 +9,17 @@
 #include "globals.h"
 #include "bar.h"
 #include "sp.h"
-#include <conio.h>
-#include <string.h>
-#include <apple2.h>
-#include <peekpoke.h>
 #ifdef __ORCAC__
+#include <coniogs.h>
+#include <apple2gs.h>
 #include <texttool.h>
 #else
+#include <conio.h>
+#include <apple2.h>
+#include <peekpoke.h>
 #include <6502.h>
 #endif
+#include <string.h>
 
 // https://retrocomputing.stackexchange.com/questions/8652/why-did-the-original-apple-e-have-two-sets-of-inverse-video-characters:
 // $00..$1F Inverse  Uppercase Letters

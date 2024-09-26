@@ -38,7 +38,11 @@
 #include "apple2/screen.h"
 #include "apple2/input.h"
 #include "apple2/bar.h"
+#ifdef __ORCAC__
+#include <coniogs.h>
+#else
 #include <conio.h>
+#endif
 // #include <stdio.h> // for debugging using sprintf
 
 extern uint8_t sp_error;
