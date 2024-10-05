@@ -200,16 +200,6 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   char num;
 #elif defined(BUILD_APPLE2)
   bool mnt = false;
-
-  if (selected_device_slot == 4 || selected_device_slot == 5)
-  {
-    screen_error("DiskII drives are read only");
-    for (i = 0; i < 4000; i++)
-      mnt = true; // Do nothing to let the message display
-    screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
-    screen_hosts_and_devices_devices_selected(selected_device_slot); // redraw bottom half of screen
-    return;
-  }
 #endif
 
   memset(temp_filename, 0, sizeof(temp_filename));
@@ -272,7 +262,9 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     io_put_device_slots(&deviceSlots[0]);
   }
   screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
-  screen_hosts_and_devices_devices_selected(selected_device_slot); // redraw bottom half of screen
+  //screen_hosts_and_devices_devices_selected(selected_device_slot); // Breaks disk order on screen??
+  selected_device_slot = 0; // Go back to drive 0 instead
+  hosts_and_devices_devices();
 #else
     io_mount_disk_image(selected_device_slot, m);
 #endif
@@ -301,7 +293,6 @@ void hosts_and_devices_done(void)
 #ifdef _CMOC_VERSION_
   cls(1);
   printf("MOUNTING DISKS...\n\n");
-  
 #endif
 
 #ifdef BUILD_APPLE2
@@ -384,7 +375,7 @@ void hosts_and_devices(void)
       break;
     }
   }
-  
+
   if (state == DONE) {
     hosts_and_devices_done();
   }

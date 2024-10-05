@@ -37,6 +37,7 @@ void io_set_device_filename(uint8_t ds, uint8_t hs, uint8_t mode, char* e);
 bool io_mount_disk_image(unsigned char ds, unsigned char mode);
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot);
 void io_set_boot_config(unsigned char toggle);
+void io_set_boot_mode(uint8_t mode);
 void io_umount_disk_image(unsigned char ds);
 bool io_get_device_enabled_status(unsigned char d);
 void io_update_devices_enabled(bool *e);

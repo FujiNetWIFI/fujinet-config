@@ -159,7 +159,7 @@ void screen_init(void)
     {
       POKE(0xC051,0); // TEXT
     }
-  #endif  
+  #endif
 }
 
 void screen_put_inverse(char c)
@@ -345,9 +345,6 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   char rw_mode;
   char host_slot;
   char separator;
-  char ostype;
-  ostype = get_ostype() & 0xF0;
-
 
   for (i = 0; i < NUM_DEVICE_SLOTS; i++)
   {
@@ -379,11 +376,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
 
     gotoxy(0, line);
-    // If running on IIC and DISKII Drive1 is empty, display a special note
-    if (ostype == APPLE_IIC && i == 4 && d[i].file[0] == 0x00 && e[i] == true)
-      cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, "IIC internal floppy");
-    else
-      cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+    cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
 
 }
@@ -430,6 +423,7 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("C","onfig ");
   screen_print_menu("TAB",":Drives ");
   screen_print_menu("S","pDevs ");
+  screen_print_menu("L","obby ");
   #ifdef __ORCAC__
     screen_print_menu("ESC",":Exit");
   #else
@@ -456,6 +450,7 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("R","ead only  ");
   screen_print_menu("W","rite\r\n");
   screen_print_menu("TAB",":Host slots  ");
+  screen_print_menu("L","obby ");
   screen_print_menu("ESC", ":Boot");
 }
 
@@ -629,8 +624,6 @@ void screen_select_slot(char *e)
   unsigned long *s;
   static const char ss[] = " SmartPort Drives";
   static const char ds[] = " Disk II Drives";
-  char ostype;
-  ostype = get_ostype() & 0xF0;
 
   clrscr();
 
@@ -641,12 +634,6 @@ void screen_select_slot(char *e)
   gotoxy(0,6);
   hline(40 - (sizeof(ds)-1));
   cputs(ds);
-
-  // Display message about Disk II Drive 1 being internal drive on IIc
-  if (ostype == APPLE_IIC)
-  {
-    cputsxy(0,10,"Note DiskII drive1 = IIC internal drive");
-  }
 
   gotoxy(0,12);
   cprintf("%-40s","File details");
@@ -687,8 +674,8 @@ void screen_hosts_and_devices_long_filename(char *f)
   {
     cputsxy(0,STATUS_BAR-3,f);
   }
-  //else
-  //  cclearxy(0,STATUS_BAR-3,120); // this was wiping the diskII, take out for now
+  else
+    cclearxy(0,STATUS_BAR-3,120);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)
@@ -738,5 +725,26 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
   cputsxy(2,1+hs,empty);
+}
+
+bool screen_mount_and_boot_lobby(void)
+{
+  unsigned char k;
+
+  // Confirm we want to go to there
+  cclearxy(0,STATUS_BAR,120);
+  gotoxy(3,STATUS_BAR);
+  screen_print_menu(" Boot to Lobby?", " Y/N");
+
+  k=cgetc();
+
+  switch (k)
+  {
+  case 'Y':
+  case 'y':
+    return true;
+  default:
+    return false;
+  }
 }
 #endif /* BUILD_APPLE2 */

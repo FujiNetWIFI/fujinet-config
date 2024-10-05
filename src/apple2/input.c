@@ -14,6 +14,8 @@
 #include "input.h"
 #include "bar.h"
 #include "screen.h"
+#include "mount_and_boot.h"
+
 #include "../set_wifi.h"
 #include "../die.h"
 #include "../hosts_and_devices.h"
@@ -467,6 +469,9 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_TAB:
   case 'T':
     bar_clear(false);
+    // Switching view, reset selected
+    selected_device_slot = 0;
+    selected_host_slot = 0;
     return HD_DEVICES;
   case KEY_RETURN:
     selected_host_slot = bar_get();
@@ -505,6 +510,10 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_up();
     selected_host_slot = bar_get();
     return HD_HOSTS;
+  case 'l':
+  case 'L':
+    mount_and_boot_lobby();
+    return HD_HOSTS;
   case KEY_DOWN_ARROW:
   case 'm':
   case 'M':
@@ -537,6 +546,9 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_TAB:
     case 'T':
       bar_clear(false);
+      // Switching view, reset selected
+      selected_device_slot = 0;
+      selected_host_slot = 0;
       return HD_HOSTS;
     case 'E':
     case 'e':
@@ -566,6 +578,10 @@ HDSubState input_hosts_and_devices_devices(void)
       selected_device_slot=bar_get();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
+    case 'l':
+    case 'L':
+      mount_and_boot_lobby();
+      return HD_HOSTS;
     case KEY_DOWN_ARROW:
     case 'm':
     case 'M':
