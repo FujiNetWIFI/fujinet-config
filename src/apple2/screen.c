@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "bar.h"
 #include "sp.h"
+#include "diskii.h"
 #include <conio.h>
 #include <string.h>
 #include <apple2.h>
@@ -18,6 +19,8 @@
 #else
 #include <6502.h>
 #endif
+
+#define MAX_SMARTPORT	4
 
 // https://retrocomputing.stackexchange.com/questions/8652/why-did-the-original-apple-e-have-two-sets-of-inverse-video-characters:
 // $00..$1F Inverse  Uppercase Letters
@@ -141,6 +144,7 @@ void screen_init(void)
       POKE(0xC050,0); // GRAPH
     }
     cputsxy(13,23,"Initializing");
+
     {
       unsigned char dots;
       unsigned int delay;
@@ -150,6 +154,11 @@ void screen_init(void)
         cputc('.');
       }
     }
+
+    // Putting this here so it happens after the splash screen, even
+    // though it's more of an io_init kind of thing.
+    diskii_find();
+    
     cclearxy(13,23,16);
     if (get_ostype() == APPLE_IIIEM) // Satan Mode
     {
@@ -349,7 +358,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   for (i = 0; i < NUM_DEVICE_SLOTS; i++)
   {
     line = y + i;
-    if (i > 3) {
+    if (i > MAX_SMARTPORT - 1) {
       // skip over diskII heading
       line++;
     }
@@ -376,7 +385,16 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
 
     gotoxy(0, line);
-    cprintf("%d%c %c%c%s", i<4 ? i+1 : i-3, rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+    if (i < MAX_SMARTPORT)
+      cprintf("%d", i+1);
+    else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 15)
+	cprintf("NA");
+    else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 0)
+      cprintf("%d", i - MAX_SMARTPORT + 1);
+    else
+      cprintf("S%dD%d", diskii_slotdrive[i - MAX_SMARTPORT].slot,
+	      diskii_slotdrive[i - MAX_SMARTPORT].drive);
+    cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
 
 }
