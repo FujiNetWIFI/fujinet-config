@@ -118,7 +118,7 @@ void screen_init(void)
     {
       allow_lowercase(true);
       lowercase = true;
-      if (get_ostype() >= APPLE_IIE)
+      if (get_ostype() > APPLE_IIE)
       {
         POKE(0xC00F,0); // SETALTCHAR
         mousetext = true;
