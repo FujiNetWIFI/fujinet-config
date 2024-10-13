@@ -158,7 +158,7 @@ void screen_init(void)
     // Putting this here so it happens after the splash screen, even
     // though it's more of an io_init kind of thing.
     diskii_find();
-    
+
     cclearxy(13,23,16);
     if (get_ostype() == APPLE_IIIEM) // Satan Mode
     {

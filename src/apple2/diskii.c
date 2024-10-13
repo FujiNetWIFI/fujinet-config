@@ -8,6 +8,7 @@ extern uint8_t sp_get_fuji_id();
 extern int8_t sp_control(uint8_t dest, uint8_t ctrlcode);
 extern int8_t sp_status(uint8_t dest, uint8_t statcode);
 extern uint8_t sp_payload[];
+extern uint8_t sp_fuji_id;
 
 #define MAX_DISKII      2
 
@@ -51,11 +52,18 @@ static void enable_diskii(uint8_t slot, uint8_t drive)
 
 void diskii_find()
 {
-  uint8_t dev_id, slot, drive, status, seen;
+  uint8_t dev_id, slot, drive, status, seen, mask;
   int8_t err;
 
 
   dev_id = sp_get_fuji_id();
+
+  // FIXME - suddenly sp_fuji_get_id() is returning 1 instead of 8 and sp_fuji_id is 0
+  if (!sp_fuji_id)
+    dev_id = sp_get_fuji_id();
+  // FIXME - even after sp_fuji_id is set it's still returning 1
+  dev_id = sp_fuji_id;
+
   memset(diskii_slotdrive, 0xff, sizeof(diskii_slotdrive));
 
   if (dev_id) {
@@ -78,7 +86,12 @@ void diskii_find()
         err = sp_status(dev_id, IWM_STATUS_ENSEEN);
 	if (!err) {
 	  status = sp_payload[0] & (~seen);
-          // FIXME - make sure only a single bit is set
+
+          // Make sure only a single bit is set
+	  mask = status & (status - 1);
+	  if (mask != 0)
+	    status ^= mask;
+
 	  if (!status)
 	    continue;
 
