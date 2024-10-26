@@ -10,15 +10,18 @@
 #include "bar.h"
 #include "sp.h"
 #include "diskii.h"
-#include <conio.h>
 #include <string.h>
-#include <apple2.h>
-#include <peekpoke.h>
 #ifdef __ORCAC__
+#include <coniogs.h>
+#include <apple2gs.h>
 #include <texttool.h>
 #else
+#include <conio.h>
+#include <apple2.h>
+#include <peekpoke.h>
 #include <6502.h>
 #endif
+#include <string.h>
 
 #define MAX_SMARTPORT	4
 
