@@ -1,4 +1,5 @@
 #ifdef BUILD_APPLE2
+#ifdef __ORCAC__
 /**
  * FujiNet Config for Apple2
  *
@@ -19,5 +20,9 @@
 #pragma cda "FujiNet Config" CDAentry CDAshutdown
 #endif /* BUILD_A2CDA */
 
+#define POKE(addr,val)     (*(unsigned char*) (addr) = (val))
+#define PEEK(addr)         (*(unsigned char*) (addr))
+
 #endif /* ORCAC_H */
+#endif /* __ORCAC__ */
 #endif /* BUILD_APPLE2 */

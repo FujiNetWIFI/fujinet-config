@@ -5,7 +5,11 @@
 #include "globals.h"
 #include "screen.h"
 #include "../die.h"
+#ifdef __ORCAC__
+#include <coniogs.h>
+#else
 #include <conio.h>
+#endif
 
 void mount_and_boot_lobby(void)
 {

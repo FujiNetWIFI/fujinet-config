@@ -1,4 +1,8 @@
+#ifdef BUILD_APPLE2
 #ifdef __ORCAC__
+
+#ifndef APPLE2GS_H
+#define APPLE2GS_H
 
 /* Return codes for get_ostype */
 #define APPLE_UNKNOWN   0x00
@@ -20,4 +24,6 @@
 #define get_ostype() APPLE_IIGS
 #define allow_lowercase(onoff)
 
-#endif
+#endif /* APPLE2GS_H */
+#endif /* __ORCAC__ */
+#endif /* BUILD_APPLE2 */

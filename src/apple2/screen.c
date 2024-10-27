@@ -21,7 +21,6 @@
 #include <peekpoke.h>
 #include <6502.h>
 #endif
-#include <string.h>
 
 #define MAX_SMARTPORT	4
 
