@@ -1,6 +1,8 @@
 #ifdef BUILD_APPLE2
 #include "diskii.h"
+#ifndef __ORCAC__
 #include <peekpoke.h>
+#endif
 #include <string.h>
 
 /* FIXME - fujinet-bus-apple2.h isn't reachable */

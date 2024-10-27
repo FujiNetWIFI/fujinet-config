@@ -1,7 +1,11 @@
+#ifdef BUILD_APPLE2
 #ifdef __ORCAC__
 
-#define POKE(addr,val)     (*(unsigned char*) (addr) = (val))
-#define PEEK(addr)         (*(unsigned char*) (addr))
+#ifndef CONIOGS_H
+#define CONIOGS_H
+
+#include "orcac.h"
+
 #define wherex() PEEK(0x57b)
 #define wherey() PEEK(0x25)
 
@@ -21,4 +25,6 @@ void chlinexy (unsigned char x, unsigned char y, unsigned char length);
 void cclear (unsigned char length);
 void cclearxy (unsigned char x, unsigned char y, unsigned char length);
 
-#endif
+#endif /* CONIOGS_H */
+#endif /* __ORCAC__ */
+#endif /* BUILD_APPLE2 */
