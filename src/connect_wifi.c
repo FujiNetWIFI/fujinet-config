@@ -91,7 +91,7 @@ void connect_wifi(void)
 			pause(150);
 			return;
 		case 3:
-			screen_error("CONNECTION SUCCESSFUL!");
+			screen_error("CONNECTION SUCCESS!");
 			state = HOSTS_AND_DEVICES;
 			pause(60);
 			return;

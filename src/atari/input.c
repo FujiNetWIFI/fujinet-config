@@ -378,6 +378,9 @@ HDSubState input_hosts_and_devices_devices(void)
 
   switch (k)
   {
+  case KCODE_RETURN:
+    selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
+    return HD_NAV_TO_HOST;
   case '1':
   case '2':
   case '3':
