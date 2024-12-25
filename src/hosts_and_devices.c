@@ -377,8 +377,6 @@ void hosts_and_devices(void)
     case HD_DONE:
       state = DONE;
       break;
-    case HD_NAV_TO_HOST:
-      break;
     }
   }
 
