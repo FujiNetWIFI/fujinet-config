@@ -21,8 +21,7 @@ typedef enum _hd_subState
    HD_HOSTS,
    HD_DEVICES,
    HD_CLEAR_ALL_DEVICES,
-   HD_DONE,
-   HD_NAV_TO_HOST
+   HD_DONE
 } HDSubState;
 
 typedef enum _sf_subState
