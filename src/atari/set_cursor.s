@@ -83,8 +83,8 @@ sc_mount_boot:
 sc_set_wifi:
     .word 0, 20
     .word 40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 440, 480, 520, 560, 600, 640, 680, 720, 760, 800
-    .word 840, 860
-    .word 880, 920, 960, 1000, 1040, 1080, 1120, 1160, 1200
+    .word 840, 880
+    .word 900, 940, 980, 1020, 1060, 1100, 1140, 1180, 1220
 
 .define set_cursor_table sc_hosts_devs, sc_show_info, sc_sel_file, sc_set_wifi
 

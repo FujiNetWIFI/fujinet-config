@@ -153,7 +153,7 @@ void screen_set_wifi(AdapterConfigExtended *ac)
   screen_clear();
   bar_clear(false);
   screen_puts(0, 0, "WELCOME TO FUJINET!");
-  screen_puts(0, 22, "SCANNING NETWORKS...");
+  screen_puts(0, 23, "SCANNING NETWORKS...");
   screen_puts(0, 2, "MAC Address:");
   screen_puts(13, 2, ac->sMacAddress);
 }
@@ -192,7 +192,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   screen_clear_line(numNetworks + NETWORKS_START_Y);
   screen_puts(2, NETWORKS_START_Y + numNetworks, "<Enter a specific SSID>");
 
-  screen_puts(0, 22, " SELECT NET, S SKIP "
+  screen_puts(0, 23, " SELECT NET, S SKIP "
                      "   ESC TO RE-SCAN   ");
 
   bar_show(NETWORKS_START_Y);
@@ -207,7 +207,8 @@ void screen_set_wifi_custom(void)
 
 void screen_set_wifi_password(void)
 {
-  screen_clear_line(22);
+  screen_clear_line(23);
+  screen_clear_line(24);
   screen_puts(0, 23, "    ENTER PASSWORD");
 }
 
@@ -719,8 +720,9 @@ void screen_dlist_set_wifi(void)
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist));
   POKE(DISPLAY_LIST + 0x0a, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
-  POKE(DISPLAY_LIST + 0x1b, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x1c, DL_CHR20x8x2);
+  POKE(DISPLAY_LIST + 0x1d, DL_CHR20x8x2);
 }
 
 void screen_dlist_mount_and_boot(void)
