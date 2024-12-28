@@ -207,7 +207,7 @@ void input_select_slot_build_eos_directory_label(char *c)
 WSSubState input_set_wifi_select(void)
 {
   unsigned char k;
-  unsigned char temp[29];
+  //unsigned char temp[29];
   k = input_ucase();
 
   // sprintf(temp, "y=%d, nn=%d, sn=%d", bar_get(), numNetworks, selected_network);
@@ -267,7 +267,6 @@ HDSubState input_hosts_and_devices_hosts(void)
 {
   // Up in the hosts section.
   unsigned char k;
-  unsigned char y;
   char temp[20];
 
   if (input_handle_console_keys() == 0x03) // "Option" key
@@ -363,7 +362,6 @@ HDSubState input_hosts_and_devices_devices(void)
 {
   // Down in the devices section.
   unsigned char k;
-  unsigned char i;
   char temp[20];
 
   if (input_handle_console_keys() == 0x03)
@@ -457,8 +455,6 @@ HDSubState input_hosts_and_devices_devices(void)
 SFSubState input_select_file_choose(void)
 {
   unsigned char k;
-  unsigned char y;
-  unsigned char temp[30];
   unsigned entryType;
 
   if (input_handle_console_keys() == 0x03)
@@ -563,8 +559,7 @@ SFSubState input_select_file_choose(void)
 SSSubState input_select_slot_choose(void)
 {
   unsigned char k;
-  unsigned char y;
-  unsigned char temp[30];
+//  unsigned char temp[30];
   if (input_handle_console_keys() == 0x03)
   {
     mount_and_boot();
@@ -696,7 +691,7 @@ DHSubState input_destination_host_slot_choose(void)
 {
   // Up in the hosts section.
   unsigned char k;
-  char temp[20];
+//  char temp[20];
 
   k = input_ucase();
 

@@ -201,7 +201,6 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 #if defined(BUILD_ATARI)
   bool mnt;
   char err_msg[64];
-  char num;
 #elif defined(BUILD_APPLE2)
   bool mnt = false;
 #endif

@@ -1,3 +1,7 @@
+## Development
+
+ * [Atari] - Remove unused variables.
+
 ## 2025-12-25
 
  * [Atari] - Upgrade fujinet-lib to 4.7.4
