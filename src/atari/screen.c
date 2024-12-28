@@ -144,7 +144,6 @@ void screen_mount_and_boot()
 
 void screen_set_wifi(AdapterConfigExtended *ac)
 {
-  char mactmp[3];
   unsigned char i = 0;
   unsigned char x = 13;
 
