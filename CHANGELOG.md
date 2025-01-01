@@ -1,8 +1,12 @@
-## 2025-12-28
+## 2025-01-01
+
+* [All Systems] - If a host entry is changed, eject any disks that were mounted from the "old" host since they aren't valid anymore.
+
+## 2024-12-28
 
  * [Atari] - Remove unused variables.
 
-## 2025-12-25
+## 2024-12-25
 
  * [Atari] - Upgrade fujinet-lib to 4.7.4
  * [Atari] - Changes to wifi network selection screen to accomodate passwords up to 64 characters in a more consistent visual style. The main password line was set as 40x8x1, but when it wrapped the next line was set to 20x8x2. Shifted down the two larger 20 column lines to leave two 40 column lines for the password.
