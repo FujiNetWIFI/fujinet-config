@@ -121,6 +121,7 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 #else
   unsigned char o;
 #endif
+  HostSlot orig_host;
 
   if (strlen((const char *)hostSlots[i]) == 0)
   {
@@ -133,10 +134,27 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
   screen_hosts_and_devices_edit_host_slot(i);
   // FRUSTRATINGLY the signature is void return, so noone ever knows if the return was good or bad
   // and just carries on and saves changes anyway. Fortunately ESC now handled well (on atari) and will save same thing back to FN
+
+  // Save off original value of host slot so we can check if it ws modified.
+  memcpy(orig_host, hostSlots[i], sizeof(HostSlot));
   input_line_hosts_and_devices_host_slot(i, o, (char *)hostSlots[i]);
 
   if (strlen((const char*)hostSlots[i]) == 0)
     screen_hosts_and_devices_host_slot_empty(i);
+
+  // if host entry has changed, eject any disks that were mounted from the host slot since they won't be valid anymore.
+  if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot))) 
+  {
+    // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
+    // declare a new variable for the loop counter.
+    for ( o = 0; o<NUM_DEVICE_SLOTS; o++)
+    {
+      if ( deviceSlots[o].hostSlot == i )
+      {
+        hosts_and_devices_eject(o);
+      }
+    }
+  } 
 
   io_put_host_slots(&hostSlots[0]);
   screen_hosts_and_devices_hosts();
