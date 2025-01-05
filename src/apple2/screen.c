@@ -390,12 +390,17 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     if (i < MAX_SMARTPORT)
       cprintf("%d", i+1);
     else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 15)
-	cprintf("NA");
+      cprintf("NA");
     else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 0)
       cprintf("%d", i - MAX_SMARTPORT + 1);
     else
-      cprintf("S%dD%d", diskii_slotdrive[i - MAX_SMARTPORT].slot,
-	      diskii_slotdrive[i - MAX_SMARTPORT].drive);
+    {
+      if (get_ostype() == APPLE_IIIEM) // Satan Mode
+        cprintf("D%d", diskii_slotdrive[i - MAX_SMARTPORT].drive);
+      else
+        cprintf("S%dD%d", diskii_slotdrive[i - MAX_SMARTPORT].slot,
+	        diskii_slotdrive[i - MAX_SMARTPORT].drive);
+    }
     cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
 
