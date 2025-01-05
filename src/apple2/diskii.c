@@ -2,8 +2,11 @@
 #include "diskii.h"
 #ifndef __ORCAC__
 #include <peekpoke.h>
+#include <apple2.h>
 #endif
 #include <string.h>
+
+
 
 /* FIXME - fujinet-bus-apple2.h isn't reachable */
 extern uint8_t sp_get_fuji_id();
@@ -44,11 +47,34 @@ static void enable_diskii(uint8_t slot, uint8_t drive)
 {
   uint16_t offset;
 
+  if (get_ostype() == APPLE_IIIEM) // Satan Mode
+  {
+    if (drive == 1)
+    {
+      POKE(0xC0D4,0); // Set Internal drive1 on
+      POKE(0xC0D2,0);
+      POKE(0xC0D0,0);
+    }
+    else
+    {
+      POKE(0xC0D5,0); // Set External drive1 on
+      POKE(0xC0D2,0);
+      POKE(0xC0D1,0);
+    }
+  }
 
   offset = 0xC080 + (slot << 4);
   POKE(offset + DISKII_SEL_DRIVE1 + ((drive - 1) & 1), 0);
   POKE(offset + DISKII_MOTOR_ON, 0);
   POKE(offset + DISKII_MOTOR_OFF, 0);
+
+  if (get_ostype() == APPLE_IIIEM) // Satan Mode
+  {
+    POKE(0xC0D5,0); // all drives off
+    POKE(0xC0D2,0);
+    POKE(0xC0D0,0);
+  }
+  
   return;
 }
 
@@ -76,28 +102,28 @@ void diskii_find()
         break;
 
       for (drive = 1; drive <= 2; drive++) {
-	err = sp_control(dev_id, IWM_CTRL_CLEAR_ENSEEN);
-	if (err) {
-	  // If err is set then might be old firmware and shouldn't hide Disk II slot
-	  diskii_slotdrive[drive - 1].slot = 0;
-	  diskii_slotdrive[drive - 1].drive = drive;
-	  continue;
-	}
+        err = sp_control(dev_id, IWM_CTRL_CLEAR_ENSEEN);
+        if (err) {
+          // If err is set then might be old firmware and shouldn't hide Disk II slot
+          diskii_slotdrive[drive - 1].slot = 0;
+          diskii_slotdrive[drive - 1].drive = drive;
+          continue;
+        }
 
         enable_diskii(slot, drive);
         err = sp_status(dev_id, IWM_STATUS_ENSEEN);
-	if (!err) {
-	  status = sp_payload[0] & (~seen);
+        if (!err) {
+	        status = sp_payload[0] & (~seen);
 
           // Make sure only a single bit is set
-	  mask = status & (status - 1);
-	  if (mask != 0)
-	    status ^= mask;
+          mask = status & (status - 1);
+          if (mask != 0)
+            status ^= mask;
 
-	  if (!status)
-	    continue;
+          if (!status)
+            continue;
 
-	  seen |= status;
+          seen |= status;
           status--;
           if (status < MAX_DISKII) {
             diskii_slotdrive[status].slot = slot;
