@@ -65,3 +65,12 @@ fujinet-lib/*
 
 # IDE files
 .vscode/*
+
+# config86
+*.err
+*.obj
+*.lk1
+config86.com
+*.mk*
+*.sym
+*.map
