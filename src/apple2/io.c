@@ -288,18 +288,12 @@ void io_boot(void)
   //clrscr();
   cprintf("\r\nRESTARTING...");
 
-  if (ostype == APPLE_II ||
-    ostype == APPLE_IIPLUS ||
-    ostype == APPLE_IIE ||
-    ostype == APPLE_IIEENH)
+  // Wait for fujinet disk ii states to be ready
+  for (i = 0; i < 2000; i++)
   {
-    // Wait for fujinet disk ii states to be ready
-    for (i = 0; i < 2000; i++)
+    if (i % 250 == 0)
     {
-      if (i % 250 == 0)
-      {
-        cprintf(".");
-      }
+      cprintf(".");
     }
   }
 
