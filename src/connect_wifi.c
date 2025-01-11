@@ -68,6 +68,12 @@
 #include "rc2014/globals.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/io.h"
+#include "config86/screen.h"
+#include "config86/globals.h"
+#endif /* BUILD_CONFIG86 */
+
 void connect_wifi(void)
 {
 	unsigned char retries = 20;

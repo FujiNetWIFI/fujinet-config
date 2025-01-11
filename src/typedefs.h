@@ -16,7 +16,7 @@ typedef enum _ws_subState
    WS_DONE
   } WSSubState;
 
-typedef enum _hd_subState 
+typedef enum _hd_subState
 {
    HD_HOSTS,
    HD_DEVICES,

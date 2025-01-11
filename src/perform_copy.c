@@ -82,6 +82,15 @@
 #include <conio.h>
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include <stdbool.h>
+#include "config86/screen.h"
+#include "config86/io.h"
+#include "config86/globals.h"
+#include "config86/input.h"
+#include "config86/bar.h"
+#endif /* BUILD_CONFIG86 */
+
 #include "perform_copy.h"
 
 extern char source_filename[128];

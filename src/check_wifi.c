@@ -44,6 +44,11 @@
 #include "rc2014/globals.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/io.h"
+#include "config86/globals.h"
+#endif /* BUILD_RC2014 */
+
 #ifdef _CMOC_VERSION_
 #include "coco/stdbool.h"
 #include "coco/io.h"

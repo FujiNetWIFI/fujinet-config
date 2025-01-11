@@ -76,6 +76,14 @@
 #define PRINTER 2 // ?
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/screen.h"
+#include "config86/input.h"
+#include "config86/globals.h"
+#include "config86/io.h"
+#define PRINTER 2 // ?
+#endif /* BUILD_CONFIG86 */
+
 SISubState si_subState;
 
 void show_info(void)

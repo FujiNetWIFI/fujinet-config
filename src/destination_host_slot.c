@@ -84,6 +84,14 @@
 #include "rc2014/bar.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/screen.h"
+#include "config86/input.h"
+#include "config86/globals.h"
+#include "config86/io.h"
+#include "config86/bar.h"
+#endif /* BUILD_CONFIG86 */
+
 #include "destination_host_slot.h"
 
 DHSubState dh_subState;

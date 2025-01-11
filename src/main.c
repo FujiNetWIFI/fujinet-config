@@ -63,6 +63,12 @@
 #include "rc2014/screen.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/io.h"
+#include "config86/screen.h"
+#include <stdbool.h>
+#endif /* BUILD_CONFIG86 */
+
 State state=HOSTS_AND_DEVICES;
 bool backToFiles=false;
 bool backFromCopy=false;
@@ -91,56 +97,56 @@ void done(void)
 
 void run(void)
 {
-	while (true)
-	{
-		switch (state)
-		{
-		case CHECK_WIFI:
-			check_wifi();
-			break;
-		case CONNECT_WIFI:
-			connect_wifi();
-			break;
-		case SET_WIFI:
-			set_wifi();
-			break;
-		case HOSTS_AND_DEVICES:
-			hosts_and_devices();
-			break;
-		case SELECT_FILE:
-			select_file();
-			break;
-		case SELECT_SLOT:
-			select_slot();
-			break;
-		case DESTINATION_HOST_SLOT:
-			destination_host_slot();
-			break;
-		case PERFORM_COPY:
-			perform_copy();
-			break;
-		case SHOW_INFO:
-			show_info();
-			break;
-		#ifdef BUILD_APPLE2
-		case SHOW_DEVICES:
-			io_list_devs();
-			break;
-		#endif
-		case DONE:
-			done();
-			#ifdef BUILD_A2CDA
-				return;
-			#endif
-			break;
-		}
+        while (true)
+        {
+                switch (state)
+                {
+                case CHECK_WIFI:
+                        check_wifi();
+                        break;
+                case CONNECT_WIFI:
+                        connect_wifi();
+                        break;
+                case SET_WIFI:
+                        set_wifi();
+                        break;
+                case HOSTS_AND_DEVICES:
+                        hosts_and_devices();
+                        break;
+                case SELECT_FILE:
+                        select_file();
+                        break;
+                case SELECT_SLOT:
+                        select_slot();
+                        break;
+                case DESTINATION_HOST_SLOT:
+                        destination_host_slot();
+                        break;
+                case PERFORM_COPY:
+                        perform_copy();
+                        break;
+                case SHOW_INFO:
+                        show_info();
+                        break;
+                #ifdef BUILD_APPLE2
+                case SHOW_DEVICES:
+                        io_list_devs();
+                        break;
+                #endif
+                case DONE:
+                        done();
+                        #ifdef BUILD_A2CDA
+                                return;
+                        #endif
+                        break;
+                }
   }
 }
 
 int main(void)
 {
-	setup();
-	state = CHECK_WIFI;
-	run();
-	return 0;
+        setup();
+        state = CHECK_WIFI;
+        run();
+        return 0;
 }

@@ -99,6 +99,16 @@
 #define ENTRIES_PER_PAGE 15
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/screen.h"
+#include "config86/io.h"
+#include "config86/globals.h"
+#include "config86/input.h"
+#include "config86/bar.h"
+#define DIR_MAX_LEN 36
+#define ENTRIES_PER_PAGE 15
+#endif /* BUILD_config86 */
+
 SFSubState sf_subState;
 char path[224];
 char filter[32] = {0};

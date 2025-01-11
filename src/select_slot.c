@@ -91,6 +91,15 @@
 #define DIR_MAX_LEN 31
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include "config86/screen.h"
+#include "config86/input.h"
+#include "config86/globals.h"
+#include "config86/io.h"
+#include "config86/bar.h"
+#define DIR_MAX_LEN 36
+#endif /* BUILD_CONFIG86 */
+
 extern DeviceSlot deviceSlots[8];
 extern bool quick_boot;
 

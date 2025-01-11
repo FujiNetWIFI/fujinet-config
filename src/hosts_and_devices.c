@@ -98,8 +98,17 @@ extern uint8_t sp_error;
 #include "rc2014/bar.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef BUILD_CONFIG86
+#include <stdbool.h>
+#include "config86/globals.h"
+#include "config86/io.h"
+#include "config86/screen.h"
+#include "config86/input.h"
+#include "config86/bar.h"
+#endif /* BUILD_CONFIG86 */
+
 HDSubState hd_subState=HD_HOSTS;
-DeviceSlot deviceSlots[8];
+DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[8];
 HostSlot hostSlots[8];
