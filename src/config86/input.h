@@ -13,7 +13,7 @@
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-char input();
+int input();
 
 /**
  * Get input from keyboard/joystick, translating lowercase presses to uppercase

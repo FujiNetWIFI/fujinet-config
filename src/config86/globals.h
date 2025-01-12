@@ -29,7 +29,7 @@
 #define HOSTS_END_Y (HOSTS_START_Y + NUM_HOST_SLOTS - 1)
 
 // Y position on screen where the device slots start.
-#define DEVICES_START_Y 13
+#define DEVICES_START_Y 11
 
 // Y position on screen where the device slots end.
 #define DEVICES_END_Y   (DEVICES_START_Y + NUM_DEVICE_SLOTS - 1)

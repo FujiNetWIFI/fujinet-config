@@ -3,6 +3,7 @@
  * FujiNet Drivewire calls
  */
 
+#include <string.h>
 #include <stdbool.h>
 #include "io.h"
 #include "globals.h"
@@ -78,6 +79,18 @@ SSIDInfo *io_get_scan_result(int n)
 
 AdapterConfig *io_get_adapter_config(void)
 {
+    strcpy(adapterConfig.ssid,"Cherryhomes");
+    strcpy(adapterConfig.hostname,"trueblue");
+    adapterConfig.localIP[0]=192; adapterConfig.localIP[1]=168; adapterConfig.localIP[2]=1; adapterConfig.localIP[3]=33;
+    adapterConfig.gateway[0]=192; adapterConfig.gateway[1]=168; adapterConfig.gateway[2]=1; adapterConfig.localIP[3]=1;
+    adapterConfig.netmask[0]=255; adapterConfig.netmask[1]=255; adapterConfig.netmask[2]=255; adapterConfig.netmask[3]=0;
+    adapterConfig.dnsIP[0]=192; adapterConfig.dnsIP[1]=168; adapterConfig.dnsIP[2]=1; adapterConfig.dnsIP[3]=1;
+    adapterConfig.macAddress[0]=0x0C; adapterConfig.macAddress[1]=0xB8; adapterConfig.macAddress[2]=0x15;
+    adapterConfig.macAddress[3]=0x6C; adapterConfig.macAddress[4]=0xC1; adapterConfig.macAddress[5]=0xDC;
+    adapterConfig.bssid[0]=0xF0; adapterConfig.bssid[1]=0x9F; adapterConfig.bssid[2]=0xC2;
+    adapterConfig.bssid[3]=0x24; adapterConfig.bssid[4]=0xE4; adapterConfig.bssid[5]=0x82;
+    strcpy(adapterConfig.fn_version,"v1.4.8fad24");
+    
     return &adapterConfig;
 }
 
@@ -88,10 +101,17 @@ int io_set_ssid(NetConfig *nc)
 
 void io_get_device_slots(DeviceSlot *d)
 {
+    d[0].hostSlot = 1;
+    d[0].mode = 0x01;
+    strcpy(d[0].file,"Ms. Pac-Man (AtariSoft).img");
 }
 
 void io_get_host_slots(HostSlot *h)
 {
+    strcpy(h[0],"SD");
+    strcpy(h[1],"fujinet.online");
+    strcpy(h[2],"apps.irata.online");
+    strcpy(h[3],"tma-2");
 }
 
 void io_put_host_slots(HostSlot *h)

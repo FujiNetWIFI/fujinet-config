@@ -3,7 +3,8 @@
 /**
  * Input routines
  */
-
+#include <stdio.h>
+#include <dos.h>
 #include "input.h"
 #include "io.h"
 #include "bar.h"
@@ -25,32 +26,54 @@ bool mounting = false;
 extern unsigned short entry_timer;
 extern HDSubState hd_subState;
 
-char input()
-{
-    return 0;
-}
+extern unsigned char _screen_color;
 
-unsigned char input_ucase()
+int input()
 {
-    return 0;
-}
+    union REGS r;
 
-unsigned char input_handle_joystick(void)
-{
-  return 0;
-}
+    r.h.ah = 0x00;
+    int86(0x16,&r,&r);
 
-// Old cursor position
-char ox=-1;
-char oy=-1;
-char oc=0;
-
-void input_cursor(char x, char y)
-{
+    return r.x.ax;
 }
 
 void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool password)
 {
+    union REGS r;
+    int k=0, pos=0;
+
+    while(k!=0x0d)
+    {
+        screen_gotoxy(x,y);
+        k=input() & 0xFF;
+
+        if (!k)
+            continue; /* Ignore extended keys */
+
+        r.h.ah = 0x09;
+        r.h.bh = 0;
+        r.h.bl = _screen_color;
+        r.x.cx = 1;
+        
+        if (pos && k==0x08)
+        {
+            pos--;
+            x--;
+            r.h.al = 0x20;
+        }
+        else
+        {
+            pos++;
+            x++;
+            if (password)
+                r.h.al = '*';
+            else
+                r.h.al = k;
+        }
+
+        int86(0x10,&r,0);
+    }
 }
 
 void input_line_set_wifi_custom(char *c)
@@ -118,7 +141,34 @@ unsigned char input_handle_console_keys(void)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  return HD_HOSTS;
+    int k=input();
+
+    switch(k)
+    {
+    case 0x0231:
+    case 0x0332:
+    case 0x0433:
+    case 0x0534:
+    case 0x0635:
+    case 0x0736:
+    case 0x0837:
+    case 0x0938:
+        bar_jump(k-'1');
+        return HD_HOSTS;
+    case 0x2E63:
+    case 0x2E43:
+        state = SHOW_INFO;
+        return HD_DONE;
+    case 0x4800:
+        bar_up();
+        selected_host_slot = bar_get();
+        return HD_HOSTS;
+    case 0x5000:
+        bar_down();
+        selected_host_slot = bar_get();
+        return HD_HOSTS;
+    }
+    return HD_HOSTS;
 }
 
 HDSubState input_hosts_and_devices_devices(void)
@@ -151,7 +201,24 @@ unsigned char input_select_slot_mode(char *mode)
  */
 SISubState input_show_info(void)
 {
-  return SI_SHOWINFO;
+    int k=input();
+
+    switch(k)
+    {
+    case 0x2E42:
+    case 0x2E63:
+        state = CONNECT_WIFI;
+        return SI_DONE;
+    case 0x1453:
+    case 0x1473:
+        state = CONNECT_WIFI;
+        return SI_DONE;
+    default:
+        state = HOSTS_AND_DEVICES;
+        return SI_DONE;
+    }
+    
+    return SI_SHOWINFO;
 }
 
 DHSubState input_destination_host_slot_choose(void)

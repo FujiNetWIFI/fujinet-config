@@ -20,6 +20,7 @@ typedef enum
    SCREEN_CONNECT_WIFI
 } _screen;
 
+void screen_gotoxy(unsigned char x, unsigned char y);
 void screen_mount_and_boot();
 void screen_dlist_connect_wifi(void);
 void screen_dlist_hosts_and_devices(void);
@@ -35,7 +36,7 @@ void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
 void screen_select_slot_mode(void);
 void font_init();
 extern void bar_setup_regs();
-void screen_puts(unsigned char x, unsigned char y, char *s);
+void screen_puts(const char *s);
 void screen_clear_line(unsigned char y);
 void screen_error(const char *msg);
 
