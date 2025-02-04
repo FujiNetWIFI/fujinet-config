@@ -70,6 +70,7 @@
 #endif /* BUILD_CONFIG86 */
 
 State state=HOSTS_AND_DEVICES;
+
 bool backToFiles=false;
 bool backFromCopy=false;
 
@@ -146,7 +147,7 @@ void run(void)
 int main(void)
 {
         setup();
-        state = CHECK_WIFI;
+        state = SET_WIFI;
         run();
         return 0;
 }

@@ -156,32 +156,103 @@ void screen_hline(unsigned char y)
 
 void screen_mount_and_boot()
 {
-    screen_puts("screen_mount_and_boot()\r\n");
+    unsigned char x = (_screen_cols == 40 ? 20 : 35);
+    unsigned char y = 12;
+    
+    screen_clear();
+    screen_gotoxy(x,y);
+
+    screen_puts("Mounting and Booting...");
 }
 
 void screen_set_wifi(AdapterConfig *ac)
 {
-    screen_puts("screen_set_wifi()\r\n");
+    char s[128];
+    
+    screen_clear();
+    bar_clear(false);
+    screen_gotoxy(_screen_cols == 40 ? 10 : 30,0);
+    screen_puts("WELCOME TO FUJINET!");
+    screen_gotoxy(_screen_cols == 40 ? 10 : 30,24);
+    screen_puts("SCANNING NETWORKS...");
+    sprintf(s,"MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+    screen_gotoxy(_screen_cols == 40 ? 10 : 30,2);
+    screen_puts(s);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
-    screen_puts("screen_set_wifi_display_ssid()\r\n");
+    unsigned char x = (_screen_cols == 40 ? 35 : 72);
+    
+    screen_gotoxy(2,n+NETWORKS_START_Y);
+    screen_puts((char *)s->ssid);
+
+    screen_gotoxy(x,n+NETWORKS_START_Y);
+    
+    if (s->rssi > -40)
+    {
+        screen_putc(0xFE);
+        screen_putc(0xFE);
+        screen_putc(0xFE);
+    }
+    else if (s->rssi > -60)
+    {
+        screen_putc(0xFE);
+        screen_putc(0xFE);
+    }
+    else
+    {
+        screen_putc(0xFE);
+    }
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
 {
-    screen_puts("screen_wifi_select_network()\r\n");
+    screen_clear_line(23);
+    screen_clear_line(24);
+    screen_gotoxy(5,23);
+    _screen_color=0x09;
+    screen_putc(0x18);
+    _screen_color=0x07;
+    screen_putc('/');
+    _screen_color=0x09;
+    screen_putc(0x19);
+    _screen_color=0x07;
+    screen_puts(" Choose Network  ");
+    _screen_color=0x09;
+    screen_putc('H');
+    _screen_color=0x07;
+    screen_puts("idden SSID       ");
+    _screen_color=0x09;
+    screen_putc('R');
+    _screen_color=0x07;
+    screen_puts("escan Networks  ");
+    _screen_color=0x09;
+    screen_puts("\x11\xC4\xD9");
+    _screen_color=0x07;
+    screen_puts(" Select Network");
+    bar_set(2,1,nn,0);
 }
 
 void screen_set_wifi_custom(void)
 {
-    screen_puts("screen_set_wifi_custom()\r\n");
+    unsigned char x = (_screen_cols == 40 ? 15 : 35);
+
+    screen_clear_line(22);
+    screen_clear_line(23);
+    screen_clear_line(24);
+    screen_gotoxy(x,22);
+    screen_puts("Enter Name  of Hidden Network");
 }
 
 void screen_set_wifi_password(void)
 {
-    screen_puts("screen_set_wifi_password()\r\n");
+    screen_clear_line(22);
+    screen_clear_line(23);
+    screen_clear_line(24);
+
+    screen_gotoxy(0,22);
+    screen_puts("   Enter Network Password;  Press \x11\xC4\xD9   ");
 }
 
 /*
@@ -281,7 +352,73 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 
 void screen_select_slot(const char *e)
 {
-    screen_puts("screen_select_slot()\r\n");
+    char s[256];
+    
+    struct _additl_info
+    {
+        unsigned char year;
+        unsigned char month;
+        unsigned char day;
+        unsigned char hour;
+        unsigned char min;
+        unsigned char sec;
+        unsigned long size;
+        unsigned char isdir;
+        unsigned char trunc;
+        unsigned char type;
+        unsigned char *filename;
+    } *i = (struct _additl_info *)e;
+  
+    screen_clear();
+
+    screen_hline(0);
+    screen_gotoxy(_screen_cols == 40 ? 20 : 60,0);
+    screen_puts("PLACE IN DEVICE SLOT:");
+
+    screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
+
+    screen_hline(11);
+    screen_gotoxy(_screen_cols == 40 ? 28 : 68,11);
+    screen_puts("FILE DETAILS");
+
+    screen_gotoxy(0,12);
+    sprintf(s,"%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",i->year,i->month,i->day,i->hour,i->min,i->sec);
+    screen_puts(s);
+    
+    screen_gotoxy(0,13);
+    sprintf(s,"%8s %lu K\n","SIZE:",i->size >> 10); // Quickly divide by 1024
+    screen_puts(s);
+
+    screen_gotoxy(0,14);
+    screen_puts(&e[13]);
+
+    screen_gotoxy(0,22);
+    _screen_color = 0x09;
+    screen_putc(0x18);
+    _screen_color = 0x07;
+    screen_putc('/');
+    _screen_color = 0x09;
+    screen_putc(0x19);
+    _screen_color = 0x07;
+
+    screen_puts(" Select Slot ");
+
+    _screen_color = 0x09;
+    screen_puts("\x11\xC4\xD9");
+    _screen_color = 0x07;
+    screen_puts(" Mount Read-Only ");
+
+    _screen_color = 0x09;
+    screen_putc('W');
+    _screen_color = 0x07;
+    screen_puts(" Mount Read-Write");
+
+    _screen_color = 0x09;
+    screen_puts("ESC");
+    _screen_color = 0x07;
+    screen_puts(" Abort");
+    
+    bar_set(1,1,NUM_DEVICE_SLOTS,0);
 }
 
 void screen_select_slot_mode(void)
