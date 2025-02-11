@@ -215,6 +215,7 @@ WSSubState input_set_wifi_select(void)
 
   switch (k)
   {
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -224,6 +225,7 @@ WSSubState input_set_wifi_select(void)
     }
     selected_network = bar_get() - NETWORKS_START_Y;
     return WS_SELECT;
+  case 0x8F: // TK-II DOWN
   case 0x1D:
   case '=':
     // down
@@ -279,6 +281,11 @@ HDSubState input_hosts_and_devices_hosts(void)
   // sprintf(temp, "y=%d,k=%02x", bar_get(), k);
   // screen_debug(temp);
 
+  if (k == 0x83) // TK-II HOME
+    k = '1';
+  else if (k == 0x84) // TK-II END
+    k = '8';
+
   switch (k)
   {
   case '1':
@@ -292,6 +299,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_show(HOSTS_START_Y + (k - '1'));
     selected_host_slot = bar_get() - HOSTS_START_Y;
     return HD_HOSTS;
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -301,6 +309,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     }
     selected_host_slot = bar_get() - HOSTS_START_Y;
     return HD_HOSTS;
+  case 0x8F:
   case 0x1D:
   case '=':
     // down
@@ -374,6 +383,11 @@ HDSubState input_hosts_and_devices_devices(void)
   // sprintf(temp, "y=%d", bar_get());
   // screen_debug(temp);
 
+  if (k == 0x83) // TK-II HOME
+    k = '1';
+  else if (k == 0x84) // TK-II END
+    k = '8';
+
   switch (k)
   {
   case '1':
@@ -389,6 +403,7 @@ HDSubState input_hosts_and_devices_devices(void)
     return HD_DEVICES;
   case CH_CLR: // Clear
     return HD_CLEAR_ALL_DEVICES;
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -398,6 +413,7 @@ HDSubState input_hosts_and_devices_devices(void)
     }
     selected_device_slot = bar_get() - DEVICES_START_Y;
     return HD_DEVICES;
+  case 0x8F: // TK-II DOWN
   case 0x1D:
   case '=':
     // down
@@ -469,6 +485,13 @@ SFSubState input_select_file_choose(void)
 
   switch (k)
   {
+  case 0x83: // TK-II HOME
+     bar_show(FILES_START_Y);
+     return SF_CHOOSE;
+  case 0x84: // TK-II END
+     bar_show(FILES_START_Y + (_visibleEntries - 1));
+     return SF_CHOOSE;
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -481,6 +504,7 @@ SFSubState input_select_file_choose(void)
       bar_up();
     }
     return SF_CHOOSE;
+  case 0x8F: // TK-II DOWN
   case 0x1D:
   case '=':
     // down
@@ -512,6 +536,7 @@ SFSubState input_select_file_choose(void)
   case KCODE_BACKSP:
     return SF_DEVANCE_FOLDER;
 
+  case 0x86: // TK-II LEFT
   case '<':
   case '+':
     if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
@@ -524,6 +549,7 @@ SFSubState input_select_file_choose(void)
     else
       return SF_DEVANCE_FOLDER;
     return SF_CHOOSE;
+  case 0x87:
   case '>':
     if ((ENTRIES_PER_PAGE == _visibleEntries ) && (dir_eof == false))
       return SF_NEXT_PAGE;
@@ -570,6 +596,11 @@ SSSubState input_select_slot_choose(void)
   // sprintf(temp, "y=%d,pos=%d,sds=%d", bar_get(), pos, selected_device_slot);
   // screen_debug(temp);
 
+  if (k == 0x83)  // TK-II HOME
+    k = '1';
+  else if (k == 0x84) // TK-II END
+    k = '8';
+
   switch (k)
   {
   case '1':
@@ -583,6 +614,7 @@ SSSubState input_select_slot_choose(void)
     bar_show(DEVICES_START_MOUNT_Y + (k - '1'));
     selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
     return SS_CHOOSE;
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -592,6 +624,7 @@ SSSubState input_select_slot_choose(void)
     }
     selected_device_slot = bar_get() - DEVICES_START_MOUNT_Y;
     return SS_CHOOSE;
+  case 0x8F: // TK-II DOWN
   case 0x1D:
   case '=':
     // down
@@ -695,6 +728,11 @@ DHSubState input_destination_host_slot_choose(void)
 
   k = input_ucase();
 
+  if (k == 0x83) // TK-II HOME
+    k = '1';
+  else if (k == 0x84) // TK-II END
+    k = '8';
+
   // sprintf(temp, "y=%d", bar_get());
   // screen_debug(temp);
 
@@ -711,6 +749,7 @@ DHSubState input_destination_host_slot_choose(void)
     bar_show(HOSTS_START_Y + (k - '1'));
     selected_host_slot = bar_get() - HOSTS_START_Y;
     return DH_CHOOSE;
+  case 0x8E: // TK-II UP
   case 0x1C:
   case '-':
     // up
@@ -720,6 +759,7 @@ DHSubState input_destination_host_slot_choose(void)
     }
     selected_host_slot = bar_get() - HOSTS_START_Y;
     return DH_CHOOSE;
+  case 0x8F: // TK-II DOWN
   case 0x1D:
   case '=':
     // down
