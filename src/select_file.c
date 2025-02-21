@@ -390,7 +390,7 @@ unsigned select_file_entry_type(void)
 
   e = io_read_directory(128, 0);
 
-  if (e[strlen(e)-1] == '/') result = ENTRY_TYPE_FOLDER;
+  if (e[0] != '\0' && e[strlen(e)-1] == '/') result = ENTRY_TYPE_FOLDER;
   else if (e[0] == '+') result = ENTRY_TYPE_LINK;
   else result = ENTRY_TYPE_FILE;
 
