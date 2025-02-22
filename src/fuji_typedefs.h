@@ -30,3 +30,4 @@ typedef enum _entry_types
 typedef unsigned short DirectoryPosition;
 
 #endif /* FUJI_TYPEDEFS_H */
+

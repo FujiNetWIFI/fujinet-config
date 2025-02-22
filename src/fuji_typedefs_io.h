@@ -79,3 +79,4 @@ typedef struct
 } NewDisk;
 
 #endif /* FUJI_TYPEDEFS_IO_H */
+

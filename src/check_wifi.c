@@ -50,6 +50,11 @@
 #include "coco/globals.h"
 #endif /* CMOC_VERSION */
 
+#ifdef __WATCOMC__
+#include "msdos/io.h"
+#include "msdos/globals.h"
+#endif /* __WATCOMC__ */
+
 #include "check_wifi.h"
 
 void check_wifi(void)
