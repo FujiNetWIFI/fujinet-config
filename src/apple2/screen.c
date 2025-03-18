@@ -121,11 +121,11 @@ void screen_init(void)
     _sys(&r);
     if (get_ostype() >= APPLE_IIIEM)
     {
+      POKE(0xC00F,0); // SETALTCHAR
       allow_lowercase(true);
       lowercase = true;
       if (get_ostype() >= APPLE_IIEENH)
       {
-        POKE(0xC00F,0); // SETALTCHAR
         mousetext = true;
       }
     }
