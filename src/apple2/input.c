@@ -304,6 +304,10 @@ unsigned char input_select_file_new_type(void)
     case '2':
       io_create_type=1;
       return 2;
+    case 'D':
+    case 'd':
+      io_create_type=2;
+      return 3;
     default:
       io_create_type=0;
       return 0;
@@ -314,6 +318,9 @@ unsigned long input_select_file_new_size(unsigned char t)
 {
   UNUSED(t); // Type not used.
 
+  if (io_create_type==2) // DO files are always 140K
+      return 280;
+  
   switch (cgetc())
     {
     case '1':
