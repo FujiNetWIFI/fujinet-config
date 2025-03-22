@@ -595,7 +595,7 @@ void screen_select_file_new_type(void)
   screen_print_menu(" New media: Select type \r\n","");
   screen_print_menu("P","O  ");
   screen_print_menu("2","MG  ");
-  screen_print_menu("D","O  ");
+  screen_print_menu("D","OS 3.3  ");
 }
 
 void screen_select_file_new_size(unsigned char k)
