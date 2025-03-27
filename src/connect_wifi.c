@@ -83,13 +83,16 @@ void connect_wifi(void)
 	while (retries > 0)
 	{
 		// check for ESC key and abort
-		key = cgetc();
-		if (key == KEY_ESCAPE)
+		if (kbhit()) 
 		{
-			screen_error("CONNECTION ABORTED");
-			pause(150);
-			state = SET_WIFI;
-			return;
+			key = cgetc();
+			if (key == KEY_ESCAPE)
+			{
+				screen_error("CONNECTION ABORTED");
+				pause(150);
+				state = SET_WIFI;
+				return;
+			}
 		}
 
 		s = io_get_wifi_status();
