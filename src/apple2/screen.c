@@ -630,7 +630,7 @@ void screen_select_file_choose(char visibleEntries)
   }
   else
   {
-    screen_print_menu("RETURN",":Selsect file to mount\r\n");
+    screen_print_menu("RETURN",":Select file to mount\r\n");
     screen_print_menu("<-","Updir  ");
     screen_print_menu("ESC",":Abort  ");
     screen_print_menu("F","ilter  ");
