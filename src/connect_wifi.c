@@ -3,7 +3,7 @@
  *
  * Connect to existing WiFi connection
  */
-
+#include <conio.h>
 #include "connect_wifi.h"
 
 #ifdef _CMOC_VERSION_
@@ -82,11 +82,11 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-		// check for ESC key and abort
+		// check for x key and abort
 		if (kbhit()) 
 		{
 			key = cgetc();
-			if (key == KEY_ESCAPE)
+			if (key == 'x')
 			{
 				screen_error("CONNECTION ABORTED");
 				pause(150);
