@@ -71,5 +71,8 @@ void screen_select_slot_mode(void);
 void screen_select_slot_eject(unsigned char ds);
 
 bool screen_mount_and_boot_lobby(void);
+
+#define KCODE_ESCAPE 0x1B
+
 #endif /* SCREEN_H */
 #endif /* BUILD_APPLE2 */
