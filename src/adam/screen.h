@@ -67,9 +67,7 @@ void screen_destination_host_slot_choose(void);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
-#define KCODE_RETURN 0x9B // is the ATASCI equivlant of 155 End Of Line (return)
 #define KCODE_ESCAPE 0x1B
-#define KCODE_BACKSP 0x7E
 
 #endif /* SCREEN_H */
 #endif /* BUILD_ADAM */
