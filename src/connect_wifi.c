@@ -68,8 +68,6 @@
 #include "rc2014/globals.h"
 #endif /* BUILD_RC2014 */
 
-#define CH_ESC	0x1B //ESC key
-
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
@@ -88,7 +86,7 @@ void connect_wifi(void)
 		if (kbhit()) 
 		{
 			key = cgetc();
-			if (key == CH_ESC)
+			if (key == KCODE_ESCAPE)
 			{
 				screen_error("CONNECTION ABORTED");
 				pause(150);
