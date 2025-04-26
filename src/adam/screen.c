@@ -169,16 +169,23 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
   gotoxy(0,y); cprintf("%32s","DISK SLOTS");
 
-  for (char i=0;i<MAX_DISK_SLOTS;i++)
-  {
-    gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-  }
-  // Clear the next line since last print isn't truncated to 31 chars :shrug:
-  gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
-
   vdp_vfill(MODE2_ATTR+y2,0xF4,256);
   vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024);
-  vdp_vfill_v(MODE2_ATTR+y2+256,0xF4,32);
+
+  for (char i=0;i<MAX_DISK_SLOTS;i++)
+  {
+      textcolor(15);
+      gotoxy(0,i+y+1);
+      textbackground(d[i].mode == 0x02 ? GREEN : BLUE);
+      cprintf("%d",i+1);
+      textcolor(0);
+      textbackground(15);
+      cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+  }
+  
+  // Clear the next line since last print isn't truncated to 31 chars :shrug:
+  // gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
+
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -252,6 +259,8 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i+1);
   smartkeys_status(response);
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+  textcolor(BLACK);
+  textbackground(LIGHTGREEN);
 }
 
 void screen_hosts_and_devices_long_filename(char *f)
@@ -478,6 +487,8 @@ void screen_select_slot_eject(unsigned char ds)
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
   vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
+  textcolor(0);
+  textbackground(15);
   gotoxy(1,12+ds); cprintf(empty);
   bar_jump(bar_get());
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);

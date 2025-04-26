@@ -206,9 +206,9 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	      x--;
 	      c--;
 	      *c=0x00;
-	      putchar(KEY_BACKSPACE);
-	      putchar(KEY_SPACE);
-	      putchar(KEY_BACKSPACE);
+	      putch(KEY_BACKSPACE);
+	      putch(KEY_SPACE);
+	      putch(KEY_BACKSPACE);
 	      cursor_pos(x,y);
 	    }
 	}
@@ -220,7 +220,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 	      x++;
 	      *c=key;
 	      c++;
-	      putchar(password ? 0x8B : key);
+	      putch(password ? 0x8B : key);
 	      cursor_pos(x,y);
 	    }
 	}
