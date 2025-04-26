@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include "../fuji_typedefs.h"
 
+extern bool screen_should_be_cleared;
+
 void screen_init(void);
 void screen_error(const char *c);
 

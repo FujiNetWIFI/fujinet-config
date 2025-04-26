@@ -34,6 +34,7 @@ extern unsigned short entry_timer;
 extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
+extern bool screen_should_be_cleared;
 
 /**
  * ADAM keyboard mapping
@@ -283,6 +284,7 @@ HDSubState input_hosts_and_devices_hosts(void)
       return HD_HOSTS;
     case KEY_TAB:
       bar_clear(false);
+      screen_should_be_cleared=false;
       return HD_DEVICES;
     case KEY_RETURN:
       selected_host_slot=bar_get();
@@ -335,6 +337,7 @@ HDSubState input_hosts_and_devices_devices(void)
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_TAB:
+        screen_should_be_cleared=false;
       bar_clear(false);
       return HD_HOSTS;
     case KEY_SMART_IV:
@@ -396,6 +399,7 @@ SFSubState input_select_file_choose(void)
       else
         return SF_DONE;
     case KEY_ESCAPE:
+        screen_should_be_cleared=true;
       copy_mode=false;
       state=HOSTS_AND_DEVICES;
       return SF_DONE;
@@ -525,6 +529,7 @@ SSSubState input_select_slot_choose(void)
   switch(k)
     {
     case KEY_ESCAPE:
+        screen_should_be_cleared=true;
       state=HOSTS_AND_DEVICES;
       return SS_ABORT;
     case KEY_1:
@@ -569,6 +574,7 @@ DHSubState input_destination_host_slot_choose(void)
       copy_mode=true;
       return DH_DONE;
     case KEY_ESCAPE:
+        screen_should_be_cleared=true;
       state=HOSTS_AND_DEVICES;
       return DH_ABORT;
     case KEY_1:
@@ -603,6 +609,7 @@ SISubState input_show_info(void)
     case KEY_RETURN:
     case KEY_ESCAPE:
     case KEY_SPACE:
+        screen_should_be_cleared=true;
       state=HOSTS_AND_DEVICES;
       return SI_DONE;
     case KEY_SMART_IV:
