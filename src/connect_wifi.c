@@ -82,7 +82,8 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-		// check for x key and abort
+#ifdef BUILD_ATARI
+		// check for esc key and abort
 		if (kbhit()) 
 		{
 			key = cgetc();
@@ -94,7 +95,7 @@ void connect_wifi(void)
 				return;
 			}
 		}
-
+#endif
 		s = io_get_wifi_status();
 
 		switch (s)
