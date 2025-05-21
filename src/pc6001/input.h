@@ -50,5 +50,10 @@ SSSubState input_select_slot_choose(void);
 SISubState input_show_info(void);
 DHSubState input_destination_host_slot_choose(void);
 
+/**
+ * @brief Abort keysym
+ */
+#define KEY_ABORT 0x1B
+
 #endif /* INPUT_H */
 #endif /* BUILD_PC6001 */

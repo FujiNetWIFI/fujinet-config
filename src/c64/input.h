@@ -54,5 +54,10 @@ WSSubState input_set_wifi_select(void);
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c);
 void input_line_filter(char *c);
 
+/**
+ * @brief Abort key
+ */
+#define KEY_ABORT 0x5F
+
 #endif /* INPUT_H */
 #endif /* BUILD_C64 */

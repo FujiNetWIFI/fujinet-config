@@ -10,6 +10,7 @@
 
 #include <atari.h>
 
+#define KEY_ABORT          CH_ESC
 #define KEY_ESCAPE         CH_ESC
 #define KEY_RETURN         CH_ENTER
 #define KEY_BACKSPACE      CH_DEL

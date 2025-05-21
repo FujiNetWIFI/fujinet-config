@@ -3,7 +3,6 @@
  *
  * Connect to existing WiFi connection
  */
-#include <conio.h>
 #include "connect_wifi.h"
 
 #ifdef _CMOC_VERSION_
@@ -13,6 +12,7 @@
 #include "coco/globals.h"
 #include "coco/io.h"
 #include "coco/screen.h"
+#include "coco/input.h"
 #else
 #include <string.h>
 #endif /* _CMOC_VERSION_ */
@@ -23,12 +23,14 @@
 #include "adam/io.h"
 #include "adam/screen.h"
 #include "adam/globals.h"
+#include "adam/input.h"
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
 #include "apple2/io.h"
 #include "apple2/screen.h"
 #include "apple2/globals.h"
+#include "apple2/input.h"
 #endif /* BUILD_APPLE2 */
 
 #ifdef BUILD_ATARI
@@ -36,36 +38,42 @@
 #include "atari/screen.h"
 #include "atari/globals.h"
 #include "atari/bar.h"
+#include "atari/input.h"
 #endif /* BUILD_ATARI */
 
 #ifdef BUILD_C64
 #include "c64/io.h"
 #include "c64/screen.h"
 #include "c64/globals.h"
+#include "c64/input.h"
 #endif /* BUILD_C64 */
 
 #ifdef BUILD_PC8801
 #include "pc8801/io.h"
 #include "pc8801/screen.h"
 #include "pc8801/globals.h"
+#include "pc8801/input.h"
 #endif /* BUILD_PC8801 */
 
 #ifdef BUILD_PC6001
 #include "pc6001/io.h"
 #include "pc6001/screen.h"
 #include "pc6001/globals.h"
+#include "pc6001/input.h"
 #endif /* BUILD_PC6001 */
 
 #ifdef BUILD_PMD85
 #include "pmd85/io.h"
 #include "pmd85/screen.h"
 #include "pmd85/globals.h"
+#include "pmd85/input.h"
 #endif /* BUILD_PMD85 */
 
 #ifdef BUILD_RC2014
 #include "rc2014/io.h"
 #include "rc2014/screen.h"
 #include "rc2014/globals.h"
+#include "rc2014/input.h"
 #endif /* BUILD_RC2014 */
 
 void connect_wifi(void)
@@ -82,20 +90,15 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-#ifdef BUILD_ATARI
 		// check for esc key and abort
-		if (kbhit()) 
+		if (input() == KEY_ABORT)
 		{
-			key = cgetc();
-			if (key == KCODE_ESCAPE)
-			{
-				screen_error("CONNECTION ABORTED");
-				pause(150);
-				state = SET_WIFI;
-				return;
-			}
+			screen_error("CONNECTION ABORTED");
+			pause(150);
+			state=SET_WIFI;
+			return;
 		}
-#endif
+
 		s = io_get_wifi_status();
 
 		switch (s)
