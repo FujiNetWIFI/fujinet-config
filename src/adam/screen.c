@@ -18,6 +18,8 @@
 #define MAX_DISK_SLOTS (4)
 #define STR_MAX_DISK_SLOTS "4"
 
+bool screen_should_be_cleared=true;
+
 extern bool copy_mode;
 extern char copy_host_name;
 extern unsigned char copy_host_slot;
@@ -69,7 +71,7 @@ void screen_error(const char *c)
 
 void screen_set_wifi(AdapterConfig *ac)
 {
-  smartkeys_set_mode();
+  clrscr();
   vdp_vfill(MODE2_ATTR,0xF5,0x100);
   vdp_vfill(MODE2_ATTR+0x100,0x1F,0x1100);
   vdp_vfill_v(MODE2_ATTR,0xF5,144);
@@ -140,12 +142,14 @@ void screen_set_wifi_password(void)
 
 void screen_connect_wifi(NetConfig *nc)
 {
-  smartkeys_set_mode();
+    vdp_noblank();
+    clrscr();
 
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   sprintf(response,"  CONNECTING TO NETWORK\n  %s",nc->ssid);
   smartkeys_status(response);
   smartkeys_sound_play(SOUND_CONFIRM);
+  vdp_blank();
 }
 
 char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
@@ -169,39 +173,59 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
   gotoxy(0,y); cprintf("%32s","DISK SLOTS");
 
-  for (char i=0;i<MAX_DISK_SLOTS;i++)
-  {
-    gotoxy(0,i+y+1); cprintf("%d%-31s",i+1,screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-  }
-  // Clear the next line since last print isn't truncated to 31 chars :shrug:
-  gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
-
   vdp_vfill(MODE2_ATTR+y2,0xF4,256);
   vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024);
-  vdp_vfill_v(MODE2_ATTR+y2+256,0xF4,32);
+
+  for (char i=0;i<MAX_DISK_SLOTS;i++)
+  {
+      textcolor(15);
+      gotoxy(0,i+y+1);
+      textbackground(d[i].mode == 0x02 ? GREEN : BLUE);
+      cprintf("%d",i+1);
+      textcolor(0);
+      textbackground(15);
+      cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+  }
+  
+  // Clear the next line since last print isn't truncated to 31 chars :shrug:
+  // gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
+
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
+    textcolor(15);
+    textbackground(1);
   gotoxy(0,0);  cprintf("%32s","HOST SLOTS");
+
+  //vdp_vfill(MODE2_ATTR,0xF4,256);
+  //vdp_vfill(MODE2_ATTR+0x0100,0x1F,2048);
 
   for (char i=0;i<8;i++)
   {
-    gotoxy(0,i+1); cprintf("%d%s",i+1,screen_hosts_and_devices_host_slot(h[i]));
+      gotoxy(0,i+1);
+      textbackground(1);
+      textcolor(15);
+      cprintf("%d",i+1);
+      textbackground(15);
+      textcolor(0);
+      cprintf("%-31s",screen_hosts_and_devices_host_slot(h[i]));
   }
-
-  vdp_vfill(MODE2_ATTR,0xF4,256);
-  vdp_vfill(MODE2_ATTR+0x0100,0x1F,2048);
-  vdp_vfill_v(MODE2_ATTR+0x0100,0xF4,64);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
-  smartkeys_set_mode();
+    if (screen_should_be_cleared)
+    {
+        vdp_noblank();
+        clrscr();
+        screen_should_be_cleared=false;
+        screen_hosts_and_devices_host_slots(h);
+        screen_hosts_and_devices_device_slots(11,d,e);
+        vdp_blank();
+    }
+    
   eos_start_read_keyboard();
-
-  screen_hosts_and_devices_host_slots(h);
-  screen_hosts_and_devices_device_slots(11,d,e);
 
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
@@ -252,6 +276,8 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
   sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i+1);
   smartkeys_status(response);
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+  textcolor(BLACK);
+  textbackground(LIGHTGREEN);
 }
 
 void screen_hosts_and_devices_long_filename(char *f)
@@ -266,7 +292,8 @@ void screen_hosts_and_devices_long_filename(char *f)
 
 void screen_show_info(bool printerEnabled, AdapterConfig* ac)
 {
-  smartkeys_set_mode();
+    vdp_noblank();
+    clrscr();
 
   gotoxy(0,7);
 
@@ -290,12 +317,14 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   }
 
   smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");
+  vdp_blank();
   smartkeys_sound_play(SOUND_MODE_CHANGE);
 }
 
 void screen_select_file(void)
 {
-  smartkeys_set_mode();
+    clrscr();
+    vdp_noblank();
   vdp_color(15,4,7);
   vdp_vfill(MODE2_ATTR,0xF4,512);
 
@@ -304,6 +333,7 @@ void screen_select_file(void)
   vdp_vfill(MODE2_ATTR+0x300,0x1F,0x0F00);
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  OPENING...");
+  vdp_blank();
 }
 
 void screen_select_file_display(char *p, char *f)
@@ -365,6 +395,7 @@ void screen_select_file_choose(char visibleEntries)
 {
   bool occupied = any_slot_occupied();
 
+  screen_should_be_cleared=true;
   bar_set(2,2,visibleEntries,0); // TODO: Handle previous
 
   if (copy_mode==true)
@@ -384,12 +415,13 @@ void screen_select_file_choose(char visibleEntries)
 void screen_select_file_filter(void)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
-  smartkeys_status("  ENTER A WILDCARD FILTER.\n  E.G. *Coleco*");
+  smartkeys_status("  ENTER A WILDCARD FILTER.\n  E.G. *Coleco*, or !TERM FOR SEARCH.");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
 void screen_select_file_new_type(void)
 {
+    screen_should_be_cleared=true;
   smartkeys_display(NULL,NULL,NULL,NULL,"  DDP"," DISK");
   smartkeys_status("  NEW MEDIA:\n  SELECT MEDIA TYPE.");
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
@@ -430,7 +462,8 @@ void screen_select_slot(char *e)
 {
   unsigned long *s;
 
-  smartkeys_set_mode();
+  vdp_noblank();
+  clrscr();
 
   gotoxy(0,7);
   cprintf("%32s","FILE DETAILS");
@@ -457,6 +490,7 @@ void screen_select_slot(char *e)
   vdp_vfill(MODE2_ATTR+0x900+64,0x1F,192);
 
   bar_set(0,1,4,0);
+  vdp_blank();
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
@@ -470,6 +504,8 @@ void screen_select_slot_choose(void)
 void screen_select_slot_eject(unsigned char ds)
 {
   vdp_vfill(0x0100+(ds<<8)+8,0x00,248);
+  textcolor(0);
+  textbackground(15);
   gotoxy(1,1+ds); cprintf("%s",empty);
   bar_jump(bar_get());
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
@@ -478,6 +514,8 @@ void screen_select_slot_eject(unsigned char ds)
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
   vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
+  textcolor(0);
+  textbackground(15);
   gotoxy(1,12+ds); cprintf(empty);
   bar_jump(bar_get());
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
@@ -485,7 +523,9 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-  gotoxy(1,1+hs); cprintf(empty);
+    textcolor(0);
+    textbackground(15);
+    gotoxy(1,1+hs); cprintf(empty);
 }
 
 void screen_select_slot_build_eos_directory(void)
@@ -511,12 +551,14 @@ void screen_select_slot_build_eos_directory_creating(void)
 
 void screen_destination_host_slot(char *h, char *p)
 {
+    vdp_noblank();
   clrscr();
   vdp_color(15,4,7);
   gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
   gotoxy(0,11); cprintf("%32s",h);
   vdp_color(1,15,7);
   gotoxy(0,12); cprintf("%-128s",p);
+  vdp_blank();
 }
 
 void screen_destination_host_slot_choose(void)
@@ -530,6 +572,7 @@ void screen_destination_host_slot_choose(void)
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+    vdp_noblank();
   clrscr();
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  COPYING FILE...PLEASE WAIT.");
@@ -538,6 +581,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   gotoxy(0,2); vdp_color(1,15,7); cprintf("%-128s",p);
   gotoxy(0,6); vdp_color(15,4,7); cprintf("%32s",dh);
   gotoxy(0,7); vdp_color(1,15,7); cprintf("%-128s",dp);
+  vdp_blank();
 }
 
 #endif /* BUILD_ADAM */

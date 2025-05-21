@@ -630,7 +630,7 @@ void screen_select_file_choose(char visibleEntries)
   }
   else
   {
-    screen_print_menu("RETURN",":Selsect file to mount\r\n");
+    screen_print_menu("RETURN",":Select file to mount\r\n");
     screen_print_menu("<-","Updir  ");
     screen_print_menu("ESC",":Abort  ");
     screen_print_menu("F","ilter  ");
@@ -728,8 +728,10 @@ void screen_select_slot_mode(void)
 
 void screen_select_slot_eject(unsigned char ds)
 {
-  cclearxy(1,1+ds,39);
-  cputsxy(2,1+ds,empty);
+    unsigned char o=1, to=2;
+    
+  cclearxy(o,1+ds,39);
+  cputsxy(to,1+ds,empty);
   bar_jump(bar_get());
 }
 
@@ -737,14 +739,15 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 {
   if (ds > 3) // diskII split
   {
-	  cclearxy(1,12+ds,39);
-    cputsxy(5,12+ds,empty);
+      cclearxy(4,12+ds,35);
+      cputsxy(8,12+ds,empty);
   }
   else
   {
-	  cclearxy(1,11+ds,39);
-    cputsxy(5,11+ds,empty);
+      cclearxy(1,11+ds,39);
+      cputsxy(5,11+ds,empty);
   }
+  
   bar_jump(bar_get());
 }
 

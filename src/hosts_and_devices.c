@@ -163,8 +163,9 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
 void hosts_and_devices_hosts(void)
 {
   io_update_devices_enabled(&deviceEnabled[0]);
-
-  screen_hosts_and_devices_hosts();
+ 
+  if (!quick_boot)
+  	screen_hosts_and_devices_hosts();
 
   while (hd_subState == HD_HOSTS)
     hd_subState = input_hosts_and_devices_hosts();

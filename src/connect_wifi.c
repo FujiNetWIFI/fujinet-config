@@ -24,6 +24,7 @@
 #include "adam/screen.h"
 #include "adam/globals.h"
 #include "adam/input.h"
+extern bool screen_should_be_cleared;
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_APPLE2
@@ -110,6 +111,9 @@ void connect_wifi(void)
 		case 3:
 			screen_error("CONNECTION SUCCESS!");
 			state = HOSTS_AND_DEVICES;
+#ifdef BUILD_ADAM
+                        screen_should_be_cleared=true;
+#endif
 			pause(60);
 			return;
 		case 4:
