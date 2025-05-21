@@ -69,5 +69,7 @@ void screen_destination_host_slot_choose(void);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
+#define KCODE_ESCAPE 0x1B
+
 #endif /* SCREEN_H */
 #endif /* BUILD_ADAM */

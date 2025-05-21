@@ -53,5 +53,10 @@ SISubState input_show_info(void);
 
 DHSubState input_destination_host_slot_choose(void);
 
+/**
+ * @brief The abort key
+ */
+#define KEY_ABORT 0x1b
+
 #endif /* INPUT_H */
 #endif /* BUILD_PMD85 */

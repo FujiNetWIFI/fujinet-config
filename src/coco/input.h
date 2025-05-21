@@ -54,5 +54,10 @@ unsigned char input_handle_joystick(void);
 unsigned char input_select_slot_mode(char *mode);
 void set_device_slot_mode(unsigned char slot, unsigned char mode);
 
+/**
+ * @brief The Abort key, corresponds to break.
+ */
+#define KEY_ABORT 0x03
+
 #endif /* INPUT_H */
 #endif /* _CMOC_VERSION_ */
