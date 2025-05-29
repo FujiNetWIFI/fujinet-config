@@ -1,7 +1,8 @@
-#ifdef _CMOC_VERSION_
+#ifdef __WATCOMC__
 /**
  * Global variables
  */
+#include <stdbool.h>
 
 #include "../typedefs.h"
 #include "../fuji_typedefs.h"
@@ -9,14 +10,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define bool unsigned char
-
-#define NUM_DEVICE_SLOTS    4
+#define NUM_DEVICE_SLOTS    8
 
 // # of files to display on the page. Moved from select_file.c to here, for Atari.
-#ifndef _CMOC_VERSION_
 #define ENTRIES_PER_PAGE 13
-#endif /* _CMOC_VERSION_ */
 
 #define COLOR_SETTING_NETWORK 0x66
 #define COLOR_SETTING_FAILED 0x33
@@ -44,6 +41,11 @@
 
 // Y position of the start of the file list from host.
 #define FILES_START_Y   6
+
+/**
+ * @brief Pointer to video memory
+ */
+extern unsigned char far *video;
 
 extern State state;
 extern char selected_host_slot;
@@ -80,4 +82,4 @@ extern bool mounting;
 extern unsigned char wifiEnabled;
 
 #endif /* GLOBALS_H */
-#endif /* _CMOC_VERSION_ */
+#endif /* __WATCOMC__ */
