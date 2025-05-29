@@ -69,6 +69,12 @@ extern bool screen_should_be_cleared;
 #include "rc2014/globals.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include "msdos/io.h"
+#include "msdos/screen.h"
+#include "msdos/globals.h"
+#endif /* __WATCOMC__ */
+
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
