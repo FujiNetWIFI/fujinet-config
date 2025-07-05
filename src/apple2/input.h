@@ -6,6 +6,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <apple2.h>
 #include <stdbool.h>
 #include "../typedefs.h"
 
@@ -55,7 +56,6 @@ void input_line_filter(char *c);
 /**
  * @brief the abort key
  */
-#define CH_ESC 0x1B
 #define KEY_ABORT CH_ESC
 
 #endif /* INPUT_H */
