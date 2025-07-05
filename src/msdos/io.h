@@ -47,8 +47,4 @@ void io_get_filename_for_device_slot(unsigned char slot, const char* filename);
 unsigned char io_mount_all(void);
 bool io_get_wifi_enabled(void);
 
-void siov();
-void rtclr();
-void cold_start();
-
 #endif /* IO_H */
