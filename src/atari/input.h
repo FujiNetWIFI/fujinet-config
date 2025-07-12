@@ -6,6 +6,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <atari.h>
 #include <stdbool.h>
 #include "../typedefs.h"
 
@@ -53,6 +54,11 @@ DHSubState input_destination_host_slot_choose(void);
 unsigned char input_handle_joystick(void);
 
 unsigned char input_select_slot_mode(char *mode);
+
+/**
+ * @brief The abort key
+ */
+#define KEY_ABORT CH_ESC
 
 #endif /* INPUT_H */
 #endif /* BUILD_ATARI */

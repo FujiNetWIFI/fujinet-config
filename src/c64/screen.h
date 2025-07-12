@@ -69,5 +69,11 @@ void screen_select_slot(char *e);
 void screen_select_slot_choose(void);
 void screen_select_slot_mode(void);
 void screen_select_slot_eject(unsigned char ds);
+
+/**
+ * Define key code to detect during keyboard capture
+ */
+#define KCODE_ESCAPE 0x5F
+
 #endif /* SCREEN_H */
 #endif /* BUILD_C64 */

@@ -6,6 +6,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <apple2.h>
 #include <stdbool.h>
 #include "../typedefs.h"
 
@@ -51,6 +52,11 @@ void input_line_set_wifi_password(char *c);
 WSSubState input_set_wifi_select(void);
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c);
 void input_line_filter(char *c);
+
+/**
+ * @brief the abort key
+ */
+#define KEY_ABORT CH_ESC
 
 #endif /* INPUT_H */
 #endif /* BUILD_APPLE2 */
