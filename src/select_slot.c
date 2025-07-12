@@ -4,9 +4,11 @@
  * Select a Destination Device Slot
  */
 
+#ifdef __WATCOMC__
 #include "typedefs.h"
 #include "fuji_typedefs.h"
 #include "fuji_typedefs_io.h"
+#endif /* __WATCOMC__ */
 
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
