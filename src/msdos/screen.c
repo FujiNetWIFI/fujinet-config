@@ -128,13 +128,23 @@ void screen_mount_and_boot(void)
     screen_puts(0,0,0x0f,"MOUNTING ALL SLOTS...");
 }
 
-void screen_set_wifi(AdapterConfigExtended *ac)
+void screen_set_wifi(AdapterConfig *ac)
 {
+  char tmp[20];
+
+  sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
+	  ac->macAddress[0],
+	  ac->macAddress[1],
+	  ac->macAddress[2],
+	  ac->macAddress[3],
+	  ac->macAddress[4],
+	  ac->macAddress[5]);
+  
   screen_clear();
   screen_puts_center(0,ATTRIBUTE_HEADER,"WELCOME TO FUJINET!");
   screen_puts_center(24,ATTRIBUTE_NORMAL,"SCANNING NETWORKS...");
   screen_puts(0,2,ATTRIBUTE_NORMAL,"MAC Address:");
-  screen_puts(13,2,ATTRIBUTE_BOLD,ac->sMacAddress);
+  screen_puts(13,2,ATTRIBUTE_BOLD,tmp);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -198,9 +208,11 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
+void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
+    char tmp[80];
+    
     screen_clear();
     
     screen_puts(x+3, 5, ATTRIBUTE_HEADER,"FUJINET CONFIG");
@@ -218,12 +230,52 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
     
     screen_puts(x+17, 7, ATTRIBUTE_BOLD,ac->ssid);
     screen_puts(x+17, 8, ATTRIBUTE_BOLD,ac->hostname);
-    screen_puts(x+17, 9, ATTRIBUTE_BOLD,ac->sLocalIP);
-    screen_puts(x+17, 10, ATTRIBUTE_BOLD,ac->sGateway);
-    screen_puts(x+17, 11, ATTRIBUTE_BOLD,ac->sDnsIP);
-    screen_puts(x+17, 12, ATTRIBUTE_BOLD,ac->sNetmask);
-    screen_puts(x+17, 13, ATTRIBUTE_BOLD,ac->sMacAddress);
-    screen_puts(x+17, 14, ATTRIBUTE_BOLD,ac->sBssid);
+
+    sprintf(tmp,"%03u.%03u.%03u.%03u",
+	    ac->localIP[0],
+	    ac->localIP[1],
+	    ac->localIP[2],
+	    ac->localIP[3]);
+    screen_puts(x+17, 9, ATTRIBUTE_BOLD,tmp);
+
+    sprintf(tmp,"%03u.%03u.%03u.%03u",
+	    ac->gateway[0],
+	    ac->gateway[1],
+	    ac->gateway[2],
+	    ac->gateway[3]);
+    screen_puts(x+17, 10, ATTRIBUTE_BOLD,tmp);
+
+    sprintf(tmp,"%03u.%03u.%03u.%03u",
+	    ac->dnsIP[0],
+	    ac->dnsIP[1],
+	    ac->dnsIP[2],
+	    ac->dnsIP[3]);
+    screen_puts(x+17, 11, ATTRIBUTE_BOLD,tmp);
+
+    sprintf(tmp,"%03u.%03u.%03u.%03u",
+	    ac->netmask[0],
+	    ac->netmask[1],
+	    ac->netmask[2],
+	    ac->netmask[3]);
+    screen_puts(x+17, 12, ATTRIBUTE_BOLD,tmp);
+
+    sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
+	    ac->macAddress[0],
+	    ac->macAddress[1],
+	    ac->macAddress[2],
+	    ac->macAddress[3],
+	    ac->macAddress[4],
+	    ac->macAddress[5]);
+    screen_puts(x+17, 13, ATTRIBUTE_BOLD,tmp);
+
+    sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
+	    ac->bssid[0],
+	    ac->bssid[1],
+	    ac->bssid[2],
+	    ac->bssid[3],
+	    ac->bssid[4],
+	    ac->bssid[5]);    
+    screen_puts(x+17, 14, ATTRIBUTE_BOLD,tmp);
     screen_puts(x+17, 15, ATTRIBUTE_BOLD,ac->fn_version);
 }
 
