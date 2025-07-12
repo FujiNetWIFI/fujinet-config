@@ -415,14 +415,14 @@ HDSubState input_hosts_and_devices_devices(void)
         // set device mode to read
         selected_device_slot = bar_get() - DEVICES_START_Y;
         hosts_and_devices_devices_set_mode(MODE_READ);
-        screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+        screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
         return HD_DEVICES;
     case 'W':
     case 'w':
         // set device mode to write
         selected_device_slot = bar_get() - DEVICES_START_Y;
         hosts_and_devices_devices_set_mode(MODE_WRITE);
-        screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+        screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
         return HD_DEVICES;
     case 'C':
     case 'c':
@@ -506,7 +506,7 @@ SFSubState input_select_file_choose(void)
         return SF_DEVANCE_FOLDER;
         
     case 0x4B00: // TK-II LEFT
-        if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
+        if ( strlen(path) == 1 && pos == 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
         {
             state = HOSTS_AND_DEVICES;
             return SF_DONE;

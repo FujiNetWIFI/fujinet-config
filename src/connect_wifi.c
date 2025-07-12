@@ -81,6 +81,7 @@ extern bool screen_should_be_cleared;
 #include "msdos/io.h"
 #include "msdos/screen.h"
 #include "msdos/globals.h"
+#include "msdos/input.h"
 #endif /* __WATCOMC__ */
 
 void connect_wifi(void)

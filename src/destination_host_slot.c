@@ -84,6 +84,14 @@
 #include "rc2014/bar.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include "msdos/screen.h"
+#include "msdos/input.h"
+#include "msdos/globals.h"
+#include "msdos/io.h"
+#include "msdos/bar.h"
+#endif
+
 #include "destination_host_slot.h"
 
 DHSubState dh_subState;

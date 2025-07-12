@@ -3,7 +3,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-
+#include <stdbool.h>
 #include "../fuji_typedefs.h"
 
 /**
@@ -61,11 +61,11 @@ void screen_set_wifi_password(void);
 
 void screen_connect_wifi(NetConfig *nc);
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e);
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_devices(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, unsigned char *e);
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e);
 
 void screen_hosts_and_devices_devices_clear_all(void);
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);

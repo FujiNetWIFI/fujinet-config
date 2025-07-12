@@ -82,6 +82,15 @@
 #include <conio.h>
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/screen.h"
+#include "msdos/io.h"
+#include "msdos/globals.h"
+#include "msdos/input.h"
+#include "msdos/bar.h"
+#endif /* BUILD_Pmd85 */
+
 #include "perform_copy.h"
 
 extern char source_filename[128];

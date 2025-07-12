@@ -6,7 +6,7 @@
  * @email thom dot cherryhomes at gmail dot com
  * @license gpl v. 3, see LICENSE for details.
  */
-
+#include <stdio.h>
 #include <dos.h>
 #include <stddef.h>
 #include <string.h>
@@ -130,11 +130,11 @@ void screen_mount_and_boot(void)
 
 void screen_set_wifi(AdapterConfigExtended *ac)
 {
-    screen_clear();
-    screen_puts_center(0,ATTRIBUTE_HEADER,"WELCOME TO FUJINET!");
-    screen_puts_center(24,ATTRIBUTE_NORMAL,"SCANNING NETWORKS...");
-    screen_puts(0,2,ATTRIBUTE_NORMAL,"MAC Address:");
-    screen_puts(13,2,ATTRIBUTE_BOLD,ac->sMacAddress);
+  screen_clear();
+  screen_puts_center(0,ATTRIBUTE_HEADER,"WELCOME TO FUJINET!");
+  screen_puts_center(24,ATTRIBUTE_NORMAL,"SCANNING NETWORKS...");
+  screen_puts(0,2,ATTRIBUTE_NORMAL,"MAC Address:");
+  screen_puts(13,2,ATTRIBUTE_BOLD,ac->sMacAddress);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -261,7 +261,7 @@ void screen_select_slot(char *e)
     screen_puts(7, DEVICES_END_MOUNT_Y + 2, ATTRIBUTE_BOLD, e);
   }
 
-  screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, (unsigned char *)&deviceEnabled[0]);
+  screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled[0]);
 
   bar_set(1,1,NUM_DEVICE_SLOTS,0);
 }
@@ -465,7 +465,7 @@ void screen_error(const char *msg)
     screen_puts(0, 24, ATTRIBUTE_BOLD, msg);
 }
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
     
@@ -477,7 +477,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 
     screen_hosts_and_devices_host_slots(&hostSlots[0]);
 
-    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
 }
 
 // Show the keys that are applicable when we are on the Hosts portion of the screen.
@@ -526,7 +526,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 // Since 'deviceSlots' is a global, do we need to access the input parameter at all?
 // Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, bool *e)
 {
   unsigned char slotNum;
   unsigned char dinfo[6];

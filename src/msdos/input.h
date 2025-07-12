@@ -54,5 +54,7 @@ unsigned char input_handle_joystick(void);
 
 unsigned char input_select_slot_mode(char *mode);
 
+#define KEY_ABORT 0x1b
+
 #endif /* INPUT_H */
 #endif /* __WATCOMC__ */

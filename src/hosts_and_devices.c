@@ -48,6 +48,15 @@
 extern uint8_t sp_error;
 #endif /* BUILD_APPLE2 */
 
+#ifdef __WATCOMC__
+#include "msdos/globals.h"
+#include "msdos/io.h"
+#include "msdos/screen.h"
+#include "msdos/input.h"
+#include "msdos/bar.h"
+#include <stdbool.h>
+#endif /* __WATCOMC__ */
+
 #ifdef BUILD_ATARI
 #include "atari/globals.h"
 #include "atari/io.h"
@@ -174,8 +183,11 @@ void hosts_and_devices_hosts(void)
 void hosts_and_devices_long_filename(void)
 {
   const char *f = io_get_device_filename(selected_device_slot);
-
+#ifdef __WATCOMC__
+  screen_hosts_and_devices_long_filename((char *)f);
+#else
   screen_hosts_and_devices_long_filename(f);
+#endif
 }
 
 void hosts_and_devices_eject(unsigned char ds)

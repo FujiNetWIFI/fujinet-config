@@ -83,6 +83,15 @@
 #include "rc2014/globals.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/io.h"
+#include "msdos/screen.h"
+#include "msdos/bar.h"
+#include "msdos/input.h"
+#include "msdos/globals.h"
+#endif /* __WATCOMC__ */
+
 WSSubState ws_subState;
 
 NetConfig nc;

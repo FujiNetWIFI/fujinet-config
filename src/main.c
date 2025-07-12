@@ -63,6 +63,13 @@
 #include "rc2014/screen.h"
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/io.h"
+#include "msdos/screen.h"
+#endif
+
+
 State state=HOSTS_AND_DEVICES;
 bool backToFiles=false;
 bool backFromCopy=false;

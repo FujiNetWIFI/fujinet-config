@@ -17,7 +17,7 @@ unsigned char io_get_wifi_status(void);
 NetConfig* io_get_ssid(void);
 unsigned char io_scan_for_networks(void);
 SSIDInfo *io_get_scan_result(int n);
-AdapterConfig *io_get_adapter_config(void);
+AdapterConfigExtended *io_get_adapter_config(void);
 int io_set_ssid(NetConfig *nc);
 void io_get_device_slots(DeviceSlot *d);
 void io_get_host_slots(HostSlot *h);

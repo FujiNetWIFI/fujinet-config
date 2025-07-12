@@ -76,6 +76,15 @@
 #define PRINTER 2 // ?
 #endif /* BUILD_RC2014 */
 
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/screen.h"
+#include "msdos/input.h"
+#include "msdos/globals.h"
+#include "msdos/io.h"
+#define PRINTER 2 // ?
+#endif /* __WATCOMC__ */
+
 SISubState si_subState;
 
 void show_info(void)

@@ -4,6 +4,10 @@
  * Select a Destination Device Slot
  */
 
+#include "typedefs.h"
+#include "fuji_typedefs.h"
+#include "fuji_typedefs_io.h"
+
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
 #include "coco/screen.h"
@@ -82,6 +86,16 @@
 #define DIR_MAX_LEN 36
 #endif /* BUILD_PMD85 */
 
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/screen.h"
+#include "msdos/input.h"
+#include "msdos/globals.h"
+#include "msdos/io.h"
+#include "msdos/bar.h"
+#define DIR_MAX_LEN 36
+#endif /* __WATCOMC__ */
+
 #ifdef BUILD_RC2014
 #include "rc2014/screen.h"
 #include "rc2014/input.h"
@@ -131,7 +145,7 @@ void select_slot_display()
 #ifdef BUILD_PMD85
       screen_select_slot(io_read_directory(120,0x80)); // up to 3 lines of 40 chars each
 #else
-      screen_select_slot(io_read_directory(49,0x80));
+      screen_select_slot((char *)io_read_directory(49,0x80));
 #endif
 
       io_close_directory();

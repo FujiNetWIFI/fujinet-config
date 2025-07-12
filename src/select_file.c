@@ -4,6 +4,10 @@
  * Select file from Host Slot
  */
 
+#include "select_file.h"
+#include "fuji_typedefs.h"
+#include "typedefs.h"
+
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
 #include "coco/strrchr.h"
@@ -18,9 +22,6 @@
 #else
 #include <string.h>
 #endif /* CMOC_VERSION */
-
-#include "select_file.h"
-#include "fuji_typedefs.h"
 
 #ifdef BUILD_ADAM
 #include "adam/screen.h"
@@ -88,6 +89,16 @@
 #define DIR_MAX_LEN 36
 #define ENTRIES_PER_PAGE 15
 #endif /* BUILD_PMD85 */
+
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include "msdos/screen.h"
+#include "msdos/io.h"
+#include "msdos/globals.h"
+#include "msdos/input.h"
+#include "msdos/bar.h"
+#define DIR_MAX_LEN 36
+#endif /* __WATCOMC__ */
 
 #ifdef BUILD_RC2014
 #include "rc2014/screen.h"
@@ -199,7 +210,7 @@ unsigned char select_file_display(void)
     {
       entry_size[i] = (unsigned char)strlen(e);
       visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
-      screen_select_file_display_entry(i, e, 0);
+      screen_select_file_display_entry(i, (char *)e, 0);
     }
   }
 
@@ -250,7 +261,7 @@ void select_display_long_filename(void)
       io_set_directory_position(pos + bar_get());
 #endif
       e = io_read_directory(64, 0);
-      screen_select_file_display_long_filename(e);
+      screen_select_file_display_long_filename((char *)e);
       io_close_directory();
       long_entry_displayed = true;
     }
