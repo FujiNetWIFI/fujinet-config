@@ -270,9 +270,11 @@ HDSubState input_hosts_and_devices_hosts(void)
     case 0x08:
     case 0x09:
       return HD_DEVICES;
+    case 'c':
     case 'C':
       state = SHOW_INFO;
       return HD_DONE;
+    case 'e':
     case 'E':
       hosts_and_devices_edit_host_slot(bar_get());
       bar_clear(true);
