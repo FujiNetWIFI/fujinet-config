@@ -91,7 +91,9 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-		// check for esc key and abort
+	  // TODO: Write COCO specific version that just checks for a key, as input() blocks! grrr. -thom
+#ifndef _CMOC_VERSION_
+	  // check for esc key and abort
 		if (input() == KEY_ABORT)
 		{
 			screen_error("CONNECTION ABORTED");
@@ -99,7 +101,8 @@ void connect_wifi(void)
 			state=SET_WIFI;
 			return;
 		}
-
+#endif /* _CMOC_VERSION_ */
+		
 		s = io_get_wifi_status();
 
 		switch (s)
