@@ -413,7 +413,7 @@ void screen_hosts_and_devices_devices()
   printf("\x80\x80\x80\x31-8slotEditENTERbrowseLobby\x80\x80\x80\x80\x80\x80\x43onfigTABdrivesBREAKboot\x80\x80\x80");
 
   locate(0,13);
-  printf("1-8 slot Eject  CLEAR  all slots");
+  printf("0-3 slot Eject  CLEAR  all slots");
   printf("<- hosts Read Write Config Lobby");
 
   screen_add_shadow(15,RED);

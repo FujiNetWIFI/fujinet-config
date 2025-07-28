@@ -289,6 +289,9 @@ HDSubState input_hosts_and_devices_hosts(void)
     case '6':
     case '7':
     case '8':
+      bar_clear(false);
+      bar_jump(k-'1');
+      
       break;
     }
   return HD_HOSTS;
@@ -337,6 +340,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 0x31:
     case 0x32:
     case 0x33:
+      bar_clear(false);
       bar_jump(k-'0');
       break;
     /* default: */
