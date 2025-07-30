@@ -90,6 +90,7 @@
 #include "msdos/bar.h"
 #include "msdos/input.h"
 #include "msdos/globals.h"
+#include "die.h"
 #endif /* __WATCOMC__ */
 
 WSSubState ws_subState;
@@ -111,9 +112,9 @@ void set_wifi_set_ssid(unsigned char i)
 void set_wifi_select(void)
 {
   unsigned char k=0;
-  
+
   screen_set_wifi_select_network(numNetworks);
-  
+
   while(ws_subState==WS_SELECT)
     ws_subState=input_set_wifi_select();
 }

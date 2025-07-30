@@ -24,6 +24,7 @@ unsigned char screen_mode = 0x03;
 bool screen_is_color = true;
 char text_empty[] = "Empty";
 char fn[256];
+char _visibleEntries;
 
 extern bool copy_mode;
 
@@ -36,7 +37,7 @@ static unsigned char far *screen_get_video_segment_address(void)
 {
     union REGS regs;
     unsigned char video_mode=0;
-    
+
     regs.h.ah = 0x0F; // Get video mode
     int86(0x10,&regs,&regs);
 
@@ -55,8 +56,8 @@ static unsigned char far *screen_get_video_segment_address(void)
     }
     else if (video_mode >= 0x0d && video_mode <= 0x0f) // CGA video modes.
         return MK_FP(0xB800,0x0000);
-    
-    return MK_FP(0xA000,0x0000); // Assume EGA/VGA if all else fails.   
+
+    return MK_FP(0xA000,0x0000); // Assume EGA/VGA if all else fails.
 }
 
 /**
@@ -101,7 +102,7 @@ void screen_puts_center(unsigned char y, unsigned char a, const char *s)
  * @brief place a NULL terminated string on screen, with selected attribute
  * @param x Column (00-screen_cols-1)
  * @param y Line (00-24)
- * @param 
+ * @param
  */
 void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *s)
 {
@@ -139,7 +140,7 @@ void screen_set_wifi(AdapterConfig *ac)
 	  ac->macAddress[3],
 	  ac->macAddress[4],
 	  ac->macAddress[5]);
-  
+
   screen_clear();
   screen_puts_center(0,ATTRIBUTE_HEADER,"WELCOME TO FUJINET!");
   screen_puts_center(24,ATTRIBUTE_NORMAL,"SCANNING NETWORKS...");
@@ -151,7 +152,7 @@ void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
 {
     char out[4] = {0x20, 0x20, 0x20, 0x00};
     unsigned char x=screen_cols == 40 ? 35 : 70;
-    
+
     if (s->rssi > -40)
     {
         out[0] = 0xB2;
@@ -181,7 +182,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 void screen_set_wifi_select_network(unsigned char nn)
 {
     unsigned char x = screen_cols == 40 ? 2 : 32;
-    
+
     screen_clear_line(numNetworks + NETWORKS_START_Y);
     screen_puts(x, NETWORKS_START_Y + numNetworks, ATTRIBUTE_NORMAL, "<Enter a specific SSID>");
 
@@ -212,9 +213,9 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
     char tmp[80];
-    
+
     screen_clear();
-    
+
     screen_puts(x+3, 5, ATTRIBUTE_HEADER,"FUJINET CONFIG");
     screen_puts_center(17,ATTRIBUTE_NORMAL,"[R]econnect  Change [S]SID");
     screen_puts(x+9, 19, ATTRIBUTE_BOLD,"Any other key to return");
@@ -227,7 +228,7 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
     screen_puts(x+5, 13, ATTRIBUTE_NORMAL,"       MAC:");
     screen_puts(x+5, 14, ATTRIBUTE_NORMAL,"     BSSID:");
     screen_puts(x+5, 15, ATTRIBUTE_NORMAL,"   Version:");
-    
+
     screen_puts(x+17, 7, ATTRIBUTE_BOLD,ac->ssid);
     screen_puts(x+17, 8, ATTRIBUTE_BOLD,ac->hostname);
 
@@ -274,7 +275,7 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
 	    ac->bssid[2],
 	    ac->bssid[3],
 	    ac->bssid[4],
-	    ac->bssid[5]);    
+	    ac->bssid[5]);
     screen_puts(x+17, 14, ATTRIBUTE_BOLD,tmp);
     screen_puts(x+17, 15, ATTRIBUTE_BOLD,ac->fn_version);
 }
@@ -332,6 +333,11 @@ void screen_select_slot_eject(unsigned char ds)
 {
 }
 
+void screen_hosts_and_devices_eject(unsigned char ds)
+{
+
+}
+
 void screen_select_slot_build_eos_directory(void)
 {
 }
@@ -364,10 +370,10 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
-    
+
     unsigned char i;
     unsigned char x = screen_cols == 40 ? 0 : 20;
-    
+
     // Host
     screen_puts(x+0, 1, ATTRIBUTE_HEADER, "Host:");
     screen_puts(x+5, 1, ATTRIBUTE_BOLD, selected_host_name);
@@ -474,7 +480,7 @@ void screen_select_file_new_type(void)
 void screen_select_file_new_size(unsigned char k)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
-    
+
     screen_clear_line(20);
     screen_clear_line(21);
 
@@ -520,7 +526,7 @@ void screen_error(const char *msg)
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
-    
+
     screen_clear();
     bar_clear(false);
 
@@ -536,7 +542,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 void screen_hosts_and_devices_hosts(void)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
-    
+
     screen_clear_line(22);
     screen_clear_line(23);
     screen_puts(x+0,22,ATTRIBUTE_NORMAL, "[1-8] Slot [E]dit [RETURN] Browse [L]obby [C]onfig [TAB] Drives [ESC] Boot");
@@ -549,7 +555,7 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
-    
+
     screen_clear_line(22);
     screen_clear_line(23);
 
@@ -570,7 +576,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
         char s[2] = {0x00,0x00};
 
         s[0] = slotNum + '1';
-        
+
         screen_puts(2,slotNum+HOSTS_START_Y,ATTRIBUTE_BOLD, s);
         screen_puts(4,slotNum+HOSTS_START_Y,ATTRIBUTE_NORMAL, hostSlots[slotNum][0] != 0x00 ? (char *)hostSlots[slotNum] : text_empty);
     }
