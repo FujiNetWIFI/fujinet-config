@@ -438,13 +438,13 @@ SSSubState input_select_slot_choose(void)
       break;
     case 0x0d: // ENTER
     case 'R':
-      mode=0;
+      mode=MODE_READ;
       selected_device_slot=(char)bar_get();
       strncpy(source_path,path,224);
       old_pos = pos;
       return SS_DONE;
     case 'W':
-      mode=2;
+      mode=MODE_WRITE;
       selected_device_slot=(char)bar_get();
       return SS_DONE;
     case 0x5E:
