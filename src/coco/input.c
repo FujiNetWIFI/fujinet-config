@@ -316,12 +316,12 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'R':
     case 'r':
       selected_device_slot=(byte)bar_get();
-      hosts_and_devices_devices_set_mode(0);
+      hosts_and_devices_devices_set_mode(MODE_READ);
       return HD_DEVICES;
     case 'W':
     case 'w':
       selected_device_slot=(byte)bar_get();
-      hosts_and_devices_devices_set_mode(2);
+      hosts_and_devices_devices_set_mode(MODE_WRITE);
       return HD_DEVICES;
     case 0x03:
       return HD_DONE;
@@ -438,13 +438,13 @@ SSSubState input_select_slot_choose(void)
       break;
     case 0x0d: // ENTER
     case 'R':
-      mode=0;
+      mode=MODE_READ;
       selected_device_slot=(char)bar_get();
       strncpy(source_path,path,224);
       old_pos = pos;
       return SS_DONE;
     case 'W':
-      mode=2;
+      mode=MODE_WRITE;
       selected_device_slot=(char)bar_get();
       return SS_DONE;
     case 0x5E:
