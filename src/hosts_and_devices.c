@@ -183,6 +183,7 @@ void hosts_and_devices_eject(unsigned char ds)
   io_umount_disk_image(ds);
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
+  deviceSlots[ds].mode = 0;
   io_put_device_slots(&deviceSlots[0]);
   io_get_device_slots(&deviceSlots[0]);
   screen_hosts_and_devices_eject(ds);
@@ -287,6 +288,10 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   //screen_hosts_and_devices_devices_selected(selected_device_slot); // Breaks disk order on screen??
   selected_device_slot = 0; // Go back to drive 0 instead
   hosts_and_devices_devices();
+#elif defined(_CMOC_VERSION_)
+    io_mount_disk_image(selected_device_slot, m);
+    screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
+    bar_jump(selected_device_slot);
 #else
     io_mount_disk_image(selected_device_slot, m);
 #endif
@@ -335,7 +340,7 @@ void hosts_and_devices_done(void)
     if (deviceSlots[i].hostSlot != 0xFF)
     {
 #ifdef _CMOC_VERSION_
-      printf("%d:%s\n",i,deviceSlots[i].file);
+      printf("%d:%s\n",i,strupr(deviceSlots[i].file));
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;
