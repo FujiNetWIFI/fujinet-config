@@ -50,7 +50,7 @@ int cgetc(void)
     // Return full scancode, if arrow key
     if (is_special_key(kbcode))
         return r.x.ax;
-   
+
     // Otherwise, Return ASCII value
     return r.h.al;
 }
@@ -64,8 +64,6 @@ unsigned char input()
     {
         return cgetc();
     }
-    /* else */
-    /*     return input_handle_joystick(); */
 
     return 0;
 }
@@ -353,9 +351,9 @@ HDSubState input_hosts_and_devices_hosts(void)
         {
             return HD_HOSTS;
         }
-    case '!':
-    case 'B': // Taken from original config. What is that checking for?
-        //mount_and_boot();
+    case 0x1b:
+      mount_and_boot();
+      return HD_HOSTS;
     default:
         return HD_HOSTS;
     }
