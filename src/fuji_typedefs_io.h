@@ -8,6 +8,8 @@
 #define FILE_MAXLEN 36
 #define SSID_MAXLEN 33 /* 32 + NULL */
 
+#ifndef FUJINET_FUJI_H
+
 /**
  * Returned info for a single SSID entry
  * from a WiFi scan
@@ -77,6 +79,8 @@ typedef struct
   unsigned char deviceSlot;
   char filename[256];
 } NewDisk;
+
+#endif /* FUJINET_FUJI_H */
 
 #endif /* FUJI_TYPEDEFS_IO_H */
 

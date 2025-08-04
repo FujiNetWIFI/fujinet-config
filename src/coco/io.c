@@ -3,6 +3,8 @@
  * FujiNet Drivewire calls
  */
 
+#include <fujinet-fuji.h>
+
 #include <cmoc.h>
 #include "stdbool.h"
 #include "io.h"
