@@ -529,6 +529,7 @@ void io_disable_device(unsigned char d)
  */
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
+    //fuji_copy_file(source_slot, destination_slot, &copySpec[0]);
 }
 
 unsigned char io_device_slot_to_device(unsigned char ds)

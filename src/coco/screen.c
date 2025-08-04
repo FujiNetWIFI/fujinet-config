@@ -386,7 +386,7 @@ void screen_hosts_and_devices_hosts()
   locate(0,0);
   printf("%32s","host\x80slots");
   
-  memset(0x400,0xAF,22);
+  memset(SCREEN_RAM_TOP,0xAF,22);
   (*(unsigned char *)0x041a) = 0x20;
 
   locate(0,13);
@@ -518,14 +518,39 @@ void screen_init(void)
 
 void screen_destination_host_slot(char *h, char *p)
 {
+  cls(3);
+  locate(0,11);
+
+  printf("%32s","copy\x80\x66rom\x80host\x80slot");
+
+  locate(0, 12); printf("%-32s", strupr(h));
+  locate(0, 13); printf("%-128s", strupr(p));
 }
 
 void screen_destination_host_slot_choose(void)
 {
+  locate(0, 0);
+  printf("%32s","copy\x80to\x80host\x80slot");
+  screen_hosts_and_devices_host_slots(&hostSlots[0]);
+  locate(0,13);
+  printf("1-8 choose\x80slot ENTER select");
+  locate(0,14);
+  printf("BREAK quit");
+  screen_add_shadow(15,BLUE);
+  
+  bar_set(1,1,8,selected_host_slot);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+  cls(3);
+
+  locate(0,0); printf("%32s","COPYING FILE FROM:");
+  locate(0,2); printf("%32s",sh);
+  locate(0,3); printf("%-128s",p);
+  locate(0,7); printf("%32s","COPYING FILE TO:");
+  locate(0,9); printf("%32s",dh);
+  locate(0,10); printf("%-128s",dp);
 }
 
 void screen_connect_wifi(NetConfig *nc)
