@@ -13,6 +13,7 @@
 #include "globals.h"
 #include "mount_and_boot.h"
 #include "strendswith.h"
+#include "../key_codes.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../set_wifi.h"

@@ -11,6 +11,9 @@
 #define true 1
 #define false 0
 
-typedef unsigned char bool;
+#ifndef bool
+#define bool _Bool
+typedef unsigned char _Bool;
+#endif /* bool */
 
 #endif /* STDBOOL_H */

@@ -6,8 +6,12 @@ CP=cp
 ECHO=echo
 FIRMWARE_DIR="../fujinet-firmware"
 
-config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
-	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
+FUJINET_LIB_DIR="../fujinet-lib-unified"
+LIBS=-L $(FUJINET_LIB_DIR)/build -lfujinet.coco
+CFLAGS=-I$(FUJINET_LIB_DIR)/include -I$(FUJINET_LIB_DIR)/bus/coco
+
+config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
+	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o -L $(FUJINET_LIB_DIR) $(LIBS)
 	$(RM) autorun.dsk
 	decb dskini autorun.dsk
 	decb copy -t -0 dist.coco/autoexec.bas autorun.dsk,AUTOEXEC.BAS
@@ -17,58 +21,61 @@ config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_device
 	$(ECHO) Now, Do a Upload Filesystem task.
 
 pause.o: src/coco/pause.c
-	$(CC) -c src/coco/pause.c
+	$(CC) $(CFLAGS) -c src/coco/pause.c
+
+strendswith.o: src/coco/strendswith.c
+	$(CC) -c src/coco/strendswith.c
 
 strrchr.o: src/coco/strrchr.c
-	$(CC) -c src/coco/strrchr.c
+	$(CC) $(CFLAGS) -c src/coco/strrchr.c
 
 check_wifi.o: src/check_wifi.c
-	$(CC) -c src/check_wifi.c
+	$(CC) $(CFLAGS) -c src/check_wifi.c
 
 connect_wifi.o: src/connect_wifi.c
-	$(CC) -c src/connect_wifi.c
+	$(CC) $(CFLAGS) -c src/connect_wifi.c
 
 destination_host_slot.o: src/destination_host_slot.c
-	$(CC) -c src/destination_host_slot.c
+	$(CC) $(CFLAGS) -c src/destination_host_slot.c
 
 hosts_and_devices.o: src/hosts_and_devices.c
-	$(CC) -c src/hosts_and_devices.c
+	$(CC) $(CFLAGS) -c src/hosts_and_devices.c
 
 main.o: src/main.c
-	$(CC) -c src/main.c
+	$(CC) $(CFLAGS) -c src/main.c
 
 perform_copy.o: src/perform_copy.c
-	$(CC) -c src/perform_copy.c
+	$(CC) $(CFLAGS) -c src/perform_copy.c
 
 select_file.o: src/select_file.c
-	$(CC) -c src/select_file.c
+	$(CC) $(CFLAGS) -c src/select_file.c
 
 select_slot.o: src/select_slot.c
-	$(CC) -c src/select_slot.c
+	$(CC) $(CFLAGS) -c src/select_slot.c
 
 set_wifi.o: src/set_wifi.c
-	$(CC) -c src/set_wifi.c
+	$(CC) $(CFLAGS) -c src/set_wifi.c
 
 show_info.o: src/show_info.c
-	$(CC) -c src/show_info.c
+	$(CC) $(CFLAGS) -c src/show_info.c
 
 bar.o: src/coco/bar.c
-	$(CC) -c src/coco/bar.c
+	$(CC) $(CFLAGS) -c src/coco/bar.c
 
 die.o: src/coco/die.c
-	$(CC) -c src/coco/die.c
+	$(CC) $(CFLAGS) -c src/coco/die.c
 
 input.o: src/coco/input.c
-	$(CC) -c src/coco/input.c
+	$(CC) $(CFLAGS) -c src/coco/input.c
 
 io.o: src/coco/io.c
-	$(CC) -c src/coco/io.c
+	$(CC) $(CFLAGS) -c src/coco/io.c
 
 mount_and_boot.o: src/coco/mount_and_boot.c
-	$(CC) -c src/coco/mount_and_boot.c
+	$(CC) $(CFLAGS) -c src/coco/mount_and_boot.c
 
 screen.o: src/coco/screen.c
-	$(CC) -c src/coco/screen.c
+	$(CC) $(CFLAGS) -c src/coco/screen.c
 
 clean:
 	$(RM) *.o
