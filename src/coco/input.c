@@ -457,12 +457,14 @@ SSSubState input_select_slot_choose(void)
 		break;
 	case KEY_ENTER: // ENTER
 	case 'R':
+	case 'r':
 		mode = MODE_READ;
 		selected_device_slot = (char)bar_get();
 		strncpy(source_path, path, 224);
 		old_pos = pos;
 		return SS_DONE;
 	case 'W':
+	case 'w':
 		mode = MODE_WRITE;
 		selected_device_slot = (char)bar_get();
 		return SS_DONE;
