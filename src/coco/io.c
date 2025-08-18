@@ -4,13 +4,16 @@
  */
 
 #include <cmoc.h>
+#include <coco.h>
 #include <fujinet-fuji.h>
+#include <fujinet-fuji-coco.h>
 #include <dw.h>
 #include "stdbool.h"
 #include "io.h"
 #include "globals.h"
 #include "screen.h"
 #include "bar.h"
+#include "../pause.h"
 
 #define OP_FUJI 0xE2
 #define CMD_READY 0x00
@@ -31,49 +34,7 @@ byte orig_casflag;
  */
 void io_ready(void)
 {
-    struct _readycmd
-    {
-        byte opcode;
-        byte command;
-    } rc;
-
-    byte z=0, r=0;
-    
-    rc.opcode = OP_FUJI;
-    rc.command = CMD_READY;
-    
-    while (!z)
-    {
-        dwwrite((byte *)&rc,sizeof(rc));
-        z = dwread((byte *)&r,sizeof(r));
-    }
-}
-
-
-/**
- * @brief Get response data from last command
- * @param devid The device ID (0-255) 
- * @param buf Target buffer 
- * @param len Length 
- */
-byte io_get_response(byte *buf, int len)
-{
-    struct _getresponsecmd
-    {
-        byte opcode;
-        byte command;
-    } grc;
-
-    byte z=0;
-    
-    grc.opcode = OP_FUJI;
-    grc.command = CMD_RESPONSE;
-
-    io_ready();
-    dwwrite((byte *)&grc, sizeof(grc));
-    dwread((byte *)buf, len);
-    
-    return z;
+    bus_ready();
 }
 
 bool io_error(void)
@@ -91,6 +52,8 @@ void io_init(void)
 {
 	// There's no partnering exit function for screen_init, so we'll set up
 	//   how casing is being handled here.  We default to lowercase.
+    // Set casing to lowercase.
+
 	asm {
 		lda $011A
 		sta orig_casflag
@@ -101,7 +64,7 @@ void io_init(void)
 bool io_get_wifi_enabled(void)
 {
     // TODO: Why is this not defined?
-    // return fuji_get_wifi_enabled();
+    //return fuji_get_wifi_enabled();
 
     bool r=0;
 
@@ -118,9 +81,9 @@ bool io_get_wifi_enabled(void)
   dwwrite((byte *)&gwec, sizeof(gwec));
 
   io_ready();
-  io_get_response(&r,1);
+  fuji_get_response(&r,1);
   
-  return r;
+ return r;
 }
 
 unsigned char io_get_wifi_status(void)
@@ -207,26 +170,16 @@ void io_mount_host_slot(unsigned char hs)
 
 void io_open_directory(unsigned char hs, char *p, char *f)
 {
-    struct _open_directory
-    {
-        byte opcode;
-        byte cmd;
-        byte hs;
-        char p[256];
-    } odc;
-
-    odc.opcode = OP_FUJI;
-    odc.cmd = 0xF7;
-    odc.hs = hs;
-
-    memset(odc.p,0,sizeof(odc.p));
-    strcpy(odc.p,p);
-    strcpy(&odc.p[strlen(odc.p)+1],filter);
-
-    io_ready();
-    dwwrite((byte *)&odc, sizeof(odc));
-
-    io_ready();
+	char *_p = p;
+	if (f[0] != 0x00)
+	{
+		// We have a filter, create a directory+filter string
+		memset(response, 0, 256);
+		strcpy((char *) response, p);
+		strcpy((char *) &response[strlen((char *) response) + 1], f);
+		_p = (char *) &response;
+	}
+	fuji_open_directory(hs, _p);
 }
 
 const char *io_read_directory(unsigned char maxlen, unsigned char a)
@@ -288,6 +241,8 @@ void io_boot(void)
 		lda orig_casflag
 		sta $011A
 	}
+    pause(180); // Pause for 3 seconds to let the user see the mounted disks.
+    coldStart();
 	exit(0);
 }
 

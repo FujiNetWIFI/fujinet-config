@@ -9,12 +9,18 @@ FIRMWARE_DIR="../fujinet-firmware"
 FUJINET_LIB_DIR="../fujinet-lib-unified"
 LIBS=-L $(FUJINET_LIB_DIR)/build -lfujinet.coco
 CFLAGS=-I$(FUJINET_LIB_DIR)/include -I$(FUJINET_LIB_DIR)/bus/coco
+LIMITFLAGS=--org=0E00 --limit=7C00
+all: cfgload.bin config.bin
+
+cfgload.bin: 
+	$(AS) -o cfgload.bin src/coco/cfgload.asm 
 
 config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
-	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o -L $(FUJINET_LIB_DIR) $(LIBS)
+	$(CC) $(LIMITFLAGS) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o -L $(FUJINET_LIB_DIR) $(LIBS)
 	$(RM) autorun.dsk
 	decb dskini autorun.dsk
 	decb copy -t -0 dist.coco/autoexec.bas autorun.dsk,AUTOEXEC.BAS
+	writecocofile autorun.dsk cfgload.bin
 	writecocofile autorun.dsk config.bin
 	$(CP) autorun.dsk $(FIRMWARE_DIR)/data/webui/device_specific/BUILD_COCO/
 #	$(CP) autorun.dsk ~/tnfs/
@@ -80,5 +86,6 @@ screen.o: src/coco/screen.c
 clean:
 	$(RM) *.o
 	$(RM) coco/*.o
+	$(RM) cfgload.bin
 	$(RM) config.bin
 	$(RM) autorun.dsk

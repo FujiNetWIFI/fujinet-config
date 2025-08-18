@@ -95,9 +95,12 @@ void screen_set_wifi(AdapterConfig *ac)
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
   char meter[4]={0x20,0x20,0x20,0x00};
-  char ds[32];
+  char ds[33];
 
   memset(ds,0x20,32);
+  ds[32] = 0x00;
+  // Print spaces first
+  locate(0,n+2);  printf("%-32s",screen_upper(ds));
   strncpy(ds,s->ssid,32);
 
   if (s->rssi > -50)
