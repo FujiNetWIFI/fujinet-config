@@ -9,6 +9,7 @@
  *
  **/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
@@ -26,6 +27,12 @@ char _visibleEntries;
 extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
+char d[256];
+unsigned char byte0;
+unsigned char byte1;
+unsigned char byte2;
+unsigned char byte3;
+uint32_t s;
 
 // The currently active screen (basically each time a different displaylist is used that will be considered a screen)
 // Used by 'set_cursor' so it knows the layout of the screen and can properly figure out the memory offset needed whengiven an (x, y) coordinate pair.
@@ -129,7 +136,7 @@ void font_init()
   memcpy((unsigned char *)FONT_MEMORY, (unsigned char *)0xE000, 1024);
 
   // And patch it.
-  memcpy(FONT_MEMORY + 520, &fontPatch, sizeof(fontPatch));
+  memcpy((unsigned char *) FONT_MEMORY + 520, &fontPatch, sizeof(fontPatch));
 
   OS.chbas = FONT_MEMORY >> 8; // use the charset
 }
@@ -262,27 +269,37 @@ void screen_select_slot(char *e)
   // Show file details if it's an existing file only.
   if ( create == false )
   {
+    memset(d, 0, sizeof(d));
+
     // Modified time
-    // sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+    sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+    screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
 
-    // Remove for now (wasn't in original config, not really all that important and removng sprintf usage), so skip over the 6 bytes for the file date/time info.
-    e += 6;
-
+    
     // File size
-    // only 2 bytes, so max size is 65535.. don't show for now until SIO method is changed to return more.
-    // Result is unreliable since if the file was < 65535 bytes it will be ok, but if it was more we don't
-    // know how to interpret the 2 bytes we have available to us.
-    //s = (unsigned int *)e;
-    //sprintf(d, "%8s %u bytes", "SIZE:", *s);
-    //sprintf(d, "%8s %u K", "SIZE:", *s >> 10);
-    //screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
-    // Skip next 4 bytes to get to the filename (2 for the size, 2 for flags we don't care about)
+    // Don't ask me why they're in this order, but this is it.
+    // Hex value of 00 01 68 10 (Decimal 92176) is coming in as: 10 68 00 01
+    byte0 = e[2]; // Most significant byte
+    byte1 = e[3];
+    byte2 = e[1];
+    byte3 = e[0]; // Least significant byte
+
+    // Combine the bytes using bitwise shifts and OR operations
+    s = ((uint32_t)byte0 << 24) |
+        ((uint32_t)byte1 << 16) |
+        ((uint32_t)byte2 << 8) |
+        (uint32_t)byte3;
+
+    sprintf(d, "%8s %lu K", "SIZE:", s >> 10);
+    screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
+
+    // Skip next 4 bytes to get to the filename
     e += 4;
 
     // Filename
-    screen_puts(1, DEVICES_END_MOUNT_Y + 2, "FILE:");
-    screen_puts(7, DEVICES_END_MOUNT_Y + 2, e);
+    screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
+    screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
   }
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
