@@ -454,13 +454,16 @@ const char host_slot_char(unsigned char hostSlot)
 
 const char device_slot_mode(unsigned char mode)
 {
-  switch(mode)
+  // Mask out 0x40
+  unsigned char masked_mode = mode & ~MODE_MOUNTED;
+
+  switch(masked_mode)
     {
     case 0:
       return 0x80;
-    case 1:
+    case MODE_READ:
       return 0xAF;
-    case 2:
+    case MODE_WRITE:
       return 0x9F;
     }
 }
@@ -516,7 +519,8 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_init(void)
 {
-  // TODO: figure out lowercase.
+  // Make sure the screen is in 32 column mode
+  width(32);
 }
 
 void screen_destination_host_slot(char *h, char *p)

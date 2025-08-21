@@ -14,6 +14,7 @@
 
 #define MODE_READ 1
 #define MODE_WRITE 2
+#define MODE_MOUNTED 0x40
 
 #define MAX_HOST_LEN 32
 #define NUM_HOST_SLOTS 8
