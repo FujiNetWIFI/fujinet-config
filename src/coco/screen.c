@@ -530,8 +530,8 @@ void screen_destination_host_slot(char *h, char *p)
 
   printf("%32s","copy\x80\x66rom\x80host\x80slot");
 
-  locate(0, 12); printf("%-32s", strupr(h));
-  locate(0, 13); printf("%-128s", strupr(p));
+  locate(0, 12); printf("%-32s", screen_upper(h));
+  locate(0, 13); printf("%-128s", p);
 }
 
 void screen_destination_host_slot_choose(void)
