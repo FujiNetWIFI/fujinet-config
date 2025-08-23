@@ -174,7 +174,7 @@ void select_slot_done()
     screen_select_file_new_creating();
     io_create_new(selected_host_slot,selected_device_slot,selected_size,path);
     memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
-    deviceSlots[selected_device_slot].mode=2;
+    deviceSlots[selected_device_slot].mode=MODE_WRITE;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
