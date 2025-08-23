@@ -256,6 +256,7 @@ void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
 
 void screen_select_slot(char *e)
 {
+  unsigned long *s;
   screen_dlist_select_slot();
   set_active_screen(SCREEN_SELECT_SLOT);
 
@@ -277,26 +278,13 @@ void screen_select_slot(char *e)
 
     
     // File size
+    s=(unsigned long *)e; // Cast the next four bytes as a long integer.
 
-    // Don't ask me why they're in this order, but this is it.
-    // Hex value of 00 01 68 10 (Decimal 92176) is coming in as: 10 68 00 01
-    byte0 = e[2]; // Most significant byte
-    byte1 = e[3];
-    byte2 = e[1];
-    byte3 = e[0]; // Least significant byte
-
-    // Combine the bytes using bitwise shifts and OR operations
-    s = ((uint32_t)byte0 << 24) |
-        ((uint32_t)byte1 << 16) |
-        ((uint32_t)byte2 << 8) |
-        (uint32_t)byte3;
-
-    sprintf(d, "%8s %lu K", "SIZE:", s >> 10);
+    sprintf(d, "%8s %lu K", "SIZE:", *s >> 10);
     screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
-    // Skip next 4 bytes to get to the filename
-    e += 4;
-
+     e += sizeof(unsigned long) + 3; // Skip isdir, trunc, type
+     
     // Filename
     screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
     screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
