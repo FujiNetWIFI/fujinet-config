@@ -1,4 +1,7 @@
 TARGET  = config.com
+R2R_DIR = r2r/msdos
+R2R_BIN = $(R2R_DIR)/$(TARGET)
+
 CC      = wcc
 CFLAGS  = -q -0 -bt=dos -ms -osh $(CPPFLAGS) -i=src -i=src/msdos 
 
@@ -10,8 +13,14 @@ SOURCE	= src/check_wifi.c src/connect_wifi.c src/destination_host_slot.c src/hos
 
 all:	$(TARGET)
 
-$(TARGET): $(OBJS)
+# Create the "Ready 2 Run" executable/disk
+r2r: $(R2R_BIN)
+
+$(R2R_BIN): $(OBJS) | $(R2R_DIR)
 	$(LD) $(LDFLAGS) NAME $@
+
+$(R2R_DIR):
+	mkdir -p $@
 
 src/check_wifi.obj: src/check_wifi.c
 	$(CC) $(CFLAGS) src/check_wifi.c 

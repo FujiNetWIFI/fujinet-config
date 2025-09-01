@@ -17,6 +17,8 @@ FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
 PROGRAM := config
+R2R_DIR := r2r/$(TARGETS)
+DISK := $(R2R_DIR)/autorun.po
 
 # Path(s) to additional libraries required for linking the program
 # Use only if you don't want to place copies of the libraries in SRCDIR
@@ -256,7 +258,7 @@ ASFLAGS += --asm-include-dir src/$(TARGETLIST)/asminc --asm-include-dir $(FUJINE
 CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
 .SUFFIXES:
-.PHONY: all test clean get_fujinet_lib zap love
+.PHONY: all test clean get_fujinet_lib zap love dist r2r
 
 all: get_fujinet_lib $(PROGRAM)
 
@@ -316,6 +318,9 @@ get_fujinet_lib:
 $(TARGETOBJDIR):
 	$(call MKDIR,$@)
 
+$(R2R_DIR):
+	$(call MKDIR,$@)
+
 vpath %.c $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
 
 $(TARGETOBJDIR)/%.o: %.c | $(TARGETOBJDIR)
@@ -344,23 +349,28 @@ test: $(PROGRAM)
 	$(EMUCMD) $<
 	$(POSTEMUCMD)
 
-dist: $(PROGRAM)
-	cp dist.apple2/bootable.po dist.apple2/dist.po
-	./dist.apple2/add-file.sh dist.apple2/dist.po config config.system
+$(DISK): $(PROGRAM) | $(R2R_DIR)
+	cp dist.apple2/bootable.po $@
+	./dist.apple2/add-file.sh $@ config config.system
+
+dist: $(DISK)
 	@( \
-    echo "Attempting to copy autorun.po to firmware folder outside of project" ; \
+    echo "Attempting to copy $(DISK) to firmware folder outside of project" ; \
     if [ -d ../fujinet-firmware/ ] ; then \
       echo "Copying into ../fujinet-firmware" ; \
-      cp dist.apple2/dist.po ../fujinet-firmware/data/webui/device_specific/BUILD_APPLE/autorun.po ; \
+      cp dist.apple2/dist.po ../fujinet-firmware/data/webui/device_specific/BUILD_APPLE/$(DISK) ; \
     elif [ -d ../fujinet-platformio/ ] ; then \
       echo "Copying into ../fujinet-platformio (NOTE: please consider renaming to updated fujinet-firmware name)" ; \
-      cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/autorun.po ; \
+      cp dist.apple2/dist.po ../fujinet-platformio/data/webui/device_specific/BUILD_APPLE/$(DISK) ; \
     else \
-      echo "ERROR: Could not find fujinet firmware folder to copy autorun.po to." ; \
+      echo "ERROR: Could not find fujinet firmware folder to copy $(DISK) to." ; \
       echo "Tried ../fujinet-firmware, and ../fujinet-platformio" ; \
       exit 1 ; \
     fi ; \
 	)
+
+# Create the "Ready 2 Run" executable/disk
+r2r: get_fujinet_lib $(DISK)
 
 gendebug: $(PROGRAM)
 	@echo "Generating debug.scr script for AppleWin"
@@ -375,7 +385,7 @@ clean:
 	$(call RMFILES,$(REMOVES))
 	$(call RMFILES,$(PROGRAM))
 	$(call RMFILES,*.map)
-	rm -rf dist/
+	rm -rf dist/ $(R2R_DIR)
 
 else # $(words $(TARGETLIST)),1
 
