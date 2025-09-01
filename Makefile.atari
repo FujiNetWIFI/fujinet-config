@@ -18,6 +18,8 @@ FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
 PROGRAM := config
+R2R_DIR := r2r/$(TARGETS)
+R2R_BIN := $(R2R_DIR)/autorun.atr
 
 # Path(s) to additional libraries required for linking the program
 # Use only if you don't want to place copies of the libraries in SRCDIR
@@ -284,7 +286,7 @@ ASFLAGS += --asm-include-dir src/$(TARGETLIST)/asminc --asm-include-dir $(FUJINE
 CFLAGS += --include-dir $(FUJINET_LIB_VERSION_DIR) -DUSING_FUJINET_LIB
 
 .SUFFIXES:
-.PHONY: all test clean get_fujinet_lib zap
+.PHONY: all test clean get_fujinet_lib zap r2r
 
 all: get_fujinet_lib $(PROGRAM)
 
@@ -344,6 +346,9 @@ get_fujinet_lib:
 $(TARGETOBJDIR):
 	$(call MKDIR,$@)
 
+$(R2R_DIR):
+	$(call MKDIR,$@)
+
 vpath %.c $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
 
 $(TARGETOBJDIR)/%.o: %.c | $(TARGETOBJDIR)
@@ -357,6 +362,9 @@ $(TARGETOBJDIR)/%.o: %.s | $(TARGETOBJDIR)
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
 	$(CC) -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^)
 
+# Create the "Ready 2 Run" executable/disk
+r2r: get_fujinet_lib $(R2R_BIN)
+
 test: $(PROGRAM)
 	$(PREEMUCMD)
 	$(EMUCMD) $<
@@ -364,26 +372,28 @@ test: $(PROGRAM)
 
 test-atr: $(PROGRAM) dist
 	$(PREEMUCMD) \
-  $(EMUCMD) //disk autorun.atr \
+  $(EMUCMD) //disk $(R2R_BIN) \
 	$(POSTEMUCMD)
 
-dist: $(PROGRAM)
+$(R2R_BIN): $(PROGRAM) | $(R2R_DIR)
 	mkdir -p dist
 	cp ../fujinet-tools/atari/dist/*.COM dist/ || true
 	cp ../fujinet-tools/atari/dist/*.com dist/ || true
 	cp $(PROGRAM) dist/
-	dir2atr -m -S -B picoboot.bin autorun.atr dist/
+	dir2atr -m -S -B picoboot.bin $@ dist/
+
+dist: $(R2R_BIN)
 
 dist-z: $(PROGRAM)
 	@if [ -d "../fujinet-config-loader" ] ; then \
-    echo "Found fujinet-config-loader, creating compressed autorun.atr"; \
+    echo "Found fujinet-config-loader, creating compressed $(R2R_BIN)"; \
     $(MAKE) -C ../fujinet-config-loader clean dist > /dev/null 2>&1 ; \
     if [ $$? -ne 0 ] ; then \
       echo "ERROR running compressor"; \
       exit 1; \
     fi; \
-    cp ../fujinet-config-loader/autorun-zx0.atr ./autorun.atr; \
-    echo "Compressed file saved as autorun.atr"; \
+    cp ../fujinet-config-loader/autorun-zx0.atr ./$(R2R_BIN); \
+    echo "Compressed file saved as $(R2R_BIN)"; \
   else \
     echo "ERROR: Could not find fujinet-config-loader in sibling directory to current."; \
     exit 1; \

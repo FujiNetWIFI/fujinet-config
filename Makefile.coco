@@ -5,16 +5,31 @@ AS=lwasm
 CP=cp
 ECHO=echo
 FIRMWARE_DIR="../fujinet-firmware"
+TARGET_EXEC=config.bin
+DISK=autorun.dsk
+R2R_DIR=r2r/coco
+R2R_BIN=$(R2R_DIR)/$(DISK)
 
-config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
-	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
-	$(RM) autorun.dsk
-	decb dskini autorun.dsk
-	decb copy -t -0 dist.coco/autoexec.bas autorun.dsk,AUTOEXEC.BAS
-	writecocofile autorun.dsk config.bin
-	$(CP) autorun.dsk $(FIRMWARE_DIR)/data/webui/device_specific/BUILD_COCO/
-#	$(CP) autorun.dsk ~/tnfs/
+$(TARGET_EXEC): check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
+	$(CC) -o $@ check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
+
+$(R2R_BIN): $(TARGET_EXEC) | $(R2R_DIR)
+	$(RM) $@
+	decb dskini $@
+	decb copy -t -0 dist.coco/autoexec.bas $@,AUTOEXEC.BAS
+	writecocofile $@ $<
+
+dist: $(R2R_BIN)
+	$(CP) $< $(FIRMWARE_DIR)/data/webui/device_specific/BUILD_COCO/
 	$(ECHO) Now, Do a Upload Filesystem task.
+
+.PHONY: r2r
+
+# Create the "Ready 2 Run" executable/disk
+r2r: $(R2R_BIN)
+
+$(R2R_DIR):
+	mkdir -p $@
 
 pause.o: src/coco/pause.c
 	$(CC) -c src/coco/pause.c
@@ -73,5 +88,5 @@ screen.o: src/coco/screen.c
 clean:
 	$(RM) *.o
 	$(RM) coco/*.o
-	$(RM) config.bin
-	$(RM) autorun.dsk
+	$(RM) $(TARGET_EXEC)
+	$(RM) $(DISK)

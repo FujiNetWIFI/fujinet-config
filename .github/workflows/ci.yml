@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - adam
+          - apple2
+          - atari
+          - c64
+          - coco
+          # - msdos # MSDOS doesn't seem to build yet
+
+    container:
+      image: fozztexx/defoogi:1.4.1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: make -f Makefile.${{ matrix.platform }} r2r
+
+      - name: Upload artifact for ${{ matrix.platform }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: r2r/${{ matrix.platform }}/**
