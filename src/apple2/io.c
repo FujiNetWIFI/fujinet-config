@@ -115,7 +115,7 @@ uint8_t io_scan_for_networks(void)
 
 SSIDInfo *io_get_scan_result(uint8_t n)
 {
-  fuji_get_scan_result(n, &ssidInfo);
+  fuji_get_scan_result((unsigned char) n, &ssidInfo);
   return &ssidInfo;
 }
 

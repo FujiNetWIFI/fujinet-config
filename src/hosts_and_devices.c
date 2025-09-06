@@ -116,11 +116,8 @@ void hosts_and_devices_edit_host_slot(int i)
 void hosts_and_devices_edit_host_slot(unsigned char i)
 #endif
 {
-#ifdef _CMOC_VERSION_
-  unsigned int o;
-#else
   unsigned char o;
-#endif
+
   HostSlot orig_host;
 
   if (strlen((const char *)hostSlots[i]) == 0)
@@ -129,7 +126,9 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
     o = 0;
   }
   else
-    o = strlen((const char *)hostSlots[i]);
+  {
+        o = (unsigned char) strlen((const char *)hostSlots[i]);
+  }
 
   screen_hosts_and_devices_edit_host_slot(i);
   // FRUSTRATINGLY the signature is void return, so noone ever knows if the return was good or bad
@@ -340,7 +339,7 @@ void hosts_and_devices_done(void)
     if (deviceSlots[i].hostSlot != 0xFF)
     {
 #ifdef _CMOC_VERSION_
-      printf("%d:%s\n",i,strupr(deviceSlots[i].file));
+      printf("%d:%s\n",i,deviceSlots[i].file);
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;

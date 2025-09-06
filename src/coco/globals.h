@@ -9,7 +9,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#ifndef bool
 #define bool unsigned char
+#endif /* bool */
 
 #define NUM_DEVICE_SLOTS    4
 

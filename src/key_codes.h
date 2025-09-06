@@ -77,6 +77,23 @@
 
 #include <apple2.h>
 
+#elif defined(_CMOC_VERSION_)
+
+#define KEY_LEFT_ARROW       0x08
+#define KEY_RIGHT_ARROW      0x09
+#define KEY_UP_ARROW         0x5E
+#define KEY_DOWN_ARROW       0x0A
+#define KEY_SHIFT_UP_ARROW   0x5F
+#define KEY_SHIFT_DOWN_ARROW 0x5B
+#define KEY_ENTER            0x0D
+#define KEY_BREAK            0x03
+#define KEY_CLEAR            0x0C
+
+#define KEY_0                0x30        
+#define KEY_1                0x31
+#define KEY_2                0x32
+#define KEY_3                0x33
+
 #endif // defined(...)
 
 #endif // KEY_CODES_H
