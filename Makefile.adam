@@ -25,7 +25,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS)
-	cp autorun.ddp ../fujinet-platformio/data/webui/device_specific/BUILD_ADAM/
+	cp autorun.ddp ../fujinet-firmware/data/webui/device_specific/BUILD_ADAM/
 
 # c source
 $(BUILD_DIR)/%.c.o: %.c
