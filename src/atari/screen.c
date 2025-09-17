@@ -373,7 +373,7 @@ void screen_select_file_display(char *p, char *f)
   screen_clear_line(FILES_START_Y - 1);
 }
 
-void screen_select_file_display_long_filename(char *e)
+void screen_select_file_display_long_filename(const char *e)
 {
   screen_puts(0, 24, e);
 }
@@ -417,7 +417,7 @@ void screen_select_file_prev(void)
   }
 }
 
-void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
+void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
 
 /*
@@ -643,7 +643,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
   screen_append(text_empty);
 }
 
-void screen_hosts_and_devices_long_filename(char *f)
+void screen_hosts_and_devices_long_filename(const char *f)
 {
   // show_line_nums();
 }
