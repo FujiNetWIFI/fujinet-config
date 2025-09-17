@@ -369,8 +369,7 @@ test-atr: $(PROGRAM) dist
 
 dist: $(PROGRAM)
 	mkdir -p dist
-	cp ../fujinet-tools/pre-migration/atari/dist/*.COM dist/ || true
-	cp ../fujinet-tools/pre-migration/atari/dist/*.com dist/ || true
+	cp ../fujinet-tools/pre_migration/atari/dist/*.com dist/ || true
 	cp $(PROGRAM) dist/
 	dir2atr -m -S -B picoboot.bin autorun.atr dist/
 
