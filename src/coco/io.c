@@ -23,6 +23,15 @@ byte response[256];
 int _dirpos=0;
 byte orig_casflag;
 
+#ifndef DRAGON
+#define DWWRT_VEC 0xD941
+#define DWREAD_VEC 0xD93F
+#else
+#define DWWRT_VEC 0xFA00
+#define DWREAD_VEC 0xF9FE
+#endif
+
+
 /**
  * @brief Read string to s from DriveWire with expected length l
  * @param s pointer to string buffer
@@ -33,10 +42,11 @@ byte dwread(byte *s, int l)
 {
   asm
     {
+    orcc  #$50
     pshs x,y
     ldx :s
     ldy :l
-    jsr [0xD93F]
+    jsr [DWREAD_VEC]
     puls y,x
     tfr cc,b
     lsrb
@@ -55,12 +65,13 @@ int dwwrite(byte *s, int l)
 {
   asm
     {
+        orcc  #$50
         pshs x,y
         ldx :s
-	ldy :l
-        jsr [0xD941]
-	tfr cc,d
-	puls y,x
+	    ldy :l
+        jsr [DWWRT_VEC]
+	    tfr cc,d
+	    puls y,x
     }
 }
 
@@ -174,7 +185,7 @@ unsigned char io_get_wifi_status(void)
 
   io_ready();
   io_get_response(&r, 1);
-    
+
   return r;
 }
 
@@ -458,6 +469,10 @@ void io_mount_disk_image(unsigned char ds, unsigned char mode)
     dwwrite((byte *)"\xE2\xF8",2);
     dwwrite((byte *)&ds,1);
     dwwrite((byte *)&mode,1);
+
+#ifdef DRAGON
+
+#endif
 }
 
 void io_umount_disk_image(unsigned char ds)

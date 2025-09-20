@@ -359,7 +359,9 @@ void hosts_and_devices_done(void)
       io_mount_disk_image(i, deviceSlots[i].mode);
     }
   }
-
+#ifdef DRAGON
+  printf("DON'T FORGET TO MAP DISKS\n I.E. \"LINK 1,5\"");
+#endif
   state = DONE;
 }
 
