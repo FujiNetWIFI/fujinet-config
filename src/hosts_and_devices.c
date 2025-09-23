@@ -8,7 +8,6 @@
 
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
-#include "coco/stdbool.h"
 #include "coco/globals.h"
 #include "coco/io.h"
 #include "coco/screen.h"
@@ -147,7 +146,7 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
   {
     // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
-    for ( o = 0; o<NUM_DEVICE_SLOTS; o++)
+    for (unsigned char o = 0; o<NUM_DEVICE_SLOTS; o++)
     {
       if ( deviceSlots[o].hostSlot == i )
       {
@@ -340,7 +339,7 @@ void hosts_and_devices_done(void)
     if (deviceSlots[i].hostSlot != 0xFF)
     {
 #ifdef _CMOC_VERSION_
-      printf("%d:%s\n",i,strupr(deviceSlots[i].file));
+      printf("%d:%s\n",i,deviceSlots[i].file);
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;

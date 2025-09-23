@@ -9,8 +9,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define bool unsigned char
-
 #define NUM_DEVICE_SLOTS    4
 
 // # of files to display on the page. Moved from select_file.c to here, for Atari.

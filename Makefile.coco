@@ -6,72 +6,119 @@ CP=cp
 ECHO=echo
 FIRMWARE_DIR="../fujinet-firmware"
 
-config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
-	$(CC) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
+CURRENT_TARGET := coco
+
+FUJINET_LIB_VERSION = 4.7.8
+FUJINET_LIB = fujinet-lib
+
+FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(CURRENT_TARGET)
+FUJINET_LIB_PATH = $(FUJINET_LIB_VERSION_DIR)/fujinet-$(CURRENT_TARGET)-$(FUJINET_LIB_VERSION).lib
+FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-lib-$(CURRENT_TARGET)-$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-lib-$(CURRENT_TARGET)-$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_BASENAME := $(notdir $(FUJINET_LIB_PATH))
+FUJINET_LIB_SYMLINK  := libfujinet-$(CURRENT_TARGET)-$(FUJINET_LIB_VERSION).lib.a
+
+
+LIBS=-L $(FUJINET_LIB_VERSION_DIR) -l$(FUJINET_LIB_BASENAME)
+CFLAGS=-DUSING_FUJINET_LIB -I$(FUJINET_LIB_VERSION_DIR)
+LIMITFLAGS=--org=0E00 --limit=7C00
+
+all: clean get_fujinet_lib cfgload.bin config.bin
+
+get_fujinet_lib:
+	@if [ ! -f "$(FUJINET_LIB_DOWNLOAD_FILE)" ]; then \
+		if [ -d "$(FUJINET_LIB_VERSION_DIR)" ]; then \
+		  echo "A directory already exists with version $(FUJINET_LIB_VERSION) - please remove it first"; \
+			exit 1; \
+		fi; \
+		HTTPSTATUS=$$(curl -Is $(FUJINET_LIB_DOWNLOAD_URL) | head -n 1 | awk '{print $$2}'); \
+		if [ "$${HTTPSTATUS}" == "404" ]; then \
+			echo "ERROR: Unable to find file $(FUJINET_LIB_DOWNLOAD_URL)"; \
+			exit 1; \
+		fi; \
+		echo "Downloading fujinet-lib for $(CURRENT_TARGET) version $(FUJINET_LIB_VERSION) from $(FUJINET_LIB_DOWNLOAD_URL)"; \
+		mkdir -p $(FUJINET_LIB); \
+		curl -L $(FUJINET_LIB_DOWNLOAD_URL) -o $(FUJINET_LIB_DOWNLOAD_FILE); \
+		echo "Unzipping to $(FUJINET_LIB)"; \
+		unzip -o $(FUJINET_LIB_DOWNLOAD_FILE) -d $(FUJINET_LIB_VERSION_DIR); \
+		echo "Unzip complete."; \
+		( cd "$(FUJINET_LIB_VERSION_DIR)" && ln -sf "$(FUJINET_LIB_BASENAME)" "$(FUJINET_LIB_SYMLINK)" ); \
+	fi
+
+cfgload.bin:
+	$(AS) -o cfgload.bin src/coco/cfgload.asm
+
+config.bin: check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
+	$(CC) $(LIMITFLAGS) -o config.bin check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o $(LIBS)
 	$(RM) autorun.dsk
 	decb dskini autorun.dsk
 	decb copy -t -0 dist.coco/autoexec.bas autorun.dsk,AUTOEXEC.BAS
+	writecocofile autorun.dsk cfgload.bin
 	writecocofile autorun.dsk config.bin
 	$(CP) autorun.dsk $(FIRMWARE_DIR)/data/webui/device_specific/BUILD_COCO/
 #	$(CP) autorun.dsk ~/tnfs/
 	$(ECHO) Now, Do a Upload Filesystem task.
 
 pause.o: src/coco/pause.c
-	$(CC) -c src/coco/pause.c
+	$(CC) $(CFLAGS) -c src/coco/pause.c
+
+strendswith.o: src/coco/strendswith.c
+	$(CC) $(CFLAGS) -c src/coco/strendswith.c
 
 strrchr.o: src/coco/strrchr.c
-	$(CC) -c src/coco/strrchr.c
+	$(CC) $(CFLAGS) -c src/coco/strrchr.c
 
 check_wifi.o: src/check_wifi.c
-	$(CC) -c src/check_wifi.c
+	$(CC) $(CFLAGS) -c src/check_wifi.c
 
 connect_wifi.o: src/connect_wifi.c
-	$(CC) -c src/connect_wifi.c
+	$(CC) $(CFLAGS) -c src/connect_wifi.c
 
 destination_host_slot.o: src/destination_host_slot.c
-	$(CC) -c src/destination_host_slot.c
+	$(CC) $(CFLAGS) -c src/destination_host_slot.c
 
 hosts_and_devices.o: src/hosts_and_devices.c
-	$(CC) -c src/hosts_and_devices.c
+	$(CC) $(CFLAGS) -c src/hosts_and_devices.c
 
 main.o: src/main.c
-	$(CC) -c src/main.c
+	$(CC) $(CFLAGS) -c src/main.c
 
 perform_copy.o: src/perform_copy.c
-	$(CC) -c src/perform_copy.c
+	$(CC) $(CFLAGS) -c src/perform_copy.c
 
 select_file.o: src/select_file.c
-	$(CC) -c src/select_file.c
+	$(CC) $(CFLAGS) -c src/select_file.c
 
 select_slot.o: src/select_slot.c
-	$(CC) -c src/select_slot.c
+	$(CC) $(CFLAGS) -c src/select_slot.c
 
 set_wifi.o: src/set_wifi.c
-	$(CC) -c src/set_wifi.c
+	$(CC) $(CFLAGS) -c src/set_wifi.c
 
 show_info.o: src/show_info.c
-	$(CC) -c src/show_info.c
+	$(CC) $(CFLAGS) -c src/show_info.c
 
 bar.o: src/coco/bar.c
-	$(CC) -c src/coco/bar.c
+	$(CC) $(CFLAGS) -c src/coco/bar.c
 
 die.o: src/coco/die.c
-	$(CC) -c src/coco/die.c
+	$(CC) $(CFLAGS) -c src/coco/die.c
 
 input.o: src/coco/input.c
-	$(CC) -c src/coco/input.c
+	$(CC) $(CFLAGS) -c src/coco/input.c
 
 io.o: src/coco/io.c
-	$(CC) -c src/coco/io.c
+	$(CC) $(CFLAGS) -c src/coco/io.c
 
 mount_and_boot.o: src/coco/mount_and_boot.c
-	$(CC) -c src/coco/mount_and_boot.c
+	$(CC) $(CFLAGS) -c src/coco/mount_and_boot.c
 
 screen.o: src/coco/screen.c
-	$(CC) -c src/coco/screen.c
+	$(CC) $(CFLAGS) -c src/coco/screen.c
 
 clean:
 	$(RM) *.o
 	$(RM) coco/*.o
+	$(RM) cfgload.bin
 	$(RM) config.bin
 	$(RM) autorun.dsk

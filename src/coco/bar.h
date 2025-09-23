@@ -9,7 +9,6 @@
 #define true 1
 #define false 0
 
-#include "stdbool.h"
 #include "globals.h"
 
 /**

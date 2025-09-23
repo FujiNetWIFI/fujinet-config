@@ -7,7 +7,6 @@
 
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
-#include "coco/stdbool.h"
 #include "coco/bar.h"
 #include "coco/globals.h"
 #include "coco/io.h"
