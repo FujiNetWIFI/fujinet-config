@@ -145,7 +145,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
     memset(response,0,sizeof(response));
-    fuji_read_directory(maxlen, a, &response[0]);
+    fuji_read_directory(maxlen, a, (char *) &response[0]);
     
     return (const char *)response;
 }
@@ -171,7 +171,7 @@ void io_set_device_filename(unsigned char ds, char* e)
 const char *io_get_device_filename(unsigned char slot)
 {
     memset(response,0,sizeof(response));
-    fuji_get_device_filename(slot, &response[0]);
+    fuji_get_device_filename(slot, (char *) &response[0]);
     return (const char *)response;
 }
 

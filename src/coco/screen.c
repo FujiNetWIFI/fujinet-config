@@ -31,7 +31,7 @@ extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 extern HostSlot hostSlots[8];
 
 char uppercase_tmp[32]; // temp space for strupr(s) output.
-                               // so original strings doesn't get changed.
+                        // so original strings doesn't get changed.
 
 char *screen_upper(char *s)
 {
@@ -129,7 +129,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   printf("        up/down TO SELECT       ");
   printf("hIDDEN SSID rESCAN enter SELECT");
   bar_draw(0,false);
-  bar_set(2,1,nn,0);
+  bar_set(2,0,nn,0);
 
   screen_add_shadow(nn+2,CYAN);
 }
