@@ -7,7 +7,6 @@
 #ifndef IO_H
 #define IO_H
 
-#include "stdbool.h"
 #include "../fuji_typedefs.h"
 
 bool io_error(void);

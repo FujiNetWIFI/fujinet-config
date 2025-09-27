@@ -6,7 +6,6 @@
 
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
-#include "coco/stdbool.h"
 #include "coco/screen.h"
 #include "coco/io.h"
 #include "coco/globals.h"

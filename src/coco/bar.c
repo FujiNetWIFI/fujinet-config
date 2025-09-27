@@ -6,7 +6,6 @@
 
 #include <cmoc.h>
 #include "bar.h"
-#include "stdbool.h"
 
 /**
  * static local variables for bar y, max, and index.

@@ -6,8 +6,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "stdbool.h"
 #include "../typedefs.h"
+#include "../fuji_typedefs.h"
 
 /**
  * Get input from keyboard/joystick
