@@ -10,8 +10,8 @@ DISK=autorun.dsk
 R2R_DIR=r2r/coco
 R2R_BIN=$(R2R_DIR)/$(DISK)
 
-$(TARGET_EXEC): check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
-	$(CC) -o $@ check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o pause.o
+$(TARGET_EXEC): check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
+	$(CC) -o $@ $^
 
 cfgload.bin:
 	$(AS) -o $@ src/coco/cfgload.asm
