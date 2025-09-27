@@ -4,11 +4,13 @@
  */
 
 #ifdef _CMOC_VERSION_
-#include "coco/stdbool.h"
+#include <cmoc.h>
+#include <coco.h>
 #else
 #include <stdlib.h>
 #endif /* CMOC_VERSION */
 
+#include "fuji_typedefs.h"
 #include "typedefs.h"
 #include "check_wifi.h"
 #include "connect_wifi.h"

@@ -45,7 +45,6 @@
 #endif /* BUILD_RC2014 */
 
 #ifdef _CMOC_VERSION_
-#include "coco/stdbool.h"
 #include "coco/io.h"
 #include "coco/globals.h"
 #endif /* CMOC_VERSION */
@@ -67,15 +66,15 @@ void check_wifi(void)
     state=HOSTS_AND_DEVICES;
   }
   else if (io_get_wifi_status() == 3)
-    {
-      state=HOSTS_AND_DEVICES;
-    }
+  {
+	  state = HOSTS_AND_DEVICES;
+  }
   else if (io_get_ssid()->ssid[0] == 0x00)
-    {
-      state=SET_WIFI;
-    }
+  {
+	  state = SET_WIFI;
+  }
   else
-    {
-      state=CONNECT_WIFI;
-    }
+  {
+	  state = CONNECT_WIFI;
+  }
 }

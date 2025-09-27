@@ -7,7 +7,6 @@
 
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
-#include "coco/stdbool.h"
 #include "coco/bar.h"
 #include "coco/globals.h"
 #include "coco/io.h"
@@ -79,11 +78,7 @@ extern bool screen_should_be_cleared;
 
 void connect_wifi(void)
 {
-#ifndef _CMOC_VERSION_
 	unsigned char retries = 20;
-#else
-	unsigned char retries = 2;
-#endif
 	NetConfig nc;
 	unsigned char s, key;
 
@@ -99,24 +94,14 @@ void connect_wifi(void)
 #ifndef _CMOC_VERSION_
 	  // check for esc key and abort
 		if (input() == KEY_ABORT)
-#else
-		unsigned char c = inkey();
-		if (c!=0) 
-		{
-			char szMsg[32];
-			sprintf(szMsg, "c = %02x\n", c);
-			screen_error(szMsg);
-			pause(150);
-		}
-		if (c==' ' || c==0x3)
-#endif /* _CMOC_VERSION_ */
 		{
 			screen_error("CONNECTION ABORTED");
 			pause(150);
-			state=HOSTS_AND_DEVICES;
+			state=SET_WIFI;
 			return;
 		}
-
+#endif /* _CMOC_VERSION_ */
+		
 		s = io_get_wifi_status();
 
 		switch (s)
@@ -134,23 +119,13 @@ void connect_wifi(void)
 			pause(60);
 			return;
 		case 4:
-			screen_error("CONNECT FAILED1");
-			//pause(150);
-			// ws_subState = WS_SCAN;
-			state = HOSTS_AND_DEVICES;
+			screen_error("CONNECT FAILED");
+			pause(150);
 			return;
 		case 5:
 			screen_error("CONNECTION LOST");
 			pause(150);
 			return;
-#ifdef _CMOC_VERSION_			
-		case 6:
-			//screen_error("CONNECT FAILED");
-			screen_error("BAD PSK");
-			pause(150);
-			state = HOSTS_AND_DEVICES;
-			return;
-#endif			
 		default:
 			screen_error("PLEASE WAIT...");
  			pause(150);

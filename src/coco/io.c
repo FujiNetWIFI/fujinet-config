@@ -4,7 +4,6 @@
  */
 
 #include <cmoc.h>
-#include "stdbool.h"
 #include "io.h"
 #include "globals.h"
 #include "screen.h"

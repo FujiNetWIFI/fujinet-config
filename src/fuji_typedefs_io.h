@@ -8,6 +8,12 @@
 #define FILE_MAXLEN 36
 #define SSID_MAXLEN 33 /* 32 + NULL */
 
+#ifdef _CMOC_VERSION_
+typedef unsigned char bool;
+#define true  1
+#define false 0
+#endif /* _CMOC_VERSION_ */
+
 /**
  * Returned info for a single SSID entry
  * from a WiFi scan

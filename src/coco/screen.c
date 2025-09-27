@@ -31,7 +31,7 @@ extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 extern HostSlot hostSlots[8];
 
 char uppercase_tmp[32]; // temp space for strupr(s) output.
-                               // so original strings doesn't get changed.
+                        // so original strings doesn't get changed.
 
 char *screen_upper(char *s)
 {
@@ -95,9 +95,12 @@ void screen_set_wifi(AdapterConfig *ac)
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
   char meter[4]={0x20,0x20,0x20,0x00};
-  char ds[32];
+  char ds[33];
 
   memset(ds,0x20,32);
+  ds[32] = 0x00;
+  // Print spaces first
+  locate(0,n+2);  printf("%-32s",screen_upper(ds));
   strncpy(ds,s->ssid,32);
 
   if (s->rssi > -50)
@@ -126,7 +129,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   printf("        up/down TO SELECT       ");
   printf("hIDDEN SSID rESCAN enter SELECT");
   bar_draw(0,false);
-  bar_set(2,1,nn,0);
+  bar_set(2,0,nn,0);
 
   screen_add_shadow(nn+2,CYAN);
 }
@@ -386,7 +389,7 @@ void screen_hosts_and_devices_hosts()
   locate(0,0);
   printf("%32s","host\x80slots");
   
-  memset(0x400,0xAF,22);
+  memset(SCREEN_RAM_TOP,0xAF,22);
   (*(unsigned char *)0x041a) = 0x20;
 
   locate(0,13);
@@ -451,13 +454,16 @@ const char host_slot_char(unsigned char hostSlot)
 
 const char device_slot_mode(unsigned char mode)
 {
-  switch(mode)
+  // Mask out 0x40
+  unsigned char masked_mode = mode & ~MODE_MOUNTED;
+
+  switch(masked_mode)
     {
     case 0:
       return 0x80;
-    case 1:
+    case MODE_READ:
       return 0xAF;
-    case 2:
+    case MODE_WRITE:
       return 0x9F;
     }
 }
@@ -513,19 +519,45 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_init(void)
 {
-  // TODO: figure out lowercase.
+  // Make sure the screen is in 32 column mode
+  width(32);
 }
 
 void screen_destination_host_slot(char *h, char *p)
 {
+  cls(3);
+  locate(0,11);
+
+  printf("%32s","copy\x80\x66rom\x80host\x80slot");
+
+  locate(0, 12); printf("%-32s", screen_upper(h));
+  locate(0, 13); printf("%-128s", p);
 }
 
 void screen_destination_host_slot_choose(void)
 {
+  locate(0, 0);
+  printf("%32s","copy\x80to\x80host\x80slot");
+  screen_hosts_and_devices_host_slots(&hostSlots[0]);
+  locate(0,13);
+  printf("1-8 choose\x80slot ENTER select");
+  locate(0,14);
+  printf("BREAK quit");
+  screen_add_shadow(15,BLUE);
+  
+  bar_set(1,1,8,selected_host_slot);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+  cls(3);
+
+  locate(0,0); printf("%32s","COPYING FILE FROM:");
+  locate(0,2); printf("%32s",sh);
+  locate(0,3); printf("%-128s",p);
+  locate(0,7); printf("%32s","COPYING FILE TO:");
+  locate(0,9); printf("%32s",dh);
+  locate(0,10); printf("%-128s",dp);
 }
 
 void screen_connect_wifi(NetConfig *nc)
