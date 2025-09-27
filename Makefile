@@ -1,9 +1,13 @@
 PRODUCT = config
-PLATFORMS = coco apple2 atari c64 adam
+PLATFORMS += adam
+PLATFORMS += apple2
+PLATFORMS += atari
+PLATFORMS += c64
+PLATFORMS += coco
+PLATFORMS += msdos
 
 # Not currently in buildable state
 #PLATFORMS += dragon
-PLATFORMS += msdos
 #PLATFORMS += pc6001
 #PLATFORMS += pc8801
 #PLATFORMS += pmd85
@@ -31,8 +35,6 @@ SRC_DIRS = src src/%PLATFORM%
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
 FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
-
-$(info FUJUNET_LIB=$(FUJINET_LIB))
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
 # even if the library isn’t present.
