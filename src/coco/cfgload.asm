@@ -1,5 +1,5 @@
 ****************************************************
-* CONFIG LOADER 
+* CONFIG LOADER
 * BASED ON CODE FROM BY SIMON JONASSEN (AKA INVISIBLE MAN)
 *
 * PREREQUISITES:
@@ -12,9 +12,9 @@
 lhook	equ	$cfc5
 fname	equ	$094c		(8.3 notation) PADDED without "." ($20 pad)
 ftype	equ	$0957		$0200 for .bin file
-execsd  equ $009D
+execsd  equ	$009D
 
-start	
+start
 	ldx	#myfile
 	ldu	#fname
 dofname	ldd	,x++
@@ -24,11 +24,10 @@ dofname	ldd	,x++
 	ldd	#$200
 	std	ftype		;bin file type right after name
 	jsr	lhook
-    ldx execsd
-    jmp ,x
-	rts	
+	ldx	execsd
+	jmp	,x
+	rts
 
 myfile	fcc	'CONFIG  BIN'
 endmy	equ	*
 	end	start
-
