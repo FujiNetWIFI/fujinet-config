@@ -35,59 +35,10 @@ r2r: $(R2R_BIN)
 $(R2R_DIR):
 	mkdir -p $@
 
-pause.o: src/coco/pause.c
-	$(CC) -c src/coco/pause.c
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-strrchr.o: src/coco/strrchr.c
-	$(CC) -c src/coco/strrchr.c
-
-check_wifi.o: src/check_wifi.c
-	$(CC) -c src/check_wifi.c
-
-connect_wifi.o: src/connect_wifi.c
-	$(CC) -c src/connect_wifi.c
-
-destination_host_slot.o: src/destination_host_slot.c
-	$(CC) -c src/destination_host_slot.c
-
-hosts_and_devices.o: src/hosts_and_devices.c
-	$(CC) -c src/hosts_and_devices.c
-
-main.o: src/main.c
-	$(CC) -c src/main.c
-
-perform_copy.o: src/perform_copy.c
-	$(CC) -c src/perform_copy.c
-
-select_file.o: src/select_file.c
-	$(CC) -c src/select_file.c
-
-select_slot.o: src/select_slot.c
-	$(CC) -c src/select_slot.c
-
-set_wifi.o: src/set_wifi.c
-	$(CC) -c src/set_wifi.c
-
-show_info.o: src/show_info.c
-	$(CC) -c src/show_info.c
-
-bar.o: src/coco/bar.c
-	$(CC) -c src/coco/bar.c
-
-die.o: src/coco/die.c
-	$(CC) -c src/coco/die.c
-
-input.o: src/coco/input.c
-	$(CC) -c src/coco/input.c
-
-io.o: src/coco/io.c
-	$(CC) -c src/coco/io.c
-
-mount_and_boot.o: src/coco/mount_and_boot.c
-	$(CC) -c src/coco/mount_and_boot.c
-
-screen.o: src/coco/screen.c
-	$(CC) -c src/coco/screen.c
+vpath %.c src src/coco
 
 clean:
 	$(RM) *.o
