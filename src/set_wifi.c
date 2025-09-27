@@ -163,7 +163,9 @@ void set_wifi_scan(void)
 
 void set_wifi_done(void)
 {
+#ifdef _CMOC_VERSION_  
   locate(0,14);
+#endif
   int result = io_set_ssid(&nc);
   // always (good or bad) go to connect_wifi.
   // I had used result to only show this when we have good return, but
