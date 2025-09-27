@@ -62,10 +62,10 @@ dist: $(R2R_BIN) cfgload.bin
 	$(CP) $< $(FIRMWARE_DIR)/data/webui/device_specific/BUILD_COCO/
 	$(ECHO) Now, Do a Upload Filesystem task.
 
-.PHONY: r2r
+.PHONY: r2r get_fujinet_lib
 
 # Create the "Ready 2 Run" executable/disk
-r2r: $(R2R_BIN)
+r2r: get_fujinet_lib $(R2R_BIN)
 
 $(R2R_DIR):
 	mkdir -p $@
