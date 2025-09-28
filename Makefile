@@ -32,6 +32,8 @@ include makefiles/toplevel-rules.mk
 # Common things
 
 CFLAGS = -DBUILD_$(PLATFORM_UC)
+CFLAGS_EXTRA_CC65 = -Os
+CFLAGS_EXTRA_Z88DK = -Os
 
 ########################################
 # CoCo customization
@@ -61,21 +63,21 @@ coco/disk-post::
 
 A2_LINKER_CFG = src/apple2/config.cfg
 EXECUTABLE_EXTRA_DEPS_APPLE2 = $(A2_LINKER_CFG)
-CFLAGS_EXTRA_APPLE2 = -Os -DUSING_FUJINET_LIB
+CFLAGS_EXTRA_APPLE2 = -DUSING_FUJINET_LIB
 LDFLAGS_EXTRA_APPLE2 = -C $(A2_LINKER_CFG)
 
 ########################################
 # Atari customization
 
-CFLAGS_EXTRA_ATARI = -Os -DUSING_FUJINET_LIB
+CFLAGS_EXTRA_ATARI = -DUSING_FUJINET_LIB
 EXTRA_INCLUDE_ATARI = src/atari/asminc
 
 ########################################
 # Commodore 64 customization
 
-CFLAGS_EXTRA_C64 = -Os -DUSING_FUJINET_LIB -DUSE_EDITSTRING
+CFLAGS_EXTRA_C64 = -DUSING_FUJINET_LIB -DUSE_EDITSTRING
 
 ########################################
 # Adam customization
 
-CFLAGS_EXTRA_ADAM = -Os -DUSING_FUJINET_LIB
+CFLAGS_EXTRA_ADAM = -DUSING_FUJINET_LIB
