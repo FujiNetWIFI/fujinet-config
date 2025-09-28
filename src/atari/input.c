@@ -343,7 +343,6 @@ HDSubState input_hosts_and_devices_hosts(void)
       default: // Anything but Y/y take to mean "no"
         return HD_HOSTS;
       }
-    return HD_HOSTS;
   case KCODE_RETURN:
     selected_host_slot = bar_get() - HOSTS_START_Y;
     if ( !wifiEnabled && strcmp((char *) hostSlots[selected_host_slot],"SD") != 0) // Don't go in a TNFS host if wifi is disabled.
@@ -461,7 +460,6 @@ HDSubState input_hosts_and_devices_devices(void)
       default: // Anything but Y/y take to mean "no"
         return HD_DEVICES;
       }
-    return HD_DEVICES;
   case '!':
     mount_and_boot();
   default:
@@ -547,9 +545,7 @@ SFSubState input_select_file_choose(void)
     }
     if ( pos > 0 )
       return SF_PREV_PAGE;
-    else
-      return SF_DEVANCE_FOLDER;
-    return SF_CHOOSE;
+    return SF_DEVANCE_FOLDER;
   case 0x87:
   case '>':
     if ((ENTRIES_PER_PAGE == _visibleEntries ) && (dir_eof == false))
@@ -674,16 +670,13 @@ unsigned char input_select_slot_mode(char *mode)
     {
     case KCODE_ESCAPE:
       return 0;
-      break;
     case 'W':
       mode[0] = 2;
       return 1;
-      break;
     case KCODE_RETURN:
     case 'R':
       mode[0] = 1;
       return 1;
-      break;
     default:
       break;
     }
