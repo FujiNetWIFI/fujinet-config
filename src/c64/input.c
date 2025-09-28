@@ -66,7 +66,7 @@ unsigned char input_ucase(void)
  * @param l Length
  * @param password echoes characters.
  */
-void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
+void input_line(unsigned char x, unsigned char y, unsigned char, char *c, unsigned char len, bool password)
 {
 	// currently not using o, not many places used it, but may need to change edit_string if it proves to be required
 	edit_string(c, len, x, y, 36, password);

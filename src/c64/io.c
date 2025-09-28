@@ -86,7 +86,7 @@ char *io_get_device_filename(uint8_t slot)
 	return (char *) &response[0];
 }
 
-void io_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot, unsigned long selected_size, char *path)
+void io_create_new(uint8_t, uint8_t, unsigned long, char *)
 {
 	// TODO implement
 }
@@ -172,13 +172,13 @@ void io_umount_disk_image(uint8_t ds)
 	fuji_unmount_disk_image(ds);
 }
 
-void io_update_devices_enabled(bool *e) {}
+void io_update_devices_enabled(bool *) {}
 
-void io_enable_device(unsigned char d) {}
+void io_enable_device(unsigned char) {}
 
-void io_disable_device(unsigned char d) {}
+void io_disable_device(unsigned char) {}
 
-bool io_get_device_enabled_status(unsigned char d)
+bool io_get_device_enabled_status(unsigned char)
 {
 	return false;
 }

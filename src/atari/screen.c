@@ -115,7 +115,7 @@ void put_char(char c)
   POKE(cursor_ptr++, c + offset); // Insert into the locaiton in memory for next bit in cursor_ptr the ATASCI character.  c+offset is the ATASCI character desired to be displayed.
 }
 
-void screen_append(char *s)
+void screen_append(const char *s)
 {
   while (*s != 0)
   {
@@ -124,7 +124,7 @@ void screen_append(char *s)
   }
 }
 
-void screen_puts(unsigned char x, unsigned char y, char *s)
+void screen_puts(unsigned char x, unsigned char y, const char *s)
 {
   set_cursor(x, y);
   screen_append(s);
@@ -193,7 +193,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   screen_set_wifi_print_rssi(s, n);
 }
 
-void screen_set_wifi_select_network(unsigned char nn)
+void screen_set_wifi_select_network(unsigned char)
 {
   screen_clear_line(numNetworks + NETWORKS_START_Y);
   screen_puts(2, NETWORKS_START_Y + numNetworks, "<Enter a specific SSID>");
@@ -222,7 +222,7 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfigExtended *ac)
+void screen_show_info(int, AdapterConfigExtended *ac)
 {
   screen_dlist_show_info();
   set_active_screen(SCREEN_SHOW_INFO);
@@ -290,7 +290,7 @@ void screen_select_slot(char *e)
     screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
   }
 
-  screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled);
+  screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, deviceSlots, deviceEnabled);
 
   bar_show(DEVICES_START_MOUNT_Y);
 }
@@ -306,7 +306,7 @@ void screen_select_slot_choose(void)
 {
 }
 
-void screen_select_slot_eject(unsigned char ds)
+void screen_select_slot_eject(unsigned char)
 {
 }
 
@@ -417,7 +417,7 @@ void screen_select_file_prev(void)
   }
 }
 
-void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
+void screen_select_file_display_entry(unsigned char y, const char *e, unsigned)
 {
 
 /*
@@ -452,7 +452,7 @@ void screen_select_file_new_type(void)
   // Not used on Atari
 }
 
-void screen_select_file_new_size(unsigned char k)
+void screen_select_file_new_size(unsigned char)
 {
   screen_clear_line(20);
   screen_clear_line(21);
@@ -496,7 +496,7 @@ void screen_error(const char *msg)
   screen_puts(0, 24, msg);
 }
 
-void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
+void screen_hosts_and_devices(HostSlot *, DeviceSlot *, unsigned char *)
 {
   screen_dlist_hosts_and_devices();
   set_active_screen(SCREEN_HOSTS_AND_DEVICES);
@@ -510,7 +510,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
 
-  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], (bool *) "");
 }
 
 void screen_clear()
@@ -549,7 +549,7 @@ void screen_hosts_and_devices_devices(void)
   bar_show(selected_device_slot + DEVICES_START_Y);
 }
 
-void screen_hosts_and_devices_host_slots(HostSlot *h)
+void screen_hosts_and_devices_host_slots(HostSlot *)
 {
   unsigned char slotNum;
 
@@ -565,7 +565,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 // Since 'deviceSlots' is a global, do we need to access the input parameter at all?
 // Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *, const unsigned char *)
 {
   unsigned char slotNum;
   unsigned char dinfo[6];
@@ -593,7 +593,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, u
       dinfo[3] = 0x20;
     }
 
-    screen_puts(0, slotNum + y, dinfo);
+    screen_puts(0, slotNum + y, (char *) dinfo);
 
     screen_append(deviceSlots[slotNum].file[0] != 0x00 ? (char *)deviceSlots[slotNum].file : text_empty);
   }
@@ -605,12 +605,12 @@ void screen_hosts_and_devices_devices_clear_all(void)
   screen_puts(0, 11, "EJECTING ALL.. WAIT");
 }
 
-void screen_hosts_and_devices_clear_host_slot(unsigned char i)
+void screen_hosts_and_devices_clear_host_slot(unsigned char)
 {
   // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
 
-void screen_hosts_and_devices_edit_host_slot(unsigned char i)
+void screen_hosts_and_devices_edit_host_slot(unsigned char)
 {
   // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
 }
@@ -636,14 +636,14 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   screen_puts(5, y + ds, text_empty);
 }
 
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+void screen_hosts_and_devices_host_slot_empty(unsigned char)
 {
   // When this gets called it seems like the cursor is right where we want it to be.
   // so no need to move to a position first.
   screen_append(text_empty);
 }
 
-void screen_hosts_and_devices_long_filename(const char *f)
+void screen_hosts_and_devices_long_filename(const char *)
 {
   // show_line_nums();
 }
@@ -680,7 +680,7 @@ void screen_destination_host_slot_choose(void)
   // show_line_nums();
 }
 
-void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
+void screen_perform_copy(char *, char *, char *, char *)
 {
   // show_line_nums();
   screen_clear();

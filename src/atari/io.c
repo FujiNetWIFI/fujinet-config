@@ -37,6 +37,7 @@ bool io_error(void)
 
 unsigned char io_status(void)
 {
+  return 0;
 }
 
 void io_init(void)
@@ -156,7 +157,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
     memset(response, 0, 256);
     strcpy(response, p);
     strcpy(&response[strlen(response) + 1], f);
-    _p = &response;
+    _p = response;
   }
   fuji_open_directory(hs, _p);
 }
@@ -164,8 +165,8 @@ void io_open_directory(unsigned char hs, char *p, char *f)
 char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
   memset(response, 0, maxlen);
-  fuji_read_directory(maxlen, a, &response);
-  return &response;
+  fuji_read_directory(maxlen, a, response);
+  return response;
 }
 
 void io_close_directory(void)
@@ -185,8 +186,8 @@ void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mo
 
 char *io_get_device_filename(unsigned char slot)
 {
-  fuji_get_device_filename(slot, &response);
-  return &response;
+  fuji_get_device_filename(slot, response);
+  return response;
 }
 
 void io_set_boot_config(unsigned char toggle)
@@ -260,11 +261,11 @@ void io_create_new(unsigned char selected_host_slot, unsigned char selected_devi
 
 }
 
-void io_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
+void io_build_directory(unsigned char, unsigned long, char *)
 {
 }
 
-bool io_get_device_enabled_status(unsigned char d)
+bool io_get_device_enabled_status(unsigned char)
 {
   // adam calls $D1, which doesn't exist in atari.
   return false;
@@ -281,11 +282,11 @@ void io_update_devices_enabled(bool *e)
   }
 }
 
-void io_enable_device(unsigned char d)
+void io_enable_device(unsigned char)
 {
 }
 
-void io_disable_device(unsigned char d)
+void io_disable_device(unsigned char)
 {
 }
 
@@ -296,11 +297,12 @@ void io_disable_device(unsigned char d)
 void io_copy_file(unsigned char source_slot, unsigned char destination_slot)
 {
   // incrementing is handled in function, we keep everything 0 based
-  fuji_copy_file(source_slot, destination_slot, &copySpec);
+  fuji_copy_file(source_slot, destination_slot, copySpec);
 }
 
-unsigned char io_device_slot_to_device(unsigned char ds)
+unsigned char io_device_slot_to_device(unsigned char)
 {
+  return 0;
 }
 
 /**

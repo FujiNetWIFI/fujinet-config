@@ -1,9 +1,9 @@
 *.bin
-*.c~
+*~
 *.cas
 *.d88
-*.h~
 *.swp
+*.err
 .vscode/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
@@ -13,6 +13,8 @@ autorun
 autorun.atr
 autorun.rmm
 build
+_cache
+r2r
 config
 config.com
 config.com.lbl

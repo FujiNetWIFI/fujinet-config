@@ -75,7 +75,7 @@ void screen_error(const char *c)
 	screen_inverse_line(STATUS_BAR + 1);
 }
 
-void screen_putlcc(char c)
+void screen_putlcc(char)
 {
 	// REMOVE
 }
@@ -353,7 +353,7 @@ void screen_select_file_prev(void)
 	cprintf("%-40s", "[...]");
 }
 
-void screen_select_file_display_long_filename(char *e)
+void screen_select_file_display_long_filename(const char *)
 {
 	// it wasn't this.
 	/* gotoxy(0,19); */
@@ -366,7 +366,7 @@ void screen_select_file_next(void)
 	cprintf("%-40s", "[...]");
 }
 
-void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
+void screen_select_file_display_entry(unsigned char y, const char *e, unsigned)
 {
 	gotoxy(0, y + 3);
 	cprintf("%-40s", &e[0]);
@@ -468,7 +468,7 @@ void screen_select_file_new_name(void)
 	screen_print_menu(" NEW MEDIA: ENTER FILENAME \r\n", "");
 }
 
-void screen_hosts_and_devices_long_filename(char *f)
+void screen_hosts_and_devices_long_filename(const char *f)
 {
 	// TODO: implement
 	if (strlen(f) > 31)

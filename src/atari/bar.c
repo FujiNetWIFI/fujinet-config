@@ -15,7 +15,7 @@ static unsigned char bar_y=1;
 /**
  * Clear bar from screen
  */
-void bar_clear(bool old)
+void bar_clear(bool)
 {
   memset(bar_pmbase,0,1024);
 }

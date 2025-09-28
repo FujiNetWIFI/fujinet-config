@@ -45,7 +45,7 @@ void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
 void screen_select_slot_mode(void);
 void font_init();
 extern void bar_setup_regs();
-void screen_puts(unsigned char x, unsigned char y, char *s);
+void screen_puts(unsigned char x, unsigned char y, const char *s);
 void screen_clear_line(unsigned char y);
 void screen_error(const char *msg);
 
@@ -64,7 +64,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_devices(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, unsigned char *e);
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const bool *e);
 
 void screen_hosts_and_devices_devices_clear_all(void);
 void screen_hosts_and_devices_clear_host_slot(unsigned char i);
