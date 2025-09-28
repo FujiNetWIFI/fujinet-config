@@ -141,8 +141,9 @@ All build artifacts go under the `r2r/<platform>/` directory:
 There are two kinds of per-platform/per-compiler variables:
 
 1. Extra include directories – add paths for the compiler and assembler to search:
-  * Use `EXTRA_INCLUDE` to specify one or more directories. They are
-    automatically added to `-I` flags during compilation and assembly.
+  * Use `EXTRA_INCLUDE` or `EXTRA_INCLUDE_<platform>`to specify one or
+    more directories. They are automatically added to `-I` flags
+    during compilation and assembly.
 2. Extras flags – add flags or options without removing the defaults:
   * Example: `LDFLAGS_EXTRA_COCO` adds extra linker flags when building for CoCo.
 3. Overrides – completely replace the default for a platform:
@@ -195,8 +196,8 @@ post-build targets. These allow you to:
 
 #### Key points
 
-* The extra dependencies variables (e.g., `EXECUTABLE_POSTDEPS_COCO`,
-  `DISK_POSTDEPS_COCO`, `R2R_POSTDEPS_COCO`) **do not automatically
+* The extra dependencies variables (e.g., `EXECUTABLE_EXTRA_DEPS_COCO`,
+  `DISK_EXTRA_DEPS_COCO`, `R2R_EXTRA_DEPS_COCO`) **do not automatically
   add files to the output**. They only make sure that your custom
   files are rebuilt when modified.
 * You are responsible for handling these extra dependencies
@@ -206,7 +207,7 @@ post-build targets. These allow you to:
 #### Example: Adding files to a COCO disk
 
 ```
-DISK_POSTDEPS_COCO := r2r/coco/4voice.bin basic/coco/song.bas
+DISK_EXTRA_DEPS_COCO := r2r/coco/4voice.bin basic/coco/song.bas
 
 coco/disk-post::
         decb copy -b -2 r2r/coco/4voice.bin "$(DISK),4VOICE.BIN"
