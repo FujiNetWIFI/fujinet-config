@@ -54,14 +54,14 @@ void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_new_type(void);
 void screen_select_file_prev(void);
-void screen_select_file_display_long_filename(char *e);
-void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType);
+void screen_select_file_display_long_filename(const char *e);
+void screen_select_file_display_entry(unsigned char y, const char* e, unsigned entryType);
 void screen_select_file_clear_long_filename(void);
 void screen_select_file_choose(char visibleEntries);
 void screen_select_file_new_size(unsigned char k);
 void screen_select_file_new_custom(void);
 void screen_select_file_new_name(void);
-void screen_hosts_and_devices_long_filename(char *f);
+void screen_hosts_and_devices_long_filename(const char *f);
 void screen_hosts_and_devices_devices_clear_all(void);
 void screen_select_file_new_creating(void);
 

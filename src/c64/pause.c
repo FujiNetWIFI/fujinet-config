@@ -1,6 +1,6 @@
 #ifdef BUILD_C64
 
-void pause(unsigned char delay)
+void pause(unsigned char)
 {
 	// TODO implement
 }

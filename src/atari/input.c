@@ -84,7 +84,7 @@ unsigned char input_handle_joystick(void)
     return 0;
 }
 
-void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
+void input_line(unsigned char, unsigned char, unsigned char, char *, unsigned char, bool)
 {
 }
 
@@ -107,7 +107,7 @@ void input_line_set_wifi_password(char *c)
   edit_line(0, 21, c, 64, true);
 }
 
-void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
+void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char, char *c)
 {
   edit_line(5, i + HOSTS_START_Y, c, 32, false);
 }
@@ -123,7 +123,7 @@ unsigned char input_select_file_new_type(void)
   return 1;
 }
 
-unsigned long input_select_file_new_size(unsigned char t)
+unsigned long input_select_file_new_size(unsigned char)
 {
   char temp[8];
   memset(temp, 0, sizeof(temp));
@@ -198,9 +198,10 @@ void input_select_file_new_name(char *c)
 
 bool input_select_slot_build_eos_directory(void)
 {
+  return false;
 }
 
-void input_select_slot_build_eos_directory_label(char *c)
+void input_select_slot_build_eos_directory_label(char *)
 {
 }
 
@@ -345,13 +346,13 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_HOSTS;
   case KCODE_RETURN:
     selected_host_slot = bar_get() - HOSTS_START_Y;
-    if ( !wifiEnabled && strcmp(hostSlots[selected_host_slot],"SD") != 0) // Don't go in a TNFS host if wifi is disabled.
+    if ( !wifiEnabled && strcmp((char *) hostSlots[selected_host_slot],"SD") != 0) // Don't go in a TNFS host if wifi is disabled.
     {
       return HD_HOSTS;
     }
     if (hostSlots[selected_host_slot][0] != 0)
     {
-      strcpy(selected_host_name, hostSlots[selected_host_slot]);
+      strcpy(selected_host_name, (char *) hostSlots[selected_host_slot]);
       state = SELECT_FILE;
       return HD_DONE;
     }
@@ -433,13 +434,13 @@ HDSubState input_hosts_and_devices_devices(void)
     // set device mode to read
     selected_device_slot = bar_get() - DEVICES_START_Y;
     hosts_and_devices_devices_set_mode(MODE_READ);
-    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], (bool *) "");
     return HD_DEVICES;
   case 'W':
     // set device mode to write
     selected_device_slot = bar_get() - DEVICES_START_Y;
     hosts_and_devices_devices_set_mode(MODE_WRITE);
-    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], "");
+    screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], (bool *) "");
     return HD_DEVICES;
   case 'C':
     state = SHOW_INFO;

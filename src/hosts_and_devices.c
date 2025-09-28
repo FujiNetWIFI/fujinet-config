@@ -150,7 +150,7 @@ void hosts_and_devices_edit_host_slot(unsigned char i)
     {
       if ( deviceSlots[o].hostSlot == i )
       {
-        hosts_and_devices_eject(o);
+        hosts_and_devices_eject((unsigned char) o);
       }
     }
   } 
@@ -216,7 +216,6 @@ void hosts_and_devices_devices(void)
 
 void hosts_and_devices_devices_set_mode(unsigned char m)
 {
-  int i;
 #if defined(BUILD_ATARI)
   bool mnt;
   char err_msg[64];
@@ -255,6 +254,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   // Check for error
   if (!mnt)
   {
+    unsigned int i;
     // Display error for a moment then redraw menu after
     strcpy(err_msg, "ERROR SETTING DISK MODE: ");
     screen_error(err_msg);
@@ -274,6 +274,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   // Check for error
   if (!mnt)
   {
+    unsigned int i;
     // Display error for a moment then redraw menu after
     screen_error("Error setting disk mode");
     for (i = 0; i < 4000; i++)
