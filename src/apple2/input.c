@@ -133,7 +133,6 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       cputc(' ');
       c[i] = 0;
       return; // done
-      break;
     default:
       if (i < len)
       {
@@ -264,9 +263,7 @@ SFSubState input_select_file_choose(void)
     }
     if (pos > 0)
       return SF_PREV_PAGE;
-    else
-      return SF_DEVANCE_FOLDER;
-    return SF_CHOOSE;
+    return SF_DEVANCE_FOLDER;
   case KEY_DOWN_ARROW:
   case 'm':
   case 'M':
@@ -279,7 +276,6 @@ SFSubState input_select_file_choose(void)
       select_display_long_filename();
       return SF_CHOOSE;
     }
-    break;
   case ',':
   case '<':
     if (pos > 0)
@@ -379,16 +375,6 @@ SSSubState input_select_slot_choose(void)
       selected_device_slot=bar_get();
       mode = MODE_READ;
       return SS_DONE;
-      // Ask for mode.
-      screen_select_slot_mode();
-      k = input_select_slot_mode(&mode);
-
-      if (!k)
-      {
-        state = SELECT_FILE;
-        backToFiles = true;
-      }
-      return SS_DONE;
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
@@ -459,7 +445,6 @@ SISubState input_show_info(void)
     state = HOSTS_AND_DEVICES;
     return SI_DONE;
   }
-  return SI_SHOWINFO;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
@@ -571,13 +556,11 @@ HDSubState input_hosts_and_devices_devices(void)
       selected_device_slot=bar_get();
       hosts_and_devices_devices_set_mode(MODE_READ);
       return HD_DEVICES;
-      break;
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
       hosts_and_devices_devices_set_mode(MODE_WRITE);
       return HD_DEVICES;
-      break;
     // case KEY_CLEAR:
     //   return HD_CLEAR_ALL_DEVICES;
     case KEY_UP_ARROW:

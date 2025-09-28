@@ -176,14 +176,11 @@ SFSubState input_select_file_choose(void)
 	case KEY_RIGHT_ARROW:
 		if ((bar_get() == 14) && (dir_eof == false))
 			return SF_NEXT_PAGE;
-		else
-		{
-			long_entry_displayed = false;
-			bar_down();
-			select_display_long_filename();
-			return SF_CHOOSE;
-		}
-		break;
+
+		long_entry_displayed = false;
+		bar_down();
+		select_display_long_filename();
+		return SF_CHOOSE;
 	case ',':
 	case '<':
 		if (pos > 0)
@@ -309,7 +306,6 @@ SISubState input_show_info(void)
 		state = HOSTS_AND_DEVICES;
 		return SI_DONE;
 	}
-	return SI_SHOWINFO;
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
@@ -395,13 +391,11 @@ HDSubState input_hosts_and_devices_devices(void)
 		selected_device_slot = bar_get();
 		hosts_and_devices_devices_set_mode(0);
 		return HD_DEVICES;
-		break;
 	case 'W':
 	case 'w':
 		selected_device_slot = bar_get();
 		hosts_and_devices_devices_set_mode(2);
 		return HD_DEVICES;
-		break;
 	// case KEY_CLEAR:
 	//   return HD_CLEAR_ALL_DEVICES;
 	case KEY_UP_ARROW:
