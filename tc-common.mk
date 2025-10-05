@@ -1,0 +1,30 @@
+# Automatically figure out TOOLCHAIN from the .mk file that included us
+TOOLCHAIN_MK := $(call pop,$(MAKEFILE_LIST))
+TOOLCHAIN := $(basename $(notdir $(lastword $(TOOLCHAIN_MK))))
+TOOLCHAIN_UC := $(shell echo "$(TOOLCHAIN)" | tr '[:lower:]' '[:upper:]')
+$(info Using TOOLCHAIN=$(TOOLCHAIN))
+
+CC_$(TOOLCHAIN_UC) ?= $(CC_DEFAULT)
+AS_$(TOOLCHAIN_UC) ?= $(AS_DEFAULT)
+LD_$(TOOLCHAIN_UC) ?= $(LD_DEFAULT)
+
+CC := $(CC_$(TOOLCHAIN_UC))
+AS := $(AS_$(TOOLCHAIN_UC))
+LD := $(LD_$(TOOLCHAIN_UC))
+
+EXTRA_INCLUDE_$(TOOLCHAIN_UC) += $(EXTRA_INCLUDE) $(EXTRA_INCLUDE_$(PLATFORM_UC))
+CFLAGS += $(CFLAGS_EXTRA_$(TOOLCHAIN_UC)) $(CFLAGS_EXTRA_$(PLATFORM_UC))
+AFLAGS += $(AFLAGS_EXTRA_$(TOOLCHAIN_UC)) $(AFLAGS_EXTRA_$(PLATFORM_UC))
+LDFLAGS += $(LDFLAGS_EXTRA_$(TOOLCHAIN_UC)) $(LDFLAGS_EXTRA_$(PLATFORM_UC))
+
+CFLAGS += $(foreach incdir,$(EXTRA_INCLUDE),$(call include-dir-flag,$(incdir)))
+CFLAGS += $(foreach incdir,$(EXTRA_INCLUDE_$(PLATFORM_UC)),$(call include-dir-flag,$(incdir)))
+AFLAGS += $(foreach incdir,$(EXTRA_INCLUDE),$(call asm-include-dir-flag,$(incdir)))
+AFLAGS += $(foreach incdir,$(EXTRA_INCLUDE_$(PLATFORM_UC)),$(call asm-include-dir-flag,$(incdir)))
+
+ifdef FUJINET_LIB_INCLUDE
+  CFLAGS += $(call include-dir-flag,$(FUJINET_LIB_INCLUDE))
+endif
+ifdef FUJINET_LIB_DIR
+  LIBS = $(call library-dir-flag,$(FUJINET_LIB_DIR)) $(call library-flag,$(FUJINET_LIB_LDLIB))
+endif
