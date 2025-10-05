@@ -88,7 +88,7 @@ class LibLocator:
       rxm = re.match(VERSION_NAME, FUJINET_LIB)
       if rxm:
         self.MV.FUJINET_LIB_VERSION = rxm.group(1)
-      elif "://" in FUJINET_LIB:
+      elif "://" or "@" in FUJINET_LIB:
         self.gitClone(FUJINET_LIB)
       elif os.path.isfile(FUJINET_LIB):
         _, ext = os.path.splitext(FUJINET_LIB)
@@ -184,7 +184,7 @@ class LibLocator:
           self.MV.FUJINET_LIB_VERSION = rxm.group(2)
         self.MV.FUJINET_LIB_FILE = rxm.group(0)
         return
-      raise ValueError("No library found")
+      error_exit(f"No library found for \"{self.PLATFORM}\"")
 
     # No version was specified, so any version is fine
     if self.MV.FUJINET_LIB_VERSION:
@@ -274,7 +274,8 @@ class LibLocator:
       cmd = ["make", ]
       subprocess.run(cmd, cwd=repoDir, check=True)
       rxm = self.findLibrary(os.listdir(self.MV.FUJINET_LIB_DIR))
-      self.MV.FUJINET_LIB_FILE = rxm.group(0)
+      if rxm:
+        self.MV.FUJINET_LIB_FILE = rxm.group(0)
 
     return
 
