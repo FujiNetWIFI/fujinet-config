@@ -4,9 +4,9 @@ LD_DEFAULT ?= $(CC_DEFAULT)
 
 include $(MWD)/tc-common.mk
 
-CFLAGS += +coleco -subtype=adam
+CFLAGS +=
 AFLAGS +=
-LDFLAGS += +coleco -subtype=adam
+LDFLAGS +=
 
 define include-dir-flag
   -I$1
