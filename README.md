@@ -1,205 +1,284 @@
-# fujinet-config
+# Makefile Framework
 
-More documentation to be written as it takes shape.
+This directory provides a modular framework of Makefiles.
 
+The main goal is to make it easy to:
 
-This repo is the primary repo for the CONFIG application for every supported platform on FujiNet. 
+* Add new computer platforms by dropping in a new
+  platforms/<platform>.mk file.
+* Avoid per-project hacks inside platform makefiles.
+* Keep all project-specific customization in the top-level Makefile,
+  where it’s visible and easy to maintain.
 
-In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common code for all the platforms began to take shape in this repo. Apple II soon joined, then RC2014 and soon C64. Atari was merged back in here in 2022 Fall by frachel so there is one place for all platform CONFIGs going forward.
+Think of this as a library of Makefiles.
 
-## What is CONFIG?
-CONFIG is the primary management application for the FujiNet device. It manages the WIFI connections and credentials, the SD card if one is inserted , and it traverses the HOSTS for images to mount in the Virtual SLOTS. The main page of CONFIG is the familiar HOSTS and SLOTS view that greets most people at boot with a FN device active on their system. CONFIG also can copy images to and from the SD card (Atari) and it has it's own configuration screen that shows the current network configuration of the ESP32 on your local network.
+* `platforms/*.mk` files provide reusable rules — how to build
+  executables, how to create disk images, and other platform-specific
+  steps.
+* `toolchains/*.mk` files define compiler-specific flags and helper
+  functions.
+* The project’s top-level Makefile ties everything together, declaring
+  what to build while reusing the shared rules.
 
-The CONFIG application must be coded and compiled to build a native binary application for each host platform. Then there are some scripts used to copy the CONFIG application to a bootable disk image for each platform. The process for those steps varies by platform. The final bootable disk image is then used in the main fujinet repo to flash the fs on the FN with the disk image, which is then loaded and mounted when you are booting the system without a virtual mounted disk.
+The result is a modular system: platforms and toolchains know *how* to
+build, and the top-level Makefile defines *what* to build.
 
+## 1. The Top-Level Makefile
 
+The **project’s Makefile** is the only file you should need to edit
+when starting a new project. It contains:
 
-## Compiling on the Atari
-To compile, currently requires:
-### CC65 built and installed on your system
+- Your project’s `PRODUCT` name.
+- The `PLATFORMS` you want to build for.
+- The `SRC_DIRS` containing your source code.
+- Optional project-specific rules or custom targets.
 
-#### Pull down cc65 code
-   * https://github.com/cc65/cc65
-
-#### Build cc65
-
-For unix environments:
-```shell
-$ PREFIX=/usr/local/cc65 make
-$ sudo PREFIX=/usr/local/cc65 make install
-```
-
-For [MSYS2 environments](https://www.msys2.org/docs/environments/), you must be in an MSYS2 shell, and then install with
-
-```shell
-$ PREFIX=/usr/local/cc65 make
-$ PREFIX=/usr/local/cc65 make install
-```
-Note the lack of `sudo`.
-
-After this, you can use any subsystem shell (e.g. UCRT64) to run cc65 as normal.
-
-WARNING: If you are in a MinGW shell or any other sub-environment, the install will work, but will not be able to find the installed cfg, lib etc files.
-You must be in the MSYS2 shell for compiling and installing cc65, but not to run it.
-
-### Additional Tools
-
-Building config also requires these additional tools:
-
-* dir2atr - https://www.horus.com/~hias/atari/atarisio/atarisio-221009.tar.gz
-  * download, build and install on your local build system
-
-* https://github.com/FujiNetWIFI/fujinet-config-tools
-  * clone that repo and then do a `make dist` in order to get the ftools built for atari
-  * these are copied over to the FujiNet Atari Boot Disk to have available from DOS if needed
-
-
-Now with those prerequisites out of the way:
-
-`$ make -f Makefile.atari clean dist`
-
-Check for any errors. If sucessful there will be a log line:
+You can run:
 
 ```
-created image "autorun.atr"
+make
 ```
 
-copy autorun.atr to ~//fujinet-platformio/data/BUILD_ATARI/ and then using PIO  "Upload Filesystem Image" to load the new image onto the FujiNet. Your new CONFIG should be ready to test and use.
+This will build for every platform listed in the `PLATFORMS` variable.
 
-
-## Compiling on the Apple II
-To compile, currently requires:
-
-### CC65 built and installed on your system
-
-#### Pull down cc65 code
-   * https://github.com/cc65/cc65
-
-#### Build cc65:
-``` 
-$ PREFIX=/usr/local/cc65 make
-$ sudo PREFIX=/usr/local/cc65 make install
-```
-
-### Pull PlatformIO repo & config repo
-```
-git clone https://github.com/FujiNetWIFI/fujinet-platformio.git
-git clone https://github.com/FujiNetWIFI/fujinet-config.git
-```
-
-* You need the platformIO repo because the build script expects it to be in the same directory as CONFIG, so that it can push the completed Apple boot disk into the proper folder to be pushed to the FN device.
-
-Now with those prerequisites out of the way:
+Or, you can build for a single platform or platform-specific target:
 
 ```
-cd fujinet-config-adam.git
-$ make -f Makefile.apple2 clean dist
+make <platform>
+make <platform>/<target>
 ```
 
-Check for any errors. If sucessful there will be logs that say: 
+Examples:
 
 ```
-...
-java -jar dist.apple2/ac.jar -as dist.apple2/dist.po config.system sys <config
-cp dist.apple2/dist.po ../fujinet-platformio/data/BUILD_APPLE/autorun.po
+make coco
+make apple2/disk
 ```
 
-you will find your autorun.po in the directory indicated above. You can now flash this to the FN using the PIO's Upload Filesytem Image.
+### FujiNet library (`FUJINET_LIB`)
 
+This variable specifies which FujiNet library to use when building your project. It supports several formats:
 
-## Compiling on the Apple IIgs
+* **Version number** — e.g., `4.7.6`
+* **Directory** — a path containing the libraries for each platform
+* **Zip archive** — a locally built or downloaded zip file containing the library
+* **Git repository URL** — a remote repo to clone
+* **Empty** — automatically uses the latest available library
+* **Undefined** — disables use of a FujiNet library entirely
 
-These instructions allow Apple IIgs users to build native GS/OS versions of CONFIG. Note that for generating the firmware version, instructions under __Compiling on the Apple II__ above still apply.
-
-Two makefiles allow building GS/OS versions of CONFIG:
-
-* Makefile.apple2gs builds a standalone ORCA shell EXE which can then be installed in the Utilities folder.
-* Makefile.apple2cda builds a Classic Desk Accessory (CDA) which allows configuring wifi and mounting/umounting images on the go under GS/OS or ProDOS 8, without need for rebooting.
-
-To compile, currently requires:
-
-### GoldenGate built and installed on your system
-
-Note: you'll have to buy GoldenGate before being able to build it. See the project page: https://goldengate.gitlab.io/.
-
-A copy of the Byte Works ORCA/C and its libraries is also required. You can get it there: https://juiced.gs/store/opus-ii-software/.
-
-#### Pull down GoldenGate code
-   * https://gitlab.com/GoldenGate/GoldenGate
-
-#### Build GoldenGate:
-Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
-
-Now with those prerequisites out of the way:
-
-To build the ORCA shell EXE:
-```
-$ cd fujinet-config
-$ make -f Makefile.apple2gs
-$ make -f Makefile.apple2gs dist
-```
-
-Check for any errors. If successful there will be logs that say: 
+#### Example
 
 ```
-...
-cp dist.apple2/bootable.po dist.apple2/dist.po
-java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config exe <config
+# Use FujiNet library version 4.7.6
+FUJINET_LIB = 4.7.6
 ```
 
-You will find the `CONFIG` shell EXE in the disp.po image. Just copy it under prefix #17, then add this to 15:SYSCMND:  
-`CONFIG       U             configure Fujinet`
+### Source directories (`SRC_DIRS`)
 
-Restart ORCA shell or issue a `commands 15:syscmnd` and you're ready.
+`SRC_DIRS` lists the directories `make` should search for source
+files. You can use the literal `%PLATFORM%` token to have directories
+expand automatically based on the platform being built.
 
-To build the CDA:
-```
-cd fujinet-config
-$ make -f Makefile.apple2cda
-$ make -f Makefile.apple2cda dist
-```
-
-Check for any errors. If successful there will be logs that say: 
+Example:
 
 ```
-...
-cp dist.apple2/bootable.po dist.apple2/dist.po
-java -jar dist.apple2/ac.jar -p dist.apple2/dist.po fuji.da cda <config
+SRC_DIRS = src src/%PLATFORM%
 ```
 
-You will find the `FUJI.DA CDA` in the disp.po image. Just copy it on your GS/OS boot disk under System/Desc.Accs and you'll have  `FujiNet Config` in the Desk Accessories menu after a reboot.
+> Note: `%PLATFORM%` is used instead of `$(PLATFORM)` to avoid
+  accidental expansion in unrelated directory names. See Platform
+  Combos below.
 
+### Platform Combos (`PLATFORM_COMBOS`)
 
-## Compiling on the ADAM
-To compile, currently requires:
+`PLATFORM_COMBOS` defines extra directories (or “combo” platforms)
+that are automatically included whenever a main platform is
+built. This lets a single platform pull in multiple source directories.
 
-* make
-* Z88DK (http://github.com/z88dk/z88dk)
-* eoslib (http://github.com/tschak909/eoslib)
-* smartkeyslib (http://github.com/tschak909/smartkeyslib)
+Format:
 
-Make using 'make -f <file>'
-  where file is Makefile.<platform>
+```
+PLATFORM_COMBOS = \
+  platform1+=combo1,combo2 \
+  platform2+=comboA,comboB
+```
 
-## Compiling on the RC2014
-To compiled, currently requires:
+Example:
 
-* make
-* Z88DK (http://github.com/z88dk/z88dk)
-* fujinet-rc2014 (https://github.com/juzzas/fujinet-rc2014)
+```
+PLATFORM_COMBOS = \
+  c64+=commodore,eightbit \
+  atarixe+=atari
+```
 
-Make using `make -f Makefile.rc2014`
+With `SRC_DIRS = src src/%PLATFORM%`, building for `c64` would expand `%PLATFORM%` into:
 
-## Screen Shots
+- `src/c64`
+- `src/commodore`
+- `src/eightbit`
 
-### CONFIG on the ADAM
-![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
+### The `r2r` Target
 
+The `r2r` target is the **default build output** for a platform. It
+will always build the platform’s executable. For some platforms, it
+also creates a bootable disk image.
 
-### CONFIG on the AppleII
-![Apple II CONFIG](./docs/images/fn_apple_config_v1.jpg)
+For example:
 
-### CONFIG on the Atari
-![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
+- On **CoCo**, `r2r` builds a `.bin` file and a `.dsk` disk image.
+- On **Apple II**, `r2r` builds an AppleSingle file and a `.po` disk image.
+- Other platforms behave similarly depending on their toolchains.
 
+#### Output Location
 
+All build artifacts go under the `r2r/<platform>/` directory:
+
+- Executables: `r2r/<platform>/<product>.<ext>`
+- Optional disk images: `r2r/<platform>/<product>.dsk`
+
+### Customizing Per Platform or Compiler
+
+There are two kinds of per-platform/per-compiler variables:
+
+1. Extra include directories – add paths for the compiler and assembler to search:
+  * Use `EXTRA_INCLUDE` or `EXTRA_INCLUDE_<platform>`to specify one or
+    more directories. They are automatically added to `-I` flags
+    during compilation and assembly.
+2. Extras flags – add flags or options without removing the defaults:
+  * Example: `LDFLAGS_EXTRA_COCO` adds extra linker flags when building for CoCo.
+3. Overrides – completely replace the default for a platform:
+  * Example: `CC_APPLE2` sets the compiler to use for Apple II,
+    replacing the default `cc65` setup.
+
+### Platform-specific r2r or disk steps
+
+You can add platform-specific actions by defining double-colon targets:
+
+```
+<platform>/r2r:: <extra-dep1> <extra-dep2>
+<platform>/disk:: <extra-dep1> <extra-dep2>
+```
+
+Examples:
+
+```
+coco/r2r:: coco/custom-step1
+coco/r2r:: coco/custom-step2
+```
+
+Or define a full recipe:
+
+```
+coco/r2r::
+    echo "Doing something special for Coco r2r"
+    ./tools/special-process coco
+```
+
+Notes:
+
+* Double-colon `::` allows multiple isolated definitions for the same target without overwriting existing ones.
+* You can also use single-colon `:` if you want a single line with multiple dependencies:
+
+```
+coco/r2r: coco/custom-step1 coco/custom-step2
+```
+
+This mechanism allows you to build additional things for a specific
+platform when building standard targets.
+
+### Post-build hooks and extra dependencies
+
+For advanced customization, you can define extra dependencies and
+post-build targets. These allow you to:
+
+* Ensure extra files are built or up to date before a main build step.
+* Run additional commands **after** a build step, without modifying the main recipe.
+
+#### Key points
+
+* The extra dependencies variables (e.g., `EXECUTABLE_EXTRA_DEPS_COCO`,
+  `DISK_EXTRA_DEPS_COCO`, `R2R_EXTRA_DEPS_COCO`) **do not automatically
+  add files to the output**. They only make sure that your custom
+  files are rebuilt when modified.
+* You are responsible for handling these extra dependencies
+  appropriately in your post-build steps. For instance, adding files
+  to a disk requires platform-specific commands.
+
+#### Example: Adding files to a COCO disk
+
+```
+DISK_EXTRA_DEPS_COCO := r2r/coco/4voice.bin basic/coco/song.bas
+
+coco/disk-post::
+        decb copy -b -2 r2r/coco/4voice.bin "$(DISK),4VOICE.BIN"
+        decb copy -t -0 basic/coco/song.bas "$(DISK),SONG.BAS"
+```
+
+Notes:
+
+* Each `<platform>/disk-post` target must be defined if you want
+  post-processing for that platform.
+* Multiple post targets for the same platform can coexist thanks to
+  double-colon `::`.
+* This mechanism allows you to safely manipulate build outputs like
+  executables or disk images without changing the original recipes.
+
+---
+
+## 2. Mid-Level Files
+
+There are three “mid-level” Makefiles that provide shared rules:
+
+- **`common.mk`**
+  Defines shared variables and helper rules.
+
+- **`toplevel-rules.mk`**
+  Provides project-wide rules for building, cleaning, and delegating
+  into the platform Makefiles. This file is what ties the
+  `platforms/*.mk` and `toolchains/*.mk` files into your project.
+
+- **`tc-common.mk`**
+  Provides common things for the `toolchains/*.mk` files.
+
+---
+
+## 3. Platform Makefiles (`platforms/*.mk`)
+
+Each file in `platforms/` defines how to build for a **specific computer platform**.
+This includes:
+
+- How to build the main executable (`EXECUTABLE`).
+- How to package artifacts (like creating a disk image).
+- Any special quirks for that system’s toolchain.
+
+---
+
+## 4. Tool Chain Makefiles (`toolchains/*.mk`)
+
+These files define toolchain-specific behavior, such as:
+
+- How to compile `.c` or `.s` files.
+- What flags to use for linking.
+- What commands to use for `LD`, `CC`, or `AR`.
+
+For example, you can override the linker for a project like this in your top-level Makefile:
+
+```
+LD_COCO = ./my-custom-ld-wrapper.sh
+```
+
+Then your wrapper script can call the real linker and perform additional steps on the output.
+
+This keeps toolchain logic reusable across multiple platforms.
+
+---
+
+## Summary
+
+- **Top-level Makefile**: project-specific: define `PLATFORM`, `PRODUCT`, and any extra targets.
+- **common.mk, toplevel-rules.mk, tc-common.mk**: glue: connect top-level, platforms, and toolchains.
+- **platforms/*.mk**: platform-specific: rules for executables, disk images, quirks.
+- **toolchains/*.mk**: toolchain-specific: flags and build rules.
+
+All customization should happen in the **top-level Makefile**.
+The rest of the framework is designed to be reused without modification.
