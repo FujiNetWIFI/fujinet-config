@@ -4,10 +4,9 @@ MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk
 include $(MWD)/toolchains/z88dk.mk
 
-ADAM_FLAGS = +coleco -subtype=adam
-CFLAGS += $(ADAM_FLAGS)
-LDFLAGS += $(ADAM_FLAGS)
-LIBS += -leos.lib -lsmartkeys.lib
+MSXROM_FLAGS = +msx -subtype=rom
+CFLAGS += $(MSXROM_FLAGS)
+LDFLAGS += $(MSXROM_FLAGS)
 
 r2r:: $(EXECUTABLE) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
 	make -f $(PLATFORM_MK) $(PLATFORM)/r2r-post
