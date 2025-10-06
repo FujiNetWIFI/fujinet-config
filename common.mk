@@ -10,6 +10,16 @@ $(info Building for PLATFORM=$(PLATFORM))
 
 include $(MWD)/../Makefile
 
+IS_LIBRARY := $(if $(filter %.lib,$(PRODUCT)),1,0)
+ifeq ($(IS_LIBRARY),1)
+  PRODUCT_BASE = $(basename $(PRODUCT))
+  BUILD_LIB = $(LIBRARY)
+else
+  PRODUCT_BASE = $(PRODUCT)
+  BUILD_EXEC = $(EXECUTABLE)
+  BUILD_DISK = $(DISK)
+endif
+
 # Only set DEFAULT if the specific tool is non-empty
 ifneq ($(strip $(CC_$(TOOLCHAIN_UC))),)
 CC_DEFAULT = $(CC_$(TOOLCHAIN_UC))
@@ -49,10 +59,14 @@ AFILES := $(foreach dir,$(SRC_DIRS_EXPANDED),$(wildcard $(dir)/*.s)) \
 NORM_AFILES := $(AFILES:.asm=.s)
 OBJS := $(addprefix $(OBJ_DIR)/, $(notdir $(CFILES:.c=.o) $(NORM_AFILES:.s=.o)))
 
-$(info EXECUTABLE_EXTRA_DEPS=$(EXECUTABLE_EXTRA_DEPS_$(PLATFORM_UC)))
-$(EXECUTABLE):: $(OBJS) $(EXECUTABLE_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
+$(BUILD_EXEC):: $(OBJS) $(EXECUTABLE_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
 	$(call link-bin,$@,$(OBJS))
 	@$(MAKE) -f $(PLATFORM_MK) $(PLATFORM)/executable-post
+
+$(info LIBRARY=$(BUILD_LIB))
+$(BUILD_LIB):: $(OBJS) $(LIBRARY_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
+	$(call link-lib,$@,$(OBJS))
+	@$(MAKE) -f $(PLATFORM_MK) $(PLATFORM)/library-post
 
 # auto-created dirs
 AUTO_DIRS := $(OBJ_DIR) $(R2R_PD) $(CACHE_PLATFORM)
@@ -103,6 +117,10 @@ $(PLATFORM)/r2r-post::
 
 # Same as $(PLATFORM)/disk-post above
 $(PLATFORM)/executable-post::
+	@:
+
+# Same as $(PLATFORM)/disk-post above
+$(PLATFORM)/library-post::
 	@:
 
 # include autodeps

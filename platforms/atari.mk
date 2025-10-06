@@ -1,17 +1,18 @@
-EXECUTABLE = $(R2R_PD)/$(PRODUCT).com
-DISK = $(R2R_PD)/$(PRODUCT).atr
+EXECUTABLE = $(R2R_PD)/$(PRODUCT_BASE).com
+DISK = $(R2R_PD)/$(PRODUCT_BASE).atr
+LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk
 include $(MWD)/toolchains/cc65.mk
 
-r2r:: $(DISK) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
+r2r:: $(BUILD_DISK) $(BUILD_LIB) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
 	make -f $(PLATFORM_MK) $(PLATFORM)/r2r-post
 
 PICOBOOT_BIN = picoboot.bin
 ATRBOOT := $(CACHE_PLATFORM)/$(PICOBOOT_BIN)
 
-$(DISK): $(EXECUTABLE) $(ATRBOOT) $(DISK_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
+$(BUILD_DISK): $(BUILD_EXEC) $(ATRBOOT) $(DISK_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
 	$(RM) $@
 	$(MKDIR_P) $(CACHE_PLATFORM)/disk
 	cp $< $(CACHE_PLATFORM)/disk

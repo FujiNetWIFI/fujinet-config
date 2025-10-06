@@ -1,6 +1,7 @@
 CC_DEFAULT ?= zcc
 AS_DEFAULT ?= z80asm
 LD_DEFAULT ?= $(CC_DEFAULT)
+AR_DEFAULT ?= $(AS_DEFAULT)
 
 include $(MWD)/tc-common.mk
 
@@ -22,6 +23,10 @@ endef
 
 define library-flag
   -l$1
+endef
+
+define link-lib
+  $(AR) -xeos $1 $2
 endef
 
 define link-bin

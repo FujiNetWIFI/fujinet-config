@@ -1,4 +1,6 @@
-EXECUTABLE = $(R2R_PD)/$(PRODUCT).prg
+EXECUTABLE = $(R2R_PD)/$(PRODUCT_BASE).prg
+LIBS += -leos.lib -lsmartkeys.lib
+LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk
@@ -9,5 +11,5 @@ CFLAGS += $(ADAM_FLAGS)
 LDFLAGS += $(ADAM_FLAGS)
 LIBS += -leos.lib -lsmartkeys.lib
 
-r2r:: $(EXECUTABLE) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
+r2r:: $(BUILD_EXEC) $(BUILD_LIB) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
 	make -f $(PLATFORM_MK) $(PLATFORM)/r2r-post
