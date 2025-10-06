@@ -16,11 +16,14 @@ define asm-include-dir-flag
 endef
 
 define library-dir-flag
-  -L$1
 endef
 
 define library-flag
   $1
+endef
+
+define link-lib
+  $(LIB) -n $1 $2
 endef
 
 define link-bin

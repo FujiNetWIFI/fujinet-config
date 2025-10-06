@@ -1,6 +1,7 @@
 CC_DEFAULT ?= cl65 --color off
 AS_DEFAULT ?= $(CC_DEFAULT)
 LD_DEFAULT ?= $(CC_DEFAULT)
+AR_DEFAULT ?= ar65
 
 include $(MWD)/tc-common.mk
 
@@ -22,6 +23,10 @@ endef
 
 define library-flag
   $1
+endef
+
+define link-lib
+  $(AR) a $1 $2
 endef
 
 define link-bin

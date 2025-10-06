@@ -5,6 +5,7 @@ PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += msdos
+PLATFORMS += msxrom
 
 # Not currently in buildable state
 #PLATFORMS += dragon

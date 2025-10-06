@@ -1,6 +1,7 @@
 CC_DEFAULT ?= cmoc
 AS_DEFAULT ?= $(CC_DEFAULT)
 LD_DEFAULT ?= $(CC_DEFAULT)
+AR_DEFAULT = lwar
 
 include $(MWD)/tc-common.mk
 
@@ -29,6 +30,10 @@ endef
 
 define library-flag
   -l$1
+endef
+
+define link-lib
+  $(AR) -a -r $@ $^
 endef
 
 define link-bin
