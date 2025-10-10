@@ -26,7 +26,7 @@ define library-flag
 endef
 
 define link-lib
-  $(AR) -xeos $1 $2
+  $(AR) -x$1 $2
 endef
 
 define link-bin
@@ -38,5 +38,5 @@ define compile
 endef
 
 define assemble
-  $(AS) -c $(AFLAGS) -o $1 $2
+  $(AS) $(AFLAGS) -o=$1 $2
 endef

@@ -13,8 +13,8 @@ GITHUB_URL = "https://github.com"
 CACHE_DIR = "_cache"
 FUJINET_CACHE_DIR = os.path.join(CACHE_DIR, "fujinet-lib")
 
-VERSION_NUM = r"([0-9]+[.][0-9]+[.][0-9]+)"
-VERSION_NAME = fr"v?{VERSION_NUM}"
+VERSION_NUM_RE = r"([0-9]+[.][0-9]+[.][0-9]+)"
+VERSION_NAME_RE = fr"v?{VERSION_NUM_RE}"
 LDLIB_REGEX = r"lib(.*)[.]a$"
 LDLIB_PLATFORMS = ["coco", "msdos"]
 
@@ -52,7 +52,7 @@ class MakeVariables:
     return
 
 class LibLocator:
-  def __init__(self, FUJINET_LIB, PLATFORM):
+  def __init__(self, FUJINET_LIB, PLATFORM, COMBOS):
     """
     FUJINET_LIB can be
       - a version number such as 4.7.4
@@ -65,30 +65,35 @@ class LibLocator:
     self.MV = MakeVariables([
       "FUJINET_LIB_DIR",
       "FUJINET_LIB_FILE",
-      "FUJINET_LIB_LDLIB",
-      "FUJINET_LIB_VERSION",
       "FUJINET_LIB_INCLUDE",
+      "FUJINET_LIB_LDLIB",
+      "FUJINET_LIB_PLATFORM",
+      "FUJINET_LIB_VERSION",
       "FUJINET_LIB_ZIP",
     ])
 
     self.PLATFORM = PLATFORM
+    self.combos = self.combosToDict(COMBOS)
 
     # Several possible library filename patterns:
     #   - fujinet-coco-4.7.6.lib
     #   - fujinet.apple2.lib
     #   - fujinet.lib.c64
     #   - libfujinet.coco.a
-    self.LIBRARY_REGEX = [
-      fr"fujinet[-.]{self.PLATFORM}(-{VERSION_NUM})?[.]lib$",
-      fr"fujinet[.]lib[.]{self.PLATFORM}$",
-      fr"libfujinet[.]{self.PLATFORM}[.]a$",
-    ]
+    platforms = [self.PLATFORM, *self.combos.get(self.PLATFORM, [])]
+    self.LIBRARY_REGEX = []
+    for platform in platforms:
+      self.LIBRARY_REGEX.extend([
+        fr"fujinet[-.]({platform})(-{VERSION_NUM_RE})?[.]lib$",
+        fr"fujinet[.]lib[.]({platform})$",
+        fr"libfujinet[.]({platform})[.]a$",
+      ])
 
     if FUJINET_LIB:
-      rxm = re.match(VERSION_NAME, FUJINET_LIB)
+      rxm = re.match(VERSION_NAME_RE, FUJINET_LIB)
       if rxm:
         self.MV.FUJINET_LIB_VERSION = rxm.group(1)
-      elif "://" or "@" in FUJINET_LIB:
+      elif any(sub in FUJINET_LIB for sub in ("://", "@")):
         self.gitClone(FUJINET_LIB)
       elif os.path.isfile(FUJINET_LIB):
         _, ext = os.path.splitext(FUJINET_LIB)
@@ -134,6 +139,7 @@ class LibLocator:
     for filename in filelist:
       rxm = self.checkLibraryFilename(filename)
       if rxm:
+        self.setPlatformVersion(rxm)
         return rxm
     return None
 
@@ -161,13 +167,18 @@ class LibLocator:
 
     return filename
 
+  def setPlatformVersion(self, rxm):
+    if len(rxm.groups()) >= 2:
+      self.MV.FUJINET_LIB_PLATFORM = rxm.group(1)
+    if len(rxm.groups()) >= 3:
+      self.MV.FUJINET_LIB_VERSION = rxm.group(2)
+    return
+    
   def getVersion(self):
     if self.MV.FUJINET_LIB_ZIP:
       with zipfile.ZipFile(self.MV.FUJINET_LIB_ZIP, "r") as zf:
         rxm = self.findLibrary(zf.namelist())
         if rxm:
-          if len(rxm.groups()) >= 2:
-            self.MV.FUJINET_LIB_VERSION = rxm.group(2)
           return
 
       raise ValueError("Which file is the newest?")
@@ -180,8 +191,6 @@ class LibLocator:
     if self.MV.FUJINET_LIB_DIR:
       rxm = self.findLibrary(os.listdir(self.MV.FUJINET_LIB_DIR))
       if rxm:
-        if len(rxm.groups()) >= 2:
-          self.MV.FUJINET_LIB_VERSION = rxm.group(2)
         self.MV.FUJINET_LIB_FILE = rxm.group(0)
         return
       error_exit(f"No library found for \"{self.PLATFORM}\"")
@@ -199,7 +208,7 @@ class LibLocator:
     if not latest_version:
       raise ValueError("Can't find version")
 
-    rxm = re.match(VERSION_NAME, latest_version)
+    rxm = re.match(VERSION_NAME_RE, latest_version)
     if not rxm:
       raise ValueError("Not a FujiNet-lib version", latest_version)
 
@@ -207,7 +216,7 @@ class LibLocator:
     return
 
   def findCacheDir(self):
-    pattern = fr"{VERSION_NUM}-{self.PLATFORM}"
+    pattern = fr"{VERSION_NUM_RE}-{self.PLATFORM}"
     if not os.path.isdir(FUJINET_CACHE_DIR):
       return None
     for path in os.listdir(FUJINET_CACHE_DIR):
@@ -256,8 +265,6 @@ class LibLocator:
     if base.endswith(".git"):
       base = base.rsplit(".", 1)[0]
     repoDir = os.path.join(FUJINET_CACHE_DIR, base)
-    # FIXME - yah, this is harcoded to where we expect the output
-    self.MV.FUJINET_LIB_DIR = os.path.join(repoDir, "build")
 
     if not os.path.exists(repoDir):
       cmd = ["git", "clone", url]
@@ -265,34 +272,61 @@ class LibLocator:
         cmd.extend(["-b", branch])
       subprocess.run(cmd, cwd=FUJINET_CACHE_DIR, check=True)
 
-    rxm = None
-    if os.path.isdir(self.MV.FUJINET_LIB_DIR):
-      rxm = self.findLibrary(os.listdir(self.MV.FUJINET_LIB_DIR))
-    if rxm:
-      self.MV.FUJINET_LIB_FILE = rxm.group(0)
-    else:
+    possibleOutput = ["build", f"r2r/{self.PLATFORM}",
+                      *[f"r2r/{p}" for p in self.combos.get(self.PLATFORM, [])]]
+    self.findLibraryDir(repoDir, possibleOutput)
+    if not self.MV.FUJINET_LIB_FILE:
       cmd = ["make", ]
       subprocess.run(cmd, cwd=repoDir, check=True)
-      rxm = self.findLibrary(os.listdir(self.MV.FUJINET_LIB_DIR))
-      if rxm:
-        self.MV.FUJINET_LIB_FILE = rxm.group(0)
+      self.findLibraryDir(repoDir, possibleOutput)
 
     return
 
+  def findLibraryDir(self, baseDir, dirsToCheck):
+    for pdir in dirsToCheck:
+      pdir = os.path.join(baseDir, pdir)
+      if os.path.isdir(pdir):
+        self.MV.FUJINET_LIB_DIR = pdir
+        rxm = self.findLibrary(os.listdir(self.MV.FUJINET_LIB_DIR))
+        if rxm:
+          if not self.MV.FUJINET_LIB_PLATFORM:
+            raise ValueError("What platform?", rxm)
+          self.MV.FUJINET_LIB_FILE = rxm.group(0)
+          return rxm
+    raise ValueError("No library dir")
+    return None
+    
   def getInclude(self):
     parent = os.path.dirname(self.MV.FUJINET_LIB_DIR.rstrip("/"))
-    check_dirs = [self.MV.FUJINET_LIB_DIR, parent, os.path.join(parent, "include")]
-    for idir in check_dirs:
+    checkDirs = [self.MV.FUJINET_LIB_DIR, parent, os.path.join(parent, "include")]
+    components = self.MV.FUJINET_LIB_DIR.split(os.path.sep)
+    if components[-1] == self.MV.FUJINET_LIB_PLATFORM and components[-2] == "r2r":
+      checkDirs.append(os.path.join(os.path.dirname(parent), "include"))
+    for idir in checkDirs:
       if os.path.exists(os.path.join(idir, "fujinet-fuji.h")):
         self.MV.FUJINET_LIB_INCLUDE = idir
         return
-    raise ValueError("Unable to find include directory")
+    raise ValueError("Unable to find include directory", self.MV.FUJINET_LIB_DIR)
 
     return
 
   def printMakeVariables(self):
     self.MV.printValues()
     return
+
+  @staticmethod
+  def combosToDict(combos):
+    comboDict = {}
+    for part in combos.split():
+      if "+=" not in part:
+        continue
+      platform, others = part.split("+=", 1)
+      platform = platform.strip()
+      others = [c.strip() for c in others.split(',') if c.strip()]
+      if platform not in comboDict:
+        comboDict[platform] = []
+      comboDict[platform].extend(others)
+    return comboDict
 
 # Print errors to stderr so that `make` doesn't try to interpret them in `$(eval)`
 def error_exit(*args):
@@ -311,6 +345,8 @@ def main():
   if not PLATFORM:
     error_exit("Please specify PLATFORM")
 
+  PLATFORM_COMBOS = os.getenv("PLATFORM_COMBOS")
+
   FUJINET_LIB = args.file
   if not FUJINET_LIB:
     FUJINET_LIB = os.getenv("FUJINET_LIB")
@@ -320,7 +356,7 @@ def main():
     CACHE_DIR = env_cache_dir
     FUJINET_CACHE_DIR = os.path.join(CACHE_DIR, os.path.basename(FUJINET_CACHE_DIR))
 
-  fujinetLib = LibLocator(FUJINET_LIB, PLATFORM)
+  fujinetLib = LibLocator(FUJINET_LIB, PLATFORM, PLATFORM_COMBOS)
   fujinetLib.printMakeVariables()
 
   return

@@ -138,7 +138,7 @@ else
 
   endef
   $(eval $(subst |,$(_newline),$(shell PLATFORM=$(PLATFORM) CACHE_DIR=$(CACHE_DIR) \
-      $(MWD)/fnlib.py $(FUJINET_LIB) | tr '\n' '|')))
+      PLATFORM_COMBOS="$(PLATFORM_COMBOS)" $(MWD)/fnlib.py $(FUJINET_LIB) | tr '\n' '|')))
   ifeq ($(strip $(FUJINET_LIB_LDLIB)),)
     $(error fujinet-lib not available)
   endif
