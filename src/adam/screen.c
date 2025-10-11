@@ -5,9 +5,8 @@
  * Screen Routines
  */
 
-#include "screen.h"
-#include "globals.h"
-#include "bar.h"
+#include "../screen.h"
+#include "../globals.h"
 #include <video/tms99x8.h>
 #include <smartkeys.h>
 #include <conio.h>
@@ -84,6 +83,11 @@ void screen_set_wifi(AdapterConfig *ac)
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
+void screen_set_wifi_extended(AdapterConfigExtended *ace)
+{
+  screen_set_wifi((AdapterConfig *) ace);
+}
+
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
   char meter[4]={0x20,0x20,0x20,0x00};
@@ -152,7 +156,7 @@ void screen_connect_wifi(NetConfig *nc)
   vdp_blank();
 }
 
-char* screen_hosts_and_devices_device_slot(char hs, bool e, char *fn)
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, const char *fn)
 {
   if (fn[0]!=0x00)
     return fn;
@@ -264,13 +268,13 @@ void screen_hosts_and_devices_devices_clear_all(void)
   smartkeys_sound_play(SOUND_CONFIRM);
 }
 
-void screen_hosts_and_devices_clear_host_slot(unsigned char i)
+void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
 {
   gotoxy(1,i+1);
   vdp_vfill((i+1)*0x0100+8,0x00,248);
 }
 
-void screen_hosts_and_devices_edit_host_slot(unsigned char i)
+void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   sprintf(response,"  EDIT THE HOST NAME FOR SLOT %u\n  PRESS [RETURN] WHEN DONE.",i+1);
@@ -319,6 +323,11 @@ void screen_show_info(bool printerEnabled, AdapterConfig* ac)
   smartkeys_display(NULL,NULL,NULL,printerEnabled == true ? "PRINTER?\n  YES" : "PRINTER?\n   NO"," CHANGE\n  SSID","RECONNECT");
   vdp_blank();
   smartkeys_sound_play(SOUND_MODE_CHANGE);
+}
+
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* ace)
+{
+  screen_show_info(printerEnabled, (AdapterConfig *) ace);
 }
 
 void screen_select_file(void)
@@ -521,7 +530,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   smartkeys_sound_play(SOUND_POSITIVE_CHIME);
 }
 
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
     textcolor(0);
     textbackground(15);

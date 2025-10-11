@@ -4,13 +4,13 @@
  * Functions to display a selection bar
  */
 
+#include "../screen.h"
 #include <cmoc.h>
-#include "bar.h"
 
 /**
  * static local variables for bar y, max, and index.
  */
-static int bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
+static uint_fast8_t bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
 /**
  * Set up bar and start display on row
@@ -81,7 +81,7 @@ void bar_draw(int y, bool clear)
  * Get current bar position
  * @return bar index
  */
-int bar_get()
+uint_fast8_t bar_get()
 {
   return bar_i;
 }
@@ -117,7 +117,7 @@ void bar_down()
 /**
  * @brief jump to bar position
  */
-void bar_jump(int i)
+void bar_jump(uint_fast8_t i)
 {
   bar_i=i;
   bar_update();

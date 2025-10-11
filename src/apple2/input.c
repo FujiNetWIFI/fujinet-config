@@ -15,10 +15,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "globals.h"
-#include "input.h"
-#include "bar.h"
-#include "screen.h"
+#include "../globals.h"
+#include "../input.h"
+#include "../screen.h"
 #include "mount_and_boot.h"
 
 #include "../set_wifi.h"

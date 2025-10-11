@@ -1,80 +1,14 @@
 /**
- * FujiNet for #Adam configuration program
- *
  * Connect to existing WiFi connection
  */
 #include "connect_wifi.h"
-
-#ifdef _CMOC_VERSION_
-#include <cmoc.h>
-#include "coco/bar.h"
-#include "coco/globals.h"
-#include "coco/io.h"
-#include "coco/screen.h"
-#include "coco/input.h"
-#else
-#include <string.h>
-#endif /* _CMOC_VERSION_ */
-
 #include "pause.h"
-
-#ifdef BUILD_ADAM
-#include "adam/io.h"
-#include "adam/screen.h"
-#include "adam/globals.h"
-#include "adam/input.h"
-extern bool screen_should_be_cleared;
-#endif /* BUILD_ADAM */
-
-#ifdef BUILD_APPLE2
-#include "apple2/io.h"
-#include "apple2/screen.h"
-#include "apple2/globals.h"
-#include "apple2/input.h"
-#endif /* BUILD_APPLE2 */
-
-#ifdef BUILD_ATARI
-#include "atari/io.h"
-#include "atari/screen.h"
-#include "atari/globals.h"
-#include "atari/bar.h"
-#include "atari/input.h"
-#endif /* BUILD_ATARI */
-
-#ifdef BUILD_C64
-#include "c64/io.h"
-#include "c64/screen.h"
-#include "c64/globals.h"
-#include "c64/input.h"
-#endif /* BUILD_C64 */
-
-#ifdef BUILD_PC8801
-#include "pc8801/io.h"
-#include "pc8801/screen.h"
-#include "pc8801/globals.h"
-#include "pc8801/input.h"
-#endif /* BUILD_PC8801 */
-
-#ifdef BUILD_PC6001
-#include "pc6001/io.h"
-#include "pc6001/screen.h"
-#include "pc6001/globals.h"
-#include "pc6001/input.h"
-#endif /* BUILD_PC6001 */
-
-#ifdef BUILD_PMD85
-#include "pmd85/io.h"
-#include "pmd85/screen.h"
-#include "pmd85/globals.h"
-#include "pmd85/input.h"
-#endif /* BUILD_PMD85 */
-
-#ifdef BUILD_RC2014
-#include "rc2014/io.h"
-#include "rc2014/screen.h"
-#include "rc2014/globals.h"
-#include "rc2014/input.h"
-#endif /* BUILD_RC2014 */
+#include "typedefs.h"
+#include "globals.h"
+#include "compat.h"
+#include "screen.h"
+#include "input.h"
+#include "io.h"
 
 void connect_wifi(void)
 {

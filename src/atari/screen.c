@@ -9,17 +9,17 @@
  *
  **/
 
+#include "atari_screen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
 #include <stdint.h>
 #include <peekpoke.h>
-#include "screen.h"
-#include "io.h"
-#include "globals.h"
-#include "bar.h"
-#include "input.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../input.h"
+#include "../constants.h"
 
 unsigned char *video_ptr;  // a pointer to the memory address containing the screen contents
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
@@ -149,7 +149,7 @@ void screen_mount_and_boot()
   bar_clear(false);
 }
 
-void screen_set_wifi(AdapterConfigExtended *ac)
+void screen_set_wifi_extended(AdapterConfigExtended *ac)
 {
   unsigned char i = 0;
   unsigned char x = 13;
@@ -222,7 +222,7 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int, AdapterConfigExtended *ac)
+void screen_show_info_extended(bool, AdapterConfigExtended *ac)
 {
   screen_dlist_show_info();
   set_active_screen(SCREEN_SHOW_INFO);
@@ -254,7 +254,7 @@ void screen_show_info(int, AdapterConfigExtended *ac)
   screen_puts(17, 15, ac->fn_version);
 }
 
-void screen_select_slot(char *e)
+void screen_select_slot(const char *e)
 {
   unsigned long *s;
   screen_dlist_select_slot();
@@ -565,7 +565,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *)
 
 // Since 'deviceSlots' is a global, do we need to access the input parameter at all?
 // Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *, const unsigned char *)
+void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *, const bool *)
 {
   unsigned char slotNum;
   unsigned char dinfo[6];

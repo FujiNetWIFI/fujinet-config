@@ -3,10 +3,10 @@
  * Bar routines
  */
 
+#include "../screen.h"
 #include <c64.h>
 #include <conio.h>
 #include <stdint.h>
-#include "bar.h"
 
 #define TEXT_RAM ((unsigned char *)0x0400)
 

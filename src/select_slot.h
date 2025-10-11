@@ -1,6 +1,4 @@
 /**
- * FujiNet for #Adam configuration program
- *
  * Select Destination Device Slot
  */
 

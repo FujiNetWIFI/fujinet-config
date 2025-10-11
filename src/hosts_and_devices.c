@@ -1,101 +1,16 @@
 /**
- * FujiNet for #Adam configuration program
- *
  * Hosts and Devices
  */
 
-#include "debug.h"
-
-#ifdef _CMOC_VERSION_
-#include <cmoc.h>
-#include "coco/globals.h"
-#include "coco/io.h"
-#include "coco/screen.h"
-#include "coco/input.h"
-#include "coco/bar.h"
-#else
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#endif /* _CMOC_VERSION_ */
 #include "hosts_and_devices.h"
 #include "die.h"
-#include "typedefs.h"
-#include "fuji_typedefs.h"
-
-#ifdef BUILD_ADAM
-#include "adam/globals.h"
-#include "adam/io.h"
-#include "adam/screen.h"
-#include "adam/input.h"
-#include "adam/bar.h"
-#endif /* BUILD_ADAM */
-
-#ifdef BUILD_APPLE2
-#include "apple2/globals.h"
-#include "apple2/io.h"
-#include "apple2/screen.h"
-#include "apple2/input.h"
-#include "apple2/bar.h"
-#ifdef __ORCAC__
-#include <coniogs.h>
-#else
-#include <conio.h>
-#endif
-// #include <stdio.h> // for debugging using sprintf
-
-extern uint8_t sp_error;
-#endif /* BUILD_APPLE2 */
-
-#ifdef BUILD_ATARI
-#include "atari/globals.h"
-#include "atari/io.h"
-#include "atari/screen.h"
-#include "atari/input.h"
-#include "atari/bar.h"
-#endif /* BUILD_ATARI */
-
-#ifdef BUILD_C64
-#include "c64/globals.h"
-#include "c64/io.h"
-#include "c64/screen.h"
-#include "c64/input.h"
-#include "c64/bar.h"
-#endif /* BUILD_C64 */
-
-#ifdef BUILD_PC8801
-#include "pc8801/globals.h"
-#include "pc8801/io.h"
-#include "pc8801/screen.h"
-#include "pc8801/input.h"
-#include "pc8801/bar.h"
-#endif /* BUILD_PC8801 */
-
-#ifdef BUILD_PC6001
-#include "pc6001/globals.h"
-#include "pc6001/io.h"
-#include "pc6001/screen.h"
-#include "pc6001/input.h"
-#include "pc6001/bar.h"
-#endif /* BUILD_PC6001 */
-
-#ifdef BUILD_PMD85
-#include "pmd85/globals.h"
-#include "pmd85/io.h"
-#include "pmd85/screen.h"
-#include "pmd85/input.h"
-#include "pmd85/bar.h"
-#include "pmd85/colors.h"
-#include <conio.h>
-#endif /* BUILD_PMD85 */
-
-#ifdef BUILD_RC2014
-#include "rc2014/globals.h"
-#include "rc2014/io.h"
-#include "rc2014/screen.h"
-#include "rc2014/input.h"
-#include "rc2014/bar.h"
-#endif /* BUILD_RC2014 */
+#include "debug.h"
+#include "screen.h"
+#include "compat.h"
+#include "input.h"
+#include "constants.h"
+#include "io.h"
+#include "globals.h"
 
 HDSubState hd_subState=HD_HOSTS;
 DeviceSlot deviceSlots[8];
@@ -109,17 +24,9 @@ char temp_filename[256];
 
 extern bool quick_boot;
 
-#ifdef _CMOC_VERSION_
-void hosts_and_devices_edit_host_slot(int i)
-#else
-void hosts_and_devices_edit_host_slot(unsigned char i)
-#endif
+void hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
-#ifdef _CMOC_VERSION_
-  unsigned int o;
-#else
-  unsigned char o;
-#endif
+  uint_fast8_t o;
   HostSlot orig_host;
 
   if (strlen((const char *)hostSlots[i]) == 0)

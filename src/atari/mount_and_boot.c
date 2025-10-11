@@ -1,9 +1,9 @@
 #ifdef BUILD_ATARI
 
 #include "mount_and_boot.h"
-#include "io.h"
-#include "globals.h"
-#include "screen.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../screen.h"
 #include "../die.h"
 #include "atari_die.h"
 #include <conio.h>

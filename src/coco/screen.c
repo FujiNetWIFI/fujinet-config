@@ -11,11 +11,11 @@
 
 #include <cmoc.h>
 #include <coco.h>
-#include "screen.h"
-#include "io.h"
-#include "globals.h"
-#include "bar.h"
-#include "input.h"
+#include "coco_screen.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../input.h"
+#include "../constants.h"
 
 #define SCREEN_RAM_TOP 0x0400
 #define INVERSE_MASK   0xBF   // Bit 6 clear for inverse character
@@ -80,7 +80,7 @@ void screen_mount_and_boot()
   printf("MOUNTING ALL SLOTS...\n");
 }
 
-void screen_set_wifi(AdapterConfig *ac)
+void screen_set_wifi_extended(AdapterConfigExtended *ac)
 {
   cls(6);
   locate(0,0);
@@ -152,7 +152,7 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfig *ac)
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* ac)
 {
   cls(7);
   printf("     FUJINET CONFIGURATION      ");
@@ -468,7 +468,7 @@ const char device_slot_mode(unsigned char mode)
     }
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, unsigned char *e)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, const unsigned char *e)
 {
   byte *sp = (unsigned char *)SCREEN_RAM_TOP;
 

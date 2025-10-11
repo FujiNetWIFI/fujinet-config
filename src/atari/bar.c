@@ -6,7 +6,7 @@
 
 #include <atari.h>
 #include <string.h>
-#include "bar.h"
+#include "atari_screen.h"
 
 #define BAR_PMBASE	0x7c00
 unsigned char* bar_pmbase=(unsigned char *)BAR_PMBASE;

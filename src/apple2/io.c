@@ -5,7 +5,7 @@
  * I/O Routines
  */
 
-#include "io.h"
+#include "../io.h"
 #include <stdint.h>
 #ifdef __ORCAC__
 #include <coniogs.h>
@@ -17,7 +17,7 @@
 #include <peekpoke.h> // For the insanity in io_boot()
 #endif
 #include <stdlib.h>
-#include "globals.h"
+#include "../globals.h"
 
 #include "fujinet-fuji.h"
 
@@ -119,7 +119,7 @@ SSIDInfo *io_get_scan_result(uint8_t n)
   return &ssidInfo;
 }
 
-AdapterConfigExtended *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
   fuji_get_adapter_config_extended(&adapterConfig);
   return &adapterConfig;
@@ -131,7 +131,7 @@ int io_set_ssid(NetConfig *nc)
   return 0; // ??? TODO, should this reflect the results?
 }
 
-char *io_get_device_filename(uint8_t slot)
+const char *io_get_device_filename(uint8_t slot)
 {
   fuji_get_device_filename(slot, &response[0]);
   return &response[0];
@@ -167,9 +167,10 @@ void io_put_device_slots(DeviceSlot *d)
   fuji_put_device_slots(d, 6);
 }
 
-void io_mount_host_slot(uint8_t hs)
+uint8_t io_mount_host_slot(uint8_t hs)
 {
   fuji_mount_host_slot(hs);
+  return 0;
 }
 
 void io_open_directory(uint8_t hs, char *p, char *f)
@@ -186,7 +187,7 @@ void io_open_directory(uint8_t hs, char *p, char *f)
   fuji_open_directory(hs, _p);
 }
 
-char *io_read_directory(uint8_t maxlen, uint8_t a)
+const char *io_read_directory(uint8_t maxlen, uint8_t a)
 {
   memset(&response[0], 0, maxlen);
   fuji_read_directory(maxlen, a, &response[0]);
@@ -258,7 +259,7 @@ void io_disable_device(unsigned char d)
 
 // The enabled status area needs visiting. this requires a LOT of status codes to send to FN, as there's no payload to specify which device.
 // And in FN it always returns true anyway, so this functionality is pretty broken at the moment.
-bool io_get_device_enabled_status(unsigned char d)
+bool io_get_device_enabled_status(unsigned char)
 {
   return true;
 }

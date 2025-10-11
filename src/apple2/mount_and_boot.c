@@ -1,9 +1,9 @@
 #ifdef BUILD_APPLE2
 
 #include "mount_and_boot.h"
-#include "io.h"
-#include "globals.h"
-#include "screen.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../screen.h"
 #include "../die.h"
 #ifdef __ORCAC__
 #include <coniogs.h>

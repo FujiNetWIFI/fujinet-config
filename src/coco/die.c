@@ -5,7 +5,6 @@
  * Function to die, wait for keypress and then do coldstart
  */
 
-#include "io.h"
 #include "../die.h"
 
 /**

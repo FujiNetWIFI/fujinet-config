@@ -6,22 +6,22 @@
 #include <cmoc.h>
 #include <coco.h>
 #include <fujinet-fuji.h>
-#include "io.h"
-#include "globals.h"
-#include "screen.h"
-#include "bar.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../screen.h"
 #include "../pause.h"
+#include "../constants.h"
 
 #define OP_FUJI 0xE2
 #define CMD_READY 0x00
 #define CMD_RESPONSE 0x01
 
 extern NetConfig nc;
-static AdapterConfig adapterConfig;
+static AdapterConfigExtended adapterConfigExt;
 static SSIDInfo ssidInfo;
 NewDisk newDisk;
 unsigned char wifiEnabled=true;
-byte response[256];
+char response[256];
 int _dirpos=0;
 byte orig_casflag;
 
@@ -88,13 +88,11 @@ SSIDInfo *io_get_scan_result(int n)
     return &ssidInfo;
 }
 
-AdapterConfig *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
-    memset(&adapterConfig, 0, sizeof(adapterConfig));
+    fuji_get_adapter_config_extended(&adapterConfigExt);
 
-    fuji_get_adapter_config(&adapterConfig);
-
-    return &adapterConfig;
+    return &adapterConfigExt;
 }
 
 int io_set_ssid(NetConfig *nc)
@@ -103,14 +101,16 @@ int io_set_ssid(NetConfig *nc)
     return false;
 }
 
-void io_get_device_slots(DeviceSlot *d)
+bool io_get_device_slots(DeviceSlot *d)
 {
-    fuji_get_device_slots(d, NUM_DEVICE_SLOTS);  
+    fuji_get_device_slots(d, NUM_DEVICE_SLOTS);
+    return 0;
 }
 
-void io_get_host_slots(HostSlot *h)
+bool io_get_host_slots(HostSlot *h)
 {
     fuji_get_host_slots(h, NUM_HOST_SLOTS);
+    return 0;
 }
 
 void io_put_host_slots(HostSlot *h)
@@ -123,9 +123,10 @@ void io_put_device_slots(DeviceSlot *d)
     fuji_put_device_slots(d, NUM_DEVICE_SLOTS);
 }
 
-void io_mount_host_slot(unsigned char hs)
+bool io_mount_host_slot(unsigned char hs)
 {
     fuji_mount_host_slot(hs);
+    return 0;
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
@@ -184,9 +185,10 @@ void io_set_boot_mode(unsigned char mode)
 }
 
 
-void io_mount_disk_image(unsigned char ds, unsigned char mode)
+bool io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
     fuji_mount_disk_image(ds, mode);
+    return 0;
 }
 
 void io_umount_disk_image(unsigned char ds)

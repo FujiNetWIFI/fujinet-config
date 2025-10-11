@@ -1,17 +1,13 @@
 /**
- * FujiNet for #Adam configuration program
- *
  * Set to existing WiFi Connection
  */
 
 #ifndef SET_WIFI_H
 #define SET_WIFI_H
 
-#ifdef _CMOC_VERSION_
-void set_wifi_set_ssid(int i);
-#else
-void set_wifi_set_ssid(unsigned char i);
-#endif
+#include "typedefs.h"
+
+void set_wifi_set_ssid(uint_fast8_t i);
 void set_wifi(void);
 
 #endif /* SET_WIFI */
