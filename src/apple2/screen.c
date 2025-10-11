@@ -5,9 +5,9 @@
  * Screen Routines
  */
 
-#include "screen.h"
-#include "globals.h"
-#include "bar.h"
+#include "../screen.h"
+#include "../globals.h"
+#include "../constants.h"
 #include "sp.h"
 #include "diskii.h"
 #include <string.h>
@@ -233,7 +233,7 @@ void screen_putlcc(char c)
   }
 }
 
-void screen_set_wifi(AdapterConfigExtended *acx)
+void screen_set_wifi_extended(AdapterConfigExtended *acx)
 {
   clrscr();
   cputsxy(9,0,"Welcome to FujiNet!");
@@ -333,7 +333,7 @@ void screen_destination_host_slot_choose(void)
   bar_set(1, 1, 8, selected_host_slot);
 }
 
-const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
+const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, const char *fn)
 {
   UNUSED(hs);
   if (fn[0]!=0x00)
@@ -349,7 +349,7 @@ const char* screen_hosts_and_devices_slot(const char *c)
   return c[0]==0x00 ? empty : c;
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const bool *e)
 {
   char i;
   unsigned char line;
@@ -512,7 +512,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   gotoxy(0,10); cprintf("%-128s",dp);
 }
 
-void screen_show_info(bool printerEnabled, AdapterConfigExtended* acx)
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 {
   clrscr();
 
@@ -645,7 +645,7 @@ void screen_select_file_filter(void)
   gotoxy(0,STATUS_BAR); cprintf("Enter a wildcard filter.\r\n E.G. *Apple*");
 }
 
-void screen_select_slot(char *e)
+void screen_select_slot(const char *e)
 {
   unsigned long *s;
   static const char ss[] = " SmartPort Drives";

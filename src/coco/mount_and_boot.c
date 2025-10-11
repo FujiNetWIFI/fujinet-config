@@ -1,10 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 #include "mount_and_boot.h"
-#include "io.h"
-#include "globals.h"
-#include "screen.h"
-#include "../die.h"
+#include "../io.h"
 
 void mount_and_boot_lobby(void)
 {

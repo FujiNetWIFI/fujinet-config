@@ -5,9 +5,8 @@
  * Screen Routines
  */
 
-#include "screen.h"
-#include "globals.h"
-#include "bar.h"
+#include "../screen.h"
+#include "../globals.h"
 #include <conio.h>
 #include <string.h>
 #include <c64.h>
@@ -80,7 +79,7 @@ void screen_putlcc(char)
 	// REMOVE
 }
 
-void screen_set_wifi(AdapterConfigExtended *ac)
+void screen_set_wifi_extended(AdapterConfigExtended *ac)
 {
 	clrscr();
 	gotoxy(9, 0);
@@ -188,7 +187,7 @@ void screen_destination_host_slot_choose(void)
 	bar_set(2, 1, 8, selected_host_slot);
 }
 
-const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
+const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, const char *fn)
 {
 	UNUSED(hs);
 	if (fn[0] != 0x00)
@@ -204,7 +203,7 @@ char *screen_hosts_and_devices_slot(char *c)
 	return c[0] == 0x00 ? "EMPTY" : c;
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const bool *e)
 {
 	char i;
 
@@ -301,7 +300,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 	cprintf("%-128s", dp);
 }
 
-void screen_show_info(bool printerEnabled, AdapterConfigExtended *ac)
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
 {
 	clrscr();
 
@@ -425,7 +424,7 @@ void screen_select_file_filter(void)
 	cprintf("ENTER A WILDCARD FILTER.\r\n E.G. *Apple*");
 }
 
-void screen_select_slot(char *e)
+void screen_select_slot(const char *e)
 {
 	unsigned int s;
 	unsigned char low;

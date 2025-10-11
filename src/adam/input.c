@@ -3,22 +3,21 @@
  * Input routines
  */
 
-#include <video/tms99x8.h>
-#include <eos.h>
-#include <smartkeys.h>
-#include <conio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include "input.h"
+#include "../input.h"
 #include "cursor.h"
-#include "globals.h"
-#include "bar.h"
+#include "../globals.h"
+#include "../screen.h"
 #include "../set_wifi.h"
 #include "../die.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
-#include "io.h"
+#include "../io.h"
+
+#include <video/tms99x8.h>
+#include <eos.h>
+#include <smartkeys.h>
+#include <conio.h>
 
 static GameControllerData cont;
 static unsigned char key=0;
@@ -327,7 +326,7 @@ HDSubState input_hosts_and_devices_devices(void)
     }
 }
 
-void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
+void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
   input_line(1,i+1,o,c,32,false);
 }

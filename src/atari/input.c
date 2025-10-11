@@ -10,15 +10,15 @@
 #include <conio.h>
 #include <string.h>
 #include <peekpoke.h>
-#include "input.h"
-#include "io.h"
-#include "bar.h"
-#include "screen.h"
-#include "globals.h"
+#include "../input.h"
+#include "../io.h"
+#include "atari_screen.h"
+#include "../globals.h"
 #include "mount_and_boot.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../set_wifi.h"
+#include "../constants.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -28,28 +28,6 @@ unsigned short custom_sectorSize;
 extern char fn[256];
 bool mounting = false;
 extern unsigned short entry_timer;
-
-unsigned char input()
-{
-  if (entry_timer>0)
-    entry_timer--;
-
-  if (kbhit())
-  {
-    rtclr();
-    return cgetc();
-  }
-  else
-    return input_handle_joystick();
-}
-
-unsigned char input_ucase()
-{
-  unsigned char c = input();
-  if ((c >= 'a') && (c <= 'z'))
-    c &= ~32;
-  return c;
-}
 
 unsigned char input_handle_joystick(void)
 {
@@ -82,6 +60,28 @@ unsigned char input_handle_joystick(void)
   }
   else
     return 0;
+}
+
+unsigned char input()
+{
+  if (entry_timer>0)
+    entry_timer--;
+
+  if (kbhit())
+  {
+    rtclr();
+    return cgetc();
+  }
+  else
+    return input_handle_joystick();
+}
+
+unsigned char input_ucase()
+{
+  unsigned char c = input();
+  if ((c >= 'a') && (c <= 'z'))
+    c &= ~32;
+  return c;
 }
 
 void input_line(unsigned char, unsigned char, unsigned char, char *, unsigned char, bool)

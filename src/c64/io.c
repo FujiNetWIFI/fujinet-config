@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "globals.h"
-#include "io.h"
+#include "../globals.h"
+#include "../io.h"
 
 #define UNUSED(x) (void)(x);
 
@@ -64,7 +64,7 @@ SSIDInfo *io_get_scan_result(uint8_t n)
 	return &ssidInfo;
 }
 
-AdapterConfigExtended *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
 	fuji_get_adapter_config_extended(&adapterConfig);
 	return &adapterConfig;
@@ -80,7 +80,7 @@ int io_set_ssid(NetConfig *nc)
 	return is_err;
 }
 
-char *io_get_device_filename(uint8_t slot)
+const char *io_get_device_filename(uint8_t slot)
 {
 	fuji_get_device_filename(slot, &response[0]);
 	return (char *) &response[0];
@@ -124,7 +124,7 @@ void io_open_directory(uint8_t hs, char *p, char *f)
 	fuji_open_directory2(hs, p, f);
 }
 
-char *io_read_directory(uint8_t maxlen, uint8_t a)
+const char *io_read_directory(uint8_t maxlen, uint8_t a)
 {
 	memset(response, 0, maxlen);
 	fuji_read_directory(maxlen, a, &response[0]);

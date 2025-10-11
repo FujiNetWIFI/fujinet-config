@@ -5,12 +5,11 @@
  * I/O Routines
  */
 
+#include "../io.h"
 #include <conio.h> // for sleep()
 #include <stdlib.h>
 #include <eos.h>
 #include <string.h>
-#include "io.h"
-#include "globals.h"
 
 #define FUJI_DEV 0x0F
 
@@ -70,7 +69,7 @@ unsigned char io_scan_for_networks(void)
   return response[0];
 }
 
-SSIDInfo *io_get_scan_result(unsigned char n)
+SSIDInfo *io_get_scan_result(uint_fast8_t n)
 {
   unsigned char c[2]={0xFC,0x00};
 
@@ -90,6 +89,15 @@ AdapterConfig *io_get_adapter_config(void)
   return (AdapterConfig *)response;
 }
 
+AdapterConfigExtended *io_get_adapter_config_extended(void)
+{
+  unsigned char c=0xC4;
+
+  io_command_and_response(&c,1);
+
+  return (AdapterConfigExtended *)response;
+}
+
 int io_set_ssid(NetConfig *nc)
 {
   unsigned char c[98]={0xFB};
@@ -100,22 +108,24 @@ int io_set_ssid(NetConfig *nc)
   return 0;
 }
 
-void io_get_device_slots(DeviceSlot *d)
+bool io_get_device_slots(DeviceSlot *d)
 {
   unsigned char c=0xF2;
 
   io_command_and_response(&c,1);
 
   memcpy(d,response,304);
+  return true;
 }
 
-void io_get_host_slots(HostSlot *h)
+bool io_get_host_slots(HostSlot *h)
 {
   unsigned char c=0xF4;
 
   io_command_and_response(&c,1);
 
   memcpy(h,response,256);
+  return true;
 }
 
 void io_put_host_slots(HostSlot *h)
@@ -137,13 +147,14 @@ void io_put_device_slots(DeviceSlot *d)
   csleep(10);
 }
 
-void io_mount_host_slot(unsigned char hs)
+uint8_t io_mount_host_slot(unsigned char hs)
 {
   unsigned char c[2]={0xF9,0x00};
 
   c[1] = hs;
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  return 0;
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
@@ -230,13 +241,14 @@ void io_create_new(unsigned char selected_host_slot,unsigned char selected_devic
   eos_write_character_device(FUJI_DEV,&nd,sizeof(nd));
 }
 
-void io_mount_disk_image(unsigned char ds, unsigned char mode)
+bool io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
   char c[3]={0xF8,0x00,0x00};
   c[1]=ds;
   c[2]=mode;
 
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  return true;
 }
 
 void io_set_boot_config(unsigned char toggle)

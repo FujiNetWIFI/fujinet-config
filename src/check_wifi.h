@@ -1,6 +1,4 @@
 /**
- * FujiNet for #Adam configuration program
- *
  * Check for Wifi Configuration and/or connection.
  */
 

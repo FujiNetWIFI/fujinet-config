@@ -6,11 +6,10 @@
 
 #include <cmoc.h>
 #include <coco.h>
-#include "input.h"
-#include "io.h"
-#include "bar.h"
-#include "screen.h"
-#include "globals.h"
+#include "../input.h"
+#include "../io.h"
+#include "../screen.h"
+#include "../globals.h"
 #include "mount_and_boot.h"
 #include "strendswith.h"
 #include "../key_codes.h"
@@ -33,7 +32,7 @@ extern HDSubState hd_subState;
  * @brief this routine is needed because waitkey() and readline()
  *        always emit uppercase. argh!
  */
-char input()
+uint8_t input()
 {
 	char shift = false;
 	char k;
@@ -77,7 +76,7 @@ void input_cursor(char x, char y)
 	screen_put(x, y, 0xAF); // Blue cursor
 }
 
-void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool password)
+void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool password)
 {
 	int o = strlen(c);
 	char k = 0;
@@ -152,23 +151,23 @@ void input_line(unsigned char x, unsigned char y, char *c, unsigned char l, bool
 
 void input_line_set_wifi_custom(char *c)
 {
-	input_line(0, 15, c, 32, false);
+  input_line(0, 15, 0, c, 32, false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
-	input_line(0, 15, c, 64, true);
+  input_line(0, 15, 0, c, 64, true);
 }
 
-void input_line_hosts_and_devices_host_slot(int i, unsigned int o, char *c)
+void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
 	bar_clear(true);
-	input_line(1, (unsigned char)i + 1, c, 32, false);
+	input_line(1, (unsigned char)i + 1, 0, c, 32, false);
 }
 
 void input_line_filter(char *c)
 {
-	input_line(0, 15, c, 31, false);
+  input_line(0, 15, 0, c, 31, false);
 }
 
 unsigned char input_select_file_new_type(void)
@@ -182,7 +181,7 @@ unsigned long input_select_file_new_size(unsigned char t)
 
 	memset(c, 0, sizeof(c));
 
-	input_line(0, 15, c, 16, false);
+	input_line(0, 15, 0, c, 16, false);
 
 	return (long)atol(c);
 }
@@ -194,7 +193,7 @@ unsigned long input_select_file_new_custom(void)
 
 void input_select_file_new_name(char *c)
 {
-	input_line(0, 15, c, 255, false);
+  input_line(0, 15, 0, c, 255, false);
 
 	if (!strendswith(c, ".dsk") && !strendswith(c, ".DSK"))
 	{

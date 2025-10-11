@@ -5,15 +5,14 @@
  * Screen Routines
  */
 
-#include "screen.h"
+#include "../screen.h"
 
 #include <conio.h>
 #include <sys/ioctl.h>
 #include <string.h>
 
-#include "globals.h"
-#include "colors.h"
-#include "bar.h"
+#include "../globals.h"
+#include "../constants.h"
 
 #define UNUSED(x) (void)(x);
 
@@ -106,7 +105,7 @@ void screen_init(void)
   	//screen_fujinetlogo();
 }
 
-void screen_put_inverse(const char c)
+void screen_put_inverse(char c)
 {
   revers(1);
   cputc(c);
@@ -197,7 +196,7 @@ void screen_error(const char *c)
   	cputs(c);
 }
 
-void screen_set_wifi(AdapterConfigExtended *acx)
+void screen_set_wifi_extended(AdapterConfigExtended *acx)
 {
 	// screen_clear();
 	// make full screen clear here, in case we need to clear some rubbish
@@ -415,12 +414,12 @@ void screen_hosts_and_devices_devices(void)
 	bar_set(SCR_Y0 + 12, SCR_X0 + 2, 4, selected_device_slot);
 }
 
-void screen_hosts_and_devices_clear_host_slot(unsigned char i)
+void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
 {
 	cclearxy(SCR_X0 + 1, SCR_Y0 + 1 + i, 39);
 }
 
-void screen_hosts_and_devices_edit_host_slot(unsigned char i)
+void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
 	screen_clear_status();
 	gotoxy(SCR_X0, STATUS_BAR);
@@ -449,7 +448,7 @@ char *_info_str(const char *s)
 	return strshort(s, 26);
 }
 
-void screen_show_info(bool printerEnabled, AdapterConfigExtended *acx)
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *acx)
 {
 	screen_clear();
 
@@ -744,7 +743,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 	screen_print_empty_device_slot(SCR_Y0 + 12 + ds);
 }
 
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
 	gotoxy(SCR_X0 + 3, SCR_Y0 + 1 + hs);
 	textcolor(LIST_COLOR);

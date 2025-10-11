@@ -7,6 +7,15 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include "fuji_compat.h"
+
+#ifdef _CMOC_VERSION_
+typedef int uint_fast8_t;
+#else /* ! _CMOC_VERSION_ */
+#include <stdbool.h>
+#include <stdint.h>
+#endif /* _CMOC_VERSION_ */
+
 typedef enum _ws_subState
   {
    WS_SCAN,

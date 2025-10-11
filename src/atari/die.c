@@ -7,7 +7,7 @@
 
 #include <atari.h>
 #include <conio.h>
-#include "io.h"
+#include "../io.h"
 #include "../die.h"
 
 /**

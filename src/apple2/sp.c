@@ -1,7 +1,7 @@
 #ifdef BUILD_APPLE2
 
 #include "sp.h"
-#include "screen.h"
+#include "../screen.h"
 #ifdef __ORCAC__
 #include <coniogs.h>
 #else

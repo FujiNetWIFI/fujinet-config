@@ -1,7 +1,5 @@
 #ifdef BUILD_PC8801
 /**
- * FujiNet CONFIG for #Adam
- *
  * I/O Routines
  */
 

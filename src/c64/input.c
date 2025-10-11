@@ -10,10 +10,9 @@
 #include <peekpoke.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "globals.h"
-#include "input.h"
-#include "bar.h"
-#include "screen.h"
+#include "../globals.h"
+#include "../input.h"
+#include "../screen.h"
 #include "../set_wifi.h"
 #include "../die.h"
 #include "../hosts_and_devices.h"

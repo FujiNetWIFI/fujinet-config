@@ -3,9 +3,9 @@
  * Bar routines
  */
 
+#include "../screen.h"
 #include <video/tms99x8.h>
 #include <stdbool.h>
-#include "bar.h"
 
 #define DISPLAY_ROWS 17
 #define DISPLAY_LENGTH 60
@@ -95,7 +95,7 @@ void bar_down()
 /**
  * Jump to bar slot
  */
-void bar_jump(unsigned char i)
+void bar_jump(uint_fast8_t i)
 {
   bar_oldi=bar_i;
   bar_i=i;
@@ -106,7 +106,7 @@ void bar_jump(unsigned char i)
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get()
+uint_fast8_t bar_get()
 {
   return bar_i;
 }

@@ -3,11 +3,10 @@
  * Bar routines
  */
 
-#include "bar.h"
+#include "../screen.h"
 
 #include <conio.h>
 #include <stdbool.h>
-#include "screen.h"
 
 #include "colors.h"
 
@@ -100,7 +99,7 @@ void bar_down(void)
 /**
  * Jump to bar slot
  */
-void bar_jump(unsigned char i)
+void bar_jump(uint_fast8_t i)
 {
   bar_oldi = bar_i;
   bar_i = i;
@@ -111,7 +110,7 @@ void bar_jump(unsigned char i)
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get(void)
+uint_fast8_t bar_get(void)
 {
   return bar_i;
 }

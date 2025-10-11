@@ -9,10 +9,10 @@
 #include <string.h>
 #include <conio.h> // Used for interacting with the standard Atari 'console'
 #include <unistd.h> // For sleep
-#include "io.h"
-#include "globals.h"
-#include "screen.h"
-#include "bar.h"
+#include "../io.h"
+#include "../globals.h"
+#include "../screen.h"
+#include "../constants.h"
 
 static NetConfig nc;
 static AdapterConfigExtended adapterConfig;
@@ -105,7 +105,7 @@ SSIDInfo *io_get_scan_result(unsigned char n)
   return &ssidInfo;
 }
 
-AdapterConfigExtended *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
   fuji_get_adapter_config_extended(&adapterConfig);
   return &adapterConfig;
@@ -162,7 +162,7 @@ void io_open_directory(unsigned char hs, char *p, char *f)
   fuji_open_directory(hs, _p);
 }
 
-char *io_read_directory(unsigned char maxlen, unsigned char a)
+const char *io_read_directory(unsigned char maxlen, unsigned char a)
 {
   memset(response, 0, maxlen);
   fuji_read_directory(maxlen, a, response);
@@ -184,7 +184,7 @@ void io_set_device_filename(unsigned char ds, unsigned char hs, unsigned char mo
   fuji_set_device_filename(mode, hs, ds, e);
 }
 
-char *io_get_device_filename(unsigned char slot)
+const char *io_get_device_filename(unsigned char slot)
 {
   fuji_get_device_filename(slot, response);
   return response;

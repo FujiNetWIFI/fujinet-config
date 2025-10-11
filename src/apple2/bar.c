@@ -3,12 +3,16 @@
  * Bar routines
  */
 
+#include "../screen.h"
+#include "../typedefs.h"
+
 #ifdef __ORCAC__
 #include <coniogs.h>
 #else
 #include <conio.h>
 #endif
-#include "bar.h"
+
+#define CURRENT_LINE (*(char**)0x28)
 
 /**
  * static local variables for bar y, max, and index.

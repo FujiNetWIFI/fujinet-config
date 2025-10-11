@@ -1,14 +1,12 @@
 #ifdef BUILD_PMD85
 /**
- * FujiNet CONFIG for #Adam
- *
  * I/O Routines
  */
 
 #include <conio.h> // for sleep() 
 #include <stdlib.h>
 #include <string.h>
-#include "io.h"
+#include "../io.h"
 
 #include "dwread.h"
 #include "dwwrite.h"
@@ -298,7 +296,7 @@ unsigned char io_scan_for_networks(void)
 #endif
 }
 
-SSIDInfo *io_get_scan_result(unsigned char n)
+SSIDInfo *io_get_scan_result(uint_fast8_t n)
 {
 #ifdef MOCK_WIFI
   last_rc = FUJINET_RC_OK;
@@ -324,7 +322,7 @@ SSIDInfo *io_get_scan_result(unsigned char n)
 #endif
 }
 
-AdapterConfigExtended *io_get_adapter_config(void)
+AdapterConfigExtended *io_get_adapter_config_extended(void)
 {
 #ifdef MOCK_WIFI
   last_rc = FUJINET_RC_OK;
@@ -371,7 +369,7 @@ int io_set_ssid(NetConfig *nc)
   return 0;
 }
 
-void io_get_device_slots(DeviceSlot *d)
+bool io_get_device_slots(DeviceSlot *d)
 {
 #ifdef MOCK_DEVICES
   memcpy(d,mock_devices,sizeof(DeviceSlot) * 8);
@@ -394,9 +392,10 @@ void io_get_device_slots(DeviceSlot *d)
 #endif
   for (int i = 0; i < 8; i++)
     d[i].file[FILE_MAXLEN-1] = '\0';
+  return 0;
 }
 
-void io_get_host_slots(HostSlot *h)
+bool io_get_host_slots(HostSlot *h)
 {
 #ifdef MOCK_HOSTS
   memcpy(h,mock_hosts,sizeof(HostSlot) * 8);
@@ -417,6 +416,7 @@ void io_get_host_slots(HostSlot *h)
     io_ready();
     io_get_response((char *)h, 256);
 #endif
+    return 0;
 }
 
 void io_put_host_slots(HostSlot *h)
@@ -443,7 +443,7 @@ void io_put_device_slots(DeviceSlot *d)
 #endif
 }
 
-void io_mount_host_slot(unsigned char hs)
+uint8_t io_mount_host_slot(unsigned char hs)
 {
 #ifdef MOCK_HOSTS
   /* do nothing */
@@ -453,6 +453,7 @@ void io_mount_host_slot(unsigned char hs)
     dwwrite((char *)"\xE2\xF9",2);
     dwwrite((char *)&hs,1);
 #endif
+    return 0;
 }
 
 void io_open_directory(unsigned char hs, char *p, char *f)
@@ -680,7 +681,7 @@ void io_create_new(unsigned char selected_host_slot,unsigned char selected_devic
 #endif
 }
 
-void io_mount_disk_image(unsigned char ds, unsigned char mode)
+bool io_mount_disk_image(unsigned char ds, unsigned char mode)
 {
 #ifdef MOCK_DEVICES
     /* do nothing */
@@ -692,6 +693,7 @@ void io_mount_disk_image(unsigned char ds, unsigned char mode)
     dwwrite((char *)&mode,1);
     io_ready(); // make sure mount completed (before reboot)
 #endif
+    return 0;
 }
 
 void io_set_boot_config(unsigned char toggle)

@@ -8,9 +8,8 @@
 #include <stdlib.h>
 #include "input.h"
 #include "cursor.h"
-#include "globals.h"
-#include "bar.h"
-#include "screen.h"
+#include "../globals.h"
+#include "../screen.h"
 #include "colors.h"
 #include "../set_wifi.h"
 #include "../die.h"
