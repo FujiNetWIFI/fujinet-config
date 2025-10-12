@@ -68,3 +68,5 @@ fujinet-lib/*
 # IDE files
 .vscode/*
 *.o
+*.orig
+*.rej

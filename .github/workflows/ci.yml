@@ -22,13 +22,13 @@ jobs:
           # - msdos # MSDOS doesn't seem to build yet
 
     container:
-      image: fozztexx/defoogi:1.4.1
+      image: fozztexx/defoogi:1.4.2
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build
-        run: make -f Makefile.${{ matrix.platform }} r2r
+        run: make ${{ matrix.platform }}/r2r
 
       - name: Upload artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
