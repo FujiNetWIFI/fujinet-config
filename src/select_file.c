@@ -151,7 +151,7 @@ void select_display_long_filename(void)
 #else
   if ((entry_size[bar_get()] > 30) && (entry_timer == 0))
 #endif
-  {    
+  {
     if (long_entry_displayed == false)
     {
       select_get_filename(64);
