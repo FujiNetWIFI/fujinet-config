@@ -22,9 +22,6 @@ bool backFromCopy=false;
 
 void setup(void)
 {
-#if defined(BUILD_ATARI) || defined(BUILD_COCO)
-#error io_init() belongs in screen_init()
-#endif
   screen_init();
 }
 

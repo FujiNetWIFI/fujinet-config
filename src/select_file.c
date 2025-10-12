@@ -155,7 +155,7 @@ void select_display_long_filename(void)
     {
       fuji_open_directory2(selected_host_slot, path, filter);
 #ifdef BUILD_ATARI
-      io_set_directory_position(pos + bar_get() - FILES_START_Y);
+      fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
 #else
       fuji_set_directory_position(pos + bar_get());
 #endif

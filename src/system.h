@@ -13,3 +13,8 @@ extern void system_create_new(uint8_t selected_host_slot, uint8_t selected_devic
 #ifdef BUILD_APPLE2
 extern void system_list_devs(void);
 #endif /* BUILD_APPLE2 */
+
+#ifdef BUILD_ATARI
+extern void cold_start(void);
+extern void rtclr(void);
+#endif /* BUILD_ATARI */
