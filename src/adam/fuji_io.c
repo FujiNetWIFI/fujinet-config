@@ -11,6 +11,8 @@
 #include <eos.h>
 #include <string.h>
 
+#define FUJI_DEV 0x0F
+
 char response[1024];
 static DCB *dcb = NULL;
 
