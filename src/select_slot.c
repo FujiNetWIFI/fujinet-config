@@ -97,7 +97,7 @@ void select_slot_done()
 
 #if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
     // why hardcoded to 2 here?
-    io_set_device_filename(selected_device_slot, selected_host_slot, 2, path);
+    fuji_set_device_filename(2, selected_host_slot, selected_device_slot, path);
 #else
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, path);

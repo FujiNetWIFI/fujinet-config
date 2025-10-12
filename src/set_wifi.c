@@ -68,7 +68,7 @@ void set_wifi_scan(void)
   for (i = 0; i < numNetworks; i++)
   {
     fuji_get_scan_result(i, &ssidInfo);
-    if (ssidInfo.ssid != NULL & strlen(ssidInfo.ssid) != 0)
+    if (strlen(ssidInfo.ssid) != 0)
     {
       screen_set_wifi_display_ssid(i, &ssidInfo);
       valid_networks++;

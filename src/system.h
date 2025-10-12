@@ -9,3 +9,7 @@ extern void system_create_new(uint8_t selected_host_slot, uint8_t selected_devic
 #else /* ! _CMOC_VERSION_ */
 #define MAX_WIFI_NETWORKS 16
 #endif /* _CMOC_VERSION_ */
+
+#ifdef BUILD_APPLE2
+extern void system_list_devs(void);
+#endif /* BUILD_APPLE2 */

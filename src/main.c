@@ -71,7 +71,7 @@ void run(void)
 			break;
 		#ifdef BUILD_APPLE2
 		case SHOW_DEVICES:
-			io_list_devs();
+			system_list_devs();
 			break;
 		#endif
 		case DONE:

@@ -169,7 +169,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   }
   screen_hosts_and_devices_device_slots(DEVICES_START_Y, deviceSlots, deviceEnabled); // redraw the disks
 #elif defined(BUILD_APPLE2)
-  mnt = io_mount_disk_image(selected_device_slot, m);
+  mnt = fuji_mount_disk_image(selected_device_slot, m);
 
   // Check for error
   if (!mnt)
@@ -182,7 +182,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    io_put_device_slots(deviceSlots);
+    fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   }
   screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled); // redraw the disks
   //screen_hosts_and_devices_devices_selected(selected_device_slot); // Breaks disk order on screen??
