@@ -12,7 +12,6 @@
 #include <cmoc.h>
 #include <coco.h>
 #include "coco_screen.h"
-#include "../io.h"
 #include "../globals.h"
 #include "../input.h"
 #include "../constants.h"
@@ -23,12 +22,9 @@
 unsigned char *video_ptr;  // a pointer to the memory address containing the screen contents
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
 char _visibleEntries;
-extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
-extern HDSubState hd_subState;
-extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
-extern HostSlot hostSlots[8];
+static byte orig_casflag;
 
 char uppercase_tmp[32]; // temp space for strupr(s) output.
                         // so original strings doesn't get changed.
@@ -519,6 +515,12 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_init(void)
 {
+  asm {
+    lda $011A
+      sta orig_casflag
+      clr $011A
+      }
+
   // Make sure the screen is in 32 column mode
   width(32);
 }
@@ -567,6 +569,16 @@ void screen_connect_wifi(NetConfig *nc)
   printf("     CONNECTING TO NETWORK:     %32s",screen_upper(nc->ssid));
 
   screen_add_shadow(9,BLUE); // change to CYAN
+}
+
+void screen_end(void)
+{
+  // Restore the original casing flag.
+  asm {
+    lda orig_casflag
+      sta $011A
+      }
+  return;
 }
 
 #endif

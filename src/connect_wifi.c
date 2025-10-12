@@ -8,7 +8,6 @@
 #include "compat.h"
 #include "screen.h"
 #include "input.h"
-#include "io.h"
 
 void connect_wifi(void)
 {
@@ -16,7 +15,7 @@ void connect_wifi(void)
 	NetConfig nc;
 	unsigned char s;
 
-	memcpy(&nc, io_get_ssid(), sizeof(NetConfig));
+        fuji_get_ssid(&nc);
 
 	state = SET_WIFI;
 
@@ -36,7 +35,7 @@ void connect_wifi(void)
 		}
 #endif /* _CMOC_VERSION_ */
 		
-		s = io_get_wifi_status();
+		fuji_get_wifi_status(&s);
 
 		switch (s)
 		{

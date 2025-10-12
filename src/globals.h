@@ -40,5 +40,9 @@ extern unsigned short custom_sectorSize;
 
 extern bool deviceEnabled[];
 extern bool mounting;
+extern AdapterConfigExtended adapterConfigExt;
+
+extern bool copy_mode;
+extern HDSubState hd_subState;
 
 #endif /* GLOBALS_H */

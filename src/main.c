@@ -12,9 +12,9 @@
 #include "perform_copy.h"
 #include "show_info.h"
 #include "destination_host_slot.h"
-#include "io.h"
 #include "screen.h"
 #include "typedefs.h"
+#include "system.h"
 
 State state=HOSTS_AND_DEVICES;
 bool backToFiles=false;
@@ -22,15 +22,18 @@ bool backFromCopy=false;
 
 void setup(void)
 {
-  io_init();
+#if defined(BUILD_ATARI) || defined(BUILD_COCO)
+#error io_init() belongs in screen_init()
+#endif
   screen_init();
 }
 
 void done(void)
 {
   // reboot here
-  io_set_boot_config(0); // disable config
-  io_boot();             // and reboot.
+  fuji_set_boot_config(0); // disable config
+  screen_end();            // restore screen/keyboard state if needed
+  system_boot();           // and reboot.
 }
 
 void run(void)
