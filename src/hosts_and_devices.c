@@ -271,9 +271,9 @@ void hosts_and_devices(void)
     hd_subState = HD_HOSTS;
 
 #ifdef BUILD_PMD85
-    io_get_host_slots(hostSlots);
-    io_get_device_slots(deviceSlots);
-    io_update_devices_enabled(deviceEnabled);
+    fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS);
+    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
     screen_hosts_and_devices(hostSlots, deviceSlots, deviceEnabled);
 #endif
 
