@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "apple2_globals.h"
+#include "../globals.h"
 #include "../input.h"
 #include "../screen.h"
 #include "mount_and_boot.h"
