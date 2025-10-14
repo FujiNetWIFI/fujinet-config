@@ -83,4 +83,3 @@ typedef unsigned short DirectoryPosition;
 #endif /* BUILD_ADAM || BUILD_RC2014 */
 
 #endif /* FUJI_TYPEDEFS_H */
-

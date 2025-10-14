@@ -49,9 +49,15 @@ static char udg[] =
   0x0F,0x08,0x08,0x0A,0x08,0x08,0x0F,0x00,        // DDP 1    0x85
   0xF0,0x10,0x10,0x50,0x10,0x10,0xF0,0x00,        // DDP 2    0x86
   0x0F,0x08,0x08,0x08,0x0A,0x08,0x0F,0x00,        // DSK 1    0x87
-  0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // DSK 2    0x88
-  0x0F,0x08,0x0B,0x0B,0x0B,0x08,0x0F,0x00,        // ROM 1    0x89
-  0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // ROM 2    0x8a
+  // 0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // DSK 2    0x88
+	0x00,0x7C,0x4A,0x42,0x7E,0x7E,0x7E,0x00,        // DSK 2    0x88
+	0x00,0x00,0x5A,0x42,0x7E,0x7E,0x00,0x00,        // ROM 1    0x89
+ 	0x00,0x00,0x7E,0x42,0x5A,0x66,0x00,0x00,        // Cassette 0x8A
+  // 0x0F,0x08,0x0B,0x0B,0x0B,0x08,0x0F,0x00,        // ROM 1    0x89
+  // 0xF0,0x10,0xD0,0xD0,0xD0,0x10,0xF0,0x00,        // ROM 2    0x8a
+ 	// 0x00,0x00,0xFE,0xEE,0xEE,0xEE,0xFE,0x00,        // ROM 1    0x89
+  // 0x00,0x7E,0x5A,0x5A,0x42,0x7E,0x00,0x00,        // ROM 1    0x89
+	// 0x00,0x00,0xFE,0xD6,0xD6,0xD6,0xFE,0x00,        // ROM 2    0x8a
   0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,  // Password smudge 0x8b
   0x00,0x70,0x4c,0x64,0x44,0x44,0x0e,0x00,        // F1       0x8c
   0x00,0x70,0x4c,0x62,0x44,0x48,0x0e,0x00,        // F2       0x8d
@@ -66,8 +72,9 @@ static char udg[] =
   // 0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,        // Underline 0x96
 };
 
-static const char *empty="EMPTY";
-static const char *off="OFF";
+// static const char *empty="EMPTY";
+static const char *empty="-empty-";
+static const char *off="-empty-";
 
 bool any_slot_occupied()
 {
@@ -276,7 +283,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
     clrscr();
     // screen_should_be_cleared=false;
     screen_hosts_and_devices_host_slots(h);
-    screen_hosts_and_devices_device_slots(11,d,e);
+    screen_hosts_and_devices_device_slots(10,d,e);
     vdp_blank();
   // }
 }
@@ -316,7 +323,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
   textcolor(VDP_INK_WHITE);
   textbackground(VDP_INK_BLACK);
-  gotoxy(0,0);  cprintf("%32s","Host Slots ");
+  gotoxy(0,0);  cprintf("%32s","Hosts ");
 
   vdp_vfill(MODE2_ATTR,0xF1,256); // white text, black bg
   vdp_vfill(MODE2_ATTR+0x0100,0x1F,2048); // black text, white bg
@@ -335,14 +342,19 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   }
 }
 
+#if 1
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
   unsigned short y2 = y << 8;
 
-  gotoxy(0,y); cprintf("%32s","Disk Slots ");
+  gotoxy(0,y); cprintf("%32s","Devices ");
 
   vdp_vfill(MODE2_ATTR+y2,0xF1,256); // white text, black bg
   vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024); // black text, white bg
+
+  bool has_disks = false;
+  uint8_t disk_n = 0;
+  uint8_t slot_n = 0;
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
   {
@@ -350,14 +362,96 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
       gotoxy(0,i+y+1);
       textcolor(WHITE);
       textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
+      char icon = ' ';
+      char label = '\0';
+      char *filename = d[i].file;
+
+      if (strstr(filename, ".cas") != NULL || strstr(filename, ".CAS") != NULL) {
+        icon = 0x8A;
+      }
+      else if (strstr(filename, ".dsk") != NULL || strstr(filename, ".DSK") != NULL) {
+        icon = 0x88;
+        label = 'A'+disk_n;
+        disk_n++;
+
+        if (!has_disks) {
+          slot_n++;
+          has_disks = true;
+        }
+      }
+      else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
+        icon = 0x89;
+        label = '1'+slot_n;
+        slot_n++;
+      }
+      cputc(icon);
       // cprintf("%d",i+1);
+      // switch (i) {
+      //   case 6:
+      //     cputc(0x89);
+      //     break;
+      //   case 7:
+      //     cputc(0x8A);
+      //     break;
+      //   default:
+      //     cputc('A'+i);
+      // }
+      // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
+      textcolor(BLACK);
+      textbackground(WHITE);
+      if (label == '\0') {
+        cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      }
+      else {
+        cputc(label);
+        cputc('=');
+        cprintf("%-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      }
+  }
+}
+#else
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+{
+  unsigned short y2 = y << 8;
+  unsigned short y3 = (y+8) << 8;
+
+  gotoxy(0,y); cprintf("%32s","Disk Drives ");
+
+  vdp_vfill(MODE2_ATTR+y2,0xF1,256); // white text, black bg
+  vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024); // black text, white bg
+
+  for (char i=0;i<MAX_DISK_SLOTS-2;i++)
+  {
+      // textcolor(15);
+      gotoxy(0,i+y+1);
+      textcolor(WHITE);
+      textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
       cputc('A'+i);
       // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
       textcolor(BLACK);
       textbackground(WHITE);
       cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
   }
+
+  gotoxy(0,y+8); cprintf("%32s","Cartridges ");
+
+  vdp_vfill(MODE2_ATTR+y3,0xF1,256); // white text, black bg
+  vdp_vfill(MODE2_ATTR+y3+256,0x1F,512); // black text, white bg
+
+  for (char i=0;i<2;i++)
+  {
+      // textcolor(15);
+      gotoxy(0,i+y+9);
+      textcolor(WHITE);
+      textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
+      cputc('1'+i);
+      // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
+      textcolor(BLACK);
+      textbackground(WHITE);
+      cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i+6].hostSlot,e[i+6],d[i+6].file));
+  }
 }
+#endif
 
 
 void screen_hosts_and_devices_devices_clear_all(void)
@@ -433,7 +527,7 @@ void screen_select_file_display(char *p, char *f)
 
   // Update content area
   vdp_color(15,4,7);
-  gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
+  // gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
 
   if (f[0]==0x00)
     cprintf("%32s",p);

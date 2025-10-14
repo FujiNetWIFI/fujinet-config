@@ -168,7 +168,6 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'D':
   case 'd':
     bar_clear(false);
-    gotoxy(0,0); cprintf("%d",HD_DEVICES);
     return HD_DEVICES;
   case KEY_RETURN:
     selected_host_slot = bar_get();
