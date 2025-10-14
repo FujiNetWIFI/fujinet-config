@@ -1,6 +1,8 @@
 #include "../system.h"
+#include "../pause.h"
 
 static NewDisk newDisk;
+char response[256];
 
 void system_boot(void)
 {

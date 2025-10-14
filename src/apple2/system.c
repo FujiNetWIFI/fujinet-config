@@ -1,6 +1,6 @@
 #include "../system.h"
 #include "sp.h"
-#include "apple2_globals.h"
+#include "../globals.h"
 #include <conio.h>
 #include <apple2.h>
 #include <peekpoke.h> // For the insanity in io_boot()

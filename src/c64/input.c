@@ -25,12 +25,6 @@
 
 #define UNUSED(x) (void)(x);
 
-extern unsigned char copy_host_slot;
-extern bool copy_mode;
-extern bool long_entry_displayed;
-
-extern unsigned char io_create_type;
-
 /**
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
@@ -199,13 +193,13 @@ unsigned char input_select_file_new_type(void)
 	{
 	case 'P':
 	case 'p':
-		io_create_type = 0;
+		system_create_type = 0;
 		return 1;
 	case '2':
-		io_create_type = 1;
+		system_create_type = 1;
 		return 2;
 	default:
-		io_create_type = 0;
+		system_create_type = 0;
 		return 0;
 	}
 }
