@@ -117,6 +117,10 @@
 /* Alias */
 #define KEY_ABORT            KEY_ESCAPE
 
+#elif defined(BUILD_MSXROM)
+
+#include "msx/key_codes.h"
+
 #endif // defined(...)
 
 #endif // KEY_CODES_H
