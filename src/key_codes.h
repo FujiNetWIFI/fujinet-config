@@ -94,6 +94,10 @@
 #define KEY_2                0x32
 #define KEY_3                0x33
 
+#elif defined(BUILD_MSXROM)
+
+#include "msx/key_codes.h"
+
 #endif // defined(...)
 
 #endif // KEY_CODES_H
