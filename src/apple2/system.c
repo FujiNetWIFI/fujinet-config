@@ -8,6 +8,7 @@
 
 static NewDisk newDisk;
 uint8_t system_create_type;
+char response[256];
 
 void system_boot(void)
 {

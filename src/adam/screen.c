@@ -593,5 +593,10 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
   vdp_blank();
 }
 
+void screen_end(void)
+{
+  return;
+}
+
 #endif /* BUILD_ADAM */
 

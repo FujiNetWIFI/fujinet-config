@@ -193,7 +193,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     screen_hosts_and_devices_device_slots(1,deviceSlots,deviceEnabled);
     bar_jump(selected_device_slot);
 #else
-    io_mount_disk_image(selected_device_slot, m);
+    fuji_mount_disk_image(selected_device_slot, m);
 #endif
 }
 

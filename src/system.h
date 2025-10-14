@@ -3,6 +3,7 @@
 extern void system_boot(void);
 extern void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                               uint32_t selected_size, const char *path);
+extern void system_build_directory(unsigned char ds, unsigned long numBlocks, char *v);
 
 #ifdef _CMOC_VERSION_
 #define MAX_WIFI_NETWORKS 11

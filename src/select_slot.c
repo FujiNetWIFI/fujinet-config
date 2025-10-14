@@ -14,7 +14,6 @@ char mode=0;
 
 bool create=false;
 SSSubState ss_subState;
-char response[256];
 
 void select_slot_init()
 {
@@ -107,11 +106,11 @@ void select_slot_done()
     screen_select_slot_build_eos_directory();
     if (input_select_slot_build_eos_directory())
     {
-      io_mount_disk_image(selected_device_slot,2); // R/W
+      fuji_mount_disk_image(selected_device_slot,2); // R/W
       screen_select_slot_build_eos_directory_label();
       input_select_slot_build_eos_directory_label(filename);
       screen_select_slot_build_eos_directory_creating();
-      io_build_directory(selected_device_slot,selected_size,filename);
+      system_build_directory(selected_device_slot,selected_size,filename);
     }
 
     state=HOSTS_AND_DEVICES;
