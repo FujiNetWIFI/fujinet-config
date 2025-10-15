@@ -16,7 +16,7 @@
 #include "typedefs.h"
 #include "system.h"
 
-State state=HOSTS_AND_DEVICES;
+State state;
 bool backToFiles=false;
 bool backFromCopy=false;
 
