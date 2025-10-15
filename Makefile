@@ -72,15 +72,14 @@ LDFLAGS_EXTRA_APPLE2 = -C $(A2_LINKER_CFG)
 ########################################
 # Atari customization
 
-CFLAGS_EXTRA_ATARI = -DUSING_FUJINET_LIB
 EXTRA_INCLUDE_ATARI = src/atari/asminc
 
 ########################################
 # Commodore 64 customization
 
-CFLAGS_EXTRA_C64 = -DUSING_FUJINET_LIB -DUSE_EDITSTRING
+CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
 
 ########################################
-# Adam customization
+# MSX customization
 
-CFLAGS_EXTRA_ADAM = -DUSING_FUJINET_LIB
+LDFLAGS_EXTRA_MSXROM = -lndos -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app

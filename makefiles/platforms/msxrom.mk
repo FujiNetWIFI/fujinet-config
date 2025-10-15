@@ -7,7 +7,7 @@ include $(MWD)/toolchains/z88dk.mk
 
 MSXROM_FLAGS = +msx -subtype=rom
 CFLAGS += $(MSXROM_FLAGS)
-LDFLAGS += $(MSXROM_FLAGS) -lndos -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app
+LDFLAGS += $(MSXROM_FLAGS)
 
 r2r:: $(EXECUTABLE) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
 	make -f $(PLATFORM_MK) $(PLATFORM)/r2r-post
