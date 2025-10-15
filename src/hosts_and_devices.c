@@ -11,7 +11,7 @@
 #include "constants.h"
 #include "globals.h"
 
-HDSubState hd_subState=HD_HOSTS;
+HDSubState hd_subState;
 DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[8];
@@ -48,7 +48,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     screen_hosts_and_devices_host_slot_empty(i);
 
   // if host entry has changed, eject any disks that were mounted from the host slot since they won't be valid anymore.
-  if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot))) 
+  if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot)))
   {
     // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
@@ -59,7 +59,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
         hosts_and_devices_eject((unsigned char) o);
       }
     }
-  } 
+  }
 
   fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
   screen_hosts_and_devices_hosts();
@@ -68,7 +68,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
 void hosts_and_devices_hosts(void)
 {
   fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
- 
+
   if (!quick_boot)
   	screen_hosts_and_devices_hosts();
 
