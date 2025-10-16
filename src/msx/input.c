@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include "../input.h"
 #include "../globals.h"
+#include "../mount_and_boot.h"
 #include "../screen.h"
 #include "../set_wifi.h"
-#include "../die.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
@@ -20,6 +20,7 @@ extern unsigned short entry_timer;
 extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
+extern bool screen_should_be_cleared;
 
 /**
  * Get input from keyboard/joystick
@@ -164,6 +165,11 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_8:
     bar_jump(k-KEY_1);
     return HD_HOSTS;
+  case 'B':
+  case 'b':
+    screen_should_be_cleared = true;
+    mount_and_boot();
+    return HD_HOSTS;
   case KEY_TAB:
   case 'D':
   case 'd':
@@ -173,6 +179,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     selected_host_slot = bar_get();
     if (hostSlots[selected_host_slot][0] != 0)
     {
+      screen_should_be_cleared = true;
       strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
       state = SELECT_FILE;
       return HD_DONE;
@@ -183,6 +190,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_DONE;
   case 'C':
   case 'c':
+    screen_should_be_cleared = true;
     state = SHOW_INFO;
     return HD_DONE;
   case 'E':
@@ -212,17 +220,6 @@ HDSubState input_hosts_and_devices_devices(void)
       selected_device_slot=bar_get();
       // hosts_and_devices_long_filename();
       return HD_DEVICES;
-    // Memory Module 'M' -> '4'
-    case 'M':
-    case 'm':
-        k = KEY_4;
-        // fall throw
-    // Tape 'T' -> '3'
-    case 'T':
-    case 't':
-      if (k != KEY_4)
-        k = KEY_3;
-        // fall throw
     case KEY_1:
     case KEY_2:
     case KEY_3:
@@ -230,6 +227,10 @@ HDSubState input_hosts_and_devices_devices(void)
       bar_jump(k-KEY_1);
       selected_device_slot=bar_get();
       //hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case 'B':
+    case 'b':
+      mount_and_boot();
       return HD_DEVICES;
     case KEY_TAB:
     case 'H':
@@ -258,6 +259,7 @@ HDSubState input_hosts_and_devices_devices(void)
     //   return HD_CLEAR_ALL_DEVICES;
     case 'C':
     case 'c':
+      screen_should_be_cleared = true;
       state = SHOW_INFO;
       return HD_DONE;
     case KEY_K10:
@@ -467,13 +469,16 @@ SISubState input_show_info(void)
 	{
 	case 'c':
 	case 'C':
+	  screen_should_be_cleared = true;
 		state = SET_WIFI;
 		return SI_DONE;
 	case 'r':
 	case 'R':
+	  screen_should_be_cleared = true;
 		state = CONNECT_WIFI;
 		return SI_DONE;
 	default:
+	  screen_should_be_cleared = true;
 		state = HOSTS_AND_DEVICES;
 		return SI_DONE;
 	}
