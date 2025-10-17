@@ -48,53 +48,45 @@ static void input_clear_bottom(void)
 
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
 {
-  char i;
-  char a;
+  unsigned char key;
+  unsigned char pos=o;
 
-  i = o; // index into array and y-coordinate
-  // x += o;
+  c += o;
+  x += o;
 
-  cputs("\x1Bq"); // reverse off
-  // textcolor(EDITLINE_COLOR);
+  cursor(true);
+  input_clear_bottom();
 
-  while(1)
-  {
-    cursor_pos(x + i, y); // update cursor position
-    cursor(1);            // turn cursor on
-    gotoxy(x + i, y);     // update text position
+  gotoxy(x,y);
+  cursor_pos(x,y);
 
-    a = input();
-    switch (a)
-    {
-    case KEY_LEFT_ARROW:
-    case KEY_DELETE:
-      if (i>0)
-      {
-        c[--i] = '\0';
-        gotoxy(x + i, y);
-        cputc(' ');
-      }
-      break;
-    case KEY_RIGHT_ARROW:
-      break;
-    case KEY_RETURN:
-      c[i] = '\0';
-      cursor(0); // turn off cursor
-      return; // done
-    default:
-      if (i < len && a > 0x1F && a < 0x7F)
-      {
-        // hide cursor
-        cursor(0);
-        // draw character on cursor position
-        if (password)
-          cputc('*');
-        else
-          cputc(a);
-        c[i++] = a;
-      }
-    break;
+  while (key = input()) {
+    if (key == KEY_RETURN) {
+   	  cursor(false);
+   	  break;
+   	}
+    else if (key == KEY_BACKSPACE) {
+      if (pos > 0) {
+	      pos--;
+	      x--;
+	      c--;
+	      *c=0x00;
+	      putch(KEY_BACKSPACE);
+	      putch(KEY_SPACE);
+	      putch(KEY_BACKSPACE);
+	      cursor_pos(x,y);
+	    }
     }
+    else if (key > 0x1F && key < 0x7F) { // Printable characters
+  	  if (pos < len) {
+ 	      pos++;
+ 	      x++;
+ 	      *c=key;
+ 	      c++;
+ 	      putch(password ? 0x8B : key);
+ 	      cursor_pos(x,y);
+ 	    }
+  	}
   }
 }
 
@@ -131,12 +123,12 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_set_wifi_custom(char *c)
 {
-  // input_line(SCR_X0, STATUS_BAR + 1, 0, c, 31, false); // should be 32, but we are given small buffer
+  input_line(0,19,0,c,32,false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
-  // input_line(SCR_X0, STATUS_BAR + 1, 0, c, 40, true); // should be 64, but we do not handle so long text on screen ;-)
+  input_line(0,19,0,c,64,true);
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
@@ -271,20 +263,12 @@ HDSubState input_hosts_and_devices_devices(void)
 
 void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
-  // reverse pixels, set editline color
-  // screen_set_region(SCR_X0 + 1, SCR_Y0 + 1 + i, 39, 1);
-  // screen_fill_region(EDITLINE_PATTERN_ON);
-
-  // input_line(SCR_X0 + 3, SCR_Y0 + 1 + i, o, c, 31, false); // should be 32
-
-  // reverse pixels, set list color
-  // screen_set_region(SCR_X0 + 1, SCR_Y0 + 1 + i, 39, 1);
-  // screen_fill_region(EDITLINE_PATTERN_OFF);
+  input_line(1,i+1,o,c,32,false);
 }
 
 void input_line_filter(char *c)
 {
-  // input_line(SCR_X0, STATUS_BAR + 1, 0, c, 31, false); // should be 32
+  input_line(0,19,0,c,32,false);
 }
 
 SFSubState input_select_file_choose(void)
