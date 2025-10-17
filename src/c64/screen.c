@@ -522,4 +522,10 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 	gotoxy(2, 2 + hs);
 	cprintf("Empty");
 }
+
+void screen_end(void)
+{
+  return;
+}
+
 #endif /* BUILD_C64 */

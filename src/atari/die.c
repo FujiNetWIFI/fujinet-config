@@ -7,8 +7,8 @@
 
 #include <atari.h>
 #include <conio.h>
-#include "../io.h"
 #include "../die.h"
+#include "../system.h"
 
 /**
  * Stop, wait for keypress, then coldstart

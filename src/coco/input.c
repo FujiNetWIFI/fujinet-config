@@ -7,7 +7,6 @@
 #include <cmoc.h>
 #include <coco.h>
 #include "../input.h"
-#include "../io.h"
 #include "../screen.h"
 #include "../globals.h"
 #include "mount_and_boot.h"

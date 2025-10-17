@@ -7,7 +7,6 @@
 #include "compat.h"
 #include "screen.h"
 #include "globals.h"
-#include "io.h"
 
 extern char source_filename[128];
 
@@ -25,7 +24,12 @@ void perform_copy(void)
   
   screen_perform_copy((char *)hostSlots[copy_host_slot],(char *)source_path,(char *)hostSlots[selected_host_slot],(char *)path);
 
-  io_copy_file(copy_host_slot, selected_host_slot);
+  /**
+   * NOTE: On the Fuji, command 0xD8 (copy file) expects the slots to
+   * be 1-8, not 0-7 like most things.  That's why we add one, since
+   * config is tracking the slots as 0-7
+   */
+  fuji_copy_file(copy_host_slot + 1, selected_host_slot + 1, copySpec);
 
   copy_mode = false;
   

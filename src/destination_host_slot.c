@@ -7,7 +7,6 @@
 #include "typedefs.h"
 #include "screen.h"
 #include "input.h"
-#include "io.h"
 #include "globals.h"
 
 DHSubState dh_subState;
@@ -26,7 +25,7 @@ void destination_host_slot_init()
 
 void destination_host_slot_display()
 {
-  io_get_host_slots(&hostSlots[0]);
+  fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
   dh_subState=DH_CHOOSE;
 }

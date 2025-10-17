@@ -776,4 +776,10 @@ bool screen_mount_and_boot_lobby(void)
     return false;
   }
 }
+
+void screen_end(void)
+{
+  return;
+}
+
 #endif /* BUILD_APPLE2 */

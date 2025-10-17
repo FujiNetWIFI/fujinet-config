@@ -22,10 +22,10 @@ FUJINET_LIB_BASENAME := $(notdir $(FUJINET_LIB_PATH))
 FUJINET_LIB_SYMLINK  := libfujinet-$(CURRENT_TARGET)-$(FUJINET_LIB_VERSION).lib.a
 
 LIBS=-L $(FUJINET_LIB_VERSION_DIR) -l$(FUJINET_LIB_BASENAME)
-CFLAGS=-DUSING_FUJINET_LIB -I$(FUJINET_LIB_VERSION_DIR)
+CFLAGS=-DUSING_FUJINET_LIB -I$(FUJINET_LIB_VERSION_DIR) -Wno-assign-in-condition
 LIMITFLAGS=--org=0E00 --limit=7C00
 
-OBJS = check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o io.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
+OBJS = check_wifi.o connect_wifi.o destination_host_slot.o hosts_and_devices.o main.o perform_copy.o select_file.o select_slot.o set_wifi.o show_info.o bar.o die.o input.o system.o mount_and_boot.o screen.o strrchr.o strendswith.o pause.o
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(LIMITFLAGS) -o $@ $^ $(LIBS)
 

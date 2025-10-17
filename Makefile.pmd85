@@ -6,7 +6,7 @@ SRC_DIRS ?= ./src
 CC=zcc
 AS=zcc
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *_pmd85.asm)
+SRCS := $(wildcard $(SRC_DIRS)/*.c) $(wildcard $(SRC_DIRS)/pmd85/*.c)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 

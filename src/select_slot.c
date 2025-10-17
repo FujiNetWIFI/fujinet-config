@@ -7,11 +7,8 @@
 #include "constants.h"
 #include "compat.h"
 #include "screen.h"
-#include "io.h"
 #include "input.h"
-
-extern DeviceSlot deviceSlots[8];
-extern bool quick_boot;
+#include "system.h"
 
 char mode=0;
 
@@ -41,19 +38,20 @@ void select_slot_display()
     }
   else
     {
-      io_open_directory(selected_host_slot,path,filter);
+      fuji_open_directory2(selected_host_slot,path,filter);
 
-      io_set_directory_position(pos);
+      fuji_set_directory_position(pos);
 
-      io_get_device_slots(&deviceSlots[0]);
+      fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 
 #ifdef BUILD_PMD85
-      screen_select_slot(io_read_directory(120,0x80)); // up to 3 lines of 40 chars each
+      fuji_read_directory(120, 0x80, response); // up to 3 lines of 40 chars each
 #else
-      screen_select_slot(io_read_directory(49,0x80));
+      fuji_read_directory(49, 0x80, response);
 #endif
+      screen_select_slot(response);
 
-      io_close_directory();
+      fuji_close_directory();
     }
 
   ss_subState=SS_CHOOSE;
@@ -61,10 +59,10 @@ void select_slot_display()
 
 void select_slot_eject(unsigned char ds)
 {
-  io_umount_disk_image(ds);
+  fuji_unmount_disk_image(ds);
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
-  io_put_device_slots(&deviceSlots[0]);
+  fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
   screen_select_slot_eject(ds);
 }
 
@@ -91,28 +89,28 @@ void select_slot_done()
   {
     create=false; // we're done with this until next time.
     screen_select_file_new_creating();
-    io_create_new(selected_host_slot,selected_device_slot,selected_size,path);
+    system_create_new(selected_host_slot,selected_device_slot,selected_size,path);
     memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
     // why hardcoded to 2 here?
-    io_set_device_filename(selected_device_slot, selected_host_slot, 2, path);
+    fuji_set_device_filename(2, selected_host_slot, selected_device_slot, path);
 #else
-    io_put_device_slots(&deviceSlots[0]);
-    io_set_device_filename(selected_device_slot, path);
+    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+    fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, path);
 #endif
 
 #ifdef BUILD_ADAM
     screen_select_slot_build_eos_directory();
     if (input_select_slot_build_eos_directory())
     {
-      io_mount_disk_image(selected_device_slot,2); // R/W
+      fuji_mount_disk_image(selected_device_slot,2); // R/W
       screen_select_slot_build_eos_directory_label();
       input_select_slot_build_eos_directory_label(filename);
       screen_select_slot_build_eos_directory_creating();
-      io_build_directory(selected_device_slot,selected_size,filename);
+      system_build_directory(selected_device_slot,selected_size,filename);
     }
 
     state=HOSTS_AND_DEVICES;
@@ -123,26 +121,24 @@ void select_slot_done()
   {
     strcat(filename,path);
 
-    io_open_directory(selected_host_slot,path,filter);
+    fuji_open_directory2(selected_host_slot,path,filter);
 
-    io_set_directory_position(pos);
+    fuji_set_directory_position(pos);
 
-    strcat(filename,io_read_directory(255-(unsigned char)strlen(path),0));
+    fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+    strcat(filename, response);
 
-#if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
-    io_set_device_filename(selected_device_slot, selected_host_slot, mode, filename);
-#else
-    io_set_device_filename(selected_device_slot,filename);
-#endif
+    fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
-    io_set_directory_position(pos);
+    fuji_set_directory_position(pos);
 
-    memcpy(deviceSlots[selected_device_slot].file,io_read_directory(DIR_MAX_LEN,0),DIR_MAX_LEN);
+    fuji_read_directory(DIR_MAX_LEN, 0, response);
+    memcpy(deviceSlots[selected_device_slot].file, response, DIR_MAX_LEN);
     deviceSlots[selected_device_slot].mode=mode;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #ifndef BUILD_ATARI
-    io_put_device_slots(&deviceSlots[0]);
+    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 #endif
 
 #ifdef BUILD_APPLE2
@@ -165,7 +161,7 @@ void select_slot_done()
       io_put_device_slots(&deviceSlots[0]);
     }*/
 #endif
-    io_close_directory();
+    fuji_close_directory();
   }
 
   if (!quick_boot)

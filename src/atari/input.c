@@ -11,7 +11,6 @@
 #include <string.h>
 #include <peekpoke.h>
 #include "../input.h"
-#include "../io.h"
 #include "atari_screen.h"
 #include "../globals.h"
 #include "mount_and_boot.h"
@@ -19,6 +18,7 @@
 #include "../select_file.h"
 #include "../set_wifi.h"
 #include "../constants.h"
+#include "../system.h"
 
 unsigned char selected_network;
 extern bool copy_mode;

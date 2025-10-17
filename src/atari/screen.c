@@ -16,7 +16,6 @@
 #include <conio.h>
 #include <stdint.h>
 #include <peekpoke.h>
-#include "../io.h"
 #include "../globals.h"
 #include "../input.h"
 #include "../constants.h"
@@ -572,7 +571,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *, const bool *
 
   // Get full filename for device slot 8
   if (deviceSlots[7].file[0] != 0x00)
-    io_get_filename_for_device_slot(7, fn);
+    fuji_get_device_filename(7, fn);
 
   // Display device slots
   for (slotNum = 0; slotNum < NUM_DEVICE_SLOTS; slotNum++)
@@ -650,6 +649,15 @@ void screen_hosts_and_devices_long_filename(const char *)
 
 void screen_init(void)
 {
+  OS.noclik = 0xFF;
+  OS.shflok = 0;
+  OS.color0 = 0x9f;
+  OS.color1 = 0x0f;
+  OS.color2 = 0x90;
+  OS.color4 = 0x90;
+  OS.coldst = 1;
+  OS.sdmctl = 0; // Turn off screen
+
   memcpy((void *)DISPLAY_LIST, &config_dlist, sizeof(config_dlist)); // copy display list to $0600
   OS.sdlst = (void *)DISPLAY_LIST;                                   // and use it.
   video_ptr = (unsigned char *)(DISPLAY_MEMORY);                     // assign the value of DISPLAY_MEMORY to video_ptr
@@ -762,6 +770,11 @@ void screen_dlist_hosts_and_devices(void)
   POKE(DISPLAY_LIST + 0x0b, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x1b, DL_CHR40x8x1);
   POKE(DISPLAY_LIST + 0x1c, DL_CHR40x8x1);
+}
+
+void screen_end(void)
+{
+  return;
 }
 
 #ifdef DEBUG
