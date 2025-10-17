@@ -13,6 +13,7 @@
 #define KEY_RETURN       KEY_EOL
 #define KEY_ESCAPE       0x1B
 #define KEY_SPACE        0x20
+#define KEY_BACKSPACE    0x08
 #define KEY_K0           0x1B
 #define KEY_K1           0x80
 #define KEY_K2           0x81

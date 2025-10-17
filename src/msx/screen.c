@@ -252,13 +252,13 @@ void screen_set_wifi_select_network(unsigned char nn)
 void screen_set_wifi_custom(void)
 {
   show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-  show_status("  ENTER NAME OF HIDDEN NETWORK");
+  show_status("Enter network name");
 }
 
 void screen_set_wifi_password(void)
 {
   show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-  show_status("  ENTER NETWORK PASSWORD\n  AND PRESS [RETURN]");
+  show_status("Enter network password and press RETURN");
 }
 
 
@@ -422,15 +422,15 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
   for (char i=0;i<MAX_DISK_SLOTS-2;i++)
   {
-      // textcolor(15);
-      gotoxy(0,i+y+1);
-      textcolor(WHITE);
-      textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
-      cputc('A'+i);
-      // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
-      textcolor(BLACK);
-      textbackground(WHITE);
-      cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // textcolor(15);
+    gotoxy(0,i+y+1);
+    textcolor(WHITE);
+    textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
+    cputc('A'+i);
+    // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
+    textcolor(BLACK);
+    textbackground(WHITE);
+    cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
   }
 
   gotoxy(0,y+8); cprintf("%32s","Cartridges ");
@@ -440,15 +440,15 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
   for (char i=0;i<2;i++)
   {
-      // textcolor(15);
-      gotoxy(0,i+y+9);
-      textcolor(WHITE);
-      textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
-      cputc('1'+i);
-      // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
-      textcolor(BLACK);
-      textbackground(WHITE);
-      cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i+6].hostSlot,e[i+6],d[i+6].file));
+    // textcolor(15);
+    gotoxy(0,i+y+9);
+    textcolor(WHITE);
+    textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
+    cputc('1'+i);
+    // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
+    textcolor(BLACK);
+    textbackground(WHITE);
+    cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i+6].hostSlot,e[i+6],d[i+6].file));
   }
 }
 #endif
@@ -468,24 +468,38 @@ void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
 
 void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
-
+  menu_clear();
+  show_status("Enter new host name:");
+  textcolor(BLACK);
+  textbackground(WHITE);
 }
 
 
 void screen_hosts_and_devices_eject(uint8_t ds)
 {
-
+  // vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
+  textcolor(BLACK);
+  textbackground(WHITE);
+  gotoxy(1,11+ds); cprintf(empty);
+  bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
-
+  textcolor(BLACK);
+  textbackground(WHITE);
+  gotoxy(1,1+hs); cprintf(empty);
 }
 
 
 void screen_hosts_and_devices_long_filename(char *f)
 {
-
+  // vdp_vfill(0x1100,0x00,1024); // Clear area first
+  if (strlen(f)>31)
+  {
+    gotoxy(0,17);
+    cprintf("%s",f);
+  }
 }
 
 
