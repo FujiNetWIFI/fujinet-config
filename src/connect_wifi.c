@@ -31,7 +31,7 @@ void connect_wifi(void)
 			return;
 		}
 #endif /* _CMOC_VERSION_ */
-		
+
 		fuji_get_wifi_status(&s);
 
 		switch (s)
@@ -44,7 +44,7 @@ void connect_wifi(void)
 			fuji_get_ssid(&nc);
 			screen_error("CONNECTION SUCCESS!");
 			state = HOSTS_AND_DEVICES;
-#ifdef BUILD_ADAM
+#if defined(BUILD_ADAM) || defined(BUILD_MSX)
                         screen_should_be_cleared=true;
 #endif
 			pause(60);
