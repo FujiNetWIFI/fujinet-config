@@ -201,7 +201,7 @@ class LibLocator:
         return
       if self.skipIfMissing:
         exit(0)
-      error_exit(f"No library found for \"{self.PLATFORM}\"")
+      #error_exit(f"No library found for \"{self.PLATFORM}\"")
 
     # No version was specified, so any version is fine
     if self.MV.FUJINET_LIB_VERSION:
@@ -316,8 +316,9 @@ class LibLocator:
       if os.path.exists(os.path.join(idir, "fujinet-fuji.h")):
         self.MV.FUJINET_LIB_INCLUDE = idir
         return
+    if self.skipIfMissing:
+      exit(0)
     raise ValueError("Unable to find include directory", self.MV.FUJINET_LIB_DIR)
-
     return
 
   def printMakeVariables(self):

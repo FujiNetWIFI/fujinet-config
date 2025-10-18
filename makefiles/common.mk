@@ -10,6 +10,10 @@ $(info Building for PLATFORM=$(PLATFORM))
 
 include $(MWD)/../Makefile
 
+# Add GIT_VERSION macro define to CFLAGS, includes tag if available,
+# short commit hash, appends '*' if changes haven't been commited
+CFLAGS += -DGIT_VERSION='\"$(shell git rev-parse --short HEAD)$(shell git status --porcelain | grep -q '^[ MADRCU]' && echo '*')\"'
+
 IS_LIBRARY := $(if $(filter %.lib,$(PRODUCT)),1,0)
 ifeq ($(IS_LIBRARY),1)
   PRODUCT_BASE = $(basename $(PRODUCT))
@@ -31,6 +35,10 @@ endif
 
 ifneq ($(strip $(LD_$(TOOLCHAIN_UC))),)
 LD_DEFAULT = $(LD_$(TOOLCHAIN_UC))
+endif
+
+ifneq ($(strip $(PC_$(TOOLCHAIN_UC))),)
+PC_DEFAULT = $(PC_$(TOOLCHAIN_UC))
 endif
 
 R2R_PD := $(R2R_DIR)/$(PLATFORM)
@@ -60,16 +68,16 @@ SRC_DIRS_EXPANDED := $(call expand_platform_pattern,$(SRC_DIRS))
 CFILES := $(foreach dir,$(SRC_DIRS_EXPANDED),$(wildcard $(dir)/*.c))
 AFILES := $(foreach dir,$(SRC_DIRS_EXPANDED),$(wildcard $(dir)/*.s)) \
           $(foreach dir,$(SRC_DIRS_EXPANDED),$(wildcard $(dir)/*.asm))
+PFILES := $(foreach dir,$(SRC_DIRS_EXPANDED),$(wildcard $(dir)/*.pas))
 
 # Need two steps: AFILES may be .s or .asm; `make` swaps one suffix at a time
 NORM_AFILES := $(AFILES:.asm=.s)
-OBJS := $(addprefix $(OBJ_DIR)/, $(notdir $(CFILES:.c=.o) $(NORM_AFILES:.s=.o)))
+OBJS := $(addprefix $(OBJ_DIR)/, $(notdir $(CFILES:.c=.o) $(NORM_AFILES:.s=.o) $(PFILES:.pas=.o)))
 
 $(BUILD_EXEC):: $(OBJS) $(EXECUTABLE_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
 	$(call link-bin,$@,$(OBJS))
 	@$(MAKE) -f $(PLATFORM_MK) $(PLATFORM)/executable-post
 
-$(info LIBRARY=$(BUILD_LIB))
 $(BUILD_LIB):: $(OBJS) $(LIBRARY_EXTRA_DEPS_$(PLATFORM_UC)) | $(R2R_PD)
 	$(call link-lib,$@,$(OBJS))
 	@$(MAKE) -f $(PLATFORM_MK) $(PLATFORM)/library-post
@@ -85,10 +93,13 @@ $(OBJ_DIR)/%.o: %.s | $(OBJ_DIR)
 	$(call assemble,$@,$<)
 $(OBJ_DIR)/%.o: %.asm | $(OBJ_DIR)
 	$(call assemble,$@,$<)
+$(OBJ_DIR)/%.o: %.pas | $(OBJ_DIR)
+	$(call compile-pas,$@,$<)
 
 vpath %.c $(SRC_DIRS_EXPANDED)
 vpath %.s $(SRC_DIRS_EXPANDED)
 vpath %.asm $(SRC_DIRS_EXPANDED)
+vpath %.pas $(SRC_DIRS_EXPANDED)
 
 .PHONY: clean debug r2r $(PLATFORM)/r2r disk $(PLATFORM)/disk
 

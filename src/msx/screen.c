@@ -538,6 +538,7 @@ void screen_show_info(bool printerEnabled,AdapterConfig* ac)
   cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","MAC:",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","BSSID:",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
   cprintf("%10s%s\n","FNVER:",ac->fn_version);
+  cprintf("%10s%s\n","CONFIG:",GIT_VERSION);
 
   vdp_vfill(MODE2_ATTR+0x0700,0xF4,256);
   vdp_vfill(MODE2_ATTR+0x0800,0x1F,256);

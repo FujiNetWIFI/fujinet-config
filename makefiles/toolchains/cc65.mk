@@ -1,4 +1,4 @@
-CC_DEFAULT ?= cl65 --color off
+CC_DEFAULT ?= cl65
 AS_DEFAULT ?= $(CC_DEFAULT)
 LD_DEFAULT ?= $(CC_DEFAULT)
 AR_DEFAULT ?= ar65
