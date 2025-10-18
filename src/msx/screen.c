@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <arch/z80.h>
 #include <video/tms99x8.h>
 #include <graphics.h>
 #include <conio.h>
@@ -84,6 +85,10 @@ bool any_slot_occupied()
     occupied = deviceSlots[i].file[0] != 0x00;
 
   return occupied;
+}
+
+void keyboard_click(bool on) {
+  z80_bpoke(0xF3DB, on ? 1 : 0);
 }
 
 void show_status(char *msg)
@@ -173,6 +178,7 @@ void screen_init(void)
   void *param = &udg;
   console_ioctl(IOCTL_GENCON_SET_UDGS, &param);
   set_mode_default();
+  keyboard_click(false);
   // show_status("Welcome to FujiNet");
 }
 
