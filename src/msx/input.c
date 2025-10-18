@@ -123,12 +123,12 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_set_wifi_custom(char *c)
 {
-  input_line(0,19,0,c,32,false);
+  input_line(0,22,0,c,32,false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
-  input_line(0,19,0,c,64,true);
+  input_line(0,22,0,c,64,true);
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
@@ -216,6 +216,10 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_2:
     case KEY_3:
     case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
       selected_device_slot=bar_get();
       //hosts_and_devices_long_filename();
@@ -268,7 +272,7 @@ void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char
 
 void input_line_filter(char *c)
 {
-  input_line(0,19,0,c,32,false);
+  input_line(0,22,0,c,32,false);
 }
 
 SFSubState input_select_file_choose(void)
@@ -294,6 +298,8 @@ SFSubState input_select_file_choose(void)
     bar_down();
     select_display_long_filename();
     break;
+  case 'M':
+  case 'm':
 	case KEY_RETURN:
 		pos += bar_get();
 		entryType = select_file_entry_type();
@@ -313,46 +319,71 @@ SFSubState input_select_file_choose(void)
 	case 'F':
 	case 'f':
 		return SF_FILTER;
-	// case 'N':
-	// case 'n':
-	// 	return SF_NEW;
-	// case 'C':
-	// case 'c':
-	// 	pos += bar_get();
-	// 	select_file_set_source_filename();
-	// 	return SF_COPY;
-	case ',':
-	case '<':
-		if (pos > 0)
-			return SF_PREV_PAGE;
-    break;
-	case '.':
-	case '>':
-		if (dir_eof == false)
-			return SF_NEXT_PAGE;
-    break;
+	case 'N':
+	case 'n':
+		return SF_NEW;
+	case 'C':
+	case 'c':
+		pos += bar_get();
+		select_file_set_source_filename();
+		return SF_COPY;
+	// case ',':
+	// case '<':
+	// 	if (pos > 0)
+	// 		return SF_PREV_PAGE;
+ //    break;
+	// case '.':
+	// case '>':
+	// 	if (dir_eof == false)
+	// 		return SF_NEXT_PAGE;
+ //    break;
 	}
   return SF_CHOOSE;
 }
 
 unsigned char input_select_file_new_type(void)
 {
+  unsigned char k = input();
+  // TODO: Actually define disk types
+	switch (k)
+	{
+	case '1':
+	  return 1;
+	case '2':
+	  return 2;
+	case 'B':
+	case 'b':
+	  return 3;
+	}
   return 0;
 }
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
+  unsigned char k = input();
+  // TODO: Actually define disk types
+	switch (k)
+	{
+	case '3':
+	  return 360;
+	case '7':
+	  return 720;
+	case 'C':
+	case 'c':
+	  return 1;
+	}
   return 0;
 }
 
 unsigned long input_select_file_new_custom(void)
 {
-  return 0;
+  char s[9];
+  input_line(0,22,0,s,8,false);
 }
 
 void input_select_file_new_name(char *c)
 {
-  // input_line(SCR_X0, SCR_Y0 + 19, 0, c, 40, false); // should be 255(?), but we do not handle multiline strings yet
+  input_line(0,22,0,c,32,false);
 }
 
 SSSubState input_select_slot_choose(void)
@@ -376,28 +407,20 @@ SSSubState input_select_slot_choose(void)
     case KEY_RIGHT_ARROW:
       bar_down();
       return SS_CHOOSE;
-    // Memory Module 'M' -> '4'
-    case 'M':
-    case 'm':
-        k = KEY_4;
-        // fall throw
-    // Tape 'T' -> '3'
-    case 'T':
-    case 't':
-      if (k != KEY_4)
-        k = KEY_3;
-        // fall throw
     case KEY_1:
     case KEY_2:
     case KEY_3:
     case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
-	  return SS_CHOOSE;
-    // case KEY_SMART_IV:
-    case 'E':
-    case 'e':
-      select_slot_eject(bar_get());
       return SS_CHOOSE;
+    // case 'E':
+    // case 'e':
+    //   select_slot_eject(bar_get());
+    //   return SS_CHOOSE;
     case 'R':
     case 'r':
     case KEY_RETURN:

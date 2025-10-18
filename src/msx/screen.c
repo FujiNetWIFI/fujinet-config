@@ -91,9 +91,15 @@ void keyboard_click(bool on) {
   z80_bpoke(0xF3DB, on ? 1 : 0);
 }
 
+void clear_status(void)
+{
+  vdp_vfill(0x1400, 0x00, 512);
+}
+
 void show_status(char *msg)
 {
-  vdp_vfill(0x1400, 0x00, 256);
+  style_white_on_blue();
+  clear_status();
   gotoxy(0, 20);
   cprintf(msg);
 }
@@ -164,6 +170,11 @@ void show_menu(char *f1_key, char *f1_lbl,
     gotoxy(x, 23);
     cputs(f5_lbl);
   }
+}
+
+void hide_menu(void)
+{
+  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 }
 
 void set_mode_default(void)
@@ -257,14 +268,14 @@ void screen_set_wifi_select_network(unsigned char nn)
 
 void screen_set_wifi_custom(void)
 {
-  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-  show_status("Enter network name");
+  hide_menu();
+  show_status("        Enter network name");
 }
 
 void screen_set_wifi_password(void)
 {
-  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-  show_status("Enter network password and press RETURN");
+  hide_menu();
+  show_status("     Enter network password");
 }
 
 
@@ -273,8 +284,8 @@ void screen_connect_wifi(NetConfig *nc)
   vdp_noblank();
   clrscr();
 
-  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-  sprintf(response,"  CONNECTING TO NETWORK\n  %s",nc->ssid);
+  hide_menu();
+  sprintf(response,"     Connecting to network\n  %s",nc->ssid);
   show_status(response);
 
   vdp_blank();
@@ -296,8 +307,9 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  show_menu("b","boot","e","edit","d","disks","l"," lobby","c"," config");
-  // show_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
+  show_menu("b","boot","e","edit","d","disks", NULL,NULL, "c"," config");
+  // show_menu("b","boot","e","edit","d","disks","l"," lobby","c"," config");
+  clear_status();
   bar_clear(false);
   bar_set(0,1,8,selected_host_slot);
 }
@@ -305,7 +317,7 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
   // show_menu("b","boot","e","eject","h","hosts","o","on/off","c","config");
-  show_menu("b","boot","e","eject","h","hosts", "r","  r/w  ", "c","config");
+  show_menu("b","boot","e","eject","h","hosts", "r","  r/w", "c","config");
   bar_clear(false);
   bar_set(10,1,8,selected_device_slot);
 }
@@ -462,7 +474,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
 
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+  hide_menu();
   show_status("  CLEARING ALL SLOTS...");
 }
 
@@ -475,7 +487,8 @@ void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
 void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
   menu_clear();
-  show_status("Enter new host name:");
+  // show_status("      Enter new host name\n   ESC cancel   RETURN save");
+  show_status("      Enter new host name");
   textcolor(BLACK);
   textbackground(WHITE);
 }
@@ -556,32 +569,33 @@ void screen_select_file(void)
   textbackground(BLACK);
   gotoxy(0,0);  cprintf("%32s","Select file ");
 
-  vdp_vfill(MODE2_ATTR,0xF1,256); // white text, black bg
-  vdp_vfill(MODE2_ATTR+0x0100,0x1F,0x800); // black text, white bg
+  vdp_vfill(MODE2_ATTR+0x000,0xF1,0x100); // white text, black bg
+  vdp_vfill(MODE2_ATTR+0x100,0xF5,0x100); // white text, light blue bg
+  vdp_vfill(MODE2_ATTR+0x200,0x1F,0x1000); // black text, white bg
 
-  menu_clear();
-  show_status("  OPENING...");
+  hide_menu();
+  show_status("           Opening...");
 
   vdp_blank();
 }
 
 void screen_select_file_display(char *p, char *f)
 {
-// Title
   textcolor(WHITE);
   textbackground(BLACK);
   gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
 
-  vdp_vfill(MODE2_ATTR+0xF1,0xF1,0x200);
-  vdp_vfill(MODE2_ATTR+0x0200,0x1F,0x0800);
+  // vdp_vfill(MODE2_ATTR,0xF1,0x100);
+  // vdp_vfill(MODE2_ATTR+0x100,0xF5,0x100); // white text, light blue bg
+  // vdp_vfill(MODE2_ATTR+0x0200,0x1F,0xF00);
 
   gotoxy(0,1);
-  textbackground(WHITE);
-  textcolor(BLACK);
+  textbackground(LIGHTBLUE);
+  textcolor(WHITE);
   if (f[0]==0x00)
     cprintf("%32s",p);
   else
-    cprintf("%22s|%8s|",p,f);
+    cprintf("%-8s|%24s",p,f);
 }
 
 void screen_select_file_display_long_filename(char *e)
@@ -598,24 +612,27 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_prev(void)
 {
+  textcolor(BLACK);
+  textbackground(WHITE);
   // vdp_color(1,5,7);
-  gotoxy(0,2); cprintf("%32s","[...]");
+  gotoxy(0,2); cprintf("%32s","...");
 }
 
 void screen_select_file_next(void)
 {
+  textcolor(BLACK);
+  textbackground(WHITE);
   // vdp_color(1,5,7);
-  gotoxy(0,18); cprintf("%32s","[...]");
+  gotoxy(0,17); cprintf("%32s","...");
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
 {
   gotoxy(0,y+2);
-  // vdp_color(15,5,7);
-  cprintf("%c%c",*e++,*e++);
-  // *e++;*e++;
-  // vdp_color(1,15,7);
-  cprintf("%-30s",e);
+  textcolor(BLACK);
+  textbackground(WHITE);
+  // cprintf("%c%c",*e++,*e++);
+  cprintf("%-32s",e);
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -623,81 +640,129 @@ void screen_select_file_choose(char visibleEntries)
   bool occupied = any_slot_occupied();
 
   screen_should_be_cleared = true;
-  bar_set(2,2,visibleEntries,0); // TODO: Handle previous
+  bar_set(1,2,visibleEntries,0); // TODO: Handle previous
 
   if (copy_mode == true) {
-    // smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", " PERFORM\n  COPY");
-    show_menu("f","filter", "c","copy", NULL,NULL, NULL,NULL, NULL,NULL);
-    show_status("Select destination");
+    show_status("       Select destination");
+    show_menu("c","copy", NULL,NULL, NULL,NULL, NULL,NULL, NULL,NULL);
   }
   else {
-    // smartkeys_display(NULL,NULL,NULL,(strcmp(path,"/") == 0) ? NULL: "   UP"," FILTER", occupied ? "  BOOT" : "  QUICK\n  BOOT");
-    show_menu("f","filter", "m","mount", "b","boot", NULL,NULL, NULL,NULL);
-    show_status("Select file to mount");
+    show_status("     Select a file to mount");
+    show_menu("m","mount", "b"," boot", "c"," copy", "n","  new", "f"," filter");
   }
 }
 
 void screen_select_file_filter(void)
 {
-
+  show_status("          Enter filter");
+  hide_menu();
 }
 
 void screen_select_file_new_type(void)
 {
-
+  show_status("       What type of disk?");
+  show_menu("1","MSX-DOS 1", "2"," MSX-DOS 2", NULL,NULL, NULL,NULL, "b","blank");
 }
 
 void screen_select_file_new_size(unsigned char k)
 {
-
+  show_status("           Disk size?");
+  show_menu("3","360K", "7","720K", NULL,NULL, NULL,NULL, "c","custom");
 }
 
 void screen_select_file_new_custom(void)
 {
-
+  show_status("        Enter disk size");
+  hide_menu();
 }
 
 void screen_select_file_new_name(void)
 {
-
+  show_status("      Enter disk filename");
+  hide_menu();
 }
 
 void screen_select_file_new_creating(void)
 {
-
+  show_status("        Creating disk...");
+  hide_menu();
 }
 
 
 void screen_select_slot(char *e)
 {
+  vdp_noblank();
+  style_white_on_blue();
+  clrscr();
 
+  // TODO: Also need to display filename?
+
+  screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
+
+  bar_set(0,1,8,0);
+
+  vdp_blank();
 }
 
 void screen_select_slot_choose(void)
 {
-
+  show_status("     Choose where to mount");
+  if (create) {
+    show_menu("r","read-only", NULL,NULL, NULL,NULL, NULL,NULL, "w","read/write");
+  }
+  else {
+    hide_menu();
+  }
 }
 
 void screen_select_slot_eject(unsigned char ds)
 {
-
+  textcolor(BLACK);
+  textbackground(WHITE);
+  gotoxy(1,1+ds); cprintf("%s",empty);
+  bar_jump(bar_get());
 }
 
 
 void screen_destination_host_slot(char *h, char *p)
 {
+  vdp_noblank();
 
+  style_white_on_blue();
+  clrscr();
+
+  gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
+  gotoxy(0,11); cprintf("%32s",h);
+  // vdp_color(1,15,7);
+  // gotoxy(0,12); cprintf("%-128s",p);
+
+  vdp_blank();
 }
 
 void screen_destination_host_slot_choose(void)
 {
-
+  show_status("      Choose a destination");
+  hide_menu();
 }
 
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+  vdp_noblank();
 
+  style_white_on_blue();
+  clrscr();
+
+  show_status("        Copying file...");
+  hide_menu();
+
+  gotoxy(0,0); vdp_color(15,4,7); cprintf("%32s","COPYING FILE FROM:");
+  gotoxy(0,1); cprintf("%32s",sh);
+  gotoxy(0,2); vdp_color(1,15,7); cprintf("%-128s",p);
+  gotoxy(0,6); vdp_color(15,4,7); cprintf("%32s",dh);
+  gotoxy(0,7); vdp_color(1,15,7); cprintf("%-128s",dp);
+
+  vdp_blank();
 }
 
 void screen_mount_and_boot()
