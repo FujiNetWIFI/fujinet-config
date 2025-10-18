@@ -1,39 +1,22 @@
 /**
- * FujiNet Config for MSX
- *
  * Cursor routines
  */
 
+#include <video/tms99x8.h>
 #include "cursor.h"
 
-static unsigned char cursor_x = 0, cursor_y = 0;
-static bool cursor_visible = false;
+static const unsigned char blank[8] =
+  {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+
+static const unsigned char _cursor[8] =
+  {0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF};
 
 void cursor(bool t)
 {
-    if (cursor_visible == t)
-        return;
-
-    cursor_visible = t;
-    // screen_set_region(cursor_x, cursor_y, 1, 1);
-    if (cursor_visible)
-      ;
-        // screen_fill_region(CURSOR_PATTERN_ON);
-    else
-    ;
-        // screen_fill_region(CURSOR_PATTERN_OFF);
+  vdp_set_sprite_8(0,t ? _cursor : blank);
 }
 
 void cursor_pos(unsigned char x, unsigned char y)
 {
-    bool on = cursor_visible;
-    // remove cursor from old position
-    if (on)
-        cursor(0);
-    // set new position
-    cursor_x = x;
-    cursor_y = y;
-    // draw cursor on new position
-    if (on)
-        cursor(1);
+  vdp_put_sprite_8(0,x<<3,y<<3,0,VDP_INK_CYAN);
 }
