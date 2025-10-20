@@ -26,6 +26,7 @@ typedef enum
 } _screen;
 
 void screen_init(void);
+void screen_end(void);
 void screen_error(const char *s);
 
 void screen_putlcc(char c);

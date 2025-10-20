@@ -4,22 +4,22 @@
 
 #include "set_wifi.h"
 #include "die.h"
-#include "io.h"
 #include "screen.h"
 #include "input.h"
 #include "globals.h"
 #include "compat.h"
+#include "system.h"
 
 WSSubState ws_subState;
-
 NetConfig nc;
-
-unsigned char numNetworks;
+uint8_t numNetworks;
+AdapterConfigExtended adapterConfigExt;
+static SSIDInfo ssidInfo;
 
 void set_wifi_set_ssid(uint_fast8_t i)
 {
-  SSIDInfo *s = io_get_scan_result(i);
-  memcpy(nc.ssid,s->ssid,32);
+  fuji_get_scan_result((uint8_t) i, &ssidInfo);
+  memcpy(nc.ssid, ssidInfo.ssid, 32);
 }
 
 void set_wifi_select(void)
@@ -50,16 +50,16 @@ void set_wifi_scan(void)
 {
   char i;
   unsigned char valid_networks = 0;
-  SSIDInfo *ssid_info;
 
-  screen_set_wifi_extended(io_get_adapter_config_extended());
+  fuji_get_adapter_config_extended(&adapterConfigExt);
+  screen_set_wifi_extended(&adapterConfigExt);
 
-  numNetworks = io_scan_for_networks();
+  fuji_scan_for_networks(&numNetworks);
 
-  if (numNetworks > 16)
-	  numNetworks = 16;
+  if (numNetworks > MAX_WIFI_NETWORKS)
+	  numNetworks = MAX_WIFI_NETWORKS;
 
-  if (io_error())
+  if (fuji_error())
   {
 	  screen_error("COULD NOT WS_SCAN NETWORKS");
 	  die(); // to do retry or something instead
@@ -67,10 +67,10 @@ void set_wifi_scan(void)
 
   for (i = 0; i < numNetworks; i++)
   {
-    ssid_info = io_get_scan_result(i);
-    if (ssid_info != NULL && ssid_info->ssid != NULL & strlen(ssid_info->ssid) != 0)
+    fuji_get_scan_result(i, &ssidInfo);
+    if (strlen(ssidInfo.ssid) != 0)
     {
-      screen_set_wifi_display_ssid(i, ssid_info);
+      screen_set_wifi_display_ssid(i, &ssidInfo);
       valid_networks++;
     }
     else
@@ -89,7 +89,7 @@ void set_wifi_done(void)
 #ifdef _CMOC_VERSION_  
   locate(0,14);
 #endif
-  int result = io_set_ssid(&nc);
+  int result = fuji_set_ssid(&nc);
   // always (good or bad) go to connect_wifi.
   // I had used result to only show this when we have good return, but
   // the connect_wifi shows error messages for us and jumps back to set wifi

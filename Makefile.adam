@@ -14,7 +14,7 @@ ADDL_LIB2 := smartkeys.lib
 CC=zcc
 AS=zcc
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *_adam.asm)
+SRCS := $(wildcard $(SRC_DIRS)/*.c) $(wildcard $(SRC_DIRS)/adam/*.c)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 

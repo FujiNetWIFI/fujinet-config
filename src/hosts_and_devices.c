@@ -9,7 +9,6 @@
 #include "compat.h"
 #include "input.h"
 #include "constants.h"
-#include "io.h"
 #include "globals.h"
 
 HDSubState hd_subState=HD_HOSTS;
@@ -62,13 +61,13 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     }
   } 
 
-  io_put_host_slots(&hostSlots[0]);
+  fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
   screen_hosts_and_devices_hosts();
 }
 
 void hosts_and_devices_hosts(void)
 {
-  io_update_devices_enabled(&deviceEnabled[0]);
+  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
  
   if (!quick_boot)
   	screen_hosts_and_devices_hosts();
@@ -79,19 +78,18 @@ void hosts_and_devices_hosts(void)
 
 void hosts_and_devices_long_filename(void)
 {
-  const char *f = io_get_device_filename(selected_device_slot);
-
-  screen_hosts_and_devices_long_filename(f);
+  fuji_get_device_filename(selected_device_slot, response);
+  screen_hosts_and_devices_long_filename(response);
 }
 
 void hosts_and_devices_eject(unsigned char ds)
 {
-  io_umount_disk_image(ds);
+  fuji_unmount_disk_image(ds);
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
   deviceSlots[ds].mode = 0;
-  io_put_device_slots(&deviceSlots[0]);
-  io_get_device_slots(&deviceSlots[0]);
+  fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_eject(ds);
   hosts_and_devices_long_filename();
 }
@@ -113,7 +111,7 @@ void hosts_and_devices_devices(void)
 {
   char k = 0;
 
-  io_update_devices_enabled(&deviceEnabled[0]);
+  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_devices();
   hosts_and_devices_long_filename();
 
@@ -135,28 +133,23 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   // Stow device slot temporarily
   memcpy(&temp_deviceSlot, &deviceSlots[selected_device_slot], sizeof(DeviceSlot));
   temp_deviceSlot.mode = m;
-  memcpy(temp_filename, io_get_device_filename(selected_device_slot), sizeof(temp_filename));
+  fuji_get_device_filename(selected_device_slot, temp_filename);
 
   // unmount disk image
-  io_umount_disk_image(selected_device_slot);
+  fuji_unmount_disk_image(selected_device_slot);
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-#if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
-  io_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
-#else
-  // i promise to implement in all cases.
-  io_set_device_filename(selected_device_slot, temp_filename);
-#endif
+  fuji_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
 
-  io_put_device_slots(&deviceSlots[0]);
+  fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
 
   // Make sure host slot is mounted or it will fail mounting disk
-  io_mount_host_slot(deviceSlots[selected_device_slot].hostSlot);
+  fuji_mount_host_slot(deviceSlots[selected_device_slot].hostSlot);
 
   // Remount
 #if defined(BUILD_ATARI)
-  mnt = io_mount_disk_image(selected_device_slot, m);
+  mnt = fuji_mount_disk_image(selected_device_slot, m);
 
   // Check for error
   if (!mnt)
@@ -171,12 +164,12 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    io_put_device_slots(&deviceSlots[0]);
+    fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
     screen_error(""); // clear the error msg
   }
-  screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+  screen_hosts_and_devices_device_slots(DEVICES_START_Y, deviceSlots, deviceEnabled); // redraw the disks
 #elif defined(BUILD_APPLE2)
-  mnt = io_mount_disk_image(selected_device_slot, m);
+  mnt = fuji_mount_disk_image(selected_device_slot, m);
 
   // Check for error
   if (!mnt)
@@ -189,34 +182,34 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    io_put_device_slots(&deviceSlots[0]);
+    fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   }
-  screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]); // redraw the disks
+  screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled); // redraw the disks
   //screen_hosts_and_devices_devices_selected(selected_device_slot); // Breaks disk order on screen??
   selected_device_slot = 0; // Go back to drive 0 instead
   hosts_and_devices_devices();
 #elif defined(_CMOC_VERSION_)
-    io_mount_disk_image(selected_device_slot, m);
-    screen_hosts_and_devices_device_slots(1,&deviceSlots[0],&deviceEnabled[0]);
+    fuji_mount_disk_image(selected_device_slot, m);
+    screen_hosts_and_devices_device_slots(1,deviceSlots,deviceEnabled);
     bar_jump(selected_device_slot);
 #else
-    io_mount_disk_image(selected_device_slot, m);
+    fuji_mount_disk_image(selected_device_slot, m);
 #endif
 }
 
 void hosts_and_devices_devices_enable_toggle(unsigned char ds)
 {
-  bool s = io_get_device_enabled_status(io_device_slot_to_device(ds));
+  bool s = fuji_get_device_enabled_status(io_device_slot_to_device(ds));
 
   if (s == true)
-    io_disable_device(io_device_slot_to_device(ds));
+    fuji_disable_device(fuji_device_slot_to_device(ds));
   else
-    io_enable_device(io_device_slot_to_device(ds));
+    fuji_enable_device(fuji_device_slot_to_device(ds));
 
-  deviceEnabled[ds] = io_get_device_enabled_status(io_device_slot_to_device(ds));
+  deviceEnabled[ds] = fuji_get_device_enabled_status(io_device_slot_to_device(ds));
 
-  io_update_devices_enabled(&deviceEnabled[0]);
-  screen_hosts_and_devices_device_slots(11, &deviceSlots[0], &deviceEnabled[0]);
+  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+  screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled);
   bar_update();
 }
 
@@ -262,8 +255,8 @@ void hosts_and_devices_done(void)
       textcolor(LIST_VBAR_COLOR); cprintf("%c:", s);
       textcolor(TEXT_COLOR); cprintf("%s", deviceSlots[i].file);
 #endif
-      io_mount_host_slot(deviceSlots[i].hostSlot);
-      io_mount_disk_image(i, deviceSlots[i].mode);
+      fuji_mount_host_slot(deviceSlots[i].hostSlot);
+      fuji_mount_disk_image(i, deviceSlots[i].mode);
     }
   }
 
@@ -278,19 +271,19 @@ void hosts_and_devices(void)
     hd_subState = HD_HOSTS;
 
 #ifdef BUILD_PMD85
-    io_get_host_slots(&hostSlots[0]);
-    io_get_device_slots(&deviceSlots[0]);
-    io_update_devices_enabled(&deviceEnabled[0]);
-    screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
+    fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS);
+    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+    screen_hosts_and_devices(hostSlots, deviceSlots, deviceEnabled);
 #endif
 
   while (state == HOSTS_AND_DEVICES)
   {
 #ifndef BUILD_PMD85
-    io_get_host_slots(&hostSlots[0]);
-    io_get_device_slots(&deviceSlots[0]);
-    io_update_devices_enabled(&deviceEnabled[0]);
-    screen_hosts_and_devices(&hostSlots[0], &deviceSlots[0], &deviceEnabled[0]);
+    fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+    screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
 #endif
 
     switch (hd_subState)
