@@ -38,10 +38,6 @@ extern bool fuji_get_host_slots(HostSlot *h, size_t size);
 extern bool fuji_copy_file(uint8_t src_slot, uint8_t dst_slot, char *copy_spec);
 extern bool fuji_create_new(NewDisk *new_disk);
 
-#ifdef BUILD_ADAM
-#define FUJI_DEV 0x0F
-#endif /* BUILD_ADAM */
-
 #endif
 
 #define MODE_READ 1
