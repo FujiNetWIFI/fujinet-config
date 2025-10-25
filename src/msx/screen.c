@@ -5,6 +5,7 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <arch/z80.h>
 #include <video/tms99x8.h>
@@ -25,11 +26,24 @@
 #define F9_ADDR          0xF8FF
 #define F10_ADDR         0xF90F
 
+#define CH_BOX_UL   0x93
+#define CH_BOX_U    0x94
+#define CH_BOX_UR   0x95
+#define CH_BOX_L    0x96
+#define CH_BOX_R    0x97
+#define CH_BOX_BL   0x98
+#define CH_BOX_B    0x99
+#define CH_BOX_BR   0x9A
+#define CH_TAB_L    0x9B
+#define CH_TAB_R    0x9C
+
 #define MAX_DISK_SLOTS (8)
 
-#define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
+// #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
+#define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_BLACK)
 #define style_gray_on_white() vdp_color(VDP_INK_GRAY, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
-#define style_white_on_black() vdp_color(VDP_INK_WHITE, VDP_INK_BLACK, VDP_INK_DARK_BLUE)
+// #define style_white_on_black() vdp_color(VDP_INK_WHITE, VDP_INK_BLACK, VDP_INK_DARK_BLUE)
+#define style_white_on_black() vdp_color(VDP_INK_WHITE, VDP_INK_BLACK, VDP_INK_BLACK)
 #define style_white_on_blue() vdp_color(VDP_INK_WHITE, VDP_INK_DARK_BLUE, VDP_INK_DARK_BLUE)
 #define style_highlighted() vdp_color(VDP_INK_WHITE, VDP_INK_DARK_BLUE, VDP_INK_DARK_BLUE)
 
@@ -65,6 +79,24 @@ static char udg[] =
   0x00,0x70,0x4c,0x62,0x44,0x42,0x0c,0x00,        // F3       0x8e
   0x00,0x70,0x4a,0x6a,0x4e,0x42,0x02,0x00,        // F4       0x8f
   0x00,0x70,0x4e,0x68,0x4e,0x42,0x0c,0x00,        // F5       0x90
+ 	// 0xFC,0xF8,0xF0,0xF0,0xF0,0xF0,0xF8,0xFC,        // Left pill cap 0x91
+  0x03,0x07,0x0F,0x0F,0x0F,0x0F,0x07,0x03,
+	// 0x3F,0x1F,0x0F,0x0F,0x0F,0x0F,0x1F,0x3F,        // Right pill cap 0x92
+	0xC0,0xE0,0xF0,0xF0,0xF0,0xF0,0xE0,0xC0,
+
+	0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x03,        // Box UL   0x93
+	0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,        // Box U    0x94
+	0x00,0x00,0x00,0x00,0x00,0x00,0x80,0xC0,        // Box UR   0x95
+	0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x03,        // Box L    0x96
+	0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,        // Box R    0x97
+	0x03,0x01,0x00,0x00,0x00,0x00,0x00,0x00,        // Box BL   0x98
+	0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,        // Box B    0x99
+	0xC0,0x80,0x00,0x00,0x00,0x00,0x00,0x00,        // Box BR   0x9A
+	// 0x01,0x03,0x03,0x03,0x03,0x07,0xFF,0xFF,        // Tab L    0x9B
+	// 0x03,0x07,0x07,0x07,0x07,0x0F,0xFF,0xFF,
+	0x0F,0x1F,0x1F,0x1F,0x1F,0x3F,0xFF,0xFF,
+	0x80,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,        // Tab R    0x9C
+
   // 0x00,0x70,0x46,0x68,0x4e,0x4a,0x06,0x00,        // F6       0x91
   // 0x00,0x70,0x4e,0x62,0x44,0x48,0x08,0x00,        // F7       0x92
   // 0x00,0x70,0x4e,0x6a,0x44,0x4a,0x0e,0x00,        // F8       0x93
@@ -98,7 +130,8 @@ void clear_status(void)
 
 void show_status(char *msg)
 {
-  style_white_on_blue();
+  // style_white_on_blue();
+  style_white_on_black();
   clear_status();
   gotoxy(0, 20);
   cprintf(msg);
@@ -118,7 +151,8 @@ void show_menu(char *f1_key, char *f1_lbl,
   // TODO: this has gotten a little wild, should probably use var args
   uint8_t len = 5;
   uint8_t x = 0;
-  style_white_on_blue();
+  // style_white_on_blue();
+  style_white_on_black();
   menu_clear();
 
   if (f1_lbl != NULL) {
@@ -180,7 +214,8 @@ void hide_menu(void)
 void set_mode_default(void)
 {
   vdp_set_mode(2);
-  style_white_on_blue();
+  // style_white_on_blue();
+  style_white_on_black();
   clrscr();
 }
 
@@ -202,7 +237,8 @@ void screen_error(const char *c)
 
 void screen_set_wifi(AdapterConfig* ac)
 {
-  style_white_on_blue();
+  style_white_on_black();
+  // style_white_on_blue();
   clrscr();
   vdp_vfill(MODE2_ATTR,0xF1,0x100);
   // vdp_vfill(MODE2_ATTR+256,0x1F,0xF00);
@@ -262,7 +298,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   bar_set(0,3,nn,0);
 
   sprintf(message,"%d networks found",nn);
-  style_white_on_blue();
+  // style_white_on_blue();
   show_status(message);
 }
 
@@ -297,6 +333,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   if (screen_should_be_cleared)
   {
     vdp_noblank();
+    style_white_on_black();
     clrscr();
     screen_should_be_cleared = false;
     screen_hosts_and_devices_host_slots(h);
@@ -311,16 +348,16 @@ void screen_hosts_and_devices_hosts(void)
   show_menu("b","boot","e","edit","d","disks", "s","basic", "c"," config");
   // show_menu("b","boot","e","edit","d","disks","l"," lobby","c"," config");
   clear_status();
-  bar_clear(false);
-  bar_set(0,1,8,selected_host_slot);
+  // bar_clear(false);
+  bar_set(0,3,8,selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
 {
   // show_menu("b","boot","e","eject","h","hosts","o","on/off","c","config");
   show_menu("b","boot","e","eject","h","hosts", "r","  r/w", "c","config");
-  bar_clear(false);
-  bar_set(10,1,8,selected_device_slot);
+  // bar_clear(false);
+  bar_set(10,3,8,selected_device_slot);
 }
 
 const char* screen_hosts_and_devices_device_slot(uint8_t hs, bool e, const char *fn)
@@ -340,25 +377,78 @@ char* screen_hosts_and_devices_host_slot(char *hs)
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
-  textcolor(WHITE);
-  textbackground(BLACK);
-  gotoxy(0,0);  cprintf("%32s","Hosts ");
+  // textcolor(WHITE);
+  // textbackground(BLACK);
+  // gotoxy(0,0);  cprintf("%32s","Hosts ");
 
-  vdp_vfill(MODE2_ATTR,0xF1,256); // white text, black bg
-  vdp_vfill(MODE2_ATTR+0x0100,0x1F,2048); // black text, white bg
+  textcolor(WHITE); textbackground(BLACK);
+  gotoxy(0,0); cputc(CH_BOX_UL);
+  for (uint8_t i = 0; i < 24; i++) cputc(CH_BOX_U);
+  // for (uint8_t i = 0; i < 23; i++) cputc(CH_BOX_U);
+  cputc(CH_TAB_L);
+
+  textcolor(BLACK); textbackground(WHITE);
+  cputs("Hosts");
+
+  textcolor(WHITE); textbackground(BLACK);
+  cputc(CH_TAB_R);
 
   for (char i=0;i<8;i++)
   {
-      gotoxy(0,i+1);
+      // gotoxy(1,i+1);
       // textbackground(1);
-      textcolor(WHITE);
-      textbackground(LIGHTBLUE);
-      cprintf("%d",i+1);
+      // textcolor(WHITE);
+      // textbackground(LIGHTBLUE);
+      // cprintf("%d",i+1);
       // textcolor(h[i][0] == '\0' ? DARKGRAY : BLACK);
-      textbackground(WHITE);
-      textcolor(BLACK);
-      cprintf("%-31s", screen_hosts_and_devices_host_slot(h[i]));
+      // textbackground(WHITE);
+      // textcolor(BLACK);
+      // cprintf("%-31s", screen_hosts_and_devices_host_slot(h[i]));
+      gotoxy(0,i+1);
+      cputc(CH_BOX_L);
+      cputc('1'+i);
+      cprintf(" %-28s", screen_hosts_and_devices_host_slot(h[i]));
+      cputc(CH_BOX_R);
   }
+
+  gotoxy(0,9); cputc(CH_BOX_BL);
+  for (uint8_t i = 0; i < 30; i++) cputc(CH_BOX_B);
+  cputc(CH_BOX_BR);
+
+  uint16_t addr = MODE2_ATTR + 0x100;
+  // bool first_col = true;
+
+  for (uint8_t y = 0; y < 8; y++) {
+    for (uint8_t x = 0; x < 32; x++) {
+      if (x == 0 || x == 31) {
+        vdp_vfill(addr, 0xF1, 8);
+        addr += 8;
+      }
+      else if (x == 1) {
+        vdp_vfill(addr, 0x1F, 8);
+        addr += 8;
+      }
+      else {
+        for (uint8_t l = 0; l < 8; l++) {
+          vdp_vpoke(addr++, l % 2 ? 0xF4 : 0xF5);
+        }
+      }
+    }
+  }
+
+  // for (uint16_t i = 0; i < 8 * 32 * 8 - 16; i++) {
+    // vdp_vpoke(addr++, i % 2 ? 0xF4 : 0xF5);
+    // if (first_col) {
+    //   vdp_vpoke(addr++, i % 2 ? 0x1E : 0x1F);
+    //   if (i % 8 == 0) first_col = false;
+    // }
+    // else {
+    //   vdp_vpoke(addr++, i % 2 ? 0xF4 : 0xF5);
+    //   if (i % 256 == 0) {
+    //     first_col = true;
+    //   }
+    // }
+  // }
 }
 
 #if 1
@@ -564,7 +654,7 @@ void screen_select_file(void)
 {
   vdp_noblank();
 
-  style_white_on_blue();
+  // style_white_on_blue();
   clrscr();
 
   textcolor(WHITE);
@@ -694,7 +784,7 @@ void screen_select_file_new_creating(void)
 void screen_select_slot(char *e)
 {
   vdp_noblank();
-  style_white_on_blue();
+  // style_white_on_blue();
   clrscr();
 
   // TODO: Also need to display filename?
@@ -730,7 +820,7 @@ void screen_destination_host_slot(char *h, char *p)
 {
   vdp_noblank();
 
-  style_white_on_blue();
+  // style_white_on_blue();
   clrscr();
 
   gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
@@ -752,7 +842,7 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
   vdp_noblank();
 
-  style_white_on_blue();
+  // style_white_on_blue();
   clrscr();
 
   show_status("        Copying file...");
