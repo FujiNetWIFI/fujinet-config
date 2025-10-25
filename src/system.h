@@ -19,3 +19,7 @@ extern void system_list_devs(void);
 extern void cold_start(void);
 extern void rtclr(void);
 #endif /* BUILD_ATARI */
+
+#if defined(BUILD_MSX) || defined(BUILD_MSXROM)
+extern void system_drop_into_basic(void);
+#endif

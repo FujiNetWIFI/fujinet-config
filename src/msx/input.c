@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "../input.h"
 #include "../globals.h"
+#include "../system.h"
 #include "../mount_and_boot.h"
 #include "../screen.h"
 #include "../set_wifi.h"
@@ -189,6 +190,10 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'e':
     bar_clear(false);
     hosts_and_devices_edit_host_slot(selected_host_slot);
+    return HD_HOSTS;
+  case 'S':
+  case 's':
+    system_drop_into_basic();
     return HD_HOSTS;
   default:
     return HD_HOSTS;
