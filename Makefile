@@ -88,6 +88,7 @@ WITHOUT_PRODOS_BOOT = dist.apple2/bootable.po
 apple2/disk-post::
 	cp $(WITHOUT_PRODOS_BOOT) $(BUILD_DISK)
 	ac -as $(BUILD_DISK) $(PRODUCT_BASE) < $(BUILD_EXEC)
+	ac -p $(BUILD_DISK) $(PRODUCT_BASE).SYSTEM SYS 0x2000 < $(CC65_UTILS_DIR)/$(LOADER_SYSTEM)
 
 ########################################
 # Atari customization
