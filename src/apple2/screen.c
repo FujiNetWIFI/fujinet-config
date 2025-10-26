@@ -528,6 +528,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
   cprintf("%10s%s\r\n","MAC: ",acx->sMacAddress);
   cprintf("%10s%s\r\n","BSSID: ",acx->sBssid);
   cprintf("%10s%s\r\n","FNVer: ",acx->fn_version);
+  cprintf("%10s%s\r\n","CONFIG: ",GIT_VERSION);
 
   gotoxy(6,STATUS_BAR);
   screen_print_menu("C","hange SSID  ");
