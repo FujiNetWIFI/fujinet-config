@@ -398,7 +398,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 void screen_hosts_and_devices_hosts(void)
 {
   // show_menu("b","boot","e","edit","d","disks", NULL,NULL, "c"," config");
-  show_menu("b","boot","e","edit","d","disks", "s","basic", "c"," config");
+  show_menu("b","boot","e","edit","d","disks", "s","basic", "c","config");
   // show_menu("b","boot","e","edit","d","disks","l"," lobby","c"," config");
   clear_status();
   // bar_clear(false);
@@ -408,7 +408,7 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
   // show_menu("b","boot","e","eject","h","hosts","o","on/off","c","config");
-  show_menu("b","boot","e","eject","h","hosts", "r","  r/w", "c","config");
+  show_menu("b","boot","e","eject","h","hosts", "r"," r/w", "c","config");
   // bar_clear(false);
   bar_set(10,3,8,selected_device_slot);
 }
