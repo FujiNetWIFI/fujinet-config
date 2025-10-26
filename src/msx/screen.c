@@ -211,6 +211,58 @@ void hide_menu(void)
   show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 }
 
+void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char *title)
+{
+
+  uint8_t title_len = 0;
+  if (title != NULL)
+    title_len = strlen(title);
+
+  textcolor(WHITE); textbackground(BLACK);
+  gotoxy(x,y); cputc(CH_BOX_UL);
+  for (uint8_t i = 0; i < w-title_len-3; i++) cputc(CH_BOX_U);
+  // for (uint8_t i = 0; i < 23; i++) cputc(CH_BOX_U);
+  cputc(CH_TAB_L);
+
+  textcolor(BLACK); textbackground(WHITE);
+  if (title != NULL)
+    cputs(title);
+
+  textcolor(WHITE); textbackground(BLACK);
+  cputc(CH_TAB_R);
+
+  for (uint8_t i = 0; i < h-2; i++) {
+    gotoxy(x, y+i+1);
+    cputc(CH_BOX_L);
+    gotoxy(x+w-1, y+i+1);
+    cputc(CH_BOX_R);
+  }
+
+  gotoxy(x,y+h-1); cputc(CH_BOX_BL);
+  for (uint8_t i = 0; i < w-2; i++) cputc(CH_BOX_B);
+  cputc(CH_BOX_BR);
+
+  uint16_t addr = MODE2_ATTR + (y+1) * 0x100;
+
+  for (uint8_t row = 0; row < 8; row++) {
+    for (uint8_t col = 0; col < 32; col++) {
+      if (col == 0 || col == 31) {
+        vdp_vfill(addr, 0xF1, 8);
+        addr += 8;
+      }
+      else if (col == 1) {
+        vdp_vfill(addr, 0x1F, 8);
+        addr += 8;
+      }
+      else {
+        for (uint8_t l = 0; l < 8; l++) {
+          vdp_vpoke(addr++, l % 2 ? 0xF4 : 0xF5);
+        }
+      }
+    }
+  }
+}
+
 void set_mode_default(void)
 {
   vdp_set_mode(2);
@@ -377,190 +429,57 @@ char* screen_hosts_and_devices_host_slot(char *hs)
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
-  // textcolor(WHITE);
-  // textbackground(BLACK);
-  // gotoxy(0,0);  cprintf("%32s","Hosts ");
-
-  textcolor(WHITE); textbackground(BLACK);
-  gotoxy(0,0); cputc(CH_BOX_UL);
-  for (uint8_t i = 0; i < 24; i++) cputc(CH_BOX_U);
-  // for (uint8_t i = 0; i < 23; i++) cputc(CH_BOX_U);
-  cputc(CH_TAB_L);
-
-  textcolor(BLACK); textbackground(WHITE);
-  cputs("Hosts");
-
-  textcolor(WHITE); textbackground(BLACK);
-  cputc(CH_TAB_R);
-
-  for (char i=0;i<8;i++)
-  {
-      // gotoxy(1,i+1);
-      // textbackground(1);
-      // textcolor(WHITE);
-      // textbackground(LIGHTBLUE);
-      // cprintf("%d",i+1);
-      // textcolor(h[i][0] == '\0' ? DARKGRAY : BLACK);
-      // textbackground(WHITE);
-      // textcolor(BLACK);
-      // cprintf("%-31s", screen_hosts_and_devices_host_slot(h[i]));
-      gotoxy(0,i+1);
-      cputc(CH_BOX_L);
-      cputc('1'+i);
-      cprintf(" %-28s", screen_hosts_and_devices_host_slot(h[i]));
-      cputc(CH_BOX_R);
+  for (uint8_t i = 0; i < 8; i++) {
+    gotoxy(1, i+1);
+    cputc('1'+i);
+    cprintf(" %-28s", screen_hosts_and_devices_host_slot(h[i]));
   }
 
-  gotoxy(0,9); cputc(CH_BOX_BL);
-  for (uint8_t i = 0; i < 30; i++) cputc(CH_BOX_B);
-  cputc(CH_BOX_BR);
-
-  uint16_t addr = MODE2_ATTR + 0x100;
-  // bool first_col = true;
-
-  for (uint8_t y = 0; y < 8; y++) {
-    for (uint8_t x = 0; x < 32; x++) {
-      if (x == 0 || x == 31) {
-        vdp_vfill(addr, 0xF1, 8);
-        addr += 8;
-      }
-      else if (x == 1) {
-        vdp_vfill(addr, 0x1F, 8);
-        addr += 8;
-      }
-      else {
-        for (uint8_t l = 0; l < 8; l++) {
-          vdp_vpoke(addr++, l % 2 ? 0xF4 : 0xF5);
-        }
-      }
-    }
-  }
-
-  // for (uint16_t i = 0; i < 8 * 32 * 8 - 16; i++) {
-    // vdp_vpoke(addr++, i % 2 ? 0xF4 : 0xF5);
-    // if (first_col) {
-    //   vdp_vpoke(addr++, i % 2 ? 0x1E : 0x1F);
-    //   if (i % 8 == 0) first_col = false;
-    // }
-    // else {
-    //   vdp_vpoke(addr++, i % 2 ? 0xF4 : 0xF5);
-    //   if (i % 256 == 0) {
-    //     first_col = true;
-    //   }
-    // }
-  // }
+  draw_card(0, 0, 32, 10, 1, "Hosts");
 }
 
-#if 1
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
-  unsigned short y2 = y << 8;
-
-  gotoxy(0,y); cprintf("%32s","Devices ");
-
-  vdp_vfill(MODE2_ATTR+y2,0xF1,256); // white text, black bg
-  vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024); // black text, white bg
-
   bool has_disks = false;
   uint8_t disk_n = 0;
   uint8_t slot_n = 0;
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
   {
-      // textcolor(15);
-      gotoxy(0,i+y+1);
-      textcolor(WHITE);
-      textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
-      char icon = ' ';
-      char label = '\0';
-      char *filename = d[i].file;
+    gotoxy(1,i+y+1);
+    char icon = ' ';
+    char label = '\0';
+    char *filename = d[i].file;
 
-      if (strstr(filename, ".cas") != NULL || strstr(filename, ".CAS") != NULL) {
-        icon = 0x8A;
-      }
-      else if (strstr(filename, ".dsk") != NULL || strstr(filename, ".DSK") != NULL) {
-        icon = 0x88;
-        label = 'A'+disk_n;
-        disk_n++;
+    if (strstr(filename, ".cas") != NULL || strstr(filename, ".CAS") != NULL) {
+      icon = 0x8A;
+    }
+    else if (strstr(filename, ".dsk") != NULL || strstr(filename, ".DSK") != NULL) {
+      icon = 0x88;
+      label = 'A'+disk_n;
+      disk_n++;
 
-        if (!has_disks) {
-          slot_n++;
-          has_disks = true;
-        }
-      }
-      else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
-        icon = 0x89;
-        label = '1'+slot_n;
+      if (!has_disks) {
         slot_n++;
+        has_disks = true;
       }
-      cputc(icon);
-      // cprintf("%d",i+1);
-      // switch (i) {
-      //   case 6:
-      //     cputc(0x89);
-      //     break;
-      //   case 7:
-      //     cputc(0x8A);
-      //     break;
-      //   default:
-      //     cputc('A'+i);
-      // }
-      // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
-      textcolor(BLACK);
-      textbackground(WHITE);
-      if (label == '\0') {
-        cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-      }
-      else {
-        cputc(label);
-        cputc('=');
-        cprintf("%-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-      }
+    }
+    else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
+      icon = 0x89;
+      label = '1'+slot_n;
+      slot_n++;
+    }
+    cputc(icon);
+    if (label == '\0') {
+      cprintf(" %-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    }
+    else {
+      cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    }
   }
+
+  draw_card(0, y, 32, 10, 1, "Devices");
 }
-#else
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
-{
-  unsigned short y2 = y << 8;
-  unsigned short y3 = (y+8) << 8;
-
-  gotoxy(0,y); cprintf("%32s","Disk Drives ");
-
-  vdp_vfill(MODE2_ATTR+y2,0xF1,256); // white text, black bg
-  vdp_vfill(MODE2_ATTR+y2+256,0x1F,1024); // black text, white bg
-
-  for (char i=0;i<MAX_DISK_SLOTS-2;i++)
-  {
-    // textcolor(15);
-    gotoxy(0,i+y+1);
-    textcolor(WHITE);
-    textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
-    cputc('A'+i);
-    // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
-    textcolor(BLACK);
-    textbackground(WHITE);
-    cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
-  }
-
-  gotoxy(0,y+8); cprintf("%32s","Cartridges ");
-
-  vdp_vfill(MODE2_ATTR+y3,0xF1,256); // white text, black bg
-  vdp_vfill(MODE2_ATTR+y3+256,0x1F,512); // black text, white bg
-
-  for (char i=0;i<2;i++)
-  {
-    // textcolor(15);
-    gotoxy(0,i+y+9);
-    textcolor(WHITE);
-    textbackground(d[i].mode == 0x02 ? GREEN : LIGHTBLUE);
-    cputc('1'+i);
-    // textcolor(d[i].file[0] == '\0' ? DARKGRAY : BLACK);
-    textcolor(BLACK);
-    textbackground(WHITE);
-    cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i+6].hostSlot,e[i+6],d[i+6].file));
-  }
-}
-#endif
 
 
 void screen_hosts_and_devices_devices_clear_all(void)
