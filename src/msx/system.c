@@ -37,14 +37,13 @@ void system_drop_into_basic(void)
   	ld	a,0
   	ld	(DTA),a	; No file name
 
-  	;ld	ix,(TEMPST)	; Erases 3 bytes
-  	;ld	(ix),0	; from the
-  	;ld	(ix+1),0	; area reserved for
-  	;ld	(ix+2),0	; the BASIC program
+  	ld	ix,(TEMPST)	; Erases 3 bytes
+  	ld	(ix),0	; from the
+  	ld	(ix+1),0	; area reserved for
+  	ld	(ix+2),0	; the BASIC program
 
   	ld	ix,BASENT
   	ld	iy,(MASTER-1)	; Slot of the Master Disk-ROM
-    ; ld	iy,MASTER
   	jp	CALSLT
   __endasm;
 }

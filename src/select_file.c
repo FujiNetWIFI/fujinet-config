@@ -67,9 +67,7 @@ unsigned char select_file_display(void)
   char i;
   //const char *e;
 
-  fuji_mount_host_slot(selected_host_slot);
-
-  if (fuji_error())
+  if (!fuji_mount_host_slot(selected_host_slot))
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
@@ -79,9 +77,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
-
-  if (fuji_error())
+  if (!fuji_open_directory2(selected_host_slot, path, filter))
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
@@ -216,9 +212,7 @@ void select_file_link(void)
   char tnfsHostname[128];
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
-
-  if (fuji_error())
+  if (!fuji_open_directory2(selected_host_slot, path, filter))
   {
       sf_subState = SF_DONE;
       state = HOSTS_AND_DEVICES;
@@ -333,7 +327,7 @@ void select_file_new(void)
     selected_size = input_select_file_new_custom();
   }
 #endif /* CMOC_VERSION */
-  
+
   if (selected_size == 0) // Aborted from size
   {
     sf_subState = SF_CHOOSE;
