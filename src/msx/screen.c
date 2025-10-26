@@ -150,14 +150,14 @@ void show_menu(char *f1_key, char *f1_lbl,
 {
   // TODO: this has gotten a little wild, should probably use var args
   uint8_t len = 5;
-  uint8_t x = 0;
+  uint8_t x = 1;
   // style_white_on_blue();
   style_white_on_black();
   menu_clear();
 
   if (f1_lbl != NULL) {
     strcpy((char *)F1_ADDR, f1_key);
-    gotoxy(0, 23);
+    gotoxy(x, 23);
     cputs(f1_lbl);
     len = strlen(f1_lbl);
     x += len < 6 ? 6 : len + 1;
@@ -244,13 +244,13 @@ void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char 
 
   uint16_t addr = MODE2_ATTR + (y+1) * 0x100;
 
-  for (uint8_t row = 0; row < 8; row++) {
-    for (uint8_t col = 0; col < 32; col++) {
-      if (col == 0 || col == 31) {
+  for (uint8_t row = 0; row < h-2; row++) {
+    for (uint8_t col = 0; col < w; col++) {
+      if (col == 0 || col == w-1) {
         vdp_vfill(addr, 0xF1, 8);
         addr += 8;
       }
-      else if (col == 1) {
+      else if (col <= margin) {
         vdp_vfill(addr, 0x1F, 8);
         addr += 8;
       }
@@ -292,11 +292,11 @@ void screen_set_wifi(AdapterConfig* ac)
   style_white_on_black();
   // style_white_on_blue();
   clrscr();
-  vdp_vfill(MODE2_ATTR,0xF1,0x100);
+  // vdp_vfill(MODE2_ATTR,0xF1,0x100);
   // vdp_vfill(MODE2_ATTR+256,0x1F,0xF00);
-  vdp_vfill(MODE2_ATTR+256,0x1F,0x1000);
-  gotoxy(3,16);
-  style_gray_on_white();
+  // vdp_vfill(MODE2_ATTR+256,0x1F,0x1000);
+  gotoxy(3,18);
+  // style_gray_on_white();
   cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
 
   show_menu("s","skip",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -334,8 +334,8 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     meter[0] = 0x80;
   }
 
-  style_black_on_white();
-  gotoxy(0,n+1); cprintf("%s",meter);
+  // style_black_on_white();
+  gotoxy(1,n+1); cprintf("%s ",meter);
   // style_white_on_blue();
   cprintf("%s",ds);
 }
@@ -345,12 +345,13 @@ void screen_set_wifi_select_network(unsigned char nn)
   char message[33];
 
   show_menu("h","hidden","r","rescan","s","skip", NULL, NULL, NULL, NULL);
-  style_white_on_black();
-  gotoxy(0,0);  cprintf("%32s","Select Network ");
-  bar_set(0,3,nn,0);
+  // style_white_on_black();
+  // gotoxy(0,0);  cprintf("%32s","Select Network ");
+  bar_set(0,5,nn,0);
+
+  draw_card(0, 0, 32, 18, 3, "Select Network");
 
   sprintf(message,"%d networks found",nn);
-  // style_white_on_blue();
   show_status(message);
 }
 
@@ -539,24 +540,17 @@ void screen_show_info(bool printerEnabled,AdapterConfig* ac)
 
   gotoxy(0,7);
 
-  cprintf("%32s","SSID");
-  cprintf("%32s",ac->ssid);
-  cprintf("%10s%s\n","HOSTNAME:",ac->hostname);
-  cprintf("%10s%u.%u.%u.%u\n","IP:",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
-  cprintf("%10s%u.%u.%u.%u\n","NETMASK:",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
-  cprintf("%10s%u.%u.%u.%u\n","DNS:",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","MAC:",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
-  cprintf("%10s%02x:%02x:%02x:%02x:%02x:%02x\n","BSSID:",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
-  cprintf("%10s%s\n","FNVER:",ac->fn_version);
-  cprintf("%10s%s\n","CONFIG:",GIT_VERSION);
+  cprintf(" %8s %-20s\n","SSID",ac->ssid);
+  cprintf(" %8s %s\n","HOSTNAME",ac->hostname);
+  cprintf(" %8s %u.%u.%u.%u\n","IP",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
+  cprintf(" %8s %u.%u.%u.%u\n","NETMASK",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
+  cprintf(" %8s %u.%u.%u.%u\n","DNS",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
+  cprintf(" %8s %02x:%02x:%02x:%02x:%02x:%02x\n","MAC",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  cprintf(" %8s %02x:%02x:%02x:%02x:%02x:%02x\n","BSSID",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  cprintf(" %8s %s\n","FN VER",ac->fn_version);
+  cprintf(" %8s %s\n","CONFIG",GIT_VERSION);
 
-  vdp_vfill(MODE2_ATTR+0x0700,0xF4,256);
-  vdp_vfill(MODE2_ATTR+0x0800,0x1F,256);
-
-  for (char i = 0; i < 7 ; i++) {
-    vdp_vfill(MODE2_ATTR+(i*256)+0x900,0xF4,80);
-    vdp_vfill(MODE2_ATTR+(i*256)+0x900+80,0x1F,176);
-  }
+  draw_card(0, 5, 32, 13, 8, "Configuration");
 
   show_menu("c","change ssid ", "r","reconnect", NULL,NULL, NULL,NULL, NULL,NULL);
   vdp_blank();
@@ -573,16 +567,10 @@ void screen_select_file(void)
 {
   vdp_noblank();
 
-  // style_white_on_blue();
+  style_white_on_black();
   clrscr();
 
-  textcolor(WHITE);
-  textbackground(BLACK);
-  gotoxy(0,0);  cprintf("%32s","Select file ");
-
-  vdp_vfill(MODE2_ATTR+0x000,0xF1,0x100); // white text, black bg
-  vdp_vfill(MODE2_ATTR+0x100,0xF5,0x100); // white text, light blue bg
-  vdp_vfill(MODE2_ATTR+0x200,0x1F,0x1000); // black text, white bg
+  draw_card(0, 0, 32, 18, 0, "Select Image");
 
   hide_menu();
   show_status("           Opening...");
@@ -592,26 +580,18 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
-  textcolor(WHITE);
-  textbackground(BLACK);
-  gotoxy(0,0); cprintf("%32s", hostSlots[selected_host_slot]);
+  draw_card(0, 0, 32, 18, 0, hostSlots[selected_host_slot]);
 
-  // vdp_vfill(MODE2_ATTR,0xF1,0x100);
-  // vdp_vfill(MODE2_ATTR+0x100,0xF5,0x100); // white text, light blue bg
-  // vdp_vfill(MODE2_ATTR+0x0200,0x1F,0xF00);
-
-  gotoxy(0,1);
-  textbackground(LIGHTBLUE);
-  textcolor(WHITE);
+  gotoxy(1,1);
   if (f[0]==0x00)
-    cprintf("%32s",p);
+    cprintf("%30s",p);
   else
-    cprintf("%-8s|%24s",p,f);
+    cprintf("%-8s|%22s",p,f);
 }
 
 void screen_select_file_display_long_filename(char *e)
 {
-  gotoxy(0,19);
+  gotoxy(1,19);
   cprintf("%-64s",e);
 }
 
@@ -623,27 +603,24 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_prev(void)
 {
-  textcolor(BLACK);
-  textbackground(WHITE);
-  // vdp_color(1,5,7);
-  gotoxy(0,2); cprintf("%32s","...");
+  textcolor(WHITE);
+  textbackground(BLUE);
+  gotoxy(2,2); cprintf("%-28s","...");
 }
 
 void screen_select_file_next(void)
 {
-  textcolor(BLACK);
-  textbackground(WHITE);
-  // vdp_color(1,5,7);
-  gotoxy(0,17); cprintf("%32s","...");
+  textcolor(WHITE);
+  textbackground(BLUE);
+  gotoxy(2,17); cprintf("%-28s","...");
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
 {
-  gotoxy(0,y+2);
-  textcolor(BLACK);
-  textbackground(WHITE);
-  // cprintf("%c%c",*e++,*e++);
-  cprintf("%-32s",e);
+  gotoxy(2,y+2);
+  textcolor(WHITE);
+  textbackground(BLUE);
+  cprintf("%-28s",e);
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -710,7 +687,7 @@ void screen_select_slot(char *e)
 
   screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
 
-  bar_set(0,1,8,0);
+  bar_set(0,3,8,0);
 
   vdp_blank();
 }
