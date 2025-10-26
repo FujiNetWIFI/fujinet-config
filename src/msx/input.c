@@ -272,7 +272,7 @@ HDSubState input_hosts_and_devices_devices(void)
 
 void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
-  input_line(1,i+1,o,c,32,false);
+  input_line(3,i+1,o,c,27,false);
 }
 
 void input_line_filter(char *c)
@@ -479,8 +479,8 @@ SISubState input_show_info(void)
 	c = input();
 	switch (c)
 	{
-	case 'c':
-	case 'C':
+	case 'e':
+	case 'E':
 	  screen_should_be_cleared = true;
 		state = SET_WIFI;
 		return SI_DONE;
