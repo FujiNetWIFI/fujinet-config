@@ -30,7 +30,6 @@ SRC_DIRS = src src/%PLATFORM%
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
 FUJINET_LIB =
-$(info FUJUNET_LIB=$(FUJINET_LIB))
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
 # even if the library isn’t present.
