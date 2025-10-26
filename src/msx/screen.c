@@ -142,6 +142,32 @@ void menu_clear()
   vdp_vfill(0x1600, 0x00, 512);
 }
 
+uint8_t print_menu_option(char *label) {
+  bool highlight = false;
+  uint8_t len = 0;
+  unsigned char c;
+
+  textcolor(DARKGRAY);
+
+  while ((c = *label) != '\0') {
+    if (c == '_') {
+      highlight = true;
+    }
+    else if (highlight) {
+      textcolor(WHITE);
+      cputc(c);
+      textcolor(DARKGRAY);
+      highlight = false;
+    }
+    else {
+      cputc(c);
+    }
+    label++;
+  }
+
+  return len;
+}
+
 void show_menu(char *f1_key, char *f1_lbl,
                char *f2_key, char *f2_lbl,
                char *f3_key, char *f3_lbl,
@@ -158,8 +184,7 @@ void show_menu(char *f1_key, char *f1_lbl,
   if (f1_lbl != NULL) {
     strcpy((char *)F1_ADDR, f1_key);
     gotoxy(x, 23);
-    cputs(f1_lbl);
-    len = strlen(f1_lbl);
+    len = print_menu_option(f1_lbl);
     x += len < 6 ? 6 : len + 1;
   }
   else {
@@ -169,8 +194,7 @@ void show_menu(char *f1_key, char *f1_lbl,
   if (f2_lbl != NULL) {
     strcpy((char *)F2_ADDR, f2_key);
     gotoxy(x, 23);
-    cputs(f2_lbl);
-    len = strlen(f2_lbl);
+    len = print_menu_option(f2_lbl);
     x += len < 6 ? 6 : len + 1;
   }
   else {
@@ -180,8 +204,7 @@ void show_menu(char *f1_key, char *f1_lbl,
   if (f3_lbl != NULL) {
     strcpy((char *)F3_ADDR, f3_key);
     gotoxy(x, 23);
-    cputs(f3_lbl);
-    len = strlen(f3_lbl);
+    len = print_menu_option(f3_lbl);
     x += len < 6 ? 6 : len + 1;
   }
   else {
@@ -191,8 +214,7 @@ void show_menu(char *f1_key, char *f1_lbl,
   if (f4_lbl != NULL) {
     strcpy((char *)F4_ADDR, f4_key);
     gotoxy(x, 23);
-    cputs(f4_lbl);
-    len = strlen(f4_lbl);
+    len = print_menu_option(f4_lbl);
     x += len < 6 ? 6 : len + 1;
   }
   else {
@@ -202,7 +224,7 @@ void show_menu(char *f1_key, char *f1_lbl,
   if (f5_lbl != NULL) {
     strcpy((char *)F5_ADDR, f5_key);
     gotoxy(x, 23);
-    cputs(f5_lbl);
+    print_menu_option(f5_lbl);
   }
 }
 
@@ -299,7 +321,7 @@ void screen_set_wifi(AdapterConfig* ac)
   // style_gray_on_white();
   cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
 
-  show_menu("s","skip",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+  show_menu("s","_skip",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
   show_status("Scanning for networks...");
 }
 
@@ -344,7 +366,7 @@ void screen_set_wifi_select_network(unsigned char nn)
 {
   char message[33];
 
-  show_menu("h","hidden","r","rescan","s","skip", NULL, NULL, NULL, NULL);
+  show_menu("h","_hidden","r","_rescan","s","_skip", NULL, NULL, NULL, NULL);
   // style_white_on_black();
   // gotoxy(0,0);  cprintf("%32s","Select Network ");
   bar_set(0,5,nn,0);
@@ -398,7 +420,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 void screen_hosts_and_devices_hosts(void)
 {
   // show_menu("b","boot","e","edit","d","disks", NULL,NULL, "c"," config");
-  show_menu("b","boot","e","edit","d","disks", "s","basic", "c","config");
+  show_menu("b","_boot","e","_edit","d","_disks", "s","ba_sic", "c","_config");
   // show_menu("b","boot","e","edit","d","disks","l"," lobby","c"," config");
   clear_status();
   // bar_clear(false);
@@ -408,7 +430,7 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
   // show_menu("b","boot","e","eject","h","hosts","o","on/off","c","config");
-  show_menu("b","boot","e","eject","h","hosts", "r"," r/w", "c","config");
+  show_menu("b","_boot","e","_eject","h","_hosts", "r"," _r/w", "_c","config");
   // bar_clear(false);
   bar_set(10,3,8,selected_device_slot);
 }
@@ -552,7 +574,7 @@ void screen_show_info(bool printerEnabled,AdapterConfig* ac)
 
   draw_card(0, 5, 32, 13, 8, "Configuration");
 
-  show_menu("c","change ssid ", "r","reconnect", NULL,NULL, NULL,NULL, NULL,NULL);
+  show_menu("c","_change ssid ", "r","_reconnect", NULL,NULL, NULL,NULL, NULL,NULL);
   vdp_blank();
 }
 
@@ -632,11 +654,11 @@ void screen_select_file_choose(char visibleEntries)
 
   if (copy_mode == true) {
     show_status("       Select destination");
-    show_menu("c","copy", NULL,NULL, NULL,NULL, NULL,NULL, NULL,NULL);
+    show_menu("c","_copy", NULL,NULL, NULL,NULL, NULL,NULL, NULL,NULL);
   }
   else {
     show_status("     Select a file to mount");
-    show_menu("m","mount", "b"," boot", "c"," copy", "n","  new", "f"," filter");
+    show_menu("m","_mount", "b"," _boot", "c"," _copy", "n","  _new", "f"," _filter");
   }
 }
 
@@ -649,13 +671,13 @@ void screen_select_file_filter(void)
 void screen_select_file_new_type(void)
 {
   show_status("       What type of disk?");
-  show_menu("1","MSX-DOS 1", "2"," MSX-DOS 2", NULL,NULL, NULL,NULL, "b","blank");
+  show_menu("1","MSX-DOS _1", "2"," MSX-DOS _2", NULL,NULL, NULL,NULL, "b","_blank");
 }
 
 void screen_select_file_new_size(unsigned char k)
 {
   show_status("           Disk size?");
-  show_menu("3","360K", "7","720K", NULL,NULL, NULL,NULL, "c","custom");
+  show_menu("3","_360K", "7","_720K", NULL,NULL, NULL,NULL, "c","_custom");
 }
 
 void screen_select_file_new_custom(void)
@@ -696,7 +718,7 @@ void screen_select_slot_choose(void)
 {
   show_status("     Choose where to mount");
   if (create) {
-    show_menu("r","read-only", NULL,NULL, NULL,NULL, NULL,NULL, "w","read/write");
+    show_menu("r","_read-only", NULL,NULL, NULL,NULL, NULL,NULL, "w","read/_write");
   }
   else {
     hide_menu();
