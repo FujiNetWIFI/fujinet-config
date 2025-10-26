@@ -87,7 +87,7 @@ class LibLocator:
     self.LIBRARY_REGEX = []
     for platform in self.possiblePlatforms:
       self.LIBRARY_REGEX.extend([
-        fr"fujinet[-.]({platform})(-{VERSION_NUM_RE})?[.]lib$",
+        fr"fujinet[-.]({platform})-({VERSION_NUM_RE})?[.]lib$",
         fr"fujinet[.]lib[.]({platform})$",
         fr"libfujinet[.]({platform})[.]a$",
       ])
@@ -114,7 +114,8 @@ class LibLocator:
     if not self.MV.FUJINET_LIB_DIR:
       self.getDirectory()
 
-    if not self.MV.FUJINET_LIB_FILE:
+    if not self.MV.FUJINET_LIB_FILE \
+       and (not self.MV.FUJINET_LIB_ZIP or not os.path.exists(self.MV.FUJINET_LIB_ZIP)):
       self.downloadZip()
 
     if not self.MV.FUJINET_LIB_INCLUDE:
