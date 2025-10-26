@@ -83,6 +83,11 @@ coco/disk-post::
 A2_LINKER_CFG = src/apple2/config.cfg
 EXECUTABLE_EXTRA_DEPS_APPLE2 = $(A2_LINKER_CFG)
 LDFLAGS_EXTRA_APPLE2 = -C $(A2_LINKER_CFG)
+WITHOUT_PRODOS_BOOT = dist.apple2/bootable.po
+
+apple2/disk-post::
+	cp $(WITHOUT_PRODOS_BOOT) $(BUILD_DISK)
+	ac -as $(BUILD_DISK) $(PRODUCT_BASE) < $(BUILD_EXEC)
 
 ########################################
 # Atari customization
