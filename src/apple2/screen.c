@@ -132,9 +132,9 @@ void screen_init(void)
   #endif
   clrscr();
   #ifndef __ORCAC__
-    POKE(0x2000,0x80); // \
-    POKE(0x2001,0x80); //  > Overwrite JMP
-    POKE(0x2002,0x80); // /
+    POKE(0x2000,0x00); // \
+    POKE(0x2001,0x00); //  > Overwrite JMP
+    POKE(0x2002,0x00); // /
     if (get_ostype() == APPLE_IIIEM) // Satan Mode
     {
       POKE(0xC057,0); // GRAPH
