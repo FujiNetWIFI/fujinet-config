@@ -284,6 +284,10 @@ HDSubState input_hosts_and_devices_hosts(void)
 		bar_jump(selected_host_slot);
 		k = 0;
 		return HD_HOSTS;
+	case 'l':
+  	case 'L':
+    	mount_and_boot_lobby();
+    	return HD_HOSTS;
 	case '1':
 	case '2':
 	case '3':
@@ -316,6 +320,10 @@ HDSubState input_hosts_and_devices_devices(void)
 	case 'e':
 		hosts_and_devices_eject((byte)bar_get());
 		break;
+	case 'L':
+  	case 'l':
+    	mount_and_boot_lobby();
+    	return HD_DEVICES;
 	case 'R':
 	case 'r':
 		selected_device_slot = (byte)bar_get();

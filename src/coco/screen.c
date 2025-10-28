@@ -571,14 +571,35 @@ void screen_connect_wifi(NetConfig *nc)
   screen_add_shadow(9,BLUE); // change to CYAN
 }
 
+bool screen_mount_and_boot_lobby(void)
+{
+	unsigned char k;
+
+	// Confirm we want to go to there
+	locate(0, 15);
+	printf(" BOOT TO LOBBY? y/n");
+
+	k = waitkey(true);
+
+	switch (k)
+	{
+	case 'Y':
+	case 'y':
+		return true;
+	default:
+		return false;
+	}
+}
+
 void screen_end(void)
 {
-  // Restore the original casing flag.
-  asm {
+	// Restore the original casing flag.
+	asm 
+  {
     lda orig_casflag
       sta $011A
-      }
-  return;
+	}
+	return;
 }
 
 #endif
