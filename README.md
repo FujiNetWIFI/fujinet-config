@@ -3,7 +3,7 @@
 More documentation to be written as it takes shape.
 
 
-This repo is the primary repo for the CONFIG application for every supported platform on FujiNet. 
+This repo is the primary repo for the CONFIG application for every supported platform on FujiNet.
 
 In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common code for all the platforms began to take shape in this repo. Apple II soon joined, then RC2014 and soon C64. Atari was merged back in here in 2022 Fall by frachel so there is one place for all platform CONFIGs going forward.
 
@@ -16,6 +16,13 @@ The CONFIG application must be coded and compiled to build a native binary appli
 
 ## Compiling on the Atari
 To compile, currently requires:
+
+### AtariSIO Tools
+
+We require the 'diratr' tool from this package to be installed and runnable.
+
+- Github: https://github.com/HiassofT/AtariSIO
+
 ### CC65 built and installed on your system
 
 #### Pull down cc65 code
@@ -70,13 +77,25 @@ copy autorun.atr to ~//fujinet-platformio/data/BUILD_ATARI/ and then using PIO  
 ## Compiling on the Apple II
 To compile, currently requires:
 
+### AppleCommander built and installed on your system
+
+Arch Package
+```sh
+yay apple-commander
+sudo ln -s /usr/bin/applecommander-ac /usr/local/bin/ac
+sudo ln -s /usr/bin/applecommander-acx /usr/local/bin/acx
+```
+
+- Github: https://github.com/AppleCommander/AppleCommander
+- Requires Java 21 JDK, Gradle.
+
 ### CC65 built and installed on your system
 
 #### Pull down cc65 code
    * https://github.com/cc65/cc65
 
 #### Build cc65:
-``` 
+```
 $ PREFIX=/usr/local/cc65 make
 $ sudo PREFIX=/usr/local/cc65 make install
 ```
@@ -96,7 +115,7 @@ cd fujinet-config-adam.git
 $ make -f Makefile.apple2 clean dist
 ```
 
-Check for any errors. If sucessful there will be logs that say: 
+Check for any errors. If sucessful there will be logs that say:
 
 ```
 ...
@@ -139,7 +158,7 @@ $ make -f Makefile.apple2gs
 $ make -f Makefile.apple2gs dist
 ```
 
-Check for any errors. If successful there will be logs that say: 
+Check for any errors. If successful there will be logs that say:
 
 ```
 ...
@@ -147,7 +166,7 @@ cp dist.apple2/bootable.po dist.apple2/dist.po
 java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config exe <config
 ```
 
-You will find the `CONFIG` shell EXE in the disp.po image. Just copy it under prefix #17, then add this to 15:SYSCMND:  
+You will find the `CONFIG` shell EXE in the disp.po image. Just copy it under prefix #17, then add this to 15:SYSCMND:
 `CONFIG       U             configure Fujinet`
 
 Restart ORCA shell or issue a `commands 15:syscmnd` and you're ready.
@@ -159,7 +178,7 @@ $ make -f Makefile.apple2cda
 $ make -f Makefile.apple2cda dist
 ```
 
-Check for any errors. If successful there will be logs that say: 
+Check for any errors. If successful there will be logs that say:
 
 ```
 ...
@@ -201,5 +220,3 @@ Make using `make -f Makefile.rc2014`
 
 ### CONFIG on the Atari
 ![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
-
-
