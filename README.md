@@ -16,6 +16,13 @@ The CONFIG application must be coded and compiled to build a native binary appli
 
 ## Compiling on the Atari
 To compile, currently requires:
+
+### AtariSIO Tools
+
+We require the 'diratr' tool from this package to be installed and runnable.
+
+- Github: https://github.com/HiassofT/AtariSIO
+
 ### CC65 built and installed on your system
 
 #### Pull down cc65 code
