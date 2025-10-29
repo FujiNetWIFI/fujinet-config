@@ -106,6 +106,8 @@ WSSubState input_set_wifi_select(void)
     case 'R':
     case 'r':
       return WS_SCAN;
+    case 'S':
+    case 's':
     case KEY_ESCAPE:
       state=HOSTS_AND_DEVICES;
       return WS_DONE;

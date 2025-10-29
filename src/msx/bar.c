@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <conio.h>
 
+#include "gfxutil.h"
+
 #define DISPLAY_ROWS 17
 #define DISPLAY_LENGTH 60
 #define ADDR_PATH_LINE MODE2_ATTR
@@ -30,21 +32,13 @@ static unsigned char bar_y=3, bar_c=3, bar_m=1, bar_i=0, bar_oldi=0, bar_co=0x17
 */
 void bar_clear(bool oldRow)
 {
-  // Fill column color in old row
-  // vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i)), ATTR_PATH_LINE, COL(bar_c));
-
-  // Fill background color in old row
-  // vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i))+COL(bar_c),ATTR_FILE_LIST,256-COL(bar_c));
-
-  gotoxy(bar_c-1, bar_y+(oldRow==true ? bar_oldi : bar_i)+1);
-  cputc(' ');
-  gotoxy(30, bar_y+(oldRow==true ? bar_oldi : bar_i)+1);
-  cputc(' ');
-
-  uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i))+COL(bar_c)-8;
-  for (uint8_t i = 0; i < 256-COL(bar_c); i++) {
-    vdp_vpoke(addr++, i % 2 ? 0xF4 : 0xF5);
+  if (!oldRow) {
+    vdp_set_sprite_8(1, blank);
+    vdp_set_sprite_8(2, blank);
   }
+  uint16_t coff = bar_c << 3;
+  uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i)) + coff;
+  vdp_vwrite(row_pattern + coff, addr, 256 - coff - 16);
 }
 
 /**
@@ -53,42 +47,13 @@ void bar_clear(bool oldRow)
 void bar_update(void)
 {
   int coff = bar_c << 3;
-
   bar_clear(true);
 
-  gotoxy(bar_c-1, bar_y+bar_i+1);
-  cputc(0x91);
-  gotoxy(30, bar_y+bar_i+1);
-  cputc(0x92);
-
-  // white
-  // vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff, 0x1F, 256 - coff - 16);
-  // cyan
-  // vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff, 0x17, 256 - coff - 16);
-  // fuschia
-  // vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff, 0xFD, 256 - coff - 16);
-  // red
   vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff, 0xF6, 256 - coff - 16);
 
-  uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+bar_i);
-  for (uint8_t i = 0; i < 8; i++) {
-    // white
-    // vdp_vpoke(addr, i % 2 ? 0x4F : 0x5F);
-    // vdp_vpoke(addr + 28*8, i % 2 ? 0x4F : 0x5F);
-    // cyan
-    // vdp_vpoke(addr, i % 2 ? 0x47 : 0x57);
-    // vdp_vpoke(addr + 28*8, i % 2 ? 0x47 : 0x57);
-    // fuschia
-    // vdp_vpoke(addr, i % 2 ? 0x4D : 0x5D);
-    // vdp_vpoke(addr + 28*8, i % 2 ? 0x4D : 0x5D);
-    // red
-    // vdp_vpoke(addr, i % 2 ? 0x46 : 0x56);
-    // vdp_vpoke(addr + 28*8, i % 2 ? 0x46 : 0x56);
-    // red - inverted
-    vdp_vpoke(addr + coff - 8, i % 2 ? 0x64 : 0x65);
-    vdp_vpoke(addr + 30*8, i % 2 ? 0x64 : 0x65);
-    addr++;
-  }
+  uint8_t y = (bar_y+bar_i+1) << 3;
+  vdp_put_sprite_8(1, coff-8, y, 1, VDP_INK_DARK_RED);
+  vdp_put_sprite_8(2, 256-2*8, y, 2, VDP_INK_DARK_RED);
 }
 
 /**
@@ -105,7 +70,11 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
   bar_m = (m == 0 ? 0 : m-1);
   bar_i = i;
   bar_oldi = bar_i;
+
   bar_update();
+
+  vdp_set_sprite_8(1, m ? pill_left : blank);
+  vdp_set_sprite_8(2, m ? pill_right : blank);
 }
 
 /**
@@ -153,9 +122,4 @@ void bar_jump(unsigned char i)
 unsigned char bar_get()
 {
   return bar_i;
-}
-
-void bar_color(unsigned char f,unsigned char b)
-{
-  bar_co = (f << 4) | b;
 }
