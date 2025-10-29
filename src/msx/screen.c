@@ -107,7 +107,7 @@ static char udg[] =
 
 // static const char *empty="EMPTY";
 static const char *empty="-empty-";
-static const char *off="-empty-";
+static const char *off="-off-";
 
 bool any_slot_occupied()
 {
@@ -460,9 +460,9 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
 {
-  bool has_disks = false;
-  uint8_t disk_n = 0;
-  uint8_t slot_n = 0;
+  // bool has_disks = false;
+  // uint8_t disk_n = 0;
+  // uint8_t slot_n = 0;
 
   for (char i=0;i<MAX_DISK_SLOTS;i++)
   {
@@ -476,25 +476,35 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
     else if (strstr(filename, ".dsk") != NULL || strstr(filename, ".DSK") != NULL) {
       icon = 0x88;
-      label = 'A'+disk_n;
-      disk_n++;
+      // label = 'A'+disk_n;
+      // disk_n++;
 
-      if (!has_disks) {
-        slot_n++;
-        has_disks = true;
-      }
+      // if (!has_disks) {
+        // slot_n++;
+        // has_disks = true;
+      // }
     }
     else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
       icon = 0x89;
-      label = '1'+slot_n;
-      slot_n++;
+      // label = '1'+slot_n;
+      // slot_n++;
     }
     cputc(icon);
-    if (label == '\0') {
-      cprintf(" %-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // if (label == '\0') {
+    //   cprintf(" %-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // }
+    // else {
+    //   cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // }
+
+    if (filename[0] == '\0') {
+      cprintf(" %-29s",
+        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
     else {
-      cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      cprintf(" %u:%-27s",
+        d[i].hostSlot+1,
+        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
   }
 
