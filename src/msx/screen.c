@@ -477,7 +477,18 @@ void screen_hosts_and_devices_eject(uint8_t ds)
   // vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
   // textcolor(BLACK);
   // textbackground(WHITE);
-  gotoxy(1,11+ds); cprintf(empty);
+  //
+  // gotoxy(3,11+ds);
+  // TODO: use optimized function
+  // cputs(empty);
+  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0B00 + ds*0x100 + 16, 24);
+  // bar_jump(bar_get());
+
+  uint16_t offset = 0x0B00 + ds*0x100 + 8;
+  vdp_vfill(offset-8, 0, 240);
+  gotoxy(3,11+ds);
+  cputs(empty);
+  vdp_vwrite(row_pattern, MODE2_ATTR + offset, 232);
   bar_jump(bar_get());
 }
 
@@ -485,7 +496,14 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
   // textcolor(BLACK);
   // textbackground(WHITE);
-  gotoxy(1,1+hs); cprintf(empty);
+
+  // TODO: Use optimized function
+  uint16_t offset = 0x0100 + hs*0x100;
+  vdp_vfill(offset, 0, 240);
+  gotoxy(3,1+hs);
+  cputs(empty);
+  vdp_vwrite(row_pattern, MODE2_ATTR + offset, 240);
+  bar_jump(bar_get());
 }
 
 
