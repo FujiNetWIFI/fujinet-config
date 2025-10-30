@@ -130,6 +130,7 @@ void select_slot_done()
 
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
+#ifdef OBSOLETE
     fuji_set_directory_position(pos);
 
     fuji_read_directory(DIR_MAX_LEN, 0, response);
@@ -140,6 +141,7 @@ void select_slot_done()
 #ifndef BUILD_ATARI
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 #endif
+
 
 #ifdef BUILD_APPLE2
     // Try to mount the disk and error on failure
@@ -161,6 +163,8 @@ void select_slot_done()
       io_put_device_slots(&deviceSlots[0]);
     }*/
 #endif
+#endif // OBSOLETE
+
     fuji_close_directory();
   }
 
