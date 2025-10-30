@@ -321,7 +321,7 @@ SFSubState input_select_file_choose(void)
 		copy_mode = false;
 		state = HOSTS_AND_DEVICES;
 		return SF_DONE;
-	case KEY_RCL:
+	case KEY_BACKSPACE:
 		return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
 	case 'F':
 	case 'f':
