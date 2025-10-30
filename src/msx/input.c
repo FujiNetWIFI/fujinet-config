@@ -190,8 +190,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_DONE;
   case 'E':
   case 'e':
-    hosts_and_devices_edit_host_slot(selected_host_slot);
     screen_should_be_cleared = true;
+    hosts_and_devices_edit_host_slot(selected_host_slot);
     return HD_HOSTS;
   case 'S':
   case 's':
