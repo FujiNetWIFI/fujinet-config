@@ -126,12 +126,12 @@ WSSubState input_set_wifi_select(void)
 
 void input_line_set_wifi_custom(char *c)
 {
-  input_line(0,22,0,c,32,false);
+  input_line(1,22,0,c,30,false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
-  input_line(0,22,0,c,64,true);
+  input_line(1,22,0,c,64,true);
 }
 
 HDSubState input_hosts_and_devices_hosts(void)
@@ -190,8 +190,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_DONE;
   case 'E':
   case 'e':
-    bar_clear(false);
     hosts_and_devices_edit_host_slot(selected_host_slot);
+    screen_should_be_cleared = true;
     return HD_HOSTS;
   case 'S':
   case 's':
@@ -274,12 +274,12 @@ HDSubState input_hosts_and_devices_devices(void)
 
 void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
-  input_line(3,i+1,o,c,27,false);
+  input_line(1,22,o,c,30,false);
 }
 
 void input_line_filter(char *c)
 {
-  input_line(0,22,0,c,32,false);
+  input_line(1,22,0,c,30,false);
 }
 
 SFSubState input_select_file_choose(void)
