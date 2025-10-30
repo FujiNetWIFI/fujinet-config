@@ -1,6 +1,8 @@
 #ifndef MSX_GFXUTIL_H
 #define MSX_GFXUTIL_H
 
+#include <stdint.h>
+
 #define CH_BOX_UL   0x93
 #define CH_BOX_U    0x94
 #define CH_BOX_UR   0x95
@@ -17,5 +19,8 @@ extern const unsigned char udg[256];
 extern const unsigned char blank[8];
 extern const unsigned char pill_left[8];
 extern const unsigned char pill_right[8];
+
+void gfx_putcxy(char c, uint8_t x, uint8_t y);
+void gfx_putsxy(char *s, uint8_t x, uint8_t y);
 
 #endif // MSX_GFXUTIL_H

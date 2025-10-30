@@ -1,4 +1,8 @@
 #include "gfxutil.h"
+#include <stdint.h>
+
+#define CHAR_ADDR 0x1800
+#define ROW(y) y<<5
 
 const unsigned char row_pattern[256] =
 {
@@ -95,3 +99,19 @@ const unsigned char pill_left[8] =
 
 const unsigned char pill_right[8] =
   {0xC0,0xE0,0xF0,0xF0,0xF0,0xF0,0xE0,0xC0};
+
+void gfx_putcxy(char c, uint8_t x, uint8_t y)
+{
+  // TODO: Make this actually work
+  uint16_t addr = CHAR_ADDR + ROW(y) + x;
+  vdp_vpoke(addr, c);
+}
+
+void gfx_putsxy(char *s, uint8_t x, uint8_t y)
+{
+  // TODO: Make this actually work
+  char c;
+  uint16_t addr = CHAR_ADDR + (y<<5) + x;
+  while ((c = *s++) != '\0')
+    vdp_vpoke(addr++, c);
+}

@@ -6,7 +6,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <arch/z80.h>
 #include <video/tms99x8.h>
@@ -14,6 +13,7 @@
 #include <conio.h>
 #include <sys/ioctl.h>
 #include "../screen.h"
+#include "../constants.h"
 #include "../globals.h"
 #include "gfxutil.h"
 
@@ -208,7 +208,7 @@ void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char 
   uint16_t addr = MODE2_ATTR + (y+1) * 0x100;
   for (uint8_t row = 0; row < h-2; row++) {
     vdp_vwrite(row_pattern, addr, 256);
-    vdp_vfill(addr+8, 0x1F, margin << 3);
+    if (margin) vdp_vfill(addr+8, 0x1F, margin << 3);
     addr += 256;
   }
 }
@@ -339,9 +339,12 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
     vdp_noblank();
     style_white_on_black();
     clrscr();
+    bar_clear(false);
     screen_should_be_cleared = false;
+
     screen_hosts_and_devices_host_slots(h);
     screen_hosts_and_devices_device_slots(10,d,e);
+
     vdp_blank();
   }
 }
@@ -379,7 +382,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   for (uint8_t i = 0; i < 8; i++) {
     gotoxy(1, i+1);
     cputc('1'+i);
-    cprintf(" %-28s", screen_hosts_and_devices_host_slot(h[i]));
+    cprintf(" %.28s", screen_hosts_and_devices_host_slot(h[i]));
   }
 
   draw_card(0, 0, 32, 10, 1, "Hosts");
@@ -425,11 +428,11 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     // }
 
     if (filename[0] == '\0') {
-      cprintf(" %-29s",
+      cprintf(" %.28s",
         screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
     else {
-      cprintf(" %u:%-27s",
+      cprintf(" %u:%.25s",
         d[i].hostSlot+1,
         screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     }
@@ -525,8 +528,9 @@ void screen_select_file(void)
 
   style_white_on_black();
   clrscr();
+  bar_clear(false);
 
-  draw_card(0, 0, 32, 18, 0, "Select Image");
+  draw_card(0, 0, 32, 19, 0, hostSlots[selected_host_slot]);
 
   hide_menu();
   show_status("Opening...");
@@ -536,13 +540,20 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
-  draw_card(0, 0, 32, 18, 0, hostSlots[selected_host_slot]);
-
   gotoxy(1,1);
   if (f[0]==0x00)
     cprintf("%30s",p);
   else
     cprintf("%-8s|%22s",p,f);
+
+  // TODO: swap for optimized function
+  uint16_t addr = MODE2_ATTR + 0x200 + 8;
+  for (uint8_t y = 0; y < ENTRIES_PER_PAGE; y++) {
+    gotoxy(1,y+2);
+    cprintf("%30s"," ");
+    vdp_vwrite(row_pattern+8, addr, 30<<3);
+    addr += 0x100;
+  }
 }
 
 void screen_select_file_display_long_filename(char *e)
@@ -574,9 +585,13 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
 {
   gotoxy(2,y+2);
-  textcolor(WHITE);
   textbackground(BLUE);
-  cprintf("%-28s",e);
+  cprintf("%.28s",e);
+
+  // TODO: swap for optimized function
+  uint16_t addr = MODE2_ATTR + 0x200 + 0x100*y + 16;
+  vdp_vwrite(row_pattern + 8, addr, 28<<3);
+  // gfx_putsxy("hello", 2, y+2);
 }
 
 void screen_select_file_choose(char visibleEntries)
