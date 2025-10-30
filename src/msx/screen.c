@@ -244,7 +244,7 @@ void screen_set_wifi(AdapterConfig* ac)
 
   draw_card(0, 0, 32, 18, 3, "Select Network");
 
-  gotoxy(3,18);
+  gotoxy(6,18);
   cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
 
   show_menu("s","_skip",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -265,8 +265,8 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   char meter[4]={0x20,0x20,0x20,0x00};
   char ds[32];
 
-  memset(ds,0x20,28);
-  strncpy(ds,s->ssid,28);
+  memset(ds,0x20,26);
+  strncpy(ds,s->ssid,26);
 
   if (s->rssi > -40)
   {
@@ -284,36 +284,43 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     meter[0] = 0x80;
   }
 
-  // style_black_on_white();
-  gotoxy(1,n+1); cprintf("%s ",meter);
-  // style_white_on_blue();
-  cprintf("%s",ds);
+  gotoxy(1,n+1);
+  textcolor(BLACK);
+  textbackground(WHITE);
+  cputs(meter);
+  textcolor(WHITE);
+  textbackground(BLUE);
+  cputc(' ');
+  cputs(ds);
+
+  // TODO: swap for optimized function
+  uint16_t addr = MODE2_ATTR + 0x100 + 0x100*n + 32;
+  vdp_vwrite(row_pattern + 8, addr, 26<<3);
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
 {
   char message[33];
 
-  show_menu("h","_hidden","r","_rescan","s","_skip", NULL, NULL, NULL, NULL);
-  // style_white_on_black();
-  // gotoxy(0,0);  cprintf("%32s","Select Network ");
   bar_set(0,5,nn,0);
-
-  draw_card(0, 0, 32, 18, 3, "Select Network");
 
   sprintf(message,"%d networks found",nn);
   show_status(message);
+
+  show_menu("h","_hidden","r","_rescan","s","_skip", NULL, NULL, NULL, NULL);
 }
 
 void screen_set_wifi_custom(void)
 {
   hide_menu();
+  bar_clear(false);
   show_status("Enter network name");
 }
 
 void screen_set_wifi_password(void)
 {
   hide_menu();
+  bar_clear(false);
   show_status("Enter network password");
 }
 
@@ -358,7 +365,7 @@ void screen_hosts_and_devices_hosts(void)
 
 void screen_hosts_and_devices_devices(void)
 {
-  show_menu("b","_boot","e","_eject","h","_hosts", "r"," _r/w", "_c","config");
+  show_menu("b","_boot","e","_eject","h","_hosts", "r"," _r/w", "c","_config");
   bar_set(10,3,8,selected_device_slot);
 }
 
@@ -458,8 +465,10 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
   menu_clear();
   show_status("Enter new host name");
-  textcolor(BLACK);
-  textbackground(WHITE);
+  textcolor(WHITE);
+  textbackground(BLACK);
+  gotoxy(1,22);
+  cputs(hostSlots[i]);
 }
 
 
@@ -494,8 +503,8 @@ void screen_hosts_and_devices_long_filename(char *f)
 void screen_show_info(bool printerEnabled,AdapterConfig* ac)
 {
   vdp_noblank();
-  clrscr();
   bar_clear(false);
+  clrscr();
 
   gotoxy(0,7);
 
@@ -600,7 +609,6 @@ void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryTy
   // TODO: swap for optimized function
   uint16_t addr = MODE2_ATTR + 0x200 + 0x100*y + 16;
   vdp_vwrite(row_pattern + 8, addr, 28<<3);
-  // gfx_putsxy("hello", 2, y+2);
 }
 
 void screen_select_file_choose(char visibleEntries)
