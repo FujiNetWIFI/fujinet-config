@@ -466,16 +466,16 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 void screen_hosts_and_devices_eject(uint8_t ds)
 {
   // vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
-  textcolor(BLACK);
-  textbackground(WHITE);
+  // textcolor(BLACK);
+  // textbackground(WHITE);
   gotoxy(1,11+ds); cprintf(empty);
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
-  textcolor(BLACK);
-  textbackground(WHITE);
+  // textcolor(BLACK);
+  // textbackground(WHITE);
   gotoxy(1,1+hs); cprintf(empty);
 }
 
@@ -547,12 +547,13 @@ void screen_select_file_display(char *p, char *f)
     cprintf("%-8s|%22s",p,f);
 
   // TODO: swap for optimized function
-  uint16_t addr = MODE2_ATTR + 0x200 + 8;
-  for (uint8_t y = 0; y < ENTRIES_PER_PAGE; y++) {
-    gotoxy(1,y+2);
-    cprintf("%30s"," ");
-    vdp_vwrite(row_pattern+8, addr, 30<<3);
-    addr += 0x100;
+  uint16_t patt_addr = 0x200 + 8;
+  uint16_t attr_addr = MODE2_ATTR + 0x200 + 8;
+  for (uint8_t y = 0; y < ENTRIES_PER_PAGE+1; y++) {
+    vdp_vfill(patt_addr,0,240);
+    vdp_vwrite(row_pattern+8, attr_addr, 30<<3);
+    attr_addr += 0x100;
+    patt_addr += 0x100;
   }
 }
 
@@ -570,16 +571,24 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_prev(void)
 {
-  textcolor(WHITE);
-  textbackground(BLUE);
-  gotoxy(2,2); cprintf("%-28s","...");
+  // textcolor(WHITE);
+  // textbackground(BLUE);
+  // gotoxy(2,2); cprintf("%-28s","...");
+
+  // TODO: replace with optimized function
+  gotoxy(2,2); cputs("...");
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0200 + 16, 24);
 }
 
 void screen_select_file_next(void)
 {
-  textcolor(WHITE);
-  textbackground(BLUE);
-  gotoxy(2,17); cprintf("%-28s","...");
+  // textcolor(WHITE);
+  // textbackground(BLUE);
+  // gotoxy(2,17); cprintf("%-28s","...");
+
+  // TODO: replace with optimized function
+  gotoxy(2,17); cputs("...");
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x1100 + 16, 24);
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
