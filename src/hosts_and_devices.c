@@ -62,7 +62,15 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   }
 
   fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+
+  // Need to re-render both hosts and devices because some devices
+  // may have been eject if they belonged to old host
+#ifdef OBSOLETE
   screen_hosts_and_devices_hosts();
+#else
+  screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+  screen_hosts_and_devices_hosts();
+#endif // OBSOLETE
 }
 
 void hosts_and_devices_hosts(void)
