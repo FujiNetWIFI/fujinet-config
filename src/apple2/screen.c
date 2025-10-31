@@ -579,7 +579,7 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, const char* e, unsigned entryType)
 {
   gotoxy(0,y+3);
-  cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
+  cprintf("%-40s",&e[0]);
 }
 #pragma warn (unused-param, pop)
 
