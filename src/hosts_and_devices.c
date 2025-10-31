@@ -93,13 +93,17 @@ void hosts_and_devices_long_filename(void)
 void hosts_and_devices_eject(unsigned char ds)
 {
   fuji_unmount_disk_image(ds);
+#ifdef OBSOLETE
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
   deviceSlots[ds].mode = 0;
   fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+#endif // OBSOLETE
   fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_eject(ds);
+#ifdef OBSOLETE
   hosts_and_devices_long_filename();
+#endif // OBSOLETE
 }
 
 void hosts_and_devices_devices_clear_all(void)

@@ -484,11 +484,11 @@ void screen_hosts_and_devices_eject(uint8_t ds)
   // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0B00 + ds*0x100 + 16, 24);
   // bar_jump(bar_get());
 
-  uint16_t offset = 0x0B00 + ds*0x100 + 8;
+  uint16_t offset = 0x0B00 + ds*0x100 + 16;
   vdp_vfill(offset-8, 0, 240);
   gotoxy(3,11+ds);
   cputs(empty);
-  vdp_vwrite(row_pattern, MODE2_ATTR + offset, 232);
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + offset, 232);
   bar_jump(bar_get());
 }
 
@@ -571,7 +571,7 @@ void screen_select_file_display(char *p, char *f)
   if (f[0]==0x00)
     cprintf("%30s",p);
   else
-    cprintf("%-8s|%22s",p,f);
+    cprintf("%-8s|%20s",f,p);
 
   // TODO: swap for optimized function
   uint16_t patt_addr = 0x200 + 8;
