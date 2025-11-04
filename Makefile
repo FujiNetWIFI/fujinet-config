@@ -93,6 +93,9 @@ apple2/disk-post::
 ########################################
 # Atari customization
 
+ATARI_LINKER_CFG = src/atari/atari.cfg
+EXECUTABLE_EXTRA_DEPS_ATARI = $(ATARI_LINKER_CFG)
+LDFLAGS_EXTRA_ATARI = -C $(ATARI_LINKER_CFG)
 EXTRA_INCLUDE_ATARI = src/atari/asminc
 
 ########################################
