@@ -38,7 +38,21 @@ void bar_clear(bool oldRow)
   }
   uint16_t coff = bar_c << 3;
   uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i)) + coff;
-  vdp_vwrite(row_pattern + coff, addr, 256 - coff - 16);
+
+  // TODO: Make this watermark stuff less convoluted
+  uint8_t row_len = row_lengths[oldRow==true ? bar_oldi : bar_i];
+  if (!watermark_visible || row_len >= 28) {
+    vdp_vwrite(row_pattern + coff, addr, 256 - coff - 16);
+  }
+  else {
+    uint8_t bright_len = row_len*8 - coff;
+    uint8_t dim_len = 27*8 - bright_len;
+    vdp_vwrite(row_pattern + coff, addr, bright_len);
+    // vdp_vfill(addr, 0xF6, bright_len);
+    for (uint8_t i = row_len; i < 31; i++) {
+      vdp_vwrite(watermark_pattern, addr-coff+i*8, 8);
+    }
+  }
 }
 
 /**
@@ -49,7 +63,19 @@ void bar_update(void)
   int coff = bar_c << 3;
   bar_clear(true);
 
-  vdp_vfill(ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff, 0xF6, 256 - coff - 16);
+  uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff;
+
+  // TODO: Make this watermark stuff less convoluted
+  uint8_t row_len = row_lengths[bar_i];
+  if (!watermark_visible || row_len >= 28) {
+    vdp_vfill(addr, 0xF6, 256 - coff - 16);
+  }
+  else {
+    uint8_t bright_len = row_len*8 - coff;
+    uint8_t dim_len = 27*8 - bright_len;
+    vdp_vfill(addr, 0xF6, bright_len);
+    vdp_vfill(addr+bright_len, 0x96, dim_len);
+  }
 
   uint8_t y = (bar_y+bar_i+1) << 3;
   vdp_put_sprite_8(1, coff-8, y, 1, VDP_INK_DARK_RED);

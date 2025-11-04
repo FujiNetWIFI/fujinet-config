@@ -155,16 +155,17 @@ void hide_menu(void)
   show_menu(0);
 }
 
-void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char *title)
+void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark)
 {
+  watermark_visible = watermark;
+
   uint8_t title_len = 0;
   if (title != NULL)
     title_len = strlen(title);
 
   textcolor(WHITE); textbackground(BLACK);
-  gotoxy(x,y); putchar(CH_BOX_UL);
-  for (uint8_t i = 0; i < w-title_len-3; i++) putchar(CH_BOX_U);
-  // for (uint8_t i = 0; i < 23; i++) putchar(CH_BOX_U);
+  gotoxy(0,y); putchar(CH_BOX_UL);
+  for (uint8_t i = 0; i < 32-title_len-3; i++) putchar(CH_BOX_U);
   putchar(CH_TAB_L);
 
   textcolor(BLACK); textbackground(WHITE);
@@ -175,20 +176,27 @@ void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char 
   putchar(CH_TAB_R);
 
   for (uint8_t i = 0; i < h-2; i++) {
-    gotoxy(x, y+i+1);
+    gotoxy(0, y+i+1);
     putchar(CH_BOX_L);
-    gotoxy(x+w-1, y+i+1);
+    gotoxy(31, y+i+1);
     putchar(CH_BOX_R);
   }
 
-  gotoxy(x,y+h-1); putchar(CH_BOX_BL);
-  for (uint8_t i = 0; i < w-2; i++) putchar(CH_BOX_B);
+  gotoxy(0,y+h-1); putchar(CH_BOX_BL);
+  for (uint8_t i = 0; i < 30; i++) putchar(CH_BOX_B);
   putchar(CH_BOX_BR);
 
   uint16_t addr = MODE2_ATTR + (y+1) * 0x100;
   for (uint8_t row = 0; row < h-2; row++) {
     vdp_vwrite(row_pattern, addr, 256);
     if (margin) vdp_vfill(addr+8, 0x1F, margin << 3);
+
+    if (watermark) {
+      for (uint8_t i = row_lengths[row]; i < 31; i++) {
+        vdp_vwrite(watermark_pattern, addr+i*8, 8);
+      }
+    }
+
     addr += 256;
   }
 }
@@ -224,7 +232,7 @@ void screen_set_wifi(AdapterConfig* ac)
   style_white_on_black();
   clrscr();
 
-  draw_card(0, 0, 32, 18, 3, "Select Network");
+  draw_card(0, 18, 3, "Select Network", false);
 
   gotoxy(6,18);
   cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
@@ -343,6 +351,7 @@ void screen_hosts_and_devices_hosts(void)
   show_menu(5, 'b',"_boot", 'e',"_edit", 'd',"_disks", 's',"ba_sic", 'c',"_config");
   clear_status();
   bar_set(0,3,8,selected_host_slot);
+  // bar_set(0,3,8,3);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -366,15 +375,30 @@ char* screen_hosts_and_devices_host_slot(char *hs)
   return hs[0]==0x00 ? &empty[0] : hs;
 }
 
+void draw_watermark() {
+  gotoxy(26,1); cprintf(  "%c", 0xA6);
+  gotoxy(24,2); cprintf(  "%c%c%c%c%c%c", 0xA7,0xA5,0xA1,0xA2,0xA7,0xA5);
+  gotoxy(24,3); cprintf(  "%c %c%c%c", 0xA6,0xA3,0xA4,0xA6);
+  gotoxy(23,4); cprintf("%c%c%c%c%c%c%c%c", 0xA5,0xA1,0xA2,0x9D,0x9E,0xA1,0xA2,0xA5);
+  gotoxy(24,5); cprintf("%c%c%c%c%c%c", 0xA3,0xA4,0x9F,0xA0,0xA3,0xA4);
+  gotoxy(24,6); cprintf(  "%c%c%c%c%c%c%c", 0xA7,0xA5,0xA7,0xA5,0xA1,0xA2,0xA5);
+  gotoxy(24,7); cprintf(  "%c %c %c%c", 0xA6,0xA6,0xA3,0xA4);
+  gotoxy(26,8); cprintf(  "%c %c", 0xA6,0xA6);
+}
+
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
+  draw_watermark();
+
   for (uint8_t i = 0; i < 8; i++) {
     gotoxy(1, i+1);
     cputc('1'+i);
     cprintf(" %.28s", screen_hosts_and_devices_host_slot(h[i]));
+    // TODO: kind of wasteful
+    row_lengths[i] = 3 + strlen(screen_hosts_and_devices_host_slot(h[i]));
   }
 
-  draw_card(0, 0, 32, 10, 1, "Hosts");
+  draw_card(0, 10, 1, "Hosts", true);
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -427,7 +451,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
   }
 
-  draw_card(0, y, 32, 10, 1, "Devices");
+  draw_card(y, 10, 1, "Devices", false);
 }
 
 
@@ -518,7 +542,7 @@ void screen_show_info(bool printerEnabled,AdapterConfig* ac)
   cprintf(" %8s %s\n","FN VER",ac->fn_version);
   cprintf(" %8s %s\n","CONFIG",GIT_VERSION);
 
-  draw_card(0, 5, 32, 13, 8, "Configuration");
+  draw_card(5, 13, 8, "Configuration", false);
 
   show_menu(2, 'e',"_edit", 'r',"_reconnect");
   vdp_blank();
@@ -539,7 +563,7 @@ void screen_select_file(void)
   clrscr();
   bar_clear(false);
 
-  draw_card(0, 0, 32, 19, 0, hostSlots[selected_host_slot]);
+  draw_card(0, 19, 0, hostSlots[selected_host_slot], false);
 
   hide_menu();
   show_status("Opening...");
