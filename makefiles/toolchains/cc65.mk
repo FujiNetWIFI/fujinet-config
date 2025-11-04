@@ -5,9 +5,11 @@ AR_DEFAULT ?= ar65
 
 include $(MWD)/tc-common.mk
 
-CFLAGS += -O --cpu 6502
-ASFLAGS += --cpu 6502
+CFLAGS +=
+ASFLAGS +=
 LDFLAGS +=
+
+CFLAGS += -DGIT_VERSION='"$(GIT_VERSION)"'
 
 define include-dir-flag
   --include-dir $1

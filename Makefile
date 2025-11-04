@@ -1,11 +1,12 @@
 PRODUCT = config
-PLATFORMS = coco apple2 atari c64 adam pmd85
+PLATFORMS = coco apple2 atari c64 adam
 
 # Not currently in buildable state
 #PLATFORMS += dragon
 #PLATFORMS += msdos
 #PLATFORMS += pc6001
 #PLATFORMS += pc8801
+#PLATFORMS += pmd85
 #PLATFORMS += rc2014
 
 # Require special toolchains
@@ -29,7 +30,7 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB =
+FUJINET_LIB = 4.7.9
 $(info FUJUNET_LIB=$(FUJINET_LIB))
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
@@ -93,6 +94,9 @@ apple2/disk-post::
 ########################################
 # Atari customization
 
+ATARI_LINKER_CFG = src/atari/atari.cfg
+EXECUTABLE_EXTRA_DEPS_ATARI = $(ATARI_LINKER_CFG)
+LDFLAGS_EXTRA_ATARI = -C $(ATARI_LINKER_CFG)
 EXTRA_INCLUDE_ATARI = src/atari/asminc
 
 ########################################

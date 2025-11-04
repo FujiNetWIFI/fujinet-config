@@ -3,9 +3,12 @@ AS_DEFAULT ?= wasm
 LD_DEFAULT ?= wlink OPTION quiet
 
 include $(MWD)/tc-common.mk
-CFLAGS += -0 -bt=dos -ms -s -osh -zu
+
+CFLAGS += -0 -bt=dos -ms -s -osh -zu -fr=$(basename $@).err
 ASFLAGS +=
 LDFLAGS += SYSTEM dos LIBPATH $(FUJINET_LIB_DIR)
+
+CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 
 define include-dir-flag
   -I$1

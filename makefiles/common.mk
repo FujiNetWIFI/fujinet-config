@@ -10,9 +10,10 @@ $(info Building for PLATFORM=$(PLATFORM))
 
 include $(MWD)/../Makefile
 
-# Add GIT_VERSION macro define to CFLAGS, includes tag if available,
-# short commit hash, appends '*' if changes haven't been commited
-CFLAGS += -DGIT_VERSION='"$(shell git rev-parse --short HEAD)$(shell git status --porcelain | grep -q '^[ MADRCU]' && echo '*')"'
+# Define GIT_VERSION to be used in macro define to CFLAGS, includes
+# tag if available, short commit hash, appends '*' if changes haven't
+# been commited
+GIT_VERSION := $(shell git rev-parse --short HEAD)$(shell git status --porcelain | grep -q '^[ MADRCU]' && echo '*')
 
 IS_LIBRARY := $(if $(filter %.lib,$(PRODUCT)),1,0)
 ifeq ($(IS_LIBRARY),1)
