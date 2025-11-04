@@ -30,7 +30,7 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB = 4.8.0
+FUJINET_LIB = 4.7.9
 $(info FUJUNET_LIB=$(FUJINET_LIB))
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
