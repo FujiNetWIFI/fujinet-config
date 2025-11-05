@@ -16,6 +16,7 @@
 #include "../select_file.h"
 #include "../set_wifi.h"
 #include "../select_slot.h"
+#include "scroll.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -367,16 +368,20 @@ SFSubState input_select_file_choose(void)
 	char k;
 	unsigned entryType = 0;
 
+	scroll_reset(true);
+
 	locate(31, 15);
 
 	while (true)
 	{
-		k = waitkey(true);
+		word now = getTimer();
+    	k = inkey();
 
 		switch (k)
 		{
 		case 'C':
 		case 'c':
+			scroll_reset(false);
 			if (copy_mode == true)
 			{
 				return SF_DONE;
@@ -411,6 +416,7 @@ SFSubState input_select_file_choose(void)
 			else
 				return SF_DONE;
 		case KEY_UP_ARROW: // up arrow
+			scroll_reset(false);
 			if ((bar_get() == 0) && (pos > 0))
 				return SF_PREV_PAGE;
 			else
@@ -422,10 +428,12 @@ SFSubState input_select_file_choose(void)
 				return SF_CHOOSE;
 			}
 		case KEY_SHIFT_UP_ARROW: // shifted up arrow
+			scroll_reset(false);
 			if (pos > 0)
 				return SF_PREV_PAGE;
 			break;
 		case KEY_DOWN_ARROW: // down arrow
+			scroll_reset(false);
 			if ((bar_get() == 9) && (dir_eof == false))
 				return SF_NEXT_PAGE;
 			else
@@ -438,11 +446,25 @@ SFSubState input_select_file_choose(void)
 			}
 			break;
 		case KEY_SHIFT_DOWN_ARROW: // shifted down arrow
+			scroll_reset(false);
 			if (dir_eof == false)
 				return SF_NEXT_PAGE;
 			break;
-		default:
-			return SF_CHOOSE;
+		}
+
+		// Handle idle countdown + timed scroll
+		if ((word)(now - lastTimer) >= SCROLL_DELAY_TICKS)
+		{
+			lastTimer = now;
+
+			if (idleCounter > 0)
+			{
+				idleCounter--;
+			}
+			else
+			{
+				scroll_step();
+			}
 		}
 	}
 

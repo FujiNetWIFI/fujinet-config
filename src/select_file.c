@@ -2,6 +2,7 @@
  * Select file from Host Slot
  */
 
+#include <fujinet-fuji.h>
 #include "select_file.h"
 #include "screen.h"
 #include "constants.h"
@@ -150,18 +151,11 @@ void select_display_long_filename(void)
 #else
   if ((entry_size[bar_get()] > 30) && (entry_timer == 0))
 #endif
-  {
+  {    
     if (long_entry_displayed == false)
     {
-      fuji_open_directory2(selected_host_slot, path, filter);
-#ifdef BUILD_ATARI
-      fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
-#else
-      fuji_set_directory_position(pos + bar_get());
-#endif
-      fuji_read_directory(64, 0, response);
+      select_get_filename(64);
       screen_select_file_display_long_filename(response);
-      fuji_close_directory();
       long_entry_displayed = true;
     }
   }
@@ -170,6 +164,21 @@ void select_display_long_filename(void)
     long_entry_displayed = false;
     screen_select_file_clear_long_filename();
   }
+}
+
+void select_get_filename(uint8_t len)
+{
+  fuji_mount_host_slot(selected_host_slot);
+
+  fuji_open_directory2(selected_host_slot, path, filter);
+
+#ifdef BUILD_ATARI
+	  fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
+#else
+	  fuji_set_directory_position(pos + bar_get());
+#endif
+	  fuji_read_directory(len, 0, response);
+	  fuji_close_directory();
 }
 
 void select_next_page(void)
