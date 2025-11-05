@@ -58,6 +58,7 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
+LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
 CFGLOAD_COCO = src/coco/cfgload/cfgload.asm
 CFGLOAD_BIN = r2r/coco/cfgload.bin

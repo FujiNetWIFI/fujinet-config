@@ -7,7 +7,7 @@ include $(MWD)/tc-common.mk
 
 CFLAGS += --intdir=$(OBJ_DIR)
 ASFLAGS +=
-LDFLAGS += --org=0E00 --limit=7C00
+LDFLAGS +=
 
 CFLAGS += -DGIT_VERSION='"$(GIT_VERSION)"'
 
