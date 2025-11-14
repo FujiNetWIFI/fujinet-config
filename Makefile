@@ -60,12 +60,12 @@ CFLAGS_EXTRA_Z88DK = -Os
 
 LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
-CFGLOAD_COCO = src/coco/cfgload/cfgload.asm
+CFGLOAD_COCO = src/coco/cfgload/cfgload.c
 CFGLOAD_BIN = r2r/coco/cfgload.bin
 DISK_EXTRA_DEPS_COCO := $(AUTOEXEC_COCO) $(CFGLOAD_BIN)
 
 $(CFGLOAD_BIN):: $(CFGLOAD_COCO) | $(R2R_PD)
-	lwasm -b -9 -o $@ $<
+	cmoc -o $@ $<
 
 # $1 == decb flags
 # $2 == source file
