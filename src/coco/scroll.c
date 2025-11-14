@@ -4,7 +4,9 @@
 #include "../constants.h"
 #include "../globals.h"
 #include "../screen.h"
+#include "../select_file.h"
 #include "scroll.h"
+
 
 word lastTimer;
 word idleCounter = IDLE_TIMEOUT_COUNT;
