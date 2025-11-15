@@ -4,6 +4,7 @@
 #include "../constants.h"
 #include "../globals.h"
 #include "../screen.h"
+#include "../system.h"
 #include "scroll.h"
 
 word lastTimer;

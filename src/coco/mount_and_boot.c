@@ -4,6 +4,7 @@
 #include "../screen.h"
 #include "../typedefs.h"
 #include "../globals.h"
+#include "../system.h"
 
 void mount_and_boot_lobby(void)
 {
