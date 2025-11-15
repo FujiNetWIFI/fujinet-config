@@ -367,15 +367,8 @@ void screen_error(const char *msg)
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
-  switch(hd_subState)
-    {
-    case HD_HOSTS:
-      screen_hosts_and_devices_hosts();
-      break;
-    case HD_DEVICES:
-      screen_hosts_and_devices_devices();
-      break;
-    }
+    // Nothing to do here. The screen is completely repainted in the
+    // hosts/devices specific screen functions below
 }
 
 // Show the keys that are applicable when we are on the Hosts portion of the screen.
