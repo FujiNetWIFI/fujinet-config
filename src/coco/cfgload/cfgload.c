@@ -301,6 +301,9 @@ void draw_logo()
 // Then load config.bin
 int main(void)
 {
+    // Reset text mode to default
+    width(32);
+    
     // Setup graphics mode and clear screen
     pmode(4, SCREEN_BUFFER);
     pcls(0xff);
