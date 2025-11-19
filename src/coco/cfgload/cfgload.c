@@ -1,7 +1,7 @@
 #include <cmoc.h>
 #include <coco.h>
 
-#define SCREEN_BUFFER (byte*) 0x6000
+#define SCREEN_BUFFER (byte*) 0x6600
 
 #define LOGO_FULL_SIZE 6144
 #define LOGO_BOTTOM_TRIMMED_BYTES 320
