@@ -169,6 +169,7 @@ void screen_init(void)
     else
     {
       POKE(0xC051,0); // TEXT
+	  POKE(0xC056,0); // LORES (make AppleSqueezer happy)
     }
   #endif
 }
