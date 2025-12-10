@@ -11,5 +11,6 @@ extern char _mybuffer[2000];
         do { sprintf(_mybuffer, s); _debug(); } while(0)
 
 void _debug();
+void debug_break();
 
 #endif
