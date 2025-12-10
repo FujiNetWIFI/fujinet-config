@@ -17,3 +17,14 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
     // last_rc = fujinet_create_new(selected_host_slot, selected_device_slot, selected_size, path);
 #endif
 }
+
+#define RG9SAV 0xFFE8
+
+// default value
+uint8_t system_fps = 60;
+
+void system_set_fps()
+{
+  unsigned char *rg9sav_addr = RG9SAV;
+  system_fps = *rg9sav_addr & 0b10 ? 50 : 60;
+}
