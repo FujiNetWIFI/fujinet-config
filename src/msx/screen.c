@@ -16,18 +16,16 @@
 #include "../constants.h"
 #include "../globals.h"
 #include "gfxutil.h"
+#include "cursor.h"
+#include "stdarg.h"
 
-#define F1_ADDR          0xF87F
-#define F2_ADDR          0xF88F
-#define F3_ADDR          0xF89F
-#define F4_ADDR          0xF8AF
-#define F5_ADDR          0xF8BF
-#define F6_ADDR          0xF8CF
-#define F7_ADDR          0xF8DF
-#define F8_ADDR          0xF8EF
-#define F9_ADDR          0xF8FF
-#define F10_ADDR         0xF90F
+static const uint8_t *KEY_ADDRESSES[] = {
+  0xF87F, 0xF88F, 0xF89F, 0xF8AF, 0xF8BF, 0xF8CF, 0xF8DF, 0xF8EF, 0xF8FF, 0xF90F
+};
 
+#define MAX(x, y)  ((x) > (y) ? (x) : (y))
+
+#define MENU_LINE 23
 #define MAX_DISK_SLOTS (8)
 
 // #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
@@ -110,69 +108,49 @@ uint8_t print_menu_option(char *label) {
   return len;
 }
 
-void show_menu(char *f1_key, char *f1_lbl,
-               char *f2_key, char *f2_lbl,
-               char *f3_key, char *f3_lbl,
-               char *f4_key, char *f4_lbl,
-               char *f5_key, char *f5_lbl)
+void show_menu(uint8_t count, ...)
 {
-  // TODO: this has gotten a little wild, should probably use var args
-  uint8_t len = 5;
+  uint8_t len;
   uint8_t x = 1;
+  int key;
+  char *label;
+
+  va_list argptr;
+  va_list cpyptr;
+  va_start(argptr, count);
+
   // style_white_on_blue();
   style_white_on_black();
   menu_clear();
 
-  if (f1_lbl != NULL) {
-    strcpy((char *)F1_ADDR, f1_key);
-    gotoxy(x, 23);
-    len = print_menu_option(f1_lbl);
-    x += len < 6 ? 6 : len + 1;
-  }
-  else {
-    x += 6;
+  // "count" is broken, so we read argptr + 2
+  va_copy(cpyptr, argptr); cpyptr += 2;
+  int real_count = va_arg(cpyptr, int);
+
+  for (uint8_t i = 0; i < 10; ++i) {
+    char *key_addr = KEY_ADDRESSES[i];
+    if (i < real_count) {
+      key = 0xff & va_arg(argptr, int);
+      label = va_arg(argptr, char*);
+      if (key == 0) goto disabled;
+      gotoxy(x, MENU_LINE);
+      len = print_menu_option(label);
+      x += MAX(6, len + 1);
+    } else {
+      key = '\0';
+disabled:
+      *key_addr = key;
+      // empty menu items are used as TAB stops at: 7, 13, 19, 25
+      x = 1 + ((i + 1) * 6);
+    }
   }
 
-  if (f2_lbl != NULL) {
-    strcpy((char *)F2_ADDR, f2_key);
-    gotoxy(x, 23);
-    len = print_menu_option(f2_lbl);
-    x += len < 6 ? 6 : len + 1;
-  }
-  else {
-    x += 6;
-  }
-
-  if (f3_lbl != NULL) {
-    strcpy((char *)F3_ADDR, f3_key);
-    gotoxy(x, 23);
-    len = print_menu_option(f3_lbl);
-    x += len < 6 ? 6 : len + 1;
-  }
-  else {
-    x += 6;
-  }
-
-  if (f4_lbl != NULL) {
-    strcpy((char *)F4_ADDR, f4_key);
-    gotoxy(x, 23);
-    len = print_menu_option(f4_lbl);
-    x += len < 6 ? 6 : len + 1;
-  }
-  else {
-    x += 6;
-  }
-
-  if (f5_lbl != NULL) {
-    strcpy((char *)F5_ADDR, f5_key);
-    gotoxy(x, 23);
-    print_menu_option(f5_lbl);
-  }
+  va_end(argptr);
 }
 
 void hide_menu(void)
 {
-  show_menu(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+  show_menu(0);
 }
 
 void draw_card(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t margin, char *title)
@@ -247,7 +225,7 @@ void screen_set_wifi(AdapterConfig* ac)
   gotoxy(6,18);
   cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
 
-  show_menu("s","_skip",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+  show_menu(1, 's',"_skip");
   show_status("Scanning for networks...");
 
   vdp_blank();
@@ -307,7 +285,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   sprintf(message,"%d networks found",nn);
   show_status(message);
 
-  show_menu("h","_hidden","r","_rescan","s","_skip", NULL, NULL, NULL, NULL);
+  show_menu(3, 'h',"_hidden", 'r',"_rescan", 's', "_skip");
 }
 
 void screen_set_wifi_custom(void)
@@ -358,15 +336,15 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  show_menu("b","_boot","e","_edit","d","_disks", "s","ba_sic", "c","_config");
+  show_menu(5, 'b',"_boot", 'e',"_edit", 'd',"_disks", 's',"ba_sic", 'c',"_config");
   clear_status();
   bar_set(0,3,8,selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
 {
-  show_menu("b","_boot","e","_eject","h","_hosts", "r"," _r/w", "c","_config");
-  bar_set(10,3,8,selected_device_slot);
+  show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
+  bar_set(10, 3, 8, selected_device_slot);
 }
 
 const char* screen_hosts_and_devices_device_slot(uint8_t hs, bool e, const char *fn)
@@ -538,7 +516,7 @@ void screen_show_info(bool printerEnabled,AdapterConfig* ac)
 
   draw_card(0, 5, 32, 13, 8, "Configuration");
 
-  show_menu("e","_edit", "r","_reconnect", NULL,NULL, NULL,NULL, NULL,NULL);
+  show_menu(2, 'e',"_edit", 'r',"_reconnect");
   vdp_blank();
 }
 
@@ -638,11 +616,11 @@ void screen_select_file_choose(char visibleEntries)
 
   if (copy_mode == true) {
     show_status("Select destination");
-    show_menu("c","_copy", NULL,NULL, NULL,NULL, NULL,NULL, NULL,NULL);
+    show_menu(1, 'c',"_copy");
   }
   else {
     show_status("Select a file to mount");
-    show_menu("m","_mount", "b"," _boot", "c"," _copy", "n","  _new", "f"," _filter");
+    show_menu(5, 'm',"_mount", 'b'," _boot", 'c'," _copy", 'n',"  _new", 'f'," _filter");
   }
 }
 
@@ -655,13 +633,13 @@ void screen_select_file_filter(void)
 void screen_select_file_new_type(void)
 {
   show_status("What type of disk?");
-  show_menu("1","MSX-DOS _1", "2"," MSX-DOS _2", NULL,NULL, NULL,NULL, "b","_blank");
+  show_menu(5, '1',"MSX-DOS _1", '2'," MSX-DOS _2", 0,NULL, 0,NULL, 'b',"_blank");
 }
 
 void screen_select_file_new_size(unsigned char k)
 {
   show_status("Disk size?");
-  show_menu("3","_360K", "7","_720K", NULL,NULL, NULL,NULL, "c","_custom");
+  show_menu(5, '3',"_360K", '7',"_720K", 0,NULL, 0,NULL, 'c',"_custom");
 }
 
 void screen_select_file_new_custom(void)
@@ -702,7 +680,7 @@ void screen_select_slot_choose(void)
 {
   show_status("Choose where to mount");
   if (create) {
-    show_menu("r","_read-only", NULL,NULL, NULL,NULL, NULL,NULL, "w","read/_write");
+    show_menu(5, 'r',"_read-only", 0,NULL, 0,NULL, 0,NULL, 'w',"r/_w");
   }
   else {
     hide_menu();
@@ -739,7 +717,6 @@ void screen_destination_host_slot_choose(void)
   hide_menu();
 }
 
-
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
   vdp_noblank();
@@ -765,7 +742,6 @@ void screen_mount_and_boot()
   bar_clear(false);
   show_status("Mounting and boot...");
 }
-
 
 void screen_end(void)
 {
