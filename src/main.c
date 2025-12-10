@@ -15,6 +15,7 @@
 #include "screen.h"
 #include "typedefs.h"
 #include "system.h"
+#include "debug.h"
 
 State state;
 bool backToFiles=false;
@@ -73,7 +74,8 @@ void run(void)
 		#endif
 		case DONE:
 			done();
-			#ifdef BUILD_A2CDA
+			#if defined(BUILD_A2CDA) | defined(BUILD_MSXROM)
+				debug("dropping into BASIC");
 				return;
 			#endif
 			break;

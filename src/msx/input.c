@@ -16,6 +16,7 @@
 #include "../select_slot.h"
 #include "key_codes.h"
 #include "cursor.h"
+#include "msx_debug.h"
 
 extern unsigned short entry_timer;
 extern bool long_entry_displayed;
@@ -137,6 +138,7 @@ void input_line_set_wifi_password(char *c)
 HDSubState input_hosts_and_devices_hosts(void)
 {
   unsigned char k = input();
+  debugf("input(%d) received", k);
 
   switch (k)
   {
@@ -195,8 +197,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_HOSTS;
   case 'S':
   case 's':
-    system_drop_into_basic();
-    return HD_HOSTS;
+    show_status("Dropping into BASIC...");
+    return HD_DONE;
   default:
     return HD_HOSTS;
   }

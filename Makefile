@@ -122,4 +122,4 @@ LDFLAGS_EXTRA_ADAM = -lndos
 ########################################
 # MSX customization
 
-LDFLAGS_EXTRA_MSXROM = -lndos -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted
+LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -Ca-Isrc/msx/header
