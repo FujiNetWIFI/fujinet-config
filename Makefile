@@ -82,4 +82,5 @@ CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
 ########################################
 # MSX customization
 
-LDFLAGS_EXTRA_MSXROM = -lndos -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app
+CFLAGS_EXTRA_MSX =
+LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app -Ca-Isrc/msx/header

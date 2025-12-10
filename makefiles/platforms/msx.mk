@@ -6,7 +6,7 @@ include $(MWD)/common.mk
 include $(MWD)/toolchains/z88dk.mk
 
 MSX_FLAGS = +msx
-CFLAGS += $(MSX_FLAGS)
+CFLAGS += $(MSX_FLAGS) $(CFLAGS_EXTRA_MSX)
 LDFLAGS += $(MSX_FLAGS)
 
 r2r:: $(BUILD_EXEC) $(BUILD_LIB) $(R2R_EXTRA_DEPS_$(PLATFORM_UC))
