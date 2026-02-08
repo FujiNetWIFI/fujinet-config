@@ -155,6 +155,17 @@ void hide_menu(void)
   show_menu(0);
 }
 
+void draw_logo(uint8_t x, uint8_t y) {
+  gotoxy(x+3, y+0); cprintf(  "%c", 0xA6);
+  gotoxy(x+1, y+1); cprintf(  "%c%c%c%c%c%c", 0xA7,0xA5,0xA1,0xA2,0xA7,0xA5);
+  gotoxy(x+1, y+2); cprintf(  "%c %c%c%c", 0xA6,0xA3,0xA4,0xA6);
+  gotoxy(x+0, y+3); cprintf("%c%c%c%c%c%c%c%c", 0xA5,0xA1,0xA2,0x9D,0x9E,0xA1,0xA2,0xA5);
+  gotoxy(x+1, y+4); cprintf("%c%c%c%c%c%c", 0xA3,0xA4,0x9F,0xA0,0xA3,0xA4);
+  gotoxy(x+1, y+5); cprintf(  "%c%c%c%c%c%c%c", 0xA7,0xA5,0xA7,0xA5,0xA1,0xA2,0xA5);
+  gotoxy(x+1, y+6); cprintf(  "%c %c %c%c", 0xA6,0xA6,0xA3,0xA4);
+  gotoxy(x+3, y+7); cprintf(  "%c %c", 0xA6,0xA6);
+}
+
 void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark)
 {
   watermark_visible = watermark;
@@ -214,6 +225,7 @@ void screen_init(void)
   void *param = &udg;
   console_ioctl(IOCTL_GENCON_SET_UDGS, &param);
   set_mode_default();
+  draw_logo(12,9);
   keyboard_click(false);
   // should probably move this to a common system_init
   system_set_fps();
@@ -375,20 +387,9 @@ char* screen_hosts_and_devices_host_slot(char *hs)
   return hs[0]==0x00 ? &empty[0] : hs;
 }
 
-void draw_watermark() {
-  gotoxy(26,1); cprintf(  "%c", 0xA6);
-  gotoxy(24,2); cprintf(  "%c%c%c%c%c%c", 0xA7,0xA5,0xA1,0xA2,0xA7,0xA5);
-  gotoxy(24,3); cprintf(  "%c %c%c%c", 0xA6,0xA3,0xA4,0xA6);
-  gotoxy(23,4); cprintf("%c%c%c%c%c%c%c%c", 0xA5,0xA1,0xA2,0x9D,0x9E,0xA1,0xA2,0xA5);
-  gotoxy(24,5); cprintf("%c%c%c%c%c%c", 0xA3,0xA4,0x9F,0xA0,0xA3,0xA4);
-  gotoxy(24,6); cprintf(  "%c%c%c%c%c%c%c", 0xA7,0xA5,0xA7,0xA5,0xA1,0xA2,0xA5);
-  gotoxy(24,7); cprintf(  "%c %c %c%c", 0xA6,0xA6,0xA3,0xA4);
-  gotoxy(26,8); cprintf(  "%c %c", 0xA6,0xA6);
-}
-
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
-  draw_watermark();
+  draw_logo(23, 1);
 
   for (uint8_t i = 0; i < 8; i++) {
     gotoxy(1, i+1);
@@ -768,7 +769,7 @@ void screen_mount_and_boot()
 {
   clrscr();
   bar_clear(false);
-  show_status("Mounting and boot...");
+  show_status("Mounting and booting...");
 }
 
 void screen_end(void)
