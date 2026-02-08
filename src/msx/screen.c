@@ -87,7 +87,7 @@ uint8_t print_menu_option(char *label) {
   uint8_t len = 0;
   unsigned char c;
 
-  textcolor(DARKGRAY);
+  textcolor(LIGHTCYAN);
 
   while ((c = *label) != '\0') {
     if (c == '_') {
@@ -96,7 +96,7 @@ uint8_t print_menu_option(char *label) {
     else if (highlight) {
       textcolor(WHITE);
       cputc(c);
-      textcolor(DARKGRAY);
+      textcolor(LIGHTCYAN);
       highlight = false;
       len++;
     }
