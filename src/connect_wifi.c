@@ -60,7 +60,7 @@ void connect_wifi(void)
 			pause(150);
 			return;
 		default:
-			screen_error("PLEASE WAIT...");
+			screen_error("PLEASE WAIT...(ESC TO ABORT)");
  			pause(150);
 			retries--;
 			break;
