@@ -54,7 +54,10 @@
  */
 unsigned char input(void)
 {
-  return cgetc();
+  if (kbhit())
+    return cgetc();
+  
+  return 0;
 }
 
 unsigned char input_ucase(void)
