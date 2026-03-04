@@ -140,7 +140,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-  fuji_set_device_filename(selected_device_slot, selected_host_slot, m, temp_filename);
+  fuji_set_device_filename(m, selected_host_slot, selected_device_slot, temp_filename);
 
   fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
 
@@ -185,9 +185,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   }
   screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled); // redraw the disks
-  //screen_hosts_and_devices_devices_selected(selected_device_slot); // Breaks disk order on screen??
-  selected_device_slot = 0; // Go back to drive 0 instead
-  hosts_and_devices_devices();
+  screen_hosts_and_devices_devices_selected(selected_device_slot);
 #elif defined(_CMOC_VERSION_)
     fuji_mount_disk_image(selected_device_slot, m);
     screen_hosts_and_devices_device_slots(1,deviceSlots,deviceEnabled);
