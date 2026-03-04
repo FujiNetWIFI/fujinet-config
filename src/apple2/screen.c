@@ -367,7 +367,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
     }
 
     if (d[i].file[0]) {
-        switch (d[i].mode) {
+        switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
           case MODE_READ:
             rw_mode = 'R';
             break;
