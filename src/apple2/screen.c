@@ -732,8 +732,8 @@ void screen_select_slot_eject(unsigned char ds)
 {
     unsigned char o=1, to=2;
     
-  cclearxy(o,1+ds,39);
-  cputsxy(to,1+ds,empty);
+  cclearxy(o,2+ds,39);
+  cputsxy(to,2+ds,empty);
   bar_jump(bar_get());
 }
 
