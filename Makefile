@@ -1,6 +1,6 @@
 PRODUCT = config
 PLATFORMS = coco apple2 atari c64 adam
-PLATFOMRS += msxrom
+PLATFORMS += msxrom
 
 # Not currently in buildable state
 #PLATFORMS += dragon

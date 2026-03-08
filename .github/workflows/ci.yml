@@ -19,7 +19,7 @@ jobs:
           - atari
           - c64
           - coco
-          - msx
+          # - msx # requires special z88dk not yet in defoogi
           # - msdos # MSDOS doesn't seem to build yet
 
     container:
