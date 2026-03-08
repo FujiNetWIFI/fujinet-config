@@ -38,7 +38,7 @@ void select_slot_display()
     }
   else
     {
-      fuji_open_directory2(selected_host_slot,path,filter);
+      fuji_open_directory_filter(selected_host_slot,path,filter);
 
       fuji_set_directory_position(pos);
 
@@ -121,7 +121,7 @@ void select_slot_done()
   {
     strcat(filename,path);
 
-    fuji_open_directory2(selected_host_slot,path,filter);
+    fuji_open_directory_filter(selected_host_slot,path,filter);
 
     fuji_set_directory_position(pos);
 

@@ -11,6 +11,8 @@
 #include <eos.h>
 #include <string.h>
 
+#define FUJI_DEV 0x0F
+
 char response[1024];
 static DCB *dcb = NULL;
 
@@ -21,7 +23,7 @@ static void io_command_and_response(void* buf, unsigned short len)
 {
   if (!dcb)
     dcb = eos_find_dcb(FUJI_DEV);
-    
+
   memset(response,0,sizeof(response));
   eos_write_character_device(FUJI_DEV,buf,len);
   eos_read_character_device(FUJI_DEV,response,sizeof(response));
@@ -41,11 +43,14 @@ unsigned char io_status(void)
 }
 #endif /* UNUSED */
 
+#ifndef fuji_error
 bool fuji_error(void)
 {
   return dcb->status == 0x8C;
 }
+#endif /* fuji_error */
 
+#ifndef fuji_get_wifi_status
 bool fuji_get_wifi_status(uint8_t *status)
 {
   unsigned char c=0xFA;
@@ -55,7 +60,9 @@ bool fuji_get_wifi_status(uint8_t *status)
   *status = response[0];
   return;
 }
+#endif // fuji_get_wifi_status
 
+#ifndef fuji_get_ssid
 bool fuji_get_ssid(NetConfig *net_config)
 {
   unsigned char c=0xFE;
@@ -64,7 +71,9 @@ bool fuji_get_ssid(NetConfig *net_config)
   memcpy(net_config, response, sizeof(*net_config));
   return true;
 }
+#endif // fuji_get_ssid
 
+#ifndef fuji_scan_for_networks
 bool fuji_scan_for_networks(uint8_t *count)
 {
   unsigned char c=0xFD;
@@ -74,7 +83,9 @@ bool fuji_scan_for_networks(uint8_t *count)
   *count = response[0];
   return true;
 }
+#endif // fuji_scan_for_networks
 
+#ifndef fuji_get_scan_result
 bool fuji_get_scan_result(uint8_t n, SSIDInfo *ssid_info)
 {
   unsigned char c[2]={0xFC,0x00};
@@ -85,6 +96,7 @@ bool fuji_get_scan_result(uint8_t n, SSIDInfo *ssid_info)
 
   memcpy(ssid_info, response, sizeof(*ssid_info));
 }
+#endif // fuji_get_scan_result
 
 #ifdef UNUSED
 AdapterConfig *io_get_adapter_config(void)
@@ -97,6 +109,7 @@ AdapterConfig *io_get_adapter_config(void)
 }
 #endif /* UNUSED */
 
+#ifndef fuji_get_adapter_config_extended
 bool fuji_get_adapter_config_extended(AdapterConfigExtended *acx)
 {
   unsigned char c=0xC4;
@@ -106,7 +119,9 @@ bool fuji_get_adapter_config_extended(AdapterConfigExtended *acx)
   memcpy(acx, response, sizeof(*acx));
   return true;
 }
+#endif // fuji_get_adapter_config_extended
 
+#ifndef fuji_set_ssid
 bool fuji_set_ssid(NetConfig *nc)
 {
   unsigned char c[98]={0xFB};
@@ -116,7 +131,9 @@ bool fuji_set_ssid(NetConfig *nc)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_set_ssid
 
+#ifndef fuji_get_device_slots
 bool fuji_get_device_slots(DeviceSlot *d, size_t size)
 {
   unsigned char c=0xF2;
@@ -126,7 +143,9 @@ bool fuji_get_device_slots(DeviceSlot *d, size_t size)
   memcpy(d,response,304);
   return true;
 }
+#endif // fuji_get_device_slots
 
+#ifndef fuji_get_host_slots
 bool fuji_get_host_slots(HostSlot *h, size_t size)
 {
   unsigned char c=0xF4;
@@ -136,7 +155,9 @@ bool fuji_get_host_slots(HostSlot *h, size_t size)
   memcpy(h,response,256);
   return true;
 }
+#endif // fuji_get_host_slots
 
+#ifndef fuji_put_host_slots
 bool fuji_put_host_slots(HostSlot *h, size_t size)
 {
   unsigned char c[257]={0xF3};
@@ -146,7 +167,9 @@ bool fuji_put_host_slots(HostSlot *h, size_t size)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_put_host_slots
 
+#ifndef fuji_put_device_slots
 bool fuji_put_device_slots(DeviceSlot *d, size_t size)
 {
   unsigned char c[305]={0xF1};
@@ -156,7 +179,9 @@ bool fuji_put_device_slots(DeviceSlot *d, size_t size)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   csleep(10);
 }
+#endif // fuji_put_device_slots
 
+#ifndef fuji_mount_host_slot
 bool fuji_mount_host_slot(uint8_t hs)
 {
   unsigned char c[2]={0xF9,0x00};
@@ -166,6 +191,7 @@ bool fuji_mount_host_slot(uint8_t hs)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_mount_host_slot
 
 bool fuji_open_directory2(unsigned char hs, char *p, char *f)
 {
@@ -191,6 +217,7 @@ bool fuji_open_directory2(unsigned char hs, char *p, char *f)
   return true;
 }
 
+#ifndef fuji_read_directory
 bool fuji_read_directory(unsigned char l, unsigned char a, char *buffer)
 {
   unsigned char c[3]={0xF6,0x00,0x00};
@@ -200,7 +227,9 @@ bool fuji_read_directory(unsigned char l, unsigned char a, char *buffer)
   memcpy(buffer, response, l);
   return true;
 }
+#endif // fuji_read_directory
 
+#ifndef fuji_close_directory
 bool fuji_close_directory(void)
 {
   unsigned char c=0xF5;
@@ -208,7 +237,9 @@ bool fuji_close_directory(void)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_close_directory
 
+#ifndef fuji_set_directory_position
 bool fuji_set_directory_position(DirectoryPosition pos)
 {
   unsigned char c[3]={0xE4,0x00,0x00};
@@ -218,7 +249,9 @@ bool fuji_set_directory_position(DirectoryPosition pos)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_set_directory_position
 
+#ifndef fuji_set_device_filename
 bool fuji_set_device_filename(uint8_t mode, uint8_t hs, uint8_t ds, char *e)
 {
   char c[258]={0xE2,0x00};
@@ -230,7 +263,9 @@ bool fuji_set_device_filename(uint8_t mode, uint8_t hs, uint8_t ds, char *e)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_set_device_filename
 
+#ifndef fuji_get_device_filename
 bool fuji_get_device_filename(uint8_t ds, char *buffer)
 {
   char c[2]={0xDA,0x00};
@@ -241,7 +276,9 @@ bool fuji_get_device_filename(uint8_t ds, char *buffer)
   strcpy(buffer, response);
   return true;
 }
+#endif // fuji_get_device_filename
 
+#ifndef fuji_mount_disk_image
 bool fuji_mount_disk_image(uint8_t ds, uint8_t mode)
 {
   char c[3]={0xF8,0x00,0x00};
@@ -251,7 +288,9 @@ bool fuji_mount_disk_image(uint8_t ds, uint8_t mode)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_mount_disk_image
 
+#ifndef fuji_set_boot_config
 bool fuji_set_boot_config(unsigned char toggle)
 {
   char c[2]={0xD9,0x00};
@@ -260,7 +299,9 @@ bool fuji_set_boot_config(unsigned char toggle)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_set_boot_config
 
+#ifndef fuji_unmount_disk_image
 bool fuji_unmount_disk_image(uint8_t ds)
 {
   char c[2]={0xE9,0x00};
@@ -269,6 +310,7 @@ bool fuji_unmount_disk_image(uint8_t ds)
   eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   return true;
 }
+#endif // fuji_unmount_disk_image
 
 #ifdef UNUSED
 bool io_get_device_enabled_status(unsigned char d)
@@ -289,6 +331,7 @@ bool io_get_device_enabled_status(unsigned char d)
 }
 #endif /* UNUSED */
 
+#ifndef fuji_enable_device
 bool fuji_enable_device(uint8_t d)
 {
   struct
@@ -303,7 +346,9 @@ bool fuji_enable_device(uint8_t d)
   eos_write_character_device(FUJI_DEV,ed,sizeof(ed));
   return true;
 }
+#endif // fuji_enable_device
 
+#ifndef fuji_disable_device
 bool fuji_disable_device(uint8_t d)
 {
   struct
@@ -318,6 +363,7 @@ bool fuji_disable_device(uint8_t d)
   eos_write_character_device(FUJI_DEV,dd,sizeof(dd));
   return true;
 }
+#endif // fuji_disable_device
 
 #ifdef UNUSED
 void io_update_devices_enabled(bool *e)
@@ -331,11 +377,12 @@ void io_update_devices_enabled(bool *e)
 }
 #endif /* UNUSED */
 
+#ifndef fuji_copy_file
 bool fuji_copy_file(uint8_t source_slot, uint8_t destination_slot, char *copy_spec)
 {
   char cf[259]={0xD8,0x00,0x00};
   DCB *dcb = NULL;
-  
+
   cf[1]=source_slot;
   cf[2]=destination_slot;
   strcpy(&cf[3],copy_spec);
@@ -345,6 +392,7 @@ bool fuji_copy_file(uint8_t source_slot, uint8_t destination_slot, char *copy_sp
   while (eos_request_device_status(FUJI_DEV,dcb) != 0x80);
   return true;
 }
+#endif // fuji_copy_file
 
 #ifdef UNUSED
 unsigned char io_device_slot_to_device(unsigned char ds)

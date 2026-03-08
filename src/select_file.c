@@ -80,7 +80,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   if (fuji_error())
   {
@@ -135,7 +135,7 @@ void select_file_set_source_filename(void)
 {
   char entry[128];
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
   fuji_set_directory_position(pos);
   fuji_read_directory(128, 0, entry);
   strcat(path, entry);
@@ -170,7 +170,7 @@ void select_get_filename(uint8_t len)
 {
   fuji_mount_host_slot(selected_host_slot);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
 #ifdef BUILD_ATARI
 	  fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
@@ -225,7 +225,7 @@ void select_file_link(void)
   char tnfsHostname[128];
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   if (fuji_error())
   {
@@ -256,7 +256,7 @@ void select_file_advance(void)
 
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
@@ -302,7 +302,7 @@ unsigned select_file_entry_type(void)
   //const char *e;
   unsigned result;
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
