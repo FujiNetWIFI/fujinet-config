@@ -11,7 +11,7 @@
 #include "constants.h"
 #include "globals.h"
 
-HDSubState hd_subState;
+HDSubState hd_subState=HD_HOSTS;
 DeviceSlot deviceSlots[8];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[8];

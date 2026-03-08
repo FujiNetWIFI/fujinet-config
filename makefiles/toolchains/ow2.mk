@@ -14,6 +14,8 @@ endif
 
 CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 
+CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+
 define include-dir-flag
   -I$1
 endef

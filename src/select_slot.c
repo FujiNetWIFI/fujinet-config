@@ -39,7 +39,7 @@ void select_slot_display()
     }
   else
     {
-      fuji_open_directory2(selected_host_slot,path,filter);
+      fuji_open_directory_filter(selected_host_slot,path,filter);
 
       fuji_set_directory_position(pos);
 
@@ -122,7 +122,7 @@ void select_slot_done()
   {
     strcat(filename,path);
 
-    fuji_open_directory2(selected_host_slot,path,filter);
+    fuji_open_directory_filter(selected_host_slot,path,filter);
 
     fuji_set_directory_position(pos);
 
@@ -145,7 +145,6 @@ void select_slot_done()
 #ifndef BUILD_ATARI
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 #endif
-
 
 #ifdef BUILD_APPLE2
     // Try to mount the disk and error on failure
