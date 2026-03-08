@@ -17,7 +17,7 @@
 #include "system.h"
 #include "debug.h"
 
-State state;
+State state=HOSTS_AND_DEVICES;
 bool backToFiles=false;
 bool backFromCopy=false;
 
@@ -74,8 +74,7 @@ void run(void)
 		#endif
 		case DONE:
 			done();
-			#if defined(BUILD_A2CDA) | defined(BUILD_MSXROM)
-				debug("dropping into BASIC");
+			#ifdef BUILD_A2CDA
 				return;
 			#endif
 			break;

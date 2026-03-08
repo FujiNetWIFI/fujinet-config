@@ -2,6 +2,7 @@
  * Select file from Host Slot
  */
 
+#include <fujinet-fuji.h>
 #include "select_file.h"
 #include "screen.h"
 #include "constants.h"
@@ -67,7 +68,9 @@ unsigned char select_file_display(void)
   char i;
   //const char *e;
 
-  if (!fuji_mount_host_slot(selected_host_slot))
+  fuji_mount_host_slot(selected_host_slot);
+
+  if (fuji_error())
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
@@ -77,7 +80,9 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  if (!fuji_open_directory2(selected_host_slot, path, filter))
+  fuji_open_directory_filter(selected_host_slot, path, filter);
+
+  if (fuji_error())
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
@@ -130,7 +135,7 @@ void select_file_set_source_filename(void)
 {
   char entry[128];
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
   fuji_set_directory_position(pos);
   fuji_read_directory(128, 0, entry);
   strcat(path, entry);
@@ -149,15 +154,8 @@ void select_display_long_filename(void)
   {
     if (long_entry_displayed == false)
     {
-      fuji_open_directory2(selected_host_slot, path, filter);
-#ifdef BUILD_ATARI
-      fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
-#else
-      fuji_set_directory_position(pos + bar_get());
-#endif
-      fuji_read_directory(64, 0, response);
+      select_get_filename(64);
       screen_select_file_display_long_filename(response);
-      fuji_close_directory();
       long_entry_displayed = true;
     }
   }
@@ -166,6 +164,21 @@ void select_display_long_filename(void)
     long_entry_displayed = false;
     screen_select_file_clear_long_filename();
   }
+}
+
+void select_get_filename(uint8_t len)
+{
+  fuji_mount_host_slot(selected_host_slot);
+
+  fuji_open_directory_filter(selected_host_slot, path, filter);
+
+#ifdef BUILD_ATARI
+	  fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
+#else
+	  fuji_set_directory_position(pos + bar_get());
+#endif
+	  fuji_read_directory(len, 0, response);
+	  fuji_close_directory();
 }
 
 void select_next_page(void)
@@ -212,7 +225,9 @@ void select_file_link(void)
   char tnfsHostname[128];
   bar_clear(false);
 
-  if (!fuji_open_directory2(selected_host_slot, path, filter))
+  fuji_open_directory_filter(selected_host_slot, path, filter);
+
+  if (fuji_error())
   {
       sf_subState = SF_DONE;
       state = HOSTS_AND_DEVICES;
@@ -241,7 +256,7 @@ void select_file_advance(void)
 
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
@@ -287,7 +302,7 @@ unsigned select_file_entry_type(void)
   //const char *e;
   unsigned result;
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 

@@ -9,6 +9,8 @@ CFLAGS += --intdir=$(OBJ_DIR)
 ASFLAGS +=
 LDFLAGS +=
 
+CFLAGS += -DGIT_VERSION='"$(GIT_VERSION)"'
+
 # Needed because of using sed on error messages
 SHELL = /bin/bash -o pipefail
 

@@ -132,9 +132,9 @@ void screen_init(void)
   #endif
   clrscr();
   #ifndef __ORCAC__
-    POKE(0x2000,0x80); // \
-    POKE(0x2001,0x80); //  > Overwrite JMP
-    POKE(0x2002,0x80); // /
+    POKE(0x2000,0x00); // \
+    POKE(0x2001,0x00); //  > Overwrite JMP
+    POKE(0x2002,0x00); // /
     if (get_ostype() == APPLE_IIIEM) // Satan Mode
     {
       POKE(0xC057,0); // GRAPH
@@ -169,6 +169,7 @@ void screen_init(void)
     else
     {
       POKE(0xC051,0); // TEXT
+	  POKE(0xC056,0); // LORES (make AppleSqueezer happy)
     }
   #endif
 }
@@ -366,7 +367,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
     }
 
     if (d[i].file[0]) {
-        switch (d[i].mode) {
+        switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
           case MODE_READ:
             rw_mode = 'R';
             break;
@@ -528,6 +529,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
   cprintf("%10s%s\r\n","MAC: ",acx->sMacAddress);
   cprintf("%10s%s\r\n","BSSID: ",acx->sBssid);
   cprintf("%10s%s\r\n","FNVer: ",acx->fn_version);
+  cprintf("%10s%s\r\n","CONFIG: ",GIT_VERSION);
 
   gotoxy(6,STATUS_BAR);
   screen_print_menu("C","hange SSID  ");
@@ -578,7 +580,7 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, const char* e, unsigned entryType)
 {
   gotoxy(0,y+3);
-  cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
+  cprintf("%-40s",&e[0]);
 }
 #pragma warn (unused-param, pop)
 
@@ -730,8 +732,8 @@ void screen_select_slot_eject(unsigned char ds)
 {
     unsigned char o=1, to=2;
     
-  cclearxy(o,1+ds,39);
-  cputsxy(to,1+ds,empty);
+  cclearxy(o,2+ds,39);
+  cputsxy(to,2+ds,empty);
   bar_jump(bar_get());
 }
 

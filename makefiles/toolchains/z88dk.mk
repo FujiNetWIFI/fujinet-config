@@ -9,6 +9,8 @@ CFLAGS +=
 ASFLAGS +=
 LDFLAGS +=
 
+CFLAGS += -DGIT_VERSION='\"$(GIT_VERSION)\"'
+
 define include-dir-flag
   -I$1
 endef

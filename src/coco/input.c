@@ -16,6 +16,7 @@
 #include "../select_file.h"
 #include "../set_wifi.h"
 #include "../select_slot.h"
+#include "scroll.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -284,6 +285,10 @@ HDSubState input_hosts_and_devices_hosts(void)
 		bar_jump(selected_host_slot);
 		k = 0;
 		return HD_HOSTS;
+	case 'l':
+  	case 'L':
+    	mount_and_boot_lobby();
+    	return HD_HOSTS;
 	case '1':
 	case '2':
 	case '3':
@@ -316,6 +321,10 @@ HDSubState input_hosts_and_devices_devices(void)
 	case 'e':
 		hosts_and_devices_eject((byte)bar_get());
 		break;
+	case 'L':
+  	case 'l':
+    	mount_and_boot_lobby();
+    	return HD_DEVICES;
 	case 'R':
 	case 'r':
 		selected_device_slot = (byte)bar_get();
@@ -359,16 +368,20 @@ SFSubState input_select_file_choose(void)
 	char k;
 	unsigned entryType = 0;
 
+	scroll_reset(true);
+
 	locate(31, 15);
 
 	while (true)
 	{
-		k = waitkey(true);
+		word now = getTimer();
+    	k = inkey();
 
 		switch (k)
 		{
 		case 'C':
 		case 'c':
+			scroll_reset(false);
 			if (copy_mode == true)
 			{
 				return SF_DONE;
@@ -403,6 +416,7 @@ SFSubState input_select_file_choose(void)
 			else
 				return SF_DONE;
 		case KEY_UP_ARROW: // up arrow
+			scroll_reset(false);
 			if ((bar_get() == 0) && (pos > 0))
 				return SF_PREV_PAGE;
 			else
@@ -414,10 +428,12 @@ SFSubState input_select_file_choose(void)
 				return SF_CHOOSE;
 			}
 		case KEY_SHIFT_UP_ARROW: // shifted up arrow
+			scroll_reset(false);
 			if (pos > 0)
 				return SF_PREV_PAGE;
 			break;
 		case KEY_DOWN_ARROW: // down arrow
+			scroll_reset(false);
 			if ((bar_get() == 9) && (dir_eof == false))
 				return SF_NEXT_PAGE;
 			else
@@ -430,11 +446,25 @@ SFSubState input_select_file_choose(void)
 			}
 			break;
 		case KEY_SHIFT_DOWN_ARROW: // shifted down arrow
+			scroll_reset(false);
 			if (dir_eof == false)
 				return SF_NEXT_PAGE;
 			break;
-		default:
-			return SF_CHOOSE;
+		}
+
+		// Handle idle countdown + timed scroll
+		if ((word)(now - lastTimer) >= SCROLL_DELAY_TICKS)
+		{
+			lastTimer = now;
+
+			if (idleCounter > 0)
+			{
+				idleCounter--;
+			}
+			else
+			{
+				scroll_step();
+			}
 		}
 	}
 

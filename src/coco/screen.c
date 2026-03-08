@@ -367,15 +367,8 @@ void screen_error(const char *msg)
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, unsigned char *e)
 {
-  switch(hd_subState)
-    {
-    case HD_HOSTS:
-      screen_hosts_and_devices_hosts();
-      break;
-    case HD_DEVICES:
-      screen_hosts_and_devices_devices();
-      break;
-    }
+    // Nothing to do here. The screen is completely repainted in the
+    // hosts/devices specific screen functions below
 }
 
 // Show the keys that are applicable when we are on the Hosts portion of the screen.
@@ -571,14 +564,35 @@ void screen_connect_wifi(NetConfig *nc)
   screen_add_shadow(9,BLUE); // change to CYAN
 }
 
+bool screen_mount_and_boot_lobby(void)
+{
+	unsigned char k;
+
+	// Confirm we want to go to there
+	locate(0, 15);
+	printf(" BOOT TO LOBBY? y/n");
+
+	k = waitkey(true);
+
+	switch (k)
+	{
+	case 'Y':
+	case 'y':
+		return true;
+	default:
+		return false;
+	}
+}
+
 void screen_end(void)
 {
-  // Restore the original casing flag.
-  asm {
+	// Restore the original casing flag.
+	asm 
+  {
     lda orig_casflag
       sta $011A
-      }
-  return;
+	}
+	return;
 }
 
 #endif

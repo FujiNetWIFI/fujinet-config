@@ -16,7 +16,9 @@ FUJINET_CACHE_DIR = os.path.join(CACHE_DIR, "fujinet-lib")
 VERSION_NUM_RE = r"([0-9]+[.][0-9]+[.][0-9]+)"
 VERSION_NAME_RE = fr"v?{VERSION_NUM_RE}"
 LDLIB_REGEX = r"lib(.*)[.]a$"
-LDLIB_PLATFORMS = ["coco", "dragon", "msdos"]
+
+# FIXME - this is really toolchains, not platforms
+LDLIB_PLATFORMS = ["coco", "dragon"]
 
 def build_argparser():
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -114,7 +116,8 @@ class LibLocator:
     if not self.MV.FUJINET_LIB_DIR:
       self.getDirectory()
 
-    if not self.MV.FUJINET_LIB_FILE:
+    if not self.MV.FUJINET_LIB_FILE \
+       and (not self.MV.FUJINET_LIB_ZIP or not os.path.exists(self.MV.FUJINET_LIB_ZIP)):
       self.downloadZip()
 
     if not self.MV.FUJINET_LIB_INCLUDE:
@@ -176,8 +179,8 @@ class LibLocator:
   def setPlatformVersion(self, rxm):
     if len(rxm.groups()) >= 1:
       self.MV.FUJINET_LIB_PLATFORM = rxm.group(1)
-    if len(rxm.groups()) >= 2:
-      self.MV.FUJINET_LIB_VERSION = rxm.group(2)
+    if len(rxm.groups()) >= 3:
+      self.MV.FUJINET_LIB_VERSION = rxm.group(3)
     return
 
   def getVersion(self):
@@ -264,7 +267,7 @@ class LibLocator:
 
         return
 
-      error_exit("Unable to download FujiNet library from", release_url)
+      #error_exit("Unable to download FujiNet library from", release_url)
       return
 
   def gitClone(self, url):
@@ -282,13 +285,13 @@ class LibLocator:
       cmd = ["git", "clone", url]
       if branch:
         cmd.extend(["-b", branch])
-      subprocess.run(cmd, cwd=FUJINET_CACHE_DIR, check=True)
+      subprocess.run(cmd, cwd=FUJINET_CACHE_DIR, check=True, stdout=sys.stderr)
 
     possibleOutput = ["build", *[f"r2r/{p}" for p in self.possiblePlatforms]]
     self.findLibraryDir(repoDir, possibleOutput)
     if not self.MV.FUJINET_LIB_FILE:
-      cmd = ["make", "msx"]
-      subprocess.run(cmd, cwd=repoDir, check=True)
+      cmd = ["make", ]
+      subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr)
       self.findLibraryDir(repoDir, possibleOutput)
 
     return
