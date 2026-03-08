@@ -19,6 +19,7 @@ jobs:
           - atari
           - c64
           - coco
+          - msxrom
           - msdos
 
     container:
