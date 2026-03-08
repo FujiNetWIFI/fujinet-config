@@ -16,6 +16,9 @@ void check_wifi(void)
   if ( !fuji_get_wifi_enabled() )
   {
     state=HOSTS_AND_DEVICES;
+#ifdef COLOR_SETTING_FAILED
+    bar_set_color(COLOR_SETTING_FAILED);
+#endif
   }
   else {
     fuji_get_wifi_status(&status);

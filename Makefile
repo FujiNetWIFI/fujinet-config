@@ -1,6 +1,18 @@
 PRODUCT = config
-PLATFORMS = msxrom
-#PLATFORMS += coco apple2 atari c64 adam
+PLATFORMS = coco apple2 atari c64 adam
+PLATFOMRS += msxrom
+
+# Not currently in buildable state
+#PLATFORMS += dragon
+#PLATFORMS += msdos
+#PLATFORMS += pc6001
+#PLATFORMS += pc8801
+#PLATFORMS += pmd85
+#PLATFORMS += rc2014
+
+# Require special toolchains
+#PLATFORMS += apple2cda
+#PLATFORMS += apple2gs
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
@@ -21,13 +33,18 @@ SRC_DIRS = src src/%PLATFORM%
 # - undefined, no fujinet-lib will be used
 FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 
+# Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
+# even if the library isn’t present.
+FUJINET_LIB_OPTIONAL = 1
+
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
 PLATFORM_COMBOS = \
   c64+=commodore \
   atarixe+=atari \
   msxrom+=msx \
-  msxdos+=msx
+  msxdos+=msx \
+  dragon+=coco
 
 include makefiles/toplevel-rules.mk
 
@@ -41,13 +58,14 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
+LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
-CFGLOAD_COCO = src/coco/cfgload/cfgload.asm
+CFGLOAD_COCO = src/coco/cfgload/cfgload.c
 CFGLOAD_BIN = r2r/coco/cfgload.bin
 DISK_EXTRA_DEPS_COCO := $(AUTOEXEC_COCO) $(CFGLOAD_BIN)
 
 $(CFGLOAD_BIN):: $(CFGLOAD_COCO) | $(R2R_PD)
-	lwasm -b -9 -o $@ $<
+	cmoc -o $@ $<
 
 # $1 == decb flags
 # $2 == source file
@@ -66,18 +84,31 @@ coco/disk-post::
 
 A2_LINKER_CFG = src/apple2/config.cfg
 EXECUTABLE_EXTRA_DEPS_APPLE2 = $(A2_LINKER_CFG)
-CFLAGS_EXTRA_APPLE2 = -DUSING_FUJINET_LIB
 LDFLAGS_EXTRA_APPLE2 = -C $(A2_LINKER_CFG)
+WITHOUT_PRODOS_BOOT = dist.apple2/bootable.po
+
+apple2/disk-post::
+	cp $(WITHOUT_PRODOS_BOOT) $(BUILD_DISK)
+	ac -as $(BUILD_DISK) $(PRODUCT_BASE).SYSTEM < $(BUILD_EXEC)
+#	ac -p $(BUILD_DISK) $(PRODUCT_BASE).SYSTEM SYS 0x2000 < $(BUILD_EXEC)
 
 ########################################
 # Atari customization
 
+ATARI_LINKER_CFG = src/atari/atari.cfg
+EXECUTABLE_EXTRA_DEPS_ATARI = $(ATARI_LINKER_CFG)
+LDFLAGS_EXTRA_ATARI = -C $(ATARI_LINKER_CFG)
 EXTRA_INCLUDE_ATARI = src/atari/asminc
 
 ########################################
 # Commodore 64 customization
 
 CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
+
+########################################
+# Adam customization
+
+LDFLAGS_EXTRA_ADAM = -lndos
 
 ########################################
 # MSX customization

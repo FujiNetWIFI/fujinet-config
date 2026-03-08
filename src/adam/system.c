@@ -3,6 +3,8 @@
 #include <eos.h>
 #include <string.h>
 
+#define FUJI_DEV 0x0F
+
 void system_boot(void)
 {
   eos_init();

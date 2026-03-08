@@ -142,7 +142,6 @@ void select_slot_done()
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 #endif
 
-
 #ifdef BUILD_APPLE2
     // Try to mount the disk and error on failure
     /* Disabled for now because it ends up mounting now and during
