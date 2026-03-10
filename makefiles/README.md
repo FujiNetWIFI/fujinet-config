@@ -81,9 +81,12 @@ FUJINET_LIB = 4.7.6
 
 ### Source directories (`SRC_DIRS`)
 
-`SRC_DIRS` lists the directories `make` should search for source
-files. You can use the literal `%PLATFORM%` token to have directories
-expand automatically based on the platform being built.
+`SRC_DIRS` lists the directories that `make` should search for source files.
+It supports two special features:
+
+#### 1. **Platform-aware directory expansion**
+
+Use the literal `%PLATFORM%` token to have directories expand based on the active platform.
 
 Example:
 
@@ -91,9 +94,40 @@ Example:
 SRC_DIRS = src src/%PLATFORM%
 ```
 
-> Note: `%PLATFORM%` is used instead of `$(PLATFORM)` to avoid
-  accidental expansion in unrelated directory names. See Platform
-  Combos below.
+> **Note:** `%PLATFORM%` is used instead of `$(PLATFORM)` to avoid accidental
+> expansion inside unrelated directory names.
+
+#### 2. **Recursive directory search with `/**`**
+
+Appending `/**` to any entry makes `make` recursively search *all* subdirectories.
+
+Example:
+
+```
+# Recursively search inside src/apple2/
+SRC_DIRS = src src/apple2/**
+```
+
+You can also combine both features:
+
+```
+# All dirs named "exact" under the platform prefix, recursively
+SRC_DIRS = src/%PLATFORM%/**/exact
+```
+
+---
+
+### Include directories (`INCLUDE_DIRS`)
+
+`INCLUDE_DIRS` works exactly like `SRC_DIRS`.
+It supports `%PLATFORM%` and `/**`, and all expanded paths are added to both
+`CFLAGS` and `ASFLAGS` include search paths.
+
+Example:
+
+```
+INCLUDE_DIRS = include include/%PLATFORM% include/common/**
+```
 
 ### Platform Combos (`PLATFORM_COMBOS`)
 

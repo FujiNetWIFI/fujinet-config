@@ -36,7 +36,7 @@ define link-bin
 endef
 
 define compile
-  $(CC) -c $(CFLAGS) -o $1 $2
+  $(CC) -c $(CFLAGS) -o $1 $2 -MT $(1:.o=.d) -MMD
 endef
 
 define assemble

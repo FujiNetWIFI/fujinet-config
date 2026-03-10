@@ -4,7 +4,7 @@ R2R_DIR = r2r
 BUILD_DIR = build
 CACHE_DIR = _cache
 
-MAKEFILE_DIR = makefiles
+MAKEFILE_DIR = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Make a list of the things we want to build which combine R2R dir, app name, and platform
 APP_TARGETS := $(foreach p, $(PLATFORMS), $(R2R_DIR)/$(p)/$(PRODUCT))
@@ -33,16 +33,16 @@ $(PLATFORMS): %: $(R2R_DIR)/%/$(PRODUCT)
 #   $(@F) = "r2r"                (the filename part after the slash)
 #
 # This runs the corresponding platform makefile:
-#   make -f makefiles/platforms/apple2.mk r2r
+#   make -f mekkogx/platforms/apple2.mk r2r
 #
 # Works for ANY target name, so:
-#   make coco/clean   -> runs clean in makefiles/platforms/coco.mk
-#   make atari/debug  -> runs debug in makefiles/platforms/atari.mk
+#   make coco/clean   -> runs clean in mekkogx/platforms/coco.mk
+#   make atari/debug  -> runs debug in mekkogx/platforms/atari.mk
 # ------------------------------------------------------------------------
 .DEFAULT:
 	@target="$@" ; case "$@" in \
 	  */*/*)   echo "No rule to make target '$@'"; exit 1;; \
 	  */*)     platform=$${target%/*}; target=$${target##*/}; \
-	           $(MAKE) -f makefiles/platforms/$${platform}.mk $${target} ;; \
+	           $(MAKE) -f $(MAKEFILE_DIR)/platforms/$${platform}.mk $${target} ;; \
 	  *)       echo "No rule to make target '$@'"; exit 1;; \
 	esac
