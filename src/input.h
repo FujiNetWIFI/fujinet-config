@@ -78,8 +78,8 @@ void input_select_slot_build_eos_directory_label(char *c);
 #define KEY_ABORT 0x1b
 #endif /* BUILD_PMD85 */
 
-#ifdef __WATCOMC__
+#ifdef BUILD_MSDOS
 #include "key_codes.h"
-#endif /* __WATCOMC__ */
+#endif /* BUILD_MSDOS */
 
 #endif /* INPUT_H */

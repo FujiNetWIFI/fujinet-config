@@ -1,4 +1,4 @@
-#ifdef __WATCOMC__
+#ifdef BUILD_MSDOS
 
 /**
  * @brief screen routines
@@ -11,8 +11,9 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdbool.h>
+#include "globals.h"
 #include "screen.h"
-#include "bar.h"
+#include "cursor.h"
 #include "io.h"
 
 /**
@@ -35,11 +36,11 @@ extern bool copy_mode;
  */
 static unsigned char far *screen_get_video_segment_address(void)
 {
-    union REGS regs;
+    static union REGS regs;
     unsigned char video_mode=0;
 
     regs.h.ah = 0x0F; // Get video mode
-    int86(0x10,&regs,&regs);
+    int86(0x10,(union REGS *)&regs,(union REGS *)&regs);
 
     video_mode = regs.h.al;
 
@@ -69,21 +70,21 @@ static unsigned char far *screen_get_video_segment_address(void)
  */
 void screen_putc(unsigned char x, unsigned char y, unsigned char a, const char c)
 {
-    union REGS r;
+    static union REGS r;
 
     /* Set cursor position */
     r.h.ah = 0x02;
     r.h.bh = 0;
     r.h.dh = y;
     r.h.dl = x;
-    int86(0x10,&r,&r);
+    int86(0x10,(union REGS *)&r,(union REGS *)&r);
 
     r.h.ah = 0x09;
     r.h.al = c;
     r.h.bh = 0;
     r.h.bl = a;
     r.x.cx = 1;
-    int86(0x10,&r,&r);
+    int86(0x10,(union REGS *)&r,(union REGS *)&r);
 }
 
 /**
@@ -129,23 +130,18 @@ void screen_mount_and_boot(void)
     screen_puts(0,0,0x0f,"MOUNTING ALL SLOTS...");
 }
 
-void screen_set_wifi(AdapterConfig *ac)
+void screen_set_wifi_extended(AdapterConfigExtended *acx)
 {
-  char tmp[20];
+	char tmp[20];
 
-  sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
-	  ac->macAddress[0],
-	  ac->macAddress[1],
-	  ac->macAddress[2],
-	  ac->macAddress[3],
-	  ac->macAddress[4],
-	  ac->macAddress[5]);
+	sprintf((char *)tmp, "%02X:%02X:%02X:%02X:%02X:%02X", acx->macAddress[0], acx->macAddress[1], acx->macAddress[2], acx->macAddress[3],
+			acx->macAddress[4], acx->macAddress[5]);
 
-  screen_clear();
-  screen_puts_center(0,ATTRIBUTE_HEADER,"WELCOME TO FUJINET!");
-  screen_puts_center(24,ATTRIBUTE_NORMAL,"SCANNING NETWORKS...");
-  screen_puts(0,2,ATTRIBUTE_NORMAL,"MAC Address:");
-  screen_puts(13,2,ATTRIBUTE_BOLD,tmp);
+	screen_clear();
+	screen_puts_center(0, ATTRIBUTE_HEADER, "WELCOME TO FUJINET!");
+	screen_puts_center(24, ATTRIBUTE_NORMAL, "SCANNING NETWORKS...");
+	screen_puts(0, 2, ATTRIBUTE_NORMAL, "MAC Address:");
+	screen_puts(13, 2, ATTRIBUTE_BOLD, (const char *)tmp);
 }
 
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
@@ -169,7 +165,7 @@ void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
         out[0] = 0xB0;
     }
 
-    screen_puts(x, i + NETWORKS_START_Y, ATTRIBUTE_BOLD ,out);
+    screen_puts(x, i + NETWORKS_START_Y, ATTRIBUTE_BOLD, (const char *)out);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -179,7 +175,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     screen_set_wifi_print_rssi(s, n);
 }
 
-void screen_set_wifi_select_network(unsigned char nn)
+void screen_set_wifi_sel_net(unsigned char nn)
 {
     unsigned char x = screen_cols == 40 ? 2 : 32;
 
@@ -209,7 +205,7 @@ void screen_set_wifi_password(void)
 /*
  * Display the 'info' screen
  */
-void screen_show_info(int printerEnabled, AdapterConfig *ac)
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 {
     unsigned char x = screen_cols == 40 ? 0 : 22;
     char tmp[80];
@@ -229,55 +225,55 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac)
     screen_puts(x+5, 14, ATTRIBUTE_NORMAL,"     BSSID:");
     screen_puts(x+5, 15, ATTRIBUTE_NORMAL,"   Version:");
 
-    screen_puts(x+17, 7, ATTRIBUTE_BOLD,ac->ssid);
-    screen_puts(x+17, 8, ATTRIBUTE_BOLD,ac->hostname);
+    screen_puts(x+17, 7, ATTRIBUTE_BOLD,acx->ssid);
+    screen_puts(x+17, 8, ATTRIBUTE_BOLD,acx->hostname);
 
-    sprintf(tmp,"%03u.%03u.%03u.%03u",
-	    ac->localIP[0],
-	    ac->localIP[1],
-	    ac->localIP[2],
-	    ac->localIP[3]);
-    screen_puts(x+17, 9, ATTRIBUTE_BOLD,tmp);
+    sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
+	    acx->localIP[0],
+	    acx->localIP[1],
+	    acx->localIP[2],
+	    acx->localIP[3]);
+    screen_puts(x+17, 9, ATTRIBUTE_BOLD,(const char *)tmp);
 
-    sprintf(tmp,"%03u.%03u.%03u.%03u",
-	    ac->gateway[0],
-	    ac->gateway[1],
-	    ac->gateway[2],
-	    ac->gateway[3]);
-    screen_puts(x+17, 10, ATTRIBUTE_BOLD,tmp);
+    sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
+	    acx->gateway[0],
+	    acx->gateway[1],
+	    acx->gateway[2],
+	    acx->gateway[3]);
+    screen_puts(x+17, 10, ATTRIBUTE_BOLD,(const char *)tmp);
 
-    sprintf(tmp,"%03u.%03u.%03u.%03u",
-	    ac->dnsIP[0],
-	    ac->dnsIP[1],
-	    ac->dnsIP[2],
-	    ac->dnsIP[3]);
-    screen_puts(x+17, 11, ATTRIBUTE_BOLD,tmp);
+    sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
+	    acx->dnsIP[0],
+	    acx->dnsIP[1],
+	    acx->dnsIP[2],
+	    acx->dnsIP[3]);
+    screen_puts(x+17, 11, ATTRIBUTE_BOLD,(const char *)tmp);
 
-    sprintf(tmp,"%03u.%03u.%03u.%03u",
-	    ac->netmask[0],
-	    ac->netmask[1],
-	    ac->netmask[2],
-	    ac->netmask[3]);
-    screen_puts(x+17, 12, ATTRIBUTE_BOLD,tmp);
+    sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
+	    acx->netmask[0],
+	    acx->netmask[1],
+	    acx->netmask[2],
+	    acx->netmask[3]);
+    screen_puts(x+17, 12, ATTRIBUTE_BOLD,(const char *)tmp);
 
-    sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
-	    ac->macAddress[0],
-	    ac->macAddress[1],
-	    ac->macAddress[2],
-	    ac->macAddress[3],
-	    ac->macAddress[4],
-	    ac->macAddress[5]);
-    screen_puts(x+17, 13, ATTRIBUTE_BOLD,tmp);
+    sprintf((char *)tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
+	    acx->macAddress[0],
+	    acx->macAddress[1],
+	    acx->macAddress[2],
+	    acx->macAddress[3],
+	    acx->macAddress[4],
+	    acx->macAddress[5]);
+    screen_puts(x+17, 13, ATTRIBUTE_BOLD,(const char *)tmp);
 
-    sprintf(tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
-	    ac->bssid[0],
-	    ac->bssid[1],
-	    ac->bssid[2],
-	    ac->bssid[3],
-	    ac->bssid[4],
-	    ac->bssid[5]);
-    screen_puts(x+17, 14, ATTRIBUTE_BOLD,tmp);
-    screen_puts(x+17, 15, ATTRIBUTE_BOLD,ac->fn_version);
+    sprintf((char *)tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
+	    acx->bssid[0],
+	    acx->bssid[1],
+	    acx->bssid[2],
+	    acx->bssid[3],
+	    acx->bssid[4],
+	    acx->bssid[5]);
+    screen_puts(x+17, 14, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts(x+17, 15, ATTRIBUTE_BOLD,acx->fn_version);
 }
 
 void screen_select_slot(char *e)
@@ -365,28 +361,27 @@ void screen_select_file(void)
     {
         screen_puts_center(21,ATTRIBUTE_NORMAL, "[BACKSPACE] Up Dir [N]ew [F]ilter [C]Do It!");
     }
-    screen_puts_center(22,ATTRIBUTE_NORMAL,"[RETURN] Choose [F1] Boot [ESC] Abort");
+    screen_puts_center(22,ATTRIBUTE_NORMAL,"[RETURN] Choose [ESC] Abort");
 }
 
 void screen_select_file_display(char *p, char *f)
 {
 
     unsigned char i;
-    unsigned char x = screen_cols == 40 ? 0 : 20;
 
     // Host
-    screen_puts(x+0, 1, ATTRIBUTE_HEADER, "Host:");
-    screen_puts(x+5, 1, ATTRIBUTE_BOLD, selected_host_name);
+    screen_puts(0, 1, ATTRIBUTE_HEADER, "Host: ");
+    screen_puts(6, 1, ATTRIBUTE_BOLD, selected_host_name);
 
     // Filter
-    screen_puts(x+0, 2, ATTRIBUTE_HEADER, "Fltr:");
-    screen_puts(5, 2, ATTRIBUTE_BOLD, f);
+    screen_puts(0, 2, ATTRIBUTE_HEADER, "Fltr: ");
+    screen_puts(6, 2, ATTRIBUTE_BOLD, f);
 
     // Path - the path can wrap to line 4 (maybe 5?) so clear both to be safe.
     screen_clear_line(3);
     screen_clear_line(4);
-    screen_puts(x+0, 3, ATTRIBUTE_HEADER, "Path:");
-    screen_puts(5, 3, ATTRIBUTE_BOLD, p);
+    screen_puts(0, 3, ATTRIBUTE_HEADER, "Path: ");
+    screen_puts(6, 3, ATTRIBUTE_BOLD, p);
 
     // Clear out the file area
     for (i = FILES_START_Y; i < FILES_START_Y + ENTRIES_PER_PAGE; i++)
@@ -525,13 +520,11 @@ void screen_error(const char *msg)
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
-    unsigned char x = screen_cols == 40 ? 0 : 22;
-
     screen_clear();
     bar_clear(false);
 
-    screen_puts(x+5, 0, ATTRIBUTE_HEADER, "HOST LIST");
-    screen_puts(x+4, 11, ATTRIBUTE_HEADER, "DRIVE SLOTS");
+    screen_puts_center(0, ATTRIBUTE_HEADER, "HOST LIST");
+    screen_puts_center(11, ATTRIBUTE_HEADER, "DRIVE SLOTS");
 
     screen_hosts_and_devices_host_slots(&hostSlots[0]);
 
@@ -541,28 +534,39 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 // Show the keys that are applicable when we are on the Hosts portion of the screen.
 void screen_hosts_and_devices_hosts(void)
 {
-    unsigned char x = screen_cols == 40 ? 0 : 22;
-
     screen_clear_line(22);
     screen_clear_line(23);
-    screen_puts(x+0,22,ATTRIBUTE_NORMAL, "[1-8] Slot [E]dit [RETURN] Browse [L]obby [C]onfig [TAB] Drives [ESC] Boot");
+    if (screen_cols == 40)
+    {
+        screen_puts(0, 22, ATTRIBUTE_NORMAL, "[1-8] [E]dit [RET] Browse [TAB] Drives");
+        screen_puts(0, 23, ATTRIBUTE_NORMAL, "[L]obby [C]onfig [ESC] Exit");
+    }
+    else
+    {
+        screen_puts(0, 22, ATTRIBUTE_NORMAL, "[1-8] Slot [E]dit [RETURN] Browse [L]obby [C]onfig [TAB] Drives [ESC] Exit");
+    }
 
-    // TODO check this
-    bar_set(1,1,8,selected_host_slot);
+    bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
 }
 
 // Show the keys that are applicable when we are on the Devices portion of the screen.
 void screen_hosts_and_devices_devices(void)
 {
-    unsigned char x = screen_cols == 40 ? 0 : 22;
-
     screen_clear_line(22);
     screen_clear_line(23);
 
     screen_clear_line(11);
-    screen_puts(x+4, 11, ATTRIBUTE_HEADER, "DRIVE SLOTS");
+    screen_puts_center(11, ATTRIBUTE_HEADER, "DRIVE SLOTS");
 
-    screen_puts(x+0, 22, ATTRIBUTE_NORMAL, "[1-8] Slot [E]ject [Del] Clear Slots [L]obby [TAB] Hosts [R]ead [W]rite [C]onfig");
+    if (screen_cols == 40)
+    {
+        screen_puts(0, 22, ATTRIBUTE_NORMAL, "[1-8] [E]ject [Del] Clear [TAB] Hosts");
+        screen_puts(0, 23, ATTRIBUTE_NORMAL, "[R]ead [W]rite [L]obby [C]onfig");
+    }
+    else
+    {
+        screen_puts(0, 22, ATTRIBUTE_NORMAL, "[1-8] Slot [E]ject [Del] Clear [L]obby [TAB] Hosts [R]ead [W]rite [C]onfig");
+    }
 
     bar_set(DEVICES_START_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
 }
@@ -577,8 +581,8 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
         s[0] = slotNum + '1';
 
-        screen_puts(2,slotNum+HOSTS_START_Y,ATTRIBUTE_BOLD, s);
-        screen_puts(4,slotNum+HOSTS_START_Y,ATTRIBUTE_NORMAL, hostSlots[slotNum][0] != 0x00 ? (char *)hostSlots[slotNum] : text_empty);
+        screen_puts(2,slotNum+HOSTS_START_Y,ATTRIBUTE_BOLD, (const char *)s);
+        screen_puts(5,slotNum+HOSTS_START_Y,ATTRIBUTE_NORMAL, hostSlots[slotNum][0] != 0x00 ? (char *)hostSlots[slotNum] : text_empty);
     }
 }
 
@@ -588,10 +592,6 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, b
 {
   unsigned char slotNum;
   unsigned char dinfo[6];
-
-  // Get full filename for device slot 8
-  if (deviceSlots[7].file[0] != 0x00)
-    io_get_filename_for_device_slot(7, fn);
 
   // Display device slots
   for (slotNum = 0; slotNum < NUM_DEVICE_SLOTS; slotNum++)
@@ -612,9 +612,9 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, b
       dinfo[3] = 0x20;
     }
 
-    screen_puts(0, slotNum + y, ATTRIBUTE_BOLD, dinfo);
+    screen_puts(0, slotNum + y, ATTRIBUTE_BOLD, (const char *)dinfo);
 
-    screen_puts(4, slotNum + y, ATTRIBUTE_BOLD, deviceSlots[slotNum].file[0] != 0x00 ? (char *)deviceSlots[slotNum].file : text_empty);
+    screen_puts(5, slotNum + y, ATTRIBUTE_NORMAL, deviceSlots[slotNum].file[0] != 0x00 ? (char *)deviceSlots[slotNum].file : text_empty);
   }
 }
 
@@ -626,19 +626,22 @@ void screen_hosts_and_devices_devices_clear_all(void)
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
-    // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
+    static char spaces[33];
+    memset((void *)spaces, ' ', 32);
+    spaces[32] = 0;
+    screen_puts(5, HOSTS_START_Y + i, ATTRIBUTE_NORMAL, (const char *)spaces);
 }
 
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
-    // nothing to do, edit_line handles clearing correct space on screen, and doesn't touch the list numbers
+    bar_clear(false);
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
     // When this gets called it seems like the cursor is right where we want it to be.
     // so no need to move to a position first.
-    screen_puts(4, HOSTS_START_Y+hs, ATTRIBUTE_BOLD, text_empty);
+    screen_puts(5, HOSTS_START_Y+hs, ATTRIBUTE_BOLD, text_empty);
 }
 
 void screen_hosts_and_devices_long_filename(char *f)
@@ -681,14 +684,14 @@ void screen_connect_wifi(NetConfig *nc)
 
 void screen_clear_line(unsigned char y)
 {
-    union REGS r;
+    static union REGS r;
 
     /* Set cursor position */
     r.h.ah = 0x02;
     r.h.bh = 0;
     r.h.dh = y;
     r.h.dl = 0;
-    int86(0x10,&r,&r);
+    int86(0x10,(union REGS *)&r,(union REGS *)&r);
 
     /* Plot spaces with zero attributes */
     r.h.ah = 0x09;
@@ -696,7 +699,7 @@ void screen_clear_line(unsigned char y)
     r.h.bh = 0;
     r.h.bl = 0x00;
     r.x.cx = screen_cols;
-    int86(0x10,&r,&r);
+    int86(0x10,(union REGS *)&r,(union REGS *)&r);
 }
 
 /**
@@ -704,17 +707,24 @@ void screen_clear_line(unsigned char y)
  */
 void screen_init(void)
 {
-    union REGS r;
+    static union REGS r;
 
     // Use BIOS to return video mode characteristics.
     r.h.ah = 0x0f;
-    int86(0x10,&r,&r);
+    int86(0x10,(union REGS *)&r,(union REGS *)&r);
     screen_cols = r.h.ah;
     screen_mode = r.h.al;
 
     // Go ahead and set video segment for the moments we need direct video access.
     video = screen_get_video_segment_address();
     screen_clear();
+
+    cursor(false);
 }
 
-#endif /* __WATCOMC__ */
+void screen_end(void)
+{
+    cursor(true);
+}
+
+#endif /* BUILD_MSDOS */

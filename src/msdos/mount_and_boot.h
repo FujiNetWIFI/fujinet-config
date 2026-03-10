@@ -1,4 +1,4 @@
-#ifdef __WATCOMC__
+#ifdef BUILD_MSDOS
 
 #ifndef MOUNT_AND_BOOT_H
 #define MOUNT_AND_BOOT_H

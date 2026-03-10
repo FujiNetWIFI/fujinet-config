@@ -3,10 +3,10 @@
  */
 
 #include <stdlib.h>
-#include "io.h"
+#include <fujinet-fuji.h>
 
 void mount_and_boot(void)
 {
-  io_mount_all();
+  fuji_mount_all();
   exit(0);
 }

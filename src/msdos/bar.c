@@ -1,4 +1,4 @@
-#ifdef __WATCOMC__
+#ifdef BUILD_MSDOS
 
 /**
  * @brief   Bar routines for MS-DOS
@@ -123,4 +123,4 @@ void bar_update(void)
   bar_draw(bar_y+bar_i,false);  
 }
 
-#endif /* __WATCOMC__ */
+#endif /* BUILD_MSDOS */

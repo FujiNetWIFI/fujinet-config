@@ -3,7 +3,7 @@
  *
  * Die function
  */
-#ifdef __WATCOMC__
+#ifdef BUILD_MSDOS
 #include "../die.h"
 
 void die(void)

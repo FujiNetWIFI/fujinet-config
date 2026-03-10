@@ -94,7 +94,7 @@
 #define KEY_2                0x32
 #define KEY_3                0x33
 
-#elif defined(__WATCOMC__)
+#elif defined(BUILD_MSDOS)
 
 /* ASCII control keys */
 #define KEY_ESCAPE           0x1b
@@ -103,14 +103,16 @@
 #define KEY_BACKSPACE        0x08
 #define KEY_CTRL_RBRACKET    0x1d  /* Ctrl+] — used as network-select confirm */
 
-/* Extended BIOS scan codes (AL=0, full 16-bit value returned by cgetc) */
-#define KEY_UP_ARROW         0x4800
-#define KEY_DOWN_ARROW       0x5000
-#define KEY_LEFT_ARROW       0x4B00
-#define KEY_RIGHT_ARROW      0x4D00
-#define KEY_HOME             0x4700
-#define KEY_END              0x4F00
-#define KEY_DELETE           0x5300
+/* Extended key constants — mapped from BIOS scan codes by cgetc() */
+#define KEY_UP_ARROW         0x80
+#define KEY_DOWN_ARROW       0x81
+#define KEY_LEFT_ARROW       0x82
+#define KEY_RIGHT_ARROW      0x83
+#define KEY_HOME             0x84
+#define KEY_END              0x85
+#define KEY_DELETE           0x86
+#define KEY_PAGE_UP          0x87
+#define KEY_PAGE_DOWN        0x88
 
 /* Alias */
 #define KEY_ABORT            KEY_ESCAPE
