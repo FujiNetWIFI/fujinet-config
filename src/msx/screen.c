@@ -362,13 +362,14 @@ void screen_hosts_and_devices_hosts(void)
 {
   show_menu(5, 'b',"_boot", 'e',"_edit", 'd',"_disks", 's',"ba_sic", 'c',"_config");
   clear_status();
+  watermark_visible = true;
   bar_set(0,3,8,selected_host_slot);
-  // bar_set(0,3,8,3);
 }
 
 void screen_hosts_and_devices_devices(void)
 {
   show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
+  watermark_visible = false;
   bar_set(10, 3, 8, selected_device_slot);
 }
 
