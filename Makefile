@@ -82,5 +82,8 @@ CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
 ########################################
 # MSX customization
 
-CFLAGS_EXTRA_MSX =
-LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app -Ca-Isrc/msx/header
+CFLAGS_EXTRA_MSX = -DUSING_FUJINET_LIB
+LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -create-app -Ca-Isrc/msx/header -m
+
+msxrom/r2r-post::
+	python3 src/msx/tools/patch_rom.py $(EXECUTABLE) $(R2R_PD)/$(PRODUCT)_code_fujibus.bin $(R2R_PD)/$(PRODUCT)_fujibus_anchor.bin src/msx/fujibus.s
