@@ -451,8 +451,7 @@ void screen_select_file(void)
 
     screen_header("Disk Images");
 
-    /* Info box: rows 1-5; shadow at row 6 (FILES_START_Y-1=7, so no conflict). */
-    screen_draw_box(0, 1, screen_cols, 5, ATTRIBUTE_HEADER, true);
+    screen_draw_box(0, 1, screen_cols, 5, ATTRIBUTE_HEADER, false);
 
     /* File list box: top border row 7 (FILES_START_Y-1), bottom border row 23. No shadow (row 24 = status bar). */
     screen_draw_box(0, FILES_START_Y - 1, screen_cols, ENTRIES_PER_PAGE + 2, ATTRIBUTE_HEADER, false);
