@@ -46,14 +46,16 @@ void bar_clear(bool old)
 }
 
 /**
- * Draw bar at y
+ * Draw bar at y, respecting bar_c as left and right margin so box borders
+ * at column 0 and screen_cols-1 are not overwritten when bar_c > 0.
  */
 void bar_draw(int y, bool clear)
 {
-    int o = y * screen_cols * 2 + 1;
+    int o = (y * screen_cols + bar_c) * 2 + 1;
+    int w = screen_cols - 2 * bar_c;
     int i=0;
-    
-    for (i=0;i<screen_cols;i++)
+
+    for (i=0;i<w;i++)
     {
         if (clear)
 	{
@@ -61,7 +63,7 @@ void bar_draw(int y, bool clear)
 	}
         else
 	{
-            video[o] = 0x10;
+            video[o] = ATTRIBUTE_SELECTED;
 	}
 
         o += 2;

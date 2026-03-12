@@ -12,7 +12,7 @@
 #ifdef _CMOC_VERSION_
 #define ENTRIES_PER_PAGE 10
 #elif defined(BUILD_MSDOS)
-#define ENTRIES_PER_PAGE 13
+#define ENTRIES_PER_PAGE 15
 #else
 #define ENTRIES_PER_PAGE 15
 #endif

@@ -26,10 +26,13 @@
 #define YELLOW 14
 #define WHITE 15
 
-#define ATTRIBUTE_HEADER 0x09
-#define ATTRIBUTE_NORMAL 0x07
-#define ATTRIBUTE_BOLD 0x0E
-#define ATTRIBUTE_SELECTED 0x70
+/* EDIT.EXE inspired color scheme */
+#define ATTRIBUTE_HEADER   0x70  /* black on light gray  (title/section bars) */
+#define ATTRIBUTE_NORMAL   0x17  /* white on blue        (body text)          */
+#define ATTRIBUTE_BOLD     0x1F  /* bright white on blue (emphasized text)    */
+#define ATTRIBUTE_SELECTED 0x70  /* black on light gray  (list selection bar) */
+#define ATTRIBUTE_STATUS   0x70  /* black on light gray  (bottom status bar)  */
+#define ATTRIBUTE_SHADOW   0x08  /* dark gray on black   (drop shadow)        */
 
 /**
  * @brief screen variables
@@ -44,6 +47,13 @@ void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *
 void screen_puts_center(unsigned char y, unsigned char a, const char *s);
 void set_wifi_print_rssi(SSIDInfo *s, unsigned char i);
 void screen_show_info(int printerEnabled, AdapterConfig *ac);
+
+/* EDIT.EXE style UI helpers */
+void screen_header(const char *title);
+void screen_status(const char *text);
+void screen_fill_line(unsigned char y, unsigned char a);
+void screen_draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char a, bool shadow);
+void screen_draw_box_titled(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char a, bool shadow, const char *title);
 
 #endif /* SCREEN_MSDOS_H */
 

@@ -17,13 +17,13 @@
 #define COLOR_CHECKING_NETWORK 0x26
 
 // Y position on screen where the list of hosts starts.
-#define HOSTS_START_Y 2
+#define HOSTS_START_Y 3
 
 // Y position on screen where the list of hosts ends
 #define HOSTS_END_Y (HOSTS_START_Y + NUM_HOST_SLOTS - 1)
 
 // Y position on screen where the device slots start.
-#define DEVICES_START_Y 13
+#define DEVICES_START_Y 14
 
 // Y position on screen where the device slots end.
 #define DEVICES_END_Y   (DEVICES_START_Y + NUM_DEVICE_SLOTS - 1)
@@ -33,10 +33,11 @@
 #define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + NUM_DEVICE_SLOTS-1)
 
 // Y position on screen where the list of available wireless networks start.
-#define NETWORKS_START_Y    4
+// Row 3 = first inner row of the "Available Networks" box (box top border at row 2).
+#define NETWORKS_START_Y    3
 
 // Y position of the start of the file list from host.
-#define FILES_START_Y   6
+#define FILES_START_Y   8
 
 /**
  * @brief Pointer to video memory

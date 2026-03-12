@@ -16,6 +16,7 @@
 
 unsigned char selected_network;
 extern bool copy_mode;
+extern char mode;
 extern unsigned char copy_host_slot;
 unsigned short custom_numSectors;
 unsigned short custom_sectorSize;
@@ -32,10 +33,12 @@ int kbhit(void)
 {
     static union REGS r;
 
-    r.h.ah = 0x01;
-    int86(0x16,(union REGS *)&r,(union REGS *)&r);
+    /* INT 21h AH=0Bh: Check stdin status. Non-blocking.
+       Returns AL=0xFF if character waiting, AL=0x00 if not. */
+    r.h.ah = 0x0B;
+    int86(0x21,(union REGS *)&r,(union REGS *)&r);
 
-    return r.x.ax;
+    return (r.h.al == 0xFF);
 }
 
 unsigned char cgetc(void)
@@ -151,21 +154,21 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
 void input_line_set_wifi_custom(char *c)
 {
-    bar_set(20,1,1,0);
     memset(c, 0, 32);
-    input_line(2, 20, 0, c, 32, false);
+    input_line(0, 22, 0, c, 32, false);
 }
 
 void input_line_set_wifi_password(char *c)
 {
+    unsigned char ix = (screen_cols - (64 + 2)) / 2 + 1;  /* inside brackets */
     char stars[65];
     int l = strlen(c);
+    if (l > 64) l = 64;
     memset((void *)stars, 0, 65);
     memset((void *)stars, '*', l);
-    if (l > 64) l = 64;
     stars[l] = '\0';
-    screen_puts(0, 21, ATTRIBUTE_NORMAL, (const char *)stars);
-    input_line(0, 21, 0, c, 64, true);
+    screen_puts(ix, 22, ATTRIBUTE_NORMAL, (const char *)stars);
+    input_line(ix, 22, 0, c, 64, true);
 }
 
 void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
@@ -175,12 +178,11 @@ void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char
 
 void input_line_filter(char *c)
 {
-    input_line(5, 2, 0, c, 32, false);
+    input_line(6, 3, 0, c, 32, false);
 }
 
 unsigned char input_select_file_new_type(void)
 {
-    // Not used on Atari
     return 1;
 }
 
@@ -254,6 +256,7 @@ WSSubState input_set_wifi_select(void)
   case 's':
     state = HOSTS_AND_DEVICES;
     return WS_DONE;
+  case KEY_RETURN:
   case KEY_CTRL_RBRACKET:
     selected_network = bar_get();
     if (selected_network < numNetworks)
@@ -287,9 +290,9 @@ HDSubState input_hosts_and_devices_hosts(void)
     int k = input();
     char temp[20];
     
-    if (k == KEY_HOME) // TK-II HOME
+    if (k == KEY_HOME)
         k = '1';
-    else if (k == KEY_END) // TK-II END
+    else if (k == KEY_END)
         k = '8';
 
     switch (k)
@@ -328,7 +331,7 @@ HDSubState input_hosts_and_devices_hosts(void)
         memset((void *)temp, 0, sizeof(temp));
         screen_puts(0,24,ATTRIBUTE_BOLD, "Boot Lobby Y/N? ");
         input_line(16,24,0,(char *)temp,2, false);
-        screen_clear_line(24);
+        screen_hosts_and_devices_hosts();
         switch (temp[0])
         {
         case 'Y':
@@ -423,7 +426,7 @@ HDSubState input_hosts_and_devices_devices(void)
         memset((void *)temp, 0, sizeof(temp));
         screen_puts(0,24,ATTRIBUTE_NORMAL,"Boot Lobby Y/N? ");
         input_line(16,24,0,(char *)temp,2, false);
-        screen_clear_line(24);
+        screen_hosts_and_devices_devices();
         switch (temp[0])
         {
         case 'Y':
@@ -459,7 +462,7 @@ SFSubState input_select_file_choose(void)
             return SF_PREV_PAGE;
         return SF_CHOOSE;
     case KEY_PAGE_DOWN:
-        if ((ENTRIES_PER_PAGE == _visibleEntries) && (dir_eof == false))
+        if (dir_eof == false)
             return SF_NEXT_PAGE;
         return SF_CHOOSE;
     case KEY_UP_ARROW:
@@ -544,9 +547,9 @@ SSSubState input_select_slot_choose(void)
 {
     int k=input();
 
-    if (k == KEY_HOME)  // TK-II HOME
+    if (k == KEY_HOME)
         k = '1';
-    else if (k == KEY_END) // TK-II END
+    else if (k == KEY_END)
         k = '8';
 
     switch (k)
@@ -581,17 +584,16 @@ SSSubState input_select_slot_choose(void)
         state = SELECT_FILE;
         backToFiles = true;
         return SS_DONE;
-    case KEY_RETURN: // For Atari I think we need to ask for file mode after this, it's not in the main select_slot.c code.
+    case KEY_RETURN:
+        // Read-only mount
         selected_device_slot = bar_get();
-        // Ask for mode.
-        screen_select_slot_mode();
-        k = input_select_slot_mode(&mode);
-
-        if (!k)
-        {
-            state = SELECT_FILE;
-            backToFiles = true;
-        }
+        mode = 1;
+        return SS_DONE;
+    case 'W':
+    case 'w':
+        // Read-write mount
+        selected_device_slot = bar_get();
+        mode = 2;
         return SS_DONE;
     default:
         return SS_CHOOSE;
@@ -600,26 +602,24 @@ SSSubState input_select_slot_choose(void)
 
 unsigned char input_select_slot_mode(char *mode)
 {
-    unsigned char k = input();
+    unsigned char k;
 
     while (1)
     {
+        k = input();
         switch (k)
         {
         case KEY_ESCAPE:
             return 0;
-            break;
         case 'W':
         case 'w':
             mode[0] = 2;
             return 1;
-            break;
         case KEY_RETURN:
         case 'R':
         case 'r':
             mode[0] = 1;
             return 1;
-            break;
         default:
             break;
         }
@@ -629,7 +629,7 @@ unsigned char input_select_slot_mode(char *mode)
 /*
  *  Handle inupt for the "show info" screen.
  *
- *  'C' - Reconnect Wifi
+ *  'R' - Reconnect Wifi
  *  'S' - Change SSID
  *  Any other key - return to main hosts and devices screen
  *
@@ -642,8 +642,8 @@ SISubState input_show_info(void)
 
         switch (k)
         {
-        case 'C':
-        case 'c':
+        case 'R':
+        case 'r':
             state = CONNECT_WIFI;
             return SI_DONE;
         case 'S':
@@ -651,8 +651,12 @@ SISubState input_show_info(void)
             state = SET_WIFI;
             return SI_DONE;
         default:
-            state = HOSTS_AND_DEVICES;
-            return SI_DONE;
+            if (k != 0)
+            {
+                state = HOSTS_AND_DEVICES;
+                return SI_DONE;
+            }
+            break;
         }
     }
 }

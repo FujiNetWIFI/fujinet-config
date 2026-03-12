@@ -7,9 +7,11 @@ extern void system_build_directory(unsigned char ds, unsigned long numBlocks, ch
 
 #ifdef _CMOC_VERSION_
 #define MAX_WIFI_NETWORKS 11
-#else /* ! _CMOC_VERSION_ */
+#elif defined(BUILD_MSDOS)
+#define MAX_WIFI_NETWORKS 18
+#else
 #define MAX_WIFI_NETWORKS 16
-#endif /* _CMOC_VERSION_ */
+#endif
 
 #ifdef BUILD_APPLE2
 extern void system_list_devs(void);
