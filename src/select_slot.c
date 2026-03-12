@@ -10,6 +10,8 @@
 #include "input.h"
 #include "system.h"
 
+#define DSTEP(...)
+
 char mode=0;
 
 bool create=false;
@@ -119,25 +121,33 @@ void select_slot_done()
   }
   else
   {
+    DSTEP("1 strcat path=%s", path);
     strcat(filename,path);
 
+    DSTEP("2 open_dir2 hs=%d path=%s filt=%s", selected_host_slot, path, filter);
     fuji_open_directory2(selected_host_slot,path,filter);
 
+    DSTEP("3 set_dir_pos pos=%u", (unsigned)pos);
     fuji_set_directory_position(pos);
 
+    DSTEP("4 read_dir len=%d", 255-(unsigned char)strlen(path));
     fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
     strcat(filename, response);
 
+    DSTEP("5 set_dev_fname mode=%d hs=%d ds=%d fn=%s", mode, selected_host_slot, selected_device_slot, filename);
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
+    DSTEP("6 set_dir_pos pos=%u", (unsigned)pos);
     fuji_set_directory_position(pos);
 
+    DSTEP("7 read_dir DIR_MAX_LEN");
     fuji_read_directory(DIR_MAX_LEN, 0, response);
     memcpy(deviceSlots[selected_device_slot].file, response, DIR_MAX_LEN);
     deviceSlots[selected_device_slot].mode=mode;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #ifndef BUILD_ATARI
+    DSTEP("8 put_dev_slots");
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
 #endif
 

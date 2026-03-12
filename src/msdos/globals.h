@@ -39,6 +39,14 @@
 // Y position of the start of the file list from host.
 #define FILES_START_Y   8
 
+// Display field widths for new-disk prompts.
+#define NEW_NAME_WIDTH    36   /* max filename chars shown/accepted */
+#define NEW_SECTORS_WIDTH  7   /* max sector-count digits (9999999) */
+
+// Rows used for new-disk prompts (below the file list box, above the status bar).
+#define NEW_PROMPT_Y  22
+#define NEW_INPUT_Y   23
+
 /**
  * @brief Pointer to video memory
  */

@@ -15,6 +15,7 @@
 #include "screen.h"
 #include "cursor.h"
 #include "io.h"
+#include "../system.h"
 
 /* CP437 single-line box drawing characters */
 #define BOX_TL   '\xDA'   /* top-left corner    ┌ */
@@ -139,6 +140,10 @@ void screen_mount_and_boot(void)
     screen_puts_center(12, ATTRIBUTE_BOLD, "Mounting all slots...");
 }
 
+/**
+ * @brief Display the WiFi network scan screen with the adapter MAC address.
+ * @param acx Pointer to extended adapter configuration containing the MAC address.
+ */
 void screen_set_wifi_extended(AdapterConfigExtended *acx)
 {
     static char tmp[40];
@@ -158,6 +163,11 @@ void screen_set_wifi_extended(AdapterConfigExtended *acx)
     screen_status("Scanning networks...");
 }
 
+/**
+ * @brief Print a 3-character signal-strength indicator for a WiFi network entry.
+ * @param s Pointer to the SSIDInfo containing the RSSI value.
+ * @param i Row index within the network list (added to NETWORKS_START_Y).
+ */
 void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
 {
     /* 3-char RSSI field just inside the right box border (screen_cols-4 to screen_cols-2).
@@ -186,6 +196,11 @@ void screen_set_wifi_print_rssi(SSIDInfo *s, unsigned char i)
     screen_puts(x, i + NETWORKS_START_Y, ATTRIBUTE_BOLD, (const char *)out);
 }
 
+/**
+ * @brief Display one SSID entry and its RSSI indicator in the network list.
+ * @param n Row index within the network list (0-based, added to NETWORKS_START_Y).
+ * @param s Pointer to the SSIDInfo containing the SSID name and RSSI.
+ */
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
     /* Column 1: one cell inside the left box border */
@@ -193,6 +208,10 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
     screen_set_wifi_print_rssi(s, n);
 }
 
+/**
+ * @brief Render the "Enter a specific SSID" entry at the bottom of the network list and initialise the bar.
+ * @param nn Total number of scanned networks; the extra entry is placed at row NETWORKS_START_Y + nn.
+ */
 void screen_set_wifi_sel_net(unsigned char nn)
 {
     unsigned char y = NETWORKS_START_Y + numNetworks;
@@ -208,6 +227,9 @@ void screen_set_wifi_sel_net(unsigned char nn)
     bar_set(NETWORKS_START_Y, 1, nn + 1, 0);
 }
 
+/**
+ * @brief Display the prompt for manual SSID entry on row 23.
+ */
 void screen_set_wifi_custom(void)
 {
     /* Row 23: between the network box (bottom border row 22) and status bar (row 24) */
@@ -215,6 +237,9 @@ void screen_set_wifi_custom(void)
     screen_puts_center(23, ATTRIBUTE_NORMAL, "Enter network name and press [ENTER]");
 }
 
+/**
+ * @brief Display the password entry bracket and prompt on rows 22-23.
+ */
 void screen_set_wifi_password(void)
 {
     static const char blank[65] = "                                                                ";
@@ -226,12 +251,14 @@ void screen_set_wifi_password(void)
     screen_puts_center(23, ATTRIBUTE_NORMAL, "Enter password and press [ENTER]");
 }
 
-/*
- * Display the 'info' screen
+/**
+ * @brief Display the network information screen with IP, MAC, and firmware details.
+ * @param printerEnabled Unused on MS-DOS; present for cross-platform API compatibility.
+ * @param acx            Pointer to extended adapter configuration with network details.
  */
 void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 {
-    unsigned char x = (screen_cols - 40) / 2;
+    unsigned char x = (screen_cols - 44) / 2;
     char tmp[80];
 
     screen_clear();
@@ -318,6 +345,10 @@ struct _file_info {
 };
 #pragma pack()
 
+/**
+ * @brief Display the drive-slot selection screen with file details for the selected entry.
+ * @param e Pointer to a packed _file_info struct followed by the null-terminated filename.
+ */
 void screen_select_slot(char *e)
 {
   struct _file_info *i = (struct _file_info *)e;
@@ -357,33 +388,84 @@ void screen_select_slot(char *e)
   bar_set(DEVICES_START_MOUNT_Y, 1, NUM_DEVICE_SLOTS, 0);
 }
 
+/**
+ * @brief Display the mount-mode prompt on rows 21-22.
+ */
 void screen_select_slot_mode(void)
 {
     screen_clear_line(21);
     screen_puts_center(22,ATTRIBUTE_NORMAL,"[ENTER] Read Only [W] Read/Write [ESC] Abort");
 }
 
+/**
+ * @brief Select-slot choose update stub — no additional display needed on MS-DOS.
+ */
 void screen_select_slot_choose(void)
 {
 }
 
+/**
+ * @brief Redraw a single device slot row to show it as ejected (empty).
+ * @param y  Base row of the device slot list.
+ * @param ds Device slot index (0-based) to redraw.
+ */
+static void eject_draw_slot(unsigned char y, unsigned char ds)
+{
+    static unsigned char dinfo[9];
+    static char padded[71];
+    unsigned char row = y + ds;
+    unsigned char w   = screen_cols - 10;
+
+    bar_set(y, 1, NUM_DEVICE_SLOTS, ds);
+
+    dinfo[0] = 0x20; dinfo[1] = 0x20;
+    dinfo[2] = 0x31 + ds;
+    dinfo[3] = 0x20; dinfo[4] = 0x20; dinfo[5] = 0x20;
+    dinfo[6] = 0x20; dinfo[7] = 0x20; dinfo[8] = 0x00;
+    screen_puts(1, row, ATTRIBUTE_SELECTED, (const char *)dinfo);
+
+    memcpy((void *)padded, text_empty, 5);
+    memset((void *)(padded + 5), ' ', w - 5);
+    padded[w] = 0;
+    screen_puts(9, row, ATTRIBUTE_SELECTED, (const char *)padded);
+}
+
+/**
+ * @brief Redraw a device slot in the mount screen as ejected.
+ * @param ds Device slot index (0-based).
+ */
 void screen_select_slot_eject(unsigned char ds)
 {
+    eject_draw_slot(DEVICES_START_MOUNT_Y, ds);
 }
 
+/**
+ * @brief Redraw a device slot as ejected in whichever list is currently active.
+ * @param ds Device slot index (0-based).
+ */
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-
+    unsigned char y = mounting ? DEVICES_START_MOUNT_Y : DEVICES_START_Y;
+    eject_draw_slot(y, ds);
 }
 
+/**
+ * @brief EOS directory build screen stub — no-op on MS-DOS.
+ */
 void screen_select_slot_build_eos_directory(void)
 {
 }
 
+/**
+ * @brief EOS directory label screen stub — no-op on MS-DOS.
+ */
 void screen_select_slot_build_eos_directory_label(void)
 {
 }
 
+/**
+ * @brief EOS directory creation progress screen stub — no-op on MS-DOS.
+ */
 void screen_select_slot_build_eos_directory_creating(void)
 {
 }
@@ -444,6 +526,9 @@ static void sf_draw_file_bot_border(bool pgdn)
     screen_putc(screen_cols - 1, row, a, BOX_BR);
 }
 
+/**
+ * @brief Draw the full file-browser screen including header, info box, and file list box.
+ */
 void screen_select_file(void)
 {
     screen_clear();
@@ -462,6 +547,11 @@ void screen_select_file(void)
         screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C] Do Copy!  [ENTER] Choose  [ESC] Abort");
 }
 
+/**
+ * @brief Refresh the host, filter, and path fields and clear the file list area.
+ * @param p Current directory path string.
+ * @param f Current filename filter string.
+ */
 void screen_select_file_display(char *p, char *f)
 {
     unsigned char i;
@@ -494,22 +584,35 @@ void screen_select_file_display(char *p, char *f)
     sf_draw_file_bot_border(false);
 }
 
+/**
+ * @brief Long-filename display stub — row 24 is the status bar on MS-DOS; no-op.
+ * @param e Unused entry pointer.
+ */
 void screen_select_file_display_long_filename(char *e)
 {
     /* Row 24 is the status bar on MS-DOS — do not overwrite it. */
     (void)e;
 }
 
+/**
+ * @brief Long-filename clear stub — row 24 is the status bar on MS-DOS; no-op.
+ */
 void screen_select_file_clear_long_filename(void)
 {
     /* Row 24 is the status bar on MS-DOS — do not clear it. */
 }
 
+/**
+ * @brief Filter display stub — filter is shown inline in the info box; no additional display needed.
+ */
 void screen_select_file_filter(void)
 {
     // No need to display anything additional, we're already showing the filter on the screen.
 }
 
+/**
+ * @brief Update the file list box borders after advancing to the next page.
+ */
 void screen_select_file_next(void)
 {
     sf_draw_file_bot_border(dir_eof == false);
@@ -517,6 +620,9 @@ void screen_select_file_next(void)
         sf_draw_file_top_border(false);
 }
 
+/**
+ * @brief Update the file list box borders after going back to the previous page.
+ */
 void screen_select_file_prev(void)
 {
     sf_draw_file_top_border(pos > 0);
@@ -524,6 +630,12 @@ void screen_select_file_prev(void)
         sf_draw_file_bot_border(false);
 }
 
+/**
+ * @brief Display a single directory entry in the file list.
+ * @param y         Row offset within the file list (0-based, added to FILES_START_Y).
+ * @param e         Null-terminated entry name string.
+ * @param entryType Entry type code (ENTRY_TYPE_FOLDER, ENTRY_TYPE_LINK, etc.).
+ */
 void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
 {
 
@@ -548,41 +660,77 @@ void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryTy
 
 }
 
+/**
+ * @brief Initialise the highlight bar over the file list.
+ * @param visibleEntries Number of entries currently visible in the list.
+ */
 void screen_select_file_choose(char visibleEntries)
 {
     bar_set(FILES_START_Y,1,visibleEntries,0);
     _visibleEntries = visibleEntries;
 }
 
+/**
+ * @brief New-file type selection screen stub — type is fixed on MS-DOS; no-op.
+ */
 void screen_select_file_new_type(void)
 {
 }
 
+/**
+ * @brief Display the floppy disk size selection prompt.
+ * @param k Unused key code; included for cross-platform API compatibility.
+ */
 void screen_select_file_new_size(unsigned char k)
 {
-    unsigned char x = (screen_cols - 40) / 2;
-
-    screen_clear_line(20);
-    screen_clear_line(21);
-
-    screen_puts(x, 20, ATTRIBUTE_BOLD, "[1] 360K [2] 720K [3] 1.2MB [4] 1.44MB");
+    screen_clear_line(NEW_PROMPT_Y);
+    screen_clear_line(NEW_INPUT_Y);
+    screen_puts_center(NEW_PROMPT_Y, ATTRIBUTE_BOLD, "[1] 360K  [2] 720K  [3] 1.2MB  [4] 1.44MB  [C]ustom");
 }
 
+/**
+ * @brief Draw a centred bracket pair of width w on row y for text input display.
+ * @param y Row on which to draw the brackets.
+ * @param w Interior width in characters (bracket characters not included).
+ */
+static void screen_draw_input_brackets(unsigned char y, unsigned char w)
+{
+    static char brackets[NEW_NAME_WIDTH + 3]; /* large enough for either field */
+    unsigned char bx = (screen_cols - (w + 2)) / 2;
+    unsigned char i;
+
+    brackets[0] = '[';
+    for (i = 1; i <= w; i++) brackets[i] = ' ';
+    brackets[w + 1] = ']';
+    brackets[w + 2] = '\0';
+    screen_puts(bx, y, ATTRIBUTE_NORMAL, (const char *)brackets);
+}
+
+/**
+ * @brief Display the custom sector-count entry prompt and input brackets.
+ */
 void screen_select_file_new_custom(void)
 {
-    screen_clear_line(20);
-    screen_clear_line(21);
-
-    screen_puts(0, 20, ATTRIBUTE_NORMAL, "# 512 byte Sectors?");
+    screen_clear_line(NEW_PROMPT_Y);
+    screen_clear_line(NEW_INPUT_Y);
+    screen_puts_center(NEW_PROMPT_Y, ATTRIBUTE_NORMAL, "Number of sectors:");
+    screen_draw_input_brackets(NEW_INPUT_Y, NEW_SECTORS_WIDTH);
 }
 
+/**
+ * @brief Display the new filename entry prompt and input brackets.
+ */
 void screen_select_file_new_name(void)
 {
-    screen_clear_line(20);
-    screen_clear_line(21);
-    screen_puts(0, 20, ATTRIBUTE_NORMAL, "Enter name of new disk image file");
+    screen_clear_line(NEW_PROMPT_Y);
+    screen_clear_line(NEW_INPUT_Y);
+    screen_puts_center(NEW_PROMPT_Y, ATTRIBUTE_NORMAL, "Filename:");
+    screen_draw_input_brackets(NEW_INPUT_Y, NEW_NAME_WIDTH);
 }
 
+/**
+ * @brief Display the "Creating file…" progress screen while the image is being written.
+ */
 void screen_select_file_new_creating(void)
 {
     screen_clear();
@@ -672,7 +820,7 @@ void screen_draw_box_titled(unsigned char x, unsigned char y, unsigned char w, u
     if (title && *title)
     {
         tlen   = (unsigned char)strlen(title) + 2; /* flanking spaces */
-        tstart = x + (w - tlen) / 2;
+        tstart = x + (w >> 1) - (tlen >> 1);
         screen_putc(tstart - 1, y, a, BOX_H); /* overwrite the ┌ approach */
         screen_putc(tstart,     y, a, ' ');
         for (i = 0; title[i]; i++)
@@ -694,12 +842,22 @@ void screen_clear(void)
     }
 }
 
+/**
+ * @brief Display an error message centred on the status bar (row 24).
+ * @param msg Null-terminated error message string.
+ */
 void screen_error(const char *msg)
 {
     screen_clear_line(24);
     screen_puts_center(24, ATTRIBUTE_BOLD, msg);
 }
 
+/**
+ * @brief Draw the complete hosts-and-devices main screen.
+ * @param h Pointer to the host slot array.
+ * @param d Pointer to the device slot array.
+ * @param e Pointer to the device-enabled flags array.
+ */
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 {
     screen_clear();
@@ -714,7 +872,9 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
 }
 
-// Show the keys that are applicable when we are on the Hosts portion of the screen.
+/**
+ * @brief Update the status bar with host-panel key hints and reposition the bar on the host list.
+ */
 void screen_hosts_and_devices_hosts(void)
 {
     if (screen_cols <= 40)
@@ -725,7 +885,9 @@ void screen_hosts_and_devices_hosts(void)
     bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
 }
 
-// Show the keys that are applicable when we are on the Devices portion of the screen.
+/**
+ * @brief Update the status bar with device-panel key hints and reposition the bar on the device list.
+ */
 void screen_hosts_and_devices_devices(void)
 {
     if (screen_cols <= 40)
@@ -736,6 +898,10 @@ void screen_hosts_and_devices_devices(void)
     bar_set(DEVICES_START_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
 }
 
+/**
+ * @brief Render all host slot labels and names in the HOST SLOTS box.
+ * @param h Pointer to the host slot array.
+ */
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
     unsigned char slotNum;
@@ -751,44 +917,76 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
     }
 }
 
-// Since 'deviceSlots' is a global, do we need to access the input parameter at all?
-// Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
+/**
+ * @brief Render all device slot rows starting at row y, including drive letters and filenames.
+ * @param y     Base row for the first device slot entry.
+ * @param dslot Pointer to the device slot array.
+ * @param e     Pointer to per-slot enabled flags (may be NULL).
+ */
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, bool *e)
 {
   unsigned char slotNum;
-  unsigned char dinfo[6];
+  unsigned char dinfo[9];
+
+  system_refresh_drive_letters();
 
   // Display device slots
   for (slotNum = 0; slotNum < NUM_DEVICE_SLOTS; slotNum++)
   {
+    char dl;
+
     dinfo[1] = 0x20;
-    dinfo[2] = (slotNum == 7 && strstr(fn, ".cas") != NULL) ? 'C' : (0x31 + slotNum);
+    dinfo[2] = 0x31 + slotNum;
     dinfo[4] = 0x20;
-    dinfo[5] = 0x00;
 
     if (deviceSlots[slotNum].file[0] != 0x00)
     {
       dinfo[0] = deviceSlots[slotNum].hostSlot + 0x31;
       dinfo[3] = (deviceSlots[slotNum].mode == 0x02 ? 'W' : 'R');
+      dl = deviceDriveLetters[slotNum];
+      dinfo[5] = (dl ? (unsigned char)dl : ' ');
+      dinfo[6] = (dl ? ':' : ' ');
     }
     else
     {
       dinfo[0] = 0x20;
       dinfo[3] = 0x20;
+      dinfo[5] = 0x20;
+      dinfo[6] = 0x20;
     }
+
+    dinfo[7] = 0x20;
+    dinfo[8] = 0x00;
 
     screen_puts(1, slotNum + y, ATTRIBUTE_BOLD, (const char *)dinfo);
 
-    screen_puts(6, slotNum + y, ATTRIBUTE_NORMAL, deviceSlots[slotNum].file[0] != 0x00 ? (char *)deviceSlots[slotNum].file : text_empty);
+    {
+      static char padded[71];
+      const char *src = deviceSlots[slotNum].file[0] != 0x00 ? (char *)deviceSlots[slotNum].file : text_empty;
+      unsigned char w = screen_cols - 10; /* cols 9..screen_cols-2, after 8-char prefix */
+      unsigned char srclen = (unsigned char)strlen(src);
+      if (srclen > w) srclen = w;
+      memcpy(padded, src, srclen);
+      memset(padded + srclen, ' ', w - srclen);
+      padded[w] = 0;
+      screen_puts(9, slotNum + y, ATTRIBUTE_NORMAL, (const char *)padded);
+    }
   }
 }
 
+/**
+ * @brief Display an "EJECTING ALL.. WAIT" message while clearing all device slots.
+ */
 void screen_hosts_and_devices_devices_clear_all(void)
 {
     screen_clear_line(11);
     screen_puts(0, 11, ATTRIBUTE_NORMAL, "EJECTING ALL.. WAIT");
 }
 
+/**
+ * @brief Clear the display of a single host slot name (overwrite with spaces).
+ * @param i Host slot index (0-based).
+ */
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
 {
     static char spaces[33];
@@ -797,11 +995,19 @@ void screen_hosts_and_devices_clear_host_slot(unsigned char i)
     screen_puts(5, HOSTS_START_Y + i, ATTRIBUTE_NORMAL, (const char *)spaces);
 }
 
+/**
+ * @brief Prepare the display for host slot inline editing by clearing the bar highlight.
+ * @param i Host slot index (0-based).
+ */
 void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
     bar_clear(false);
 }
 
+/**
+ * @brief Display "Empty" in the given host slot after its contents have been cleared.
+ * @param hs Host slot index (0-based).
+ */
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
     // When this gets called it seems like the cursor is right where we want it to be.
@@ -809,28 +1015,50 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
     screen_puts(5, HOSTS_START_Y+hs, ATTRIBUTE_BOLD, text_empty);
 }
 
+/**
+ * @brief Long-filename display stub for the hosts-and-devices screen — no-op on MS-DOS.
+ * @param f Unused filename pointer.
+ */
 void screen_hosts_and_devices_long_filename(char *f)
 {
 }
 
+/**
+ * @brief Display the copy-destination host slot selection screen.
+ * @param h Source host name string.
+ * @param p Source file path string.
+ */
 void screen_destination_host_slot(char *h, char *p)
 {
+    static char label[84];
     screen_clear();
     screen_header("Copy to Host Slot");
-    screen_draw_box_titled(0, 1, screen_cols, 10, ATTRIBUTE_HEADER, true, "Host Slots");
+    screen_draw_box_titled(0, 2, screen_cols, NUM_HOST_SLOTS + 2, ATTRIBUTE_HEADER, false, "Host Slots");
 
-    screen_puts(1, 18, ATTRIBUTE_BOLD,   h);
-    screen_puts(1, 19, ATTRIBUTE_NORMAL, p);
+    screen_draw_box_titled(0, 13, screen_cols, 4, ATTRIBUTE_HEADER, false, "Disk Image Details");
+    sprintf(label, "Host: %s", h);
+    screen_puts(1, 14, ATTRIBUTE_BOLD,   (const char *)label);
+    sprintf(label, "Path: %s", p);
+    screen_puts(1, 15, ATTRIBUTE_NORMAL, (const char *)label);
 
     screen_status("[1-8] Slot  [ENTER] Select  [ESC] Abort");
+}
+
+/**
+ * @brief Initialise the highlight bar on the destination host slot list.
+ */
+void screen_destination_host_slot_choose(void)
+{
     bar_set(HOSTS_START_Y,1,NUM_HOST_SLOTS,0);
 }
 
-void screen_destination_host_slot_choose(void)
-{
-
-}
-
+/**
+ * @brief Display the copy-in-progress screen.
+ * @param sh Source host name.
+ * @param p  Source file path.
+ * @param dh Destination host name.
+ * @param dp Destination file path.
+ */
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
     screen_clear();
@@ -839,6 +1067,10 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
     screen_puts_center(12, ATTRIBUTE_BOLD, "Please wait...");
 }
 
+/**
+ * @brief Display the "Connecting to WiFi" progress screen.
+ * @param nc Pointer to the NetConfig containing the SSID to display.
+ */
 void screen_connect_wifi(NetConfig *nc)
 {
     unsigned char bx = (screen_cols - 36) / 2;
@@ -853,6 +1085,10 @@ void screen_connect_wifi(NetConfig *nc)
     screen_status("[ESC] Abort");
 }
 
+/**
+ * @brief Clear a single screen row by writing spaces with the normal background attribute.
+ * @param y Row to clear (0-24).
+ */
 void screen_clear_line(unsigned char y)
 {
     static union REGS r;
@@ -893,6 +1129,9 @@ void screen_init(void)
     cursor(false);
 }
 
+/**
+ * @brief Restore the hardware cursor on program exit.
+ */
 void screen_end(void)
 {
     cursor(true);

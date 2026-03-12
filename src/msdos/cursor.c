@@ -1,8 +1,10 @@
 #ifdef BUILD_MSDOS
 /**
- * FujiNet Config for MS-DOS
- *
- * Cursor routines
+ * @file cursor.c
+ * @brief MS-DOS hardware text cursor show/hide routines.
+ * @author Thomas Cherryhomes
+ * @email thom dot cherryhomes at gmail dot com
+ * @license gpl v. 3, see LICENSE for details.
  */
 
 #include <dos.h>

@@ -1,5 +1,13 @@
 #ifdef BUILD_MSDOS
 
+/**
+ * @file input.c
+ * @brief MS-DOS keyboard input handling and UI sub-state input dispatchers.
+ * @author Thomas Cherryhomes
+ * @email thom dot cherryhomes at gmail dot com
+ * @license gpl v. 3, see LICENSE for details.
+ */
+
 #include <dos.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -12,6 +20,7 @@
 #include "mount_and_boot.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
+#include "../select_slot.h"
 #include "../set_wifi.h"
 
 unsigned char selected_network;
@@ -24,11 +33,20 @@ extern char fn[256];
 bool mounting = false;
 extern unsigned short entry_timer;
 
+/**
+ * @brief Test whether a raw keyboard code is an extended (special) key.
+ * @param kbcode Raw keyboard code to test.
+ * @return true if the low byte is zero (i.e. the code is an extended key), false otherwise.
+ */
 bool is_special_key(int kbcode)
 {
     return !(kbcode & 0xFF);
 }
 
+/**
+ * @brief Non-blocking check for a waiting keystroke via INT 21h AH=0Bh.
+ * @return Non-zero if a key is waiting in the input buffer, zero if not.
+ */
 int kbhit(void)
 {
     static union REGS r;
@@ -41,6 +59,14 @@ int kbhit(void)
     return (r.h.al == 0xFF);
 }
 
+/**
+ * @brief Read one keystroke from the BIOS keyboard buffer (INT 16h AH=00h).
+ *
+ * For printable keys the ASCII value is returned directly.  For extended
+ * (special) keys the scan code is translated to a KEY_* constant.
+ *
+ * @return ASCII character value, a KEY_* constant, or 0 for unrecognised extended keys.
+ */
 unsigned char cgetc(void)
 {
     static union REGS r;
@@ -67,6 +93,10 @@ unsigned char cgetc(void)
     }
 }
 
+/**
+ * @brief Poll for a keypress and decrement the entry timer if active.
+ * @return The pressed key value, or 0 if no key is waiting.
+ */
 unsigned char input()
 {
     if (entry_timer>0)
@@ -80,11 +110,20 @@ unsigned char input()
     return 0;
 }
 
+/**
+ * @brief Upper-case input stub — not used on MS-DOS.
+ * @return Always returns 0.
+ */
 unsigned char input_ucase()
 {
     return 0;
 }
 
+/**
+ * @brief Move the BIOS text cursor to the given column and row.
+ * @param x Column (0-based).
+ * @param y Row (0-based).
+ */
 void gotoxy(unsigned char x, unsigned char y)
 {
     static union REGS r;
@@ -96,6 +135,15 @@ void gotoxy(unsigned char x, unsigned char y)
     int86(0x10,(union REGS *)&r,(union REGS *)&r);
 }
 
+/**
+ * @brief Read a line of text from the keyboard directly into a buffer, with echo.
+ * @param x        Starting column on screen.
+ * @param y        Row on screen.
+ * @param o        Initial offset into the buffer (pre-existing text length).
+ * @param c        Pointer to the character buffer to receive input.
+ * @param l        Maximum number of characters to accept (buffer capacity).
+ * @param password If true, echo '*' instead of the actual character.
+ */
 void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
 {
     unsigned char pos=o;
@@ -152,12 +200,20 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cursor(false);
 }
 
+/**
+ * @brief Prompt for a custom SSID network name on row 22.
+ * @param c Buffer to receive the entered network name (up to 32 characters).
+ */
 void input_line_set_wifi_custom(char *c)
 {
     memset(c, 0, 32);
     input_line(0, 22, 0, c, 32, false);
 }
 
+/**
+ * @brief Prompt for a WiFi password on row 22, echoing asterisks.
+ * @param c Buffer containing any pre-existing password; receives the updated password (up to 64 characters).
+ */
 void input_line_set_wifi_password(char *c)
 {
     unsigned char ix = (screen_cols - (64 + 2)) / 2 + 1;  /* inside brackets */
@@ -171,71 +227,104 @@ void input_line_set_wifi_password(char *c)
     input_line(ix, 22, 0, c, 64, true);
 }
 
+/**
+ * @brief Read a host-slot name from the keyboard at the appropriate screen position.
+ * @param i Host slot index (0-based), used to compute the screen row.
+ * @param o Initial character offset into the buffer.
+ * @param c Buffer to receive the edited host slot name (up to 32 characters).
+ */
 void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
 {
     input_line(5, i + HOSTS_START_Y, o, c, 32, false);
 }
 
+/**
+ * @brief Read or update the filename filter string from the keyboard.
+ * @param c Buffer containing the current filter string; receives the updated value (up to 32 characters).
+ */
 void input_line_filter(char *c)
 {
-    input_line(6, 3, 0, c, 32, false);
+    unsigned char o = (unsigned char)strlen(c);
+    input_line(7, 3, o, c, 32, false);
 }
 
+/**
+ * @brief Return the new-file type selection — always 1 (floppy) on MS-DOS.
+ * @return Always returns 1.
+ */
 unsigned char input_select_file_new_type(void)
 {
     return 1;
 }
 
+/**
+ * @brief Wait for the user to choose a floppy disk size.
+ * @param t Disk type (unused on MS-DOS; size is always determined by key press).
+ * @return Disk size code: 360, 720, 1200, 1440, 1 (custom), or 0 (invalid).
+ */
 unsigned long input_select_file_new_size(unsigned char t)
 {
-    char temp[8];
-    memset((void *)temp, 0, sizeof(temp));
-    input_line(34, 21, 0, (char *)temp, sizeof(temp), false);
-
-    // TODO: make an enum so these are easier to understand
-    switch (temp[0])
+    switch (cgetc())
     {
-    case '1':
-        return 360;
-    case '2':
-        return 720;
-    case '3':
-        return 1440;
-    case KEY_ESCAPE:
-        return 0;
+    case '1': return 360;
+    case '2': return 720;
+    case '3': return 1200;
+    case '4': return 1440;
+    case 'C':
+    case 'c': return 1;
+    default:  return 0;
     }
-
-    return 0;
 }
 
+/**
+ * @brief Prompt for a custom sector count and store it in custom_numSectors.
+ * @return Always returns 999 to signal a custom-geometry disk.
+ */
 unsigned long input_select_file_new_custom(void)
 {
-    char tmp_str[8];
+    static char tmp_str[NEW_SECTORS_WIDTH + 1];
+    unsigned char bx = (screen_cols - (NEW_SECTORS_WIDTH + 2)) / 2;
+
     custom_sectorSize = 512;
     custom_numSectors = 0;
 
-    // Number of Sectors
     memset((void *)tmp_str, 0, sizeof(tmp_str));
-    input_line(11, 20, 0, (char *)tmp_str, sizeof(tmp_str), false);
+    input_line(bx + 1, NEW_INPUT_Y, 0, (char *)tmp_str, NEW_SECTORS_WIDTH, false);
     custom_numSectors = atoi((const char *)tmp_str);
     return 999;
 }
 
+/**
+ * @brief Prompt for a new disk image filename.
+ * @param c Buffer to receive the entered filename (up to NEW_NAME_WIDTH characters).
+ */
 void input_select_file_new_name(char *c)
 {
-    // TODO: Find out actual max length we shoud allow here. Input variable is [128] but do we allow filenames that large?
-    input_line(0, 21, 0, c, 128, false);
+    unsigned char bx = (screen_cols - (NEW_NAME_WIDTH + 2)) / 2;
+    input_line(bx + 1, NEW_INPUT_Y, 0, c, NEW_NAME_WIDTH, false);
 }
 
+/**
+ * @brief EOS directory build stub — not applicable on MS-DOS.
+ * @return Always returns false.
+ */
 bool input_select_slot_build_eos_directory(void)
 {
     return false;
 }
 
+/**
+ * @brief EOS directory label input stub — no-op on MS-DOS.
+ * @param c Unused label buffer.
+ */
 void input_select_slot_build_eos_directory_label(char *c)
 {
 }
 
+/**
+ * @brief Handle input for the WiFi network selection list.
+ * @return The next WiFi setup sub-state.
+ */
 WSSubState input_set_wifi_select(void)
 {
   int k = input();
@@ -284,6 +373,10 @@ unsigned char input_handle_console_keys(void)
     return 0;
 }
 
+/**
+ * @brief Handle input while focus is on the HOST SLOTS panel.
+ * @return The next hosts-and-devices sub-state.
+ */
 HDSubState input_hosts_and_devices_hosts(void)
 {
     // Up in the hosts section.
@@ -329,8 +422,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     case 'l':
         // boot lobby.
         memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,24,ATTRIBUTE_BOLD, "Boot Lobby Y/N? ");
-        input_line(16,24,0,(char *)temp,2, false);
+        screen_puts(0,23,ATTRIBUTE_BOLD, "Boot Lobby Y/N? ");
+        input_line(16,23,0,(char *)temp,2, false);
         screen_hosts_and_devices_hosts();
         switch (temp[0])
         {
@@ -339,6 +432,7 @@ HDSubState input_hosts_and_devices_hosts(void)
             //mount_and_boot_lobby();
             return HD_DONE;
         default: // Anything but Y/y take to mean "no"
+            screen_clear_line(23);
             return HD_HOSTS;
         }
         return HD_HOSTS;
@@ -361,6 +455,10 @@ HDSubState input_hosts_and_devices_hosts(void)
     }
 }
 
+/**
+ * @brief Handle input while focus is on the DRIVE SLOTS panel.
+ * @return The next hosts-and-devices sub-state.
+ */
 HDSubState input_hosts_and_devices_devices(void)
 {
     // Down in the devices section.
@@ -424,8 +522,8 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'l':
         // boot lobby.
         memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,24,ATTRIBUTE_NORMAL,"Boot Lobby Y/N? ");
-        input_line(16,24,0,(char *)temp,2, false);
+        screen_puts(0,23,ATTRIBUTE_NORMAL,"Boot Lobby Y/N? ");
+        input_line(16,23,0,(char *)temp,2, false);
         screen_hosts_and_devices_devices();
         switch (temp[0])
         {
@@ -434,6 +532,7 @@ HDSubState input_hosts_and_devices_devices(void)
 //            mount_and_boot_lobby();
             return HD_DONE;
         default: // Anything but Y/y take to mean "no"
+            screen_clear_line(23);
             return HD_DEVICES;
         }
         return HD_DEVICES;
@@ -444,6 +543,10 @@ HDSubState input_hosts_and_devices_devices(void)
     }
 }
 
+/**
+ * @brief Handle input for the file browser selection list.
+ * @return The next select-file sub-state.
+ */
 SFSubState input_select_file_choose(void)
 {
     int k = input();
@@ -543,6 +646,10 @@ SFSubState input_select_file_choose(void)
     }
 }
 
+/**
+ * @brief Handle input for the drive slot selection list (mount screen).
+ * @return The next select-slot sub-state.
+ */
 SSSubState input_select_slot_choose(void)
 {
     int k=input();
@@ -577,7 +684,7 @@ SSSubState input_select_slot_choose(void)
     case 'e':
         // Eject
         mounting = true;
-        hosts_and_devices_eject(selected_device_slot);
+        select_slot_eject(selected_device_slot);
         mounting = false;
         return SS_CHOOSE;
     case KEY_ESCAPE:
@@ -600,6 +707,11 @@ SSSubState input_select_slot_choose(void)
     }
 }
 
+/**
+ * @brief Wait for the user to choose a mount mode (read-only or read-write).
+ * @param mode Pointer to a char that receives 1 (read-only) or 2 (read-write).
+ * @return 1 if a valid mode was chosen, 0 if the user pressed ESC.
+ */
 unsigned char input_select_slot_mode(char *mode)
 {
     unsigned char k;
@@ -626,13 +738,13 @@ unsigned char input_select_slot_mode(char *mode)
     }
 }
 
-/*
- *  Handle inupt for the "show info" screen.
+/**
+ * @brief Handle input for the network info (show info) screen.
  *
- *  'R' - Reconnect Wifi
- *  'S' - Change SSID
- *  Any other key - return to main hosts and devices screen
+ * Recognised keys: 'R' reconnects WiFi, 'S' opens the WiFi SSID selector,
+ * any other non-zero key returns to the hosts-and-devices screen.
  *
+ * @return The next show-info sub-state.
  */
 SISubState input_show_info(void)
 {
@@ -661,6 +773,10 @@ SISubState input_show_info(void)
     }
 }
 
+/**
+ * @brief Handle input for the copy-destination host slot selection screen.
+ * @return The next destination-host sub-state.
+ */
 DHSubState input_destination_host_slot_choose(void)
 {
     int k = input();

@@ -17,11 +17,11 @@
 static int bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
 /**
- * Set up bar and start display on row
- * @param y Y column for bar display
- * @param c column size in characters
- * @param m number of items
- * @param i item index to start display
+ * @brief Set up bar and start display on row.
+ * @param y Starting row for bar display.
+ * @param c Column size in characters (left/right margin).
+ * @param m Total number of items.
+ * @param i Item index to start display at.
  */
 void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
 {
@@ -33,6 +33,10 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
   bar_update();
 }
 
+/**
+ * @brief Clear the highlight attribute from the current or previous bar row.
+ * @param old If true, clear the previously highlighted row; if false, clear the current row.
+ */
 void bar_clear(bool old)
 {
   if (old)
@@ -46,8 +50,13 @@ void bar_clear(bool old)
 }
 
 /**
- * Draw bar at y, respecting bar_c as left and right margin so box borders
- * at column 0 and screen_cols-1 are not overwritten when bar_c > 0.
+ * @brief Draw or clear the highlight bar at a given screen row.
+ *
+ * Respects bar_c as the left/right margin so box borders at column 0 and
+ * screen_cols-1 are not overwritten when bar_c > 0.
+ *
+ * @param y     Absolute screen row to draw on.
+ * @param clear If true, restore normal attribute; if false, apply selected attribute.
  */
 void bar_draw(int y, bool clear)
 {
@@ -80,7 +89,7 @@ unsigned char bar_get()
 }
 
 /**
- * Move bar upward until index 0
+ * @brief Move the bar highlight up by one item, stopping at index 0.
  */
 void bar_up()
 {
@@ -94,7 +103,7 @@ void bar_up()
 }
 
 /**
- * Move bar downward until index m
+ * @brief Move the bar highlight down by one item, stopping at the last index.
  */
 void bar_down()
 {
@@ -108,7 +117,8 @@ void bar_down()
 }
 
 /**
- * @brief jump to bar position
+ * @brief Jump the bar directly to a given index and redraw.
+ * @param i Item index to jump to.
  */
 void bar_jump(unsigned char i)
 {
@@ -117,7 +127,7 @@ void bar_jump(unsigned char i)
 }
 
 /**
- * Update bar display
+ * @brief Redraw the bar: clear the old highlight and draw the new one.
  */
 void bar_update(void)
 {  
