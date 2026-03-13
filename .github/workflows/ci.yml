@@ -19,7 +19,7 @@ jobs:
           - atari
           - c64
           - coco
-          # - msdos # MSDOS doesn't seem to build yet
+          - msdos
 
     container:
       image: fozztexx/defoogi:1.4.4
