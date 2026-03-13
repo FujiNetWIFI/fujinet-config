@@ -22,7 +22,7 @@ jobs:
           # - msdos # MSDOS doesn't seem to build yet
 
     container:
-      image: fozztexx/defoogi:1.4.3
+      image: fozztexx/defoogi:1.4.4
 
     steps:
       - uses: actions/checkout@v4
