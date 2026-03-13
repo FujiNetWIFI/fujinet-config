@@ -43,7 +43,7 @@ void screen_mount_and_boot(void);
 
 void screen_set_wifi(AdapterConfig *ac);
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s);
-void screen_set_wifi_select_network(unsigned char nn);
+void screen_set_wifi_select_network(uint8_t nn);
 void screen_set_wifi_custom(void);
 void screen_set_wifi_password(void);
 void screen_set_wifi_extended(AdapterConfigExtended *acx);
@@ -57,17 +57,17 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e);
 void screen_hosts_and_devices_hosts(void);
 void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_devices(void);
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e);
+void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *d, const bool *e);
 
 #ifndef BUILD_MSDOS
 void screen_hosts_and_devices_devices_selected(char selected_slot);
 #endif /* !BUILD_MSDOS */
 
-void screen_hosts_and_devices_clear_host_slot(unsigned char i);
-void screen_hosts_and_devices_edit_host_slot(unsigned char i);
-void screen_hosts_and_devices_eject(unsigned char ds);
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs);
-void screen_hosts_and_devices_long_filename(char *f);
+void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i);
+void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i);
+void screen_hosts_and_devices_eject(uint8_t ds);
+void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs);
+void screen_hosts_and_devices_long_filename(const char *f);
 void screen_hosts_and_devices_devices_clear_all(void);
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
@@ -80,19 +80,19 @@ void screen_select_file_filter(void);
 void screen_select_file_next(void);
 void screen_select_file_prev(void);
 void screen_select_file_new_type(void);
-void screen_select_file_display_long_filename(char *e);
-void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType);
+void screen_select_file_display_long_filename(const char *e);
+void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryType);
 void screen_select_file_clear_long_filename(void);
 void screen_select_file_choose(char visibleEntries);
-void screen_select_file_new_size(unsigned char k);
+void screen_select_file_new_size(uint8_t k);
 void screen_select_file_new_custom(void);
 void screen_select_file_new_name(void);
 void screen_select_file_new_creating(void);
 
-void screen_select_slot(char *e);
+void screen_select_slot(const char *e);
 void screen_select_slot_choose(void);
 void screen_select_slot_mode(void);
-void screen_select_slot_eject(unsigned char ds);
+void screen_select_slot_eject(uint8_t ds);
 
 #ifndef BUILD_MSDOS
 bool screen_mount_and_boot_lobby(void);
@@ -130,7 +130,7 @@ void bar_down(void);
  * Jump to location
  * @param i new y offset
  */
-void bar_jump(unsigned char i);
+void bar_jump(uint_fast8_t i);
 
 /**
  * Draw bar at y
@@ -143,7 +143,7 @@ void bar_update(void);
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get(void);
+uint_fast8_t bar_get(void);
 
 #ifndef BUILD_MSDOS
 /**
@@ -161,6 +161,7 @@ void bar_set_color(unsigned char c);
 
 int edit_line(unsigned char x, unsigned char y, char *s, unsigned char maxlen, bool is_password);
 
+void screen_puts(unsigned char x, unsigned char y, const char *s);
 void set_active_screen(unsigned char screen);
 void screen_dlist_mount_and_boot(void);
 void screen_dlist_show_info(void);

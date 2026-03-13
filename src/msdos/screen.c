@@ -349,7 +349,7 @@ struct _file_info {
  * @brief Display the drive-slot selection screen with file details for the selected entry.
  * @param e Pointer to a packed _file_info struct followed by the null-terminated filename.
  */
-void screen_select_slot(char *e)
+void screen_select_slot(const char *e)
 {
   struct _file_info *i = (struct _file_info *)e;
   static char fullpath[256];
@@ -415,13 +415,19 @@ static void eject_draw_slot(unsigned char y, unsigned char ds)
     static char padded[71];
     unsigned char row = y + ds;
     unsigned char w   = screen_cols - 10;
+    char dl;
 
     bar_set(y, 1, NUM_DEVICE_SLOTS, ds);
 
+    system_refresh_drive_letters();
+    dl = deviceDriveLetters[ds];
+
     dinfo[0] = 0x20; dinfo[1] = 0x20;
     dinfo[2] = 0x31 + ds;
-    dinfo[3] = 0x20; dinfo[4] = 0x20; dinfo[5] = 0x20;
-    dinfo[6] = 0x20; dinfo[7] = 0x20; dinfo[8] = 0x00;
+    dinfo[3] = 0x20; dinfo[4] = 0x20;
+    dinfo[5] = (dl ? (unsigned char)dl : ' ');
+    dinfo[6] = (dl ? ':' : ' ');
+    dinfo[7] = 0x20; dinfo[8] = 0x00;
     screen_puts(1, row, ATTRIBUTE_SELECTED, (const char *)dinfo);
 
     memcpy((void *)padded, text_empty, 5);
@@ -434,7 +440,7 @@ static void eject_draw_slot(unsigned char y, unsigned char ds)
  * @brief Redraw a device slot in the mount screen as ejected.
  * @param ds Device slot index (0-based).
  */
-void screen_select_slot_eject(unsigned char ds)
+void screen_select_slot_eject(uint8_t ds)
 {
     eject_draw_slot(DEVICES_START_MOUNT_Y, ds);
 }
@@ -443,7 +449,7 @@ void screen_select_slot_eject(unsigned char ds)
  * @brief Redraw a device slot as ejected in whichever list is currently active.
  * @param ds Device slot index (0-based).
  */
-void screen_hosts_and_devices_eject(unsigned char ds)
+void screen_hosts_and_devices_eject(uint8_t ds)
 {
     unsigned char y = mounting ? DEVICES_START_MOUNT_Y : DEVICES_START_Y;
     eject_draw_slot(y, ds);
@@ -588,7 +594,7 @@ void screen_select_file_display(char *p, char *f)
  * @brief Long-filename display stub — row 24 is the status bar on MS-DOS; no-op.
  * @param e Unused entry pointer.
  */
-void screen_select_file_display_long_filename(char *e)
+void screen_select_file_display_long_filename(const char *e)
 {
     /* Row 24 is the status bar on MS-DOS — do not overwrite it. */
     (void)e;
@@ -636,7 +642,7 @@ void screen_select_file_prev(void)
  * @param e         Null-terminated entry name string.
  * @param entryType Entry type code (ENTRY_TYPE_FOLDER, ENTRY_TYPE_LINK, etc.).
  */
-void screen_select_file_display_entry(unsigned char y, char *e, unsigned entryType)
+void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryType)
 {
 
     /*
@@ -681,7 +687,7 @@ void screen_select_file_new_type(void)
  * @brief Display the floppy disk size selection prompt.
  * @param k Unused key code; included for cross-platform API compatibility.
  */
-void screen_select_file_new_size(unsigned char k)
+void screen_select_file_new_size(uint8_t k)
 {
     screen_clear_line(NEW_PROMPT_Y);
     screen_clear_line(NEW_INPUT_Y);
@@ -923,7 +929,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
  * @param dslot Pointer to the device slot array.
  * @param e     Pointer to per-slot enabled flags (may be NULL).
  */
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, bool *e)
+void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *dslot, const bool *e)
 {
   unsigned char slotNum;
   unsigned char dinfo[9];
@@ -986,7 +992,7 @@ void screen_hosts_and_devices_devices_clear_all(void)
  * @brief Clear the display of a single host slot name (overwrite with spaces).
  * @param i Host slot index (0-based).
  */
-void screen_hosts_and_devices_clear_host_slot(unsigned char i)
+void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
 {
     static char spaces[33];
     memset((void *)spaces, ' ', 32);
@@ -998,7 +1004,7 @@ void screen_hosts_and_devices_clear_host_slot(unsigned char i)
  * @brief Prepare the display for host slot inline editing by clearing the bar highlight.
  * @param i Host slot index (0-based).
  */
-void screen_hosts_and_devices_edit_host_slot(unsigned char i)
+void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 {
     bar_clear(false);
 }
@@ -1007,7 +1013,7 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
  * @brief Display "Empty" in the given host slot after its contents have been cleared.
  * @param hs Host slot index (0-based).
  */
-void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
+void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
     // When this gets called it seems like the cursor is right where we want it to be.
     // so no need to move to a position first.
@@ -1018,7 +1024,7 @@ void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
  * @brief Long-filename display stub for the hosts-and-devices screen — no-op on MS-DOS.
  * @param f Unused filename pointer.
  */
-void screen_hosts_and_devices_long_filename(char *f)
+void screen_hosts_and_devices_long_filename(const char *f)
 {
 }
 

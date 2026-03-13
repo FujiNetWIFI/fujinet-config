@@ -83,7 +83,7 @@ void bar_draw(int y, bool clear)
  * Get current bar position
  * @return bar index
  */
-unsigned char bar_get()
+uint_fast8_t bar_get()
 {
   return bar_i;
 }
@@ -120,7 +120,7 @@ void bar_down()
  * @brief Jump the bar directly to a given index and redraw.
  * @param i Item index to jump to.
  */
-void bar_jump(unsigned char i)
+void bar_jump(uint_fast8_t i)
 {
   bar_i=i;
   bar_update();
