@@ -939,20 +939,19 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, b
     dinfo[2] = 0x31 + slotNum;
     dinfo[4] = 0x20;
 
+    dl = deviceDriveLetters[slotNum];
+    dinfo[5] = (dl ? (unsigned char)dl : ' ');
+    dinfo[6] = (dl ? ':' : ' ');
+
     if (deviceSlots[slotNum].file[0] != 0x00)
     {
       dinfo[0] = deviceSlots[slotNum].hostSlot + 0x31;
       dinfo[3] = (deviceSlots[slotNum].mode == 0x02 ? 'W' : 'R');
-      dl = deviceDriveLetters[slotNum];
-      dinfo[5] = (dl ? (unsigned char)dl : ' ');
-      dinfo[6] = (dl ? ':' : ' ');
     }
     else
     {
       dinfo[0] = 0x20;
       dinfo[3] = 0x20;
-      dinfo[5] = 0x20;
-      dinfo[6] = 0x20;
     }
 
     dinfo[7] = 0x20;
