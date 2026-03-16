@@ -5,7 +5,7 @@
 
 #warning "FIXME - this should be part of fujinet-lib"
 
-bool fuji_open_directory2(uint8_t hs, char *p, char *f)
+bool fuji_open_directory2(uint8_t hs, const char *p, const char *f)
 {
   char *_p = p;
   if (f[0] != 0x00)

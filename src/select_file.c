@@ -221,7 +221,7 @@ void select_file_link(void)
   char tnfsHostname[128];
   bar_clear(false);
 
-  if (!fuji_open_directory_filter(selected_host_slot, path, filter)
+  if (!fuji_open_directory_filter(selected_host_slot, path, filter))
   {
       sf_subState = SF_DONE;
       state = HOSTS_AND_DEVICES;
