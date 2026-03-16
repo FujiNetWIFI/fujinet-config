@@ -89,10 +89,33 @@
 #define KEY_BREAK            0x03
 #define KEY_CLEAR            0x0C
 
-#define KEY_0                0x30        
+#define KEY_0                0x30
 #define KEY_1                0x31
 #define KEY_2                0x32
 #define KEY_3                0x33
+
+#elif defined(BUILD_MSDOS)
+
+/* ASCII control keys */
+#define KEY_ESCAPE           0x1b
+#define KEY_RETURN           0x0d
+#define KEY_TAB              0x09
+#define KEY_BACKSPACE        0x08
+#define KEY_CTRL_RBRACKET    0x1d  /* Ctrl+] — used as network-select confirm */
+
+/* Extended key constants — mapped from BIOS scan codes by cgetc() */
+#define KEY_UP_ARROW         0x80
+#define KEY_DOWN_ARROW       0x81
+#define KEY_LEFT_ARROW       0x82
+#define KEY_RIGHT_ARROW      0x83
+#define KEY_HOME             0x84
+#define KEY_END              0x85
+#define KEY_DELETE           0x86
+#define KEY_PAGE_UP          0x87
+#define KEY_PAGE_DOWN        0x88
+
+/* Alias */
+#define KEY_ABORT            KEY_ESCAPE
 
 #endif // defined(...)
 

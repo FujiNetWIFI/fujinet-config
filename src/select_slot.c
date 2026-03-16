@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "input.h"
 #include "system.h"
+#include "pause.h"
 
 char mode=0;
 
@@ -128,6 +129,9 @@ void select_slot_done()
     fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
     strcat(filename, response);
 
+#ifdef BUILD_MSDOS
+    pause(6);
+#endif
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
     fuji_set_directory_position(pos);
