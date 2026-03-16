@@ -5,8 +5,8 @@ AR_DEFAULT ?= ar65
 
 include $(MWD)/tc-common.mk
 
-CFLAGS +=
-ASFLAGS +=
+CFLAGS += -O --cpu 6502
+ASFLAGS += --cpu 6502
 LDFLAGS +=
 
 CFLAGS += -DGIT_VERSION='"$(GIT_VERSION)"'
