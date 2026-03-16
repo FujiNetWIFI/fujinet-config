@@ -12,10 +12,7 @@
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
-	NetConfig nc;
 	unsigned char s;
-
-        fuji_get_ssid(&nc);
 
 	state = SET_WIFI;
 
@@ -44,6 +41,7 @@ void connect_wifi(void)
 			pause(150);
 			return;
 		case 3:
+			fuji_get_ssid(&nc);
 			screen_error("CONNECTION SUCCESS!");
 			state = HOSTS_AND_DEVICES;
 #ifdef BUILD_ADAM

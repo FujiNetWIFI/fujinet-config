@@ -232,23 +232,27 @@ void screen_set_wifi_sel_net(unsigned char nn)
  */
 void screen_set_wifi_custom(void)
 {
-    /* Row 23: between the network box (bottom border row 22) and status bar (row 24) */
+    static const char blank[33] = "                                ";
+    unsigned char bx = (screen_cols - (32 + 2)) / 2;
     screen_clear_line(23);
-    screen_puts_center(23, ATTRIBUTE_NORMAL, "Enter network name and press [ENTER]");
+    screen_putc(bx,      23, ATTRIBUTE_NORMAL, '[');
+    screen_puts(bx + 1,  23, ATTRIBUTE_NORMAL, (const char *)blank);
+    screen_putc(bx + 33, 23, ATTRIBUTE_NORMAL, ']');
+    screen_status("Enter network name and press [ENTER]");
 }
 
 /**
- * @brief Display the password entry bracket and prompt on rows 22-23.
+ * @brief Display the password entry bracket on row 23.
  */
 void screen_set_wifi_password(void)
 {
     static const char blank[65] = "                                                                ";
     unsigned char bx = (screen_cols - (64 + 2)) / 2;
-    screen_putc(bx,      22, ATTRIBUTE_NORMAL, '[');
-    screen_puts(bx + 1,  22, ATTRIBUTE_NORMAL, (const char *)blank);
-    screen_putc(bx + 65, 22, ATTRIBUTE_NORMAL, ']');
     screen_clear_line(23);
-    screen_puts_center(23, ATTRIBUTE_NORMAL, "Enter password and press [ENTER]");
+    screen_putc(bx,      23, ATTRIBUTE_NORMAL, '[');
+    screen_puts(bx + 1,  23, ATTRIBUTE_NORMAL, (const char *)blank);
+    screen_putc(bx + 65, 23, ATTRIBUTE_NORMAL, ']');
+    screen_status("Enter password and press [ENTER]");
 }
 
 /**
@@ -372,15 +376,17 @@ void screen_select_slot(const char *e)
     screen_puts(1, 15, ATTRIBUTE_BOLD, (const char *)fullpath);
 
     /* Year is years-since-1970 */
-    sprintf((char *)tmp, "Date: %04u-%02u-%02u  %02u:%02u:%02u",
+    screen_puts(1, 16, ATTRIBUTE_NORMAL, "Date: ");
+    sprintf((char *)tmp, "%04u-%02u-%02u  %02u:%02u:%02u",
             (unsigned)(1970 + i->year), i->month, i->day, i->hour, i->minute, i->second);
-    screen_puts(1, 16, ATTRIBUTE_NORMAL, (const char *)tmp);
+    screen_puts(7, 16, ATTRIBUTE_BOLD, (const char *)tmp);
 
+    screen_puts(1, 17, ATTRIBUTE_NORMAL, "Size: ");
     if (i->size >= 1024UL)
-      sprintf((char *)tmp, "Size: %lu K", i->size >> 10);
+      sprintf((char *)tmp, "%lu K", i->size >> 10);
     else
-      sprintf((char *)tmp, "Size: %lu bytes", i->size);
-    screen_puts(1, 17, ATTRIBUTE_NORMAL, (const char *)tmp);
+      sprintf((char *)tmp, "%lu bytes", i->size);
+    screen_puts(7, 17, ATTRIBUTE_BOLD, (const char *)tmp);
   }
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled[0]);
@@ -417,8 +423,6 @@ static void eject_draw_slot(unsigned char y, unsigned char ds)
     unsigned char w   = screen_cols - 10;
     char dl;
 
-    bar_set(y, 1, NUM_DEVICE_SLOTS, ds);
-
     system_refresh_drive_letters();
     dl = deviceDriveLetters[ds];
 
@@ -428,12 +432,17 @@ static void eject_draw_slot(unsigned char y, unsigned char ds)
     dinfo[5] = (dl ? (unsigned char)dl : ' ');
     dinfo[6] = (dl ? ':' : ' ');
     dinfo[7] = 0x20; dinfo[8] = 0x00;
-    screen_puts(1, row, ATTRIBUTE_SELECTED, (const char *)dinfo);
+
+    /* Draw unhighlighted state first so bar_set captures correct attrs */
+    screen_puts(1, row, ATTRIBUTE_BOLD,   (const char *)dinfo);
 
     memcpy((void *)padded, text_empty, 5);
     memset((void *)(padded + 5), ' ', w - 5);
     padded[w] = 0;
-    screen_puts(9, row, ATTRIBUTE_SELECTED, (const char *)padded);
+    screen_puts(9, row, ATTRIBUTE_NORMAL, (const char *)padded);
+
+    /* Now bar_set saves the correct BOLD/NORMAL attrs before highlighting */
+    bar_set(y, 1, NUM_DEVICE_SLOTS, ds);
 }
 
 /**
@@ -563,18 +572,18 @@ void screen_select_file_display(char *p, char *f)
     unsigned char i;
 
     // Host — row 2, inside info box
-    screen_puts(1, 2, ATTRIBUTE_HEADER, "Host: ");
+    screen_puts(1, 2, ATTRIBUTE_NORMAL, "Host: ");
     screen_puts(7, 2, ATTRIBUTE_BOLD, selected_host_name);
 
     // Filter — row 3
-    screen_puts(1, 3, ATTRIBUTE_HEADER, "Fltr: ");
+    screen_puts(1, 3, ATTRIBUTE_NORMAL, "Fltr: ");
     screen_puts(7, 3, ATTRIBUTE_BOLD, f);
 
     // Path — row 4 (clear first so a shorter new path doesn't leave old text behind)
     screen_clear_line(4);
     screen_putc(0, 4, ATTRIBUTE_HEADER, BOX_V);
     screen_putc(screen_cols - 1, 4, ATTRIBUTE_HEADER, BOX_V);
-    screen_puts(1, 4, ATTRIBUTE_HEADER, "Path: ");
+    screen_puts(1, 4, ATTRIBUTE_NORMAL, "Path: ");
     screen_puts(7, 4, ATTRIBUTE_BOLD, p);
 
     // Clear out the file entry area, then restore the box's vertical borders
@@ -1017,7 +1026,7 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
     // When this gets called it seems like the cursor is right where we want it to be.
     // so no need to move to a position first.
-    screen_puts(5, HOSTS_START_Y+hs, ATTRIBUTE_BOLD, text_empty);
+    screen_puts(5, HOSTS_START_Y+hs, ATTRIBUTE_NORMAL, text_empty);
 }
 
 /**

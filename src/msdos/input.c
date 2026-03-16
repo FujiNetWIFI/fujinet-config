@@ -206,12 +206,13 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
  */
 void input_line_set_wifi_custom(char *c)
 {
+    unsigned char bx = (screen_cols - (32 + 2)) / 2 + 1;  /* inside brackets */
     memset(c, 0, 32);
-    input_line(0, 22, 0, c, 32, false);
+    input_line(bx, 23, 0, c, 32, false);
 }
 
 /**
- * @brief Prompt for a WiFi password on row 22, echoing asterisks.
+ * @brief Prompt for a WiFi password on row 23, echoing asterisks.
  * @param c Buffer containing any pre-existing password; receives the updated password (up to 64 characters).
  */
 void input_line_set_wifi_password(char *c)
@@ -223,8 +224,8 @@ void input_line_set_wifi_password(char *c)
     memset((void *)stars, 0, 65);
     memset((void *)stars, '*', l);
     stars[l] = '\0';
-    screen_puts(ix, 22, ATTRIBUTE_NORMAL, (const char *)stars);
-    input_line(ix, 22, 0, c, 64, true);
+    screen_puts(ix, 23, ATTRIBUTE_NORMAL, (const char *)stars);
+    input_line(ix, 23, 0, c, 64, true);
 }
 
 /**
