@@ -25,9 +25,9 @@ void set_wifi_set_ssid(uint_fast8_t i)
 void set_wifi_select(void)
 {
   unsigned char k=0;
-  
+
   screen_set_wifi_select_network(numNetworks);
-  
+
   while(ws_subState==WS_SELECT)
     ws_subState=input_set_wifi_select();
 }
@@ -86,7 +86,7 @@ void set_wifi_scan(void)
 
 void set_wifi_done(void)
 {
-#ifdef _CMOC_VERSION_  
+#ifdef _CMOC_VERSION_
   locate(0,14);
 #endif
   int result = fuji_set_ssid(&nc);

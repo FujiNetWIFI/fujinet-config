@@ -48,7 +48,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     screen_hosts_and_devices_host_slot_empty(i);
 
   // if host entry has changed, eject any disks that were mounted from the host slot since they won't be valid anymore.
-  if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot))) 
+  if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot)))
   {
     // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
@@ -59,16 +59,24 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
         hosts_and_devices_eject((unsigned char) o);
       }
     }
-  } 
+  }
 
   fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+
+  // Need to re-render both hosts and devices because some devices
+  // may have been eject if they belonged to old host
+#ifdef OBSOLETE
   screen_hosts_and_devices_hosts();
+#else
+  screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+  screen_hosts_and_devices_hosts();
+#endif // OBSOLETE
 }
 
 void hosts_and_devices_hosts(void)
 {
   fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
- 
+
   if (!quick_boot)
   	screen_hosts_and_devices_hosts();
 
@@ -85,13 +93,17 @@ void hosts_and_devices_long_filename(void)
 void hosts_and_devices_eject(unsigned char ds)
 {
   fuji_unmount_disk_image(ds);
+#ifdef OBSOLETE
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
   deviceSlots[ds].mode = 0;
   fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+#endif // OBSOLETE
   fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_eject(ds);
+#ifdef OBSOLETE
   hosts_and_devices_long_filename();
+#endif // OBSOLETE
 }
 
 void hosts_and_devices_devices_clear_all(void)

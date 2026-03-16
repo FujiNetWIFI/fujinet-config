@@ -294,7 +294,7 @@ class LibLocator:
 
     self.findLibraryDir(repoDir)
     if not self.MV.FUJINET_LIB_FILE:
-      cmd = ["make", f"{self.PLATFORM}/r2r"]
+      cmd = ["make", ]
       subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr)
       self.findLibraryDir(repoDir)
 

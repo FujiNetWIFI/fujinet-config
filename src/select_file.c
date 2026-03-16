@@ -68,9 +68,7 @@ unsigned char select_file_display(void)
   char i;
   //const char *e;
 
-  fuji_mount_host_slot(selected_host_slot);
-
-  if (fuji_error())
+  if (!fuji_mount_host_slot(selected_host_slot))
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
@@ -80,9 +78,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
-
-  if (fuji_error())
+  if (!fuji_open_directory2(selected_host_slot, path, filter))
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
@@ -135,7 +131,7 @@ void select_file_set_source_filename(void)
 {
   char entry[128];
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
   fuji_set_directory_position(pos);
   fuji_read_directory(128, 0, entry);
   strcat(path, entry);
@@ -151,7 +147,7 @@ void select_display_long_filename(void)
 #else
   if ((entry_size[bar_get()] > 30) && (entry_timer == 0))
 #endif
-  {    
+  {
     if (long_entry_displayed == false)
     {
       select_get_filename(64);
@@ -170,7 +166,7 @@ void select_get_filename(uint8_t len)
 {
   fuji_mount_host_slot(selected_host_slot);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
 #ifdef BUILD_ATARI
 	  fuji_set_directory_position(pos + bar_get() - FILES_START_Y);
@@ -225,9 +221,7 @@ void select_file_link(void)
   char tnfsHostname[128];
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
-
-  if (fuji_error())
+  if (!fuji_open_directory_filter(selected_host_slot, path, filter))
   {
       sf_subState = SF_DONE;
       state = HOSTS_AND_DEVICES;
@@ -256,7 +250,7 @@ void select_file_advance(void)
 
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
@@ -302,7 +296,7 @@ unsigned select_file_entry_type(void)
   //const char *e;
   unsigned result;
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
@@ -342,7 +336,7 @@ void select_file_new(void)
     selected_size = input_select_file_new_custom();
   }
 #endif /* CMOC_VERSION */
-  
+
   if (selected_size == 0) // Aborted from size
   {
     sf_subState = SF_CHOOSE;

@@ -15,6 +15,7 @@
 #include "screen.h"
 #include "typedefs.h"
 #include "system.h"
+#include "debug.h"
 
 State state=HOSTS_AND_DEVICES;
 bool backToFiles=false;
