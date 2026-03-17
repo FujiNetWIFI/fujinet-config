@@ -195,6 +195,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 #endif
 }
 
+#ifdef BUILD_ADAM
 void hosts_and_devices_devices_enable_toggle(unsigned char ds)
 {
   bool s = fuji_get_device_enabled_status(io_device_slot_to_device(ds));
@@ -210,6 +211,7 @@ void hosts_and_devices_devices_enable_toggle(unsigned char ds)
   screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled);
   bar_update();
 }
+#endif /* BUILD_ADAM */
 
 void hosts_and_devices_done(void)
 {

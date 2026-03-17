@@ -23,7 +23,6 @@ extern bool copy_mode;
 extern unsigned char copy_host_slot;
 unsigned short custom_numSectors;
 unsigned short custom_sectorSize;
-extern char fn[256];
 bool mounting = false;
 extern unsigned short entry_timer;
 extern HDSubState hd_subState;
@@ -82,6 +81,8 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
 	char k = 0;
 	char *b = c;
 
+	locate(x, y);
+
 	// Place string pointer at end of string
 	while (*c)
 	{
@@ -122,6 +123,9 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
 			}
 			break;
 		case KEY_ENTER: // Ignore it.
+			break;
+		case KEY_BREAK:
+		case KEY_CLEAR:
 			break;
 		default:
 			if (password)

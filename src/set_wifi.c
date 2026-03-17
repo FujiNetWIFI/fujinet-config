@@ -50,6 +50,7 @@ void set_wifi_scan(void)
 {
   char i;
   unsigned char valid_networks = 0;
+  bool result;
 
   fuji_get_adapter_config_extended(&adapterConfigExt);
   screen_set_wifi_extended(&adapterConfigExt);
@@ -59,7 +60,7 @@ void set_wifi_scan(void)
   if (numNetworks > MAX_WIFI_NETWORKS)
 	  numNetworks = MAX_WIFI_NETWORKS;
 
-  if (fuji_error())
+  if (!result)
   {
 	  screen_error("COULD NOT WS_SCAN NETWORKS");
 	  die(); // to do retry or something instead

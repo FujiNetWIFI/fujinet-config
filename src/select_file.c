@@ -66,11 +66,11 @@ unsigned char select_file_display(void)
 {
   char visibleEntries = 0;
   char i;
-  //const char *e;
+  bool result = true;
 
-  fuji_mount_host_slot(selected_host_slot);
+  result = fuji_mount_host_slot(selected_host_slot);
 
-  if (fuji_error())
+  if (!result)
   {
     screen_error("  COULD NOT MOUNT HOST SLOT.");
     sf_subState = SF_DONE;
@@ -80,9 +80,9 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  result = fuji_open_directory2(selected_host_slot, path, filter);
 
-  if (fuji_error())
+  if (!result)
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
@@ -144,6 +144,7 @@ void select_file_set_source_filename(void)
 
 void select_display_long_filename(void)
 {
+#ifndef _CMOC_VERSION_
   //const char *e;
 
 #ifdef BUILD_ATARI
@@ -151,7 +152,7 @@ void select_display_long_filename(void)
 #else
   if ((entry_size[bar_get()] > 30) && (entry_timer == 0))
 #endif
-  {    
+  {
     if (long_entry_displayed == false)
     {
       select_get_filename(64);
@@ -164,6 +165,7 @@ void select_display_long_filename(void)
     long_entry_displayed = false;
     screen_select_file_clear_long_filename();
   }
+#endif /* _CMOC_VERSION_ */
 }
 
 void select_get_filename(uint8_t len)
@@ -221,13 +223,13 @@ void select_file_choose(char visibleEntries)
 
 void select_file_link(void)
 {
-  //const char *e;
+  bool result;
   char tnfsHostname[128];
   bar_clear(false);
 
-  fuji_open_directory2(selected_host_slot, path, filter);
+  result = fuji_open_directory2(selected_host_slot, path, filter);
 
-  if (fuji_error())
+  if (!result)
   {
       sf_subState = SF_DONE;
       state = HOSTS_AND_DEVICES;

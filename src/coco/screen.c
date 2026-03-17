@@ -23,7 +23,6 @@ unsigned char *video_ptr;  // a pointer to the memory address containing the scr
 unsigned char *cursor_ptr; // a pointer to the current cursor position on the screen
 char _visibleEntries;
 char text_empty[] = "Empty";
-char fn[256];
 static byte orig_casflag;
 
 char uppercase_tmp[32]; // temp space for strupr(s) output.
@@ -420,17 +419,17 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   byte *p = &h[0]; // We need this because cmoc doesn't like untangling multi-dimensional typedefs
   byte *sp = (unsigned char *)SCREEN_RAM_TOP;
 
-  sp += 32;  // start one line down. 
-  locate(0,1); 
+  sp += 32;  // start one line down.
 
   // Color the first column
-  for (int i=0;i<8;i++)
-    {
-        printf("%u%-31s",i+1,screen_upper((char *)p));
-      p += 32;  // Next entry
-      *sp &= INVERSE_MASK;
-      sp += 32; // next line
-    }
+  for (int i = 0; i < 8; i++)
+  {
+	  locate(0, i+1);
+	  printf("%u%-31s", i + 1, screen_upper((char *)p));
+	  p += 32; // Next entry
+	  *sp &= INVERSE_MASK;
+	  sp += 32; // next line
+  }
 }
 
 const char host_slot_char(unsigned char hostSlot)
