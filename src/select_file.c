@@ -66,7 +66,6 @@ unsigned char select_file_display(void)
 {
   char visibleEntries = 0;
   char i;
-  bool result = true;
 
   if (!fuji_mount_host_slot(selected_host_slot))
   {
