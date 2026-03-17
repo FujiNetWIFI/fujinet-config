@@ -1,0 +1,778 @@
+/**
+ * FujiNet CONFIG for MSX
+ *
+ * Screen Routines
+ */
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <arch/z80.h>
+#include <video/tms99x8.h>
+#include <graphics.h>
+#include <conio.h>
+#include <sys/ioctl.h>
+#include "../screen.h"
+#include "../constants.h"
+#include "../globals.h"
+#include "gfxutil.h"
+#include "cursor.h"
+#include "stdarg.h"
+
+extern void system_set_fps();
+
+static const uint8_t *KEY_ADDRESSES[] = {
+  0xF87F, 0xF88F, 0xF89F, 0xF8AF, 0xF8BF, 0xF8CF, 0xF8DF, 0xF8EF, 0xF8FF, 0xF90F
+};
+
+#define MAX(x, y)  ((x) > (y) ? (x) : (y))
+
+#define MENU_LINE 23
+#define MAX_DISK_SLOTS (8)
+
+// #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
+#define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_BLACK)
+#define style_gray_on_white() vdp_color(VDP_INK_GRAY, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
+// #define style_white_on_black() vdp_color(VDP_INK_WHITE, VDP_INK_BLACK, VDP_INK_DARK_BLUE)
+#define style_white_on_black() vdp_color(VDP_INK_WHITE, VDP_INK_BLACK, VDP_INK_BLACK)
+#define style_white_on_blue() vdp_color(VDP_INK_WHITE, VDP_INK_DARK_BLUE, VDP_INK_DARK_BLUE)
+#define style_highlighted() vdp_color(VDP_INK_WHITE, VDP_INK_DARK_BLUE, VDP_INK_DARK_BLUE)
+
+bool screen_should_be_cleared = true;
+
+extern bool copy_mode;
+extern char copy_host_name;
+extern unsigned char copy_host_slot;
+extern bool deviceEnabled[8];
+
+// static const char *empty="EMPTY";
+static const char *empty="-empty-";
+static const char *off="-off-";
+
+bool any_slot_occupied()
+{
+  bool occupied = false;
+
+  for (char i = 0; (i < MAX_DISK_SLOTS) && (!occupied); i++)
+    occupied = deviceSlots[i].file[0] != 0x00;
+
+  return occupied;
+}
+
+void keyboard_click(bool on) {
+  z80_bpoke(0xF3DB, on ? 1 : 0);
+}
+
+void clear_status(void)
+{
+  vdp_vfill(0x1400, 0x00, 512);
+}
+
+void show_status(char *msg)
+{
+  uint8_t len = strlen(msg);
+  style_white_on_black();
+  clear_status();
+  gotoxy((32-len)/2, 20);
+  puts(msg);
+}
+
+void menu_clear()
+{
+  vdp_vfill(0x1600, 0x00, 512);
+}
+
+uint8_t print_menu_option(char *label) {
+  bool highlight = false;
+  uint8_t len = 0;
+  unsigned char c;
+
+  textcolor(LIGHTCYAN);
+
+  while ((c = *label) != '\0') {
+    if (c == '_') {
+      highlight = true;
+    }
+    else if (highlight) {
+      textcolor(WHITE);
+      cputc(c);
+      textcolor(LIGHTCYAN);
+      highlight = false;
+      len++;
+    }
+    else {
+      cputc(c);
+      len++;
+    }
+    label++;
+  }
+
+  return len;
+}
+
+void show_menu(uint8_t count, ...)
+{
+  uint8_t len;
+  uint8_t x = 1;
+  int key;
+  char *label;
+
+  va_list argptr;
+  va_list cpyptr;
+  va_start(argptr, count);
+
+  // style_white_on_blue();
+  style_white_on_black();
+  menu_clear();
+
+  // "count" is broken, so we read argptr + 2
+  va_copy(cpyptr, argptr); cpyptr += 2;
+  int real_count = va_arg(cpyptr, int);
+
+  for (uint8_t i = 0; i < 10; ++i) {
+    char *key_addr = KEY_ADDRESSES[i];
+    if (i < real_count) {
+      key = 0xff & va_arg(argptr, int);
+      label = va_arg(argptr, char*);
+      if (key == 0) goto disabled;
+      gotoxy(x, MENU_LINE);
+      len = print_menu_option(label);
+      x += MAX(6, len + 1);
+    } else {
+      key = '\0';
+disabled:
+      *key_addr = key;
+      // empty menu items are used as TAB stops at: 7, 13, 19, 25
+      x = 1 + ((i + 1) * 6);
+    }
+  }
+
+  va_end(argptr);
+}
+
+void hide_menu(void)
+{
+  show_menu(0);
+}
+
+void draw_logo(uint8_t x, uint8_t y) {
+  gotoxy(x+3, y+0); cprintf(  "%c", 0xA6);
+  gotoxy(x+1, y+1); cprintf(  "%c%c%c%c%c%c", 0xA7,0xA5,0xA1,0xA2,0xA7,0xA5);
+  gotoxy(x+1, y+2); cprintf(  "%c %c%c%c", 0xA6,0xA3,0xA4,0xA6);
+  gotoxy(x+0, y+3); cprintf("%c%c%c%c%c%c%c%c", 0xA5,0xA1,0xA2,0x9D,0x9E,0xA1,0xA2,0xA5);
+  gotoxy(x+1, y+4); cprintf("%c%c%c%c%c%c", 0xA3,0xA4,0x9F,0xA0,0xA3,0xA4);
+  gotoxy(x+1, y+5); cprintf(  "%c%c%c%c%c%c%c", 0xA7,0xA5,0xA7,0xA5,0xA1,0xA2,0xA5);
+  gotoxy(x+1, y+6); cprintf(  "%c %c %c%c", 0xA6,0xA6,0xA3,0xA4);
+  gotoxy(x+3, y+7); cprintf(  "%c %c", 0xA6,0xA6);
+}
+
+void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark)
+{
+  watermark_visible = watermark;
+
+  uint8_t title_len = 0;
+  if (title != NULL)
+    title_len = strlen(title);
+
+  textcolor(WHITE); textbackground(BLACK);
+  gotoxy(0,y); putchar(CH_BOX_UL);
+  for (uint8_t i = 0; i < 32-title_len-3; i++) putchar(CH_BOX_U);
+  putchar(CH_TAB_L);
+
+  textcolor(BLACK); textbackground(WHITE);
+  if (title != NULL)
+    cputs(title);
+
+  textcolor(WHITE); textbackground(BLACK);
+  putchar(CH_TAB_R);
+
+  for (uint8_t i = 0; i < h-2; i++) {
+    gotoxy(0, y+i+1);
+    putchar(CH_BOX_L);
+    gotoxy(31, y+i+1);
+    putchar(CH_BOX_R);
+  }
+
+  gotoxy(0,y+h-1); putchar(CH_BOX_BL);
+  for (uint8_t i = 0; i < 30; i++) putchar(CH_BOX_B);
+  putchar(CH_BOX_BR);
+
+  uint16_t addr = MODE2_ATTR + (y+1) * 0x100;
+  for (uint8_t row = 0; row < h-2; row++) {
+    vdp_vwrite(row_pattern, addr, 256);
+    if (margin) vdp_vfill(addr+8, 0x1F, margin << 3);
+
+    if (watermark) {
+      for (uint8_t i = row_lengths[row]; i < 31; i++) {
+        vdp_vwrite(watermark_pattern, addr+i*8, 8);
+      }
+    }
+
+    addr += 256;
+  }
+}
+
+void set_mode_default(void)
+{
+  vdp_set_mode(2);
+  // style_white_on_blue();
+  style_white_on_black();
+  clrscr();
+}
+
+void screen_init(void)
+{
+  void *param = &udg;
+  console_ioctl(IOCTL_GENCON_SET_UDGS, &param);
+  set_mode_default();
+  draw_logo(12,9);
+  keyboard_click(false);
+  // should probably move this to a common system_init
+  system_set_fps();
+}
+
+
+void screen_error(const char *c)
+{
+  show_status(c);
+}
+
+
+void screen_set_wifi(AdapterConfig* ac)
+{
+  vdp_noblank();
+  style_white_on_black();
+  clrscr();
+
+  draw_card(0, 18, 3, "Select Network", false);
+
+  gotoxy(6,18);
+  cprintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+
+  show_menu(1, 's',"_skip");
+  show_status("Scanning for networks...");
+
+  vdp_blank();
+}
+
+
+void screen_set_wifi_extended(AdapterConfigExtended *ace)
+{
+  screen_set_wifi((AdapterConfig *) ace);
+}
+
+
+void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
+{
+  char meter[4]={0x20,0x20,0x20,0x00};
+  char ds[32];
+
+  memset(ds,0x20,26);
+  strncpy(ds,s->ssid,26);
+
+  if (s->rssi > -40)
+  {
+    meter[0] = 0x80;
+    meter[1] = 0x81;
+    meter[2] = 0x82;
+  }
+  else if (s->rssi > -60)
+  {
+    meter[0] = 0x80;
+    meter[1] = 0x81;
+  }
+  else
+  {
+    meter[0] = 0x80;
+  }
+
+  gotoxy(1,n+1);
+  textcolor(BLACK);
+  textbackground(WHITE);
+  cputs(meter);
+  textcolor(WHITE);
+  textbackground(BLUE);
+  cputc(' ');
+  cputs(ds);
+
+  // TODO: swap for optimized function
+  uint16_t addr = MODE2_ATTR + 0x100 + 0x100*n + 32;
+  vdp_vwrite(row_pattern + 8, addr, 26<<3);
+}
+
+void screen_set_wifi_select_network(unsigned char nn)
+{
+  char message[33];
+
+  bar_set(0,5,nn,0);
+
+  sprintf(message,"%d networks found",nn);
+  show_status(message);
+
+  show_menu(3, 'h',"_hidden", 'r',"_rescan", 's', "_skip");
+}
+
+void screen_set_wifi_custom(void)
+{
+  hide_menu();
+  bar_clear(false);
+  show_status("Enter network name");
+}
+
+void screen_set_wifi_password(void)
+{
+  hide_menu();
+  bar_clear(false);
+  show_status("Enter network password");
+}
+
+
+void screen_connect_wifi(NetConfig *nc)
+{
+  vdp_noblank();
+  style_white_on_black();
+  clrscr();
+
+  hide_menu();
+  sprintf(response,"     Connecting to network\n  %s",nc->ssid);
+  show_status(response);
+
+  vdp_blank();
+}
+
+
+void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
+{
+  if (screen_should_be_cleared)
+  {
+    vdp_noblank();
+    style_white_on_black();
+    clrscr();
+    bar_clear(false);
+    screen_should_be_cleared = false;
+
+    screen_hosts_and_devices_host_slots(h);
+    screen_hosts_and_devices_device_slots(10,d,e);
+
+    vdp_blank();
+  }
+}
+
+void screen_hosts_and_devices_hosts(void)
+{
+  show_menu(5, 'b',"_boot", 'e',"_edit", 'd',"_disks", 's',"ba_sic", 'c',"_config");
+  clear_status();
+  bar_set(0,3,8,selected_host_slot);
+  // bar_set(0,3,8,3);
+}
+
+void screen_hosts_and_devices_devices(void)
+{
+  show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
+  bar_set(10, 3, 8, selected_device_slot);
+}
+
+const char* screen_hosts_and_devices_device_slot(uint8_t hs, bool e, const char *fn)
+{
+  if (fn[0]!=0x00)
+    return fn;
+  else if (e==false)
+    return &off[0];
+  else
+    return &empty[0];
+}
+
+char* screen_hosts_and_devices_host_slot(char *hs)
+{
+  return hs[0]==0x00 ? &empty[0] : hs;
+}
+
+void screen_hosts_and_devices_host_slots(HostSlot *h)
+{
+  draw_logo(23, 1);
+
+  for (uint8_t i = 0; i < 8; i++) {
+    gotoxy(1, i+1);
+    cputc('1'+i);
+    cprintf(" %.28s", screen_hosts_and_devices_host_slot(h[i]));
+    // TODO: kind of wasteful
+    row_lengths[i] = 3 + strlen(screen_hosts_and_devices_host_slot(h[i]));
+  }
+
+  draw_card(0, 10, 1, "Hosts", true);
+}
+
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+{
+  // bool has_disks = false;
+  // uint8_t disk_n = 0;
+  // uint8_t slot_n = 0;
+
+  for (char i=0;i<MAX_DISK_SLOTS;i++)
+  {
+    gotoxy(1,i+y+1);
+    char icon = ' ';
+    char label = '\0';
+    char *filename = d[i].file;
+
+    if (strstr(filename, ".cas") != NULL || strstr(filename, ".CAS") != NULL) {
+      icon = 0x8A;
+    }
+    else if (strstr(filename, ".dsk") != NULL || strstr(filename, ".DSK") != NULL) {
+      icon = 0x88;
+      // label = 'A'+disk_n;
+      // disk_n++;
+
+      // if (!has_disks) {
+        // slot_n++;
+        // has_disks = true;
+      // }
+    }
+    else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
+      icon = 0x89;
+      // label = '1'+slot_n;
+      // slot_n++;
+    }
+    cputc(icon);
+    // if (label == '\0') {
+    //   cprintf(" %-29s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // }
+    // else {
+    //   cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    // }
+
+    if (filename[0] == '\0') {
+      cprintf(" %.28s",
+        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    }
+    else {
+      cprintf(" %u:%.25s",
+        d[i].hostSlot+1,
+        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+    }
+  }
+
+  draw_card(y, 10, 1, "Devices", false);
+}
+
+
+void screen_hosts_and_devices_devices_clear_all(void)
+{
+  hide_menu();
+  show_status("CLEARING ALL SLOTS...");
+}
+
+void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
+{
+  gotoxy(1,i+1);
+  vdp_vfill((i+1)*0x0100+8,0x00,248);
+}
+
+void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
+{
+  menu_clear();
+  show_status("Enter new host name");
+  textcolor(WHITE);
+  textbackground(BLACK);
+  gotoxy(1,22);
+  cputs(hostSlots[i]);
+}
+
+
+void screen_hosts_and_devices_eject(uint8_t ds)
+{
+  // vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
+  // textcolor(BLACK);
+  // textbackground(WHITE);
+  //
+  // gotoxy(3,11+ds);
+  // TODO: use optimized function
+  // cputs(empty);
+  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0B00 + ds*0x100 + 16, 24);
+  // bar_jump(bar_get());
+
+  uint16_t offset = 0x0B00 + ds*0x100 + 16;
+  vdp_vfill(offset-8, 0, 240);
+  gotoxy(3,11+ds);
+  cputs(empty);
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + offset, 232);
+  bar_jump(bar_get());
+}
+
+void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
+{
+  // textcolor(BLACK);
+  // textbackground(WHITE);
+
+  // TODO: Use optimized function
+  uint16_t offset = 0x0100 + hs*0x100;
+  vdp_vfill(offset, 0, 240);
+  gotoxy(3,1+hs);
+  cputs(empty);
+  vdp_vwrite(row_pattern, MODE2_ATTR + offset, 240);
+  bar_jump(bar_get());
+}
+
+
+void screen_hosts_and_devices_long_filename(char *f)
+{
+  // vdp_vfill(0x1100,0x00,1024); // Clear area first
+  if (strlen(f)>31)
+  {
+    gotoxy(0,17);
+    cprintf("%s",f);
+  }
+}
+
+
+void screen_show_info(bool printerEnabled,AdapterConfig* ac)
+{
+  vdp_noblank();
+  bar_clear(false);
+  clrscr();
+
+  gotoxy(0,7);
+
+  cprintf(" %8s %-20s\n","SSID",ac->ssid);
+  cprintf(" %8s %s\n","HOSTNAME",ac->hostname);
+  cprintf(" %8s %u.%u.%u.%u\n","IP",ac->localIP[0],ac->localIP[1],ac->localIP[2],ac->localIP[3]);
+  cprintf(" %8s %u.%u.%u.%u\n","NETMASK",ac->netmask[0],ac->netmask[1],ac->netmask[2],ac->netmask[3]);
+  cprintf(" %8s %u.%u.%u.%u\n","DNS",ac->dnsIP[0],ac->dnsIP[1],ac->dnsIP[2],ac->dnsIP[3]);
+  cprintf(" %8s %02x:%02x:%02x:%02x:%02x:%02x\n","MAC",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
+  cprintf(" %8s %02x:%02x:%02x:%02x:%02x:%02x\n","BSSID",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
+  cprintf(" %8s %s\n","FN VER",ac->fn_version);
+  cprintf(" %8s %s\n","CONFIG",GIT_VERSION);
+
+  draw_card(5, 13, 8, "Configuration", false);
+
+  show_menu(2, 'e',"_edit", 'r',"_reconnect");
+  vdp_blank();
+}
+
+
+void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* ace)
+{
+  screen_show_info(printerEnabled, (AdapterConfig *) ace);
+}
+
+
+void screen_select_file(void)
+{
+  vdp_noblank();
+
+  style_white_on_black();
+  clrscr();
+  bar_clear(false);
+
+  draw_card(0, 19, 0, hostSlots[selected_host_slot], false);
+
+  hide_menu();
+  show_status("Opening...");
+
+  vdp_blank();
+}
+
+void screen_select_file_display(char *p, char *f)
+{
+  gotoxy(1,1);
+  if (f[0]==0x00)
+    cprintf("%30s",p);
+  else
+    cprintf("%-8s|%20s",f,p);
+
+  // TODO: swap for optimized function
+  uint16_t patt_addr = 0x200 + 8;
+  uint16_t attr_addr = MODE2_ATTR + 0x200 + 8;
+  for (uint8_t y = 0; y < ENTRIES_PER_PAGE+1; y++) {
+    vdp_vfill(patt_addr,0,240);
+    vdp_vwrite(row_pattern+8, attr_addr, 30<<3);
+    attr_addr += 0x100;
+    patt_addr += 0x100;
+  }
+}
+
+void screen_select_file_display_long_filename(char *e)
+{
+  gotoxy(1,19);
+  cprintf("%-64s",e);
+}
+
+void screen_select_file_clear_long_filename(void)
+{
+  // gotoxy(0,0);
+  // vdp_vfill(0x1300,0,512);
+}
+
+void screen_select_file_prev(void)
+{
+  // textcolor(WHITE);
+  // textbackground(BLUE);
+  // gotoxy(2,2); cprintf("%-28s","...");
+
+  // TODO: replace with optimized function
+  gotoxy(2,2); cputs("...");
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0200 + 16, 24);
+}
+
+void screen_select_file_next(void)
+{
+  // textcolor(WHITE);
+  // textbackground(BLUE);
+  // gotoxy(2,17); cprintf("%-28s","...");
+
+  // TODO: replace with optimized function
+  gotoxy(2,17); cputs("...");
+  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x1100 + 16, 24);
+}
+
+void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
+{
+  gotoxy(2,y+2);
+  textbackground(BLUE);
+  cprintf("%.28s",e);
+
+  // TODO: swap for optimized function
+  uint16_t addr = MODE2_ATTR + 0x200 + 0x100*y + 16;
+  vdp_vwrite(row_pattern + 8, addr, 28<<3);
+}
+
+void screen_select_file_choose(char visibleEntries)
+{
+  bool occupied = any_slot_occupied();
+
+  screen_should_be_cleared = true;
+  bar_set(1,2,visibleEntries,0); // TODO: Handle previous
+
+  if (copy_mode == true) {
+    show_status("Select destination");
+    show_menu(1, 'c',"_copy");
+  }
+  else {
+    show_status("Select a file to mount");
+    show_menu(5, 'm',"_mount", 'b'," _boot", 'c'," _copy", 'n',"  _new", 'f'," _filter");
+  }
+}
+
+void screen_select_file_filter(void)
+{
+  show_status("Enter filter");
+  hide_menu();
+}
+
+void screen_select_file_new_type(void)
+{
+  show_status("What type of disk?");
+  show_menu(5, '1',"MSX-DOS _1", '2'," MSX-DOS _2", 0,NULL, 0,NULL, 'b',"_blank");
+}
+
+void screen_select_file_new_size(unsigned char k)
+{
+  show_status("Disk size?");
+  show_menu(5, '3',"_360K", '7',"_720K", 0,NULL, 0,NULL, 'c',"_custom");
+}
+
+void screen_select_file_new_custom(void)
+{
+  show_status("Enter disk size");
+  hide_menu();
+}
+
+void screen_select_file_new_name(void)
+{
+  show_status("Enter disk filename");
+  hide_menu();
+}
+
+void screen_select_file_new_creating(void)
+{
+  show_status("Creating disk...");
+  hide_menu();
+}
+
+
+void screen_select_slot(char *e)
+{
+  vdp_noblank();
+  // style_white_on_blue();
+  clrscr();
+
+  // TODO: Also need to display filename?
+
+  screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
+
+  bar_set(0,3,8,0);
+
+  vdp_blank();
+}
+
+void screen_select_slot_choose(void)
+{
+  show_status("Choose where to mount");
+  if (create) {
+    show_menu(5, 'r',"_read-only", 0,NULL, 0,NULL, 0,NULL, 'w',"r/_w");
+  }
+  else {
+    hide_menu();
+  }
+}
+
+void screen_select_slot_eject(unsigned char ds)
+{
+  textcolor(BLACK);
+  textbackground(WHITE);
+  gotoxy(1,1+ds); cprintf("%s",empty);
+  bar_jump(bar_get());
+}
+
+
+void screen_destination_host_slot(char *h, char *p)
+{
+  vdp_noblank();
+
+  // style_white_on_blue();
+  clrscr();
+
+  gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
+  gotoxy(0,11); cprintf("%32s",h);
+  // vdp_color(1,15,7);
+  // gotoxy(0,12); cprintf("%-128s",p);
+
+  vdp_blank();
+}
+
+void screen_destination_host_slot_choose(void)
+{
+  show_status("Choose a destination");
+  hide_menu();
+}
+
+void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
+{
+  vdp_noblank();
+
+  // style_white_on_blue();
+  clrscr();
+
+  show_status("Copying file...");
+  hide_menu();
+
+  gotoxy(0,0); vdp_color(15,4,7); cprintf("%32s","COPYING FILE FROM:");
+  gotoxy(0,1); cprintf("%32s",sh);
+  gotoxy(0,2); vdp_color(1,15,7); cprintf("%-128s",p);
+  gotoxy(0,6); vdp_color(15,4,7); cprintf("%32s",dh);
+  gotoxy(0,7); vdp_color(1,15,7); cprintf("%-128s",dp);
+
+  vdp_blank();
+}
+
+void screen_mount_and_boot()
+{
+  clrscr();
+  bar_clear(false);
+  show_status("Mounting and booting...");
+}
+
+void screen_end(void)
+{
+  return;
+}

@@ -1,0 +1,502 @@
+/**
+ * Input routines
+ */
+
+#include <conio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include "../input.h"
+#include "../globals.h"
+#include "../system.h"
+#include "../mount_and_boot.h"
+#include "../screen.h"
+#include "../set_wifi.h"
+#include "../hosts_and_devices.h"
+#include "../select_file.h"
+#include "../select_slot.h"
+#include "key_codes.h"
+#include "cursor.h"
+#include "msx_debug.h"
+
+extern unsigned short entry_timer;
+extern bool long_entry_displayed;
+extern unsigned char copy_host_slot;
+extern bool copy_mode;
+extern bool screen_should_be_cleared;
+
+/**
+ * Get input from keyboard/joystick
+ * @return keycode (or synthesized keycode if joystick)
+ */
+unsigned char input()
+{
+  char c = cgetc();
+  // gotoxy(0,0); cprintf("%02X",c);
+  return c;
+
+  // return cgetc();
+}
+
+unsigned char input_ucase(void)
+{
+  unsigned char c = cgetc();
+  if ((c>='a') && (c<='z')) c&=~32;
+  return c;
+}
+
+static void input_clear_bottom(void)
+{
+}
+
+void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char len, bool password)
+{
+  unsigned char key;
+  unsigned char pos=o;
+
+  c += o;
+  x += o;
+
+  cursor(true);
+  input_clear_bottom();
+
+  gotoxy(x,y);
+  cursor_pos(x,y);
+
+  while (key = input()) {
+    if (key == KEY_RETURN) {
+   	  cursor(false);
+   	  break;
+   	}
+    else if (key == KEY_BACKSPACE) {
+      if (pos > 0) {
+	      pos--;
+	      x--;
+	      c--;
+	      *c=0x00;
+	      putch(KEY_BACKSPACE);
+	      putch(KEY_SPACE);
+	      putch(KEY_BACKSPACE);
+	      cursor_pos(x,y);
+	    }
+    }
+    else if (key > 0x1F && key < 0x7F) { // Printable characters
+  	  if (pos < len) {
+ 	      pos++;
+ 	      x++;
+ 	      *c=key;
+ 	      c++;
+ 	      putch(password ? 0x8B : key);
+ 	      cursor_pos(x,y);
+ 	    }
+  	}
+  }
+}
+
+WSSubState input_set_wifi_select(void)
+{
+  unsigned char k=input();
+
+  switch(k)
+  {
+    case KEY_RETURN:
+      set_wifi_set_ssid(bar_get());
+      return WS_PASSWORD;
+    case 'H':
+    case 'h':
+      return WS_CUSTOM;
+    case 'R':
+    case 'r':
+      return WS_SCAN;
+    case 'S':
+    case 's':
+    case KEY_ESCAPE:
+      state=HOSTS_AND_DEVICES;
+      return WS_DONE;
+    case KEY_UP_ARROW: // up arrow
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return WS_SELECT;
+    case KEY_DOWN_ARROW: // down arrow
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return WS_SELECT;
+    default:
+      return WS_SELECT;
+  }
+}
+
+void input_line_set_wifi_custom(char *c)
+{
+  input_line(1,22,0,c,30,false);
+}
+
+void input_line_set_wifi_password(char *c)
+{
+  input_line(1,22,0,c,64,true);
+}
+
+HDSubState input_hosts_and_devices_hosts(void)
+{
+  unsigned char k = input();
+  debugf("input(%d) received", k);
+
+  switch (k)
+  {
+  case KEY_UP_ARROW:
+  case KEY_LEFT_ARROW:
+    bar_up();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  case KEY_DOWN_ARROW:
+  case KEY_RIGHT_ARROW:
+    bar_down();
+    selected_host_slot = bar_get();
+    return HD_HOSTS;
+  case KEY_1:
+  case KEY_2:
+  case KEY_3:
+  case KEY_4:
+  case KEY_5:
+  case KEY_6:
+  case KEY_7:
+  case KEY_8:
+    bar_jump(k-KEY_1);
+    return HD_HOSTS;
+  case 'B':
+  case 'b':
+    screen_should_be_cleared = true;
+    mount_and_boot();
+    return HD_HOSTS;
+  case KEY_TAB:
+  case 'D':
+  case 'd':
+    bar_clear(false);
+    return HD_DEVICES;
+  case KEY_RETURN:
+    selected_host_slot = bar_get();
+    if (hostSlots[selected_host_slot][0] != 0)
+    {
+      screen_should_be_cleared = true;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+      state = SELECT_FILE;
+      return HD_DONE;
+    }
+    else
+      return HD_HOSTS;
+  case KEY_K10:
+    return HD_DONE;
+  case 'C':
+  case 'c':
+    screen_should_be_cleared = true;
+    state = SHOW_INFO;
+    return HD_DONE;
+  case 'E':
+  case 'e':
+    screen_should_be_cleared = true;
+    hosts_and_devices_edit_host_slot(selected_host_slot);
+    return HD_HOSTS;
+  case 'S':
+  case 's':
+    show_status("Dropping into BASIC...");
+    return HD_DONE;
+  default:
+    return HD_HOSTS;
+  }
+}
+
+HDSubState input_hosts_and_devices_devices(void)
+{
+  unsigned char k=input();
+  switch(k)
+    {
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      selected_device_slot=bar_get();
+      // hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      selected_device_slot=bar_get();
+      // hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-KEY_1);
+      selected_device_slot=bar_get();
+      //hosts_and_devices_long_filename();
+      return HD_DEVICES;
+    case 'B':
+    case 'b':
+      mount_and_boot();
+      return HD_DEVICES;
+    case KEY_TAB:
+    case 'H':
+    case 'h':
+      bar_clear(false);
+      // gotoxy(0,0); cprintf("Hosts!");
+      return HD_HOSTS;
+    case 'E':
+    case 'e':
+      hosts_and_devices_eject(bar_get());
+      return HD_DEVICES;
+    // TODO: R is already used by ROM Module
+    case 'R':
+    case 'r':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(MODE_READ);
+      return HD_DEVICES;
+      break;
+    case 'W':
+    case 'w':
+      selected_device_slot=bar_get();
+      hosts_and_devices_devices_set_mode(MODE_WRITE);
+      return HD_DEVICES;
+      break;
+    // case KEY_CLEAR:
+    //   return HD_CLEAR_ALL_DEVICES;
+    case 'C':
+    case 'c':
+      screen_should_be_cleared = true;
+      state = SHOW_INFO;
+      return HD_DONE;
+    case KEY_K10:
+      return HD_DONE;
+    default:
+      return HD_DEVICES;
+    }
+}
+
+void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char *c)
+{
+  input_line(1,22,o,c,30,false);
+}
+
+void input_line_filter(char *c)
+{
+  input_line(1,22,0,c,30,false);
+}
+
+SFSubState input_select_file_choose(void)
+{
+	unsigned entryType;
+	unsigned char k = input();
+
+	switch (k)
+	{
+	case KEY_UP_ARROW:
+	case KEY_LEFT_ARROW:
+		if ((bar_get() == 0) && (pos > 0))
+			return SF_PREV_PAGE;
+    long_entry_displayed = false;
+    bar_up();
+    select_display_long_filename();
+    break;
+	case KEY_DOWN_ARROW:
+	case KEY_RIGHT_ARROW:
+		if ((bar_get() == 14) && (dir_eof == false))
+			return SF_NEXT_PAGE;
+    long_entry_displayed = false;
+    bar_down();
+    select_display_long_filename();
+    break;
+  case 'M':
+  case 'm':
+	case KEY_RETURN:
+		pos += bar_get();
+		entryType = select_file_entry_type();
+		if (entryType == ENTRY_TYPE_FOLDER)
+			return SF_ADVANCE_FOLDER;
+		else if (entryType == ENTRY_TYPE_LINK)
+			return SF_LINK;
+    // strncpy(source_path, path, 224); // makes mess :-(
+    // old_pos = pos;
+    return SF_DONE;
+	case KEY_ESCAPE:
+		copy_mode = false;
+		state = HOSTS_AND_DEVICES;
+		return SF_DONE;
+	case KEY_BACKSPACE:
+		return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
+	case 'F':
+	case 'f':
+		return SF_FILTER;
+	case 'N':
+	case 'n':
+		return SF_NEW;
+	case 'C':
+	case 'c':
+		pos += bar_get();
+		select_file_set_source_filename();
+		return SF_COPY;
+	// case ',':
+	// case '<':
+	// 	if (pos > 0)
+	// 		return SF_PREV_PAGE;
+ //    break;
+	// case '.':
+	// case '>':
+	// 	if (dir_eof == false)
+	// 		return SF_NEXT_PAGE;
+ //    break;
+	}
+  return SF_CHOOSE;
+}
+
+unsigned char input_select_file_new_type(void)
+{
+  unsigned char k = input();
+  // TODO: Actually define disk types
+	switch (k)
+	{
+	case '1':
+	  return 1;
+	case '2':
+	  return 2;
+	case 'B':
+	case 'b':
+	  return 3;
+	}
+  return 0;
+}
+
+unsigned long input_select_file_new_size(unsigned char t)
+{
+  unsigned char k = input();
+  // TODO: Actually define disk types
+	switch (k)
+	{
+	case '3':
+	  return 360;
+	case '7':
+	  return 720;
+	case 'C':
+	case 'c':
+	  return 1;
+	}
+  return 0;
+}
+
+unsigned long input_select_file_new_custom(void)
+{
+  char s[9];
+  input_line(0,22,0,s,8,false);
+}
+
+void input_select_file_new_name(char *c)
+{
+  input_line(0,22,0,c,32,false);
+}
+
+SSSubState input_select_slot_choose(void)
+{
+  unsigned char k;
+
+  k=input();
+
+  switch(k)
+    {
+    case KEY_ESCAPE:
+      state = SELECT_FILE;
+      backToFiles = true;
+      // state = HOSTS_AND_DEVICES;
+      return SS_DONE;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return SS_CHOOSE;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return SS_CHOOSE;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-KEY_1);
+      return SS_CHOOSE;
+    // case 'E':
+    // case 'e':
+    //   select_slot_eject(bar_get());
+    //   return SS_CHOOSE;
+    case 'R':
+    case 'r':
+    case KEY_RETURN:
+      mode = MODE_READ;
+      selected_device_slot=bar_get();
+      return SS_DONE;
+    case 'W':
+    case 'w':
+      mode = MODE_WRITE;
+      selected_device_slot=bar_get();
+      return SS_DONE;
+    default:
+      return SS_CHOOSE;
+    }
+}
+
+unsigned char input_select_slot_mode(char *mode)
+{
+  // unsigned char k = 0;
+
+  // while (k == 0)
+  // {
+  //   k = input_ucase();
+
+  //   if (k == KEY_ESCAPE)
+  //   {
+  //     return 0;
+  //   }
+
+  //   switch(k)
+  //   {
+  //     case 'W':
+  //     case 'w':
+  //       mode[0] = 2;
+  //       break;
+  //     default:
+  //       mode[0] = 1;
+  //   }
+  // }
+  return 1;
+}
+
+DHSubState input_destination_host_slot_choose(void)
+{
+  return DH_CHOOSE;
+}
+
+SISubState input_show_info(void)
+{
+	char c;
+	c = input();
+	switch (c)
+	{
+	case 'e':
+	case 'E':
+	  screen_should_be_cleared = true;
+		state = SET_WIFI;
+		return SI_DONE;
+	case 'r':
+	case 'R':
+	  screen_should_be_cleared = true;
+		state = CONNECT_WIFI;
+		return SI_DONE;
+	default:
+	  screen_should_be_cleared = true;
+		state = HOSTS_AND_DEVICES;
+		return SI_DONE;
+	}
+	return SI_SHOWINFO;
+}

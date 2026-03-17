@@ -62,6 +62,9 @@ obj
 dist.apple2/*.jar
 dist.apple2/*.dsk
 
+# MSX data
+!src/msx/font.bin
+
 # fujinet-lib will be downloaded by makefiles that use it
 fujinet-lib/*
 

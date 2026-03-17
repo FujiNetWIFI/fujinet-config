@@ -81,5 +81,8 @@ void input_select_slot_build_eos_directory_label(char *c);
 #if defined(BUILD_MSDOS) || defined(BUILD_COCO)
 #include "key_codes.h"
 #endif /* BUILD_MSDOS || BUILD_COCO */
+#if defined(BUILD_MSDOS) || defined(BUILD_MSXROM)
+#include "key_codes.h"
+#endif /* BUILD_MSDOS || BUILD_MSXROM */
 
 #endif /* INPUT_H */
