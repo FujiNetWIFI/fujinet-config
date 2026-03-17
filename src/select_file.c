@@ -66,7 +66,7 @@ unsigned char select_file_display(void)
 {
   char visibleEntries = 0;
   char i;
-  //const char *e;
+  bool result = true;
 
   if (!fuji_mount_host_slot(selected_host_slot))
   {
@@ -140,6 +140,7 @@ void select_file_set_source_filename(void)
 
 void select_display_long_filename(void)
 {
+#ifndef _CMOC_VERSION_
   //const char *e;
 
 #ifdef BUILD_ATARI
@@ -160,6 +161,7 @@ void select_display_long_filename(void)
     long_entry_displayed = false;
     screen_select_file_clear_long_filename();
   }
+#endif /* _CMOC_VERSION_ */
 }
 
 void select_get_filename(uint8_t len)
@@ -217,7 +219,7 @@ void select_file_choose(char visibleEntries)
 
 void select_file_link(void)
 {
-  //const char *e;
+  bool result;
   char tnfsHostname[128];
   bar_clear(false);
 

@@ -20,18 +20,19 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-	  // TODO: Write COCO specific version that just checks for a key, as input() blocks! grrr. -thom
-#ifndef _CMOC_VERSION_
-	  // check for esc key and abort
+		// check for esc key and abort
+#ifdef _CMOC_VERSION_
+		if (inkey() == KEY_BREAK)
+#else
 		if (input() == KEY_ABORT)
+#endif /* _CMOC_VERSION_ */
 		{
 			screen_error("CONNECTION ABORTED");
 			pause(150);
 			state=SET_WIFI;
 			return;
 		}
-#endif /* _CMOC_VERSION_ */
-
+		
 		fuji_get_wifi_status(&s);
 
 		switch (s)
