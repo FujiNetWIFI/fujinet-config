@@ -75,3 +75,4 @@ build-msdos.sh
 *.o
 *.orig
 *.rej
+.claude/settings.json
