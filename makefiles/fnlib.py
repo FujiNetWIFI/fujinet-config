@@ -296,10 +296,12 @@ class LibLocator:
     if not self.MV.FUJINET_LIB_FILE:
       with open(os.path.join(repoDir, "Makefile")) as _mf:
         _mk = _mf.read()
+      repo_platforms = " ".join(re.findall(r'^PLATFORMS\s*[?:+]?=\s*(.+)', _mk, re.MULTILINE)).split()
+      build_platform = next((p for p in self.possiblePlatforms if p in repo_platforms), self.PLATFORM)
       if re.search(r'^TARGETS\s*[?:+]?=', _mk, re.MULTILINE):
-        cmd = ["make", f"TARGETS={self.PLATFORM}"]
+        cmd = ["make", f"TARGETS={build_platform}"]
       else:
-        cmd = ["make", f"{self.PLATFORM}/r2r"]
+        cmd = ["make", f"{build_platform}/r2r"]
       subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr)
       self.findLibraryDir(repoDir)
 
