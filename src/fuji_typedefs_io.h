@@ -1,6 +1,8 @@
 #ifndef FUJI_TYPEDEFS_IO_H
 #define FUJI_TYPEDEFS_IO_H
 
+#include <stddef.h>
+
 // These entries also exist in fujinet-lib, but for systems that are not
 // using fujinet-lib yet, we define them here. This decouples systems
 // that don't use fujinet-lib yet from including fujinet-io.h from it.
