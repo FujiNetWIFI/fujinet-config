@@ -294,14 +294,20 @@ class LibLocator:
 
     self.findLibraryDir(repoDir)
     if not self.MV.FUJINET_LIB_FILE:
-      cmd = ["make", ]
+      with open(os.path.join(repoDir, "Makefile")) as _mf:
+        _mk = _mf.read()
+      if re.search(r'^TARGETS\s*[?:+]?=', _mk, re.MULTILINE):
+        cmd = ["make", f"TARGETS={self.PLATFORM}"]
+      else:
+        cmd = ["make", f"{self.PLATFORM}/r2r"]
       subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr)
       self.findLibraryDir(repoDir)
 
     return
 
   def findLibraryDir(self, baseDir):
-    dirsToCheck = ["", "build", *[f"r2r/{p}" for p in self.possiblePlatforms]]
+    dirsToCheck = ["", "build", *[f"r2r/{p}" for p in self.possiblePlatforms],
+                   *[f"build/{p}" for p in self.possiblePlatforms]]
     for pdir in dirsToCheck:
       pdir = os.path.join(baseDir, pdir)
       if os.path.isdir(pdir):
@@ -318,7 +324,7 @@ class LibLocator:
     parent = os.path.dirname(self.MV.FUJINET_LIB_DIR.rstrip("/"))
     checkDirs = [self.MV.FUJINET_LIB_DIR, parent, os.path.join(parent, "include")]
     components = self.MV.FUJINET_LIB_DIR.split(os.path.sep)
-    if components[-1] == self.MV.FUJINET_LIB_PLATFORM and components[-2] == "r2r":
+    if components[-1] == self.MV.FUJINET_LIB_PLATFORM and components[-2] in ("r2r", "build"):
       checkDirs.append(os.path.join(os.path.dirname(parent), "include"))
     for idir in checkDirs:
       if os.path.exists(os.path.join(idir, "fujinet-fuji.h")):
