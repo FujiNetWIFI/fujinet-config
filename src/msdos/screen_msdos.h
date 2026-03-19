@@ -28,6 +28,7 @@
 
 /* EDIT.EXE inspired color scheme */
 #define ATTRIBUTE_HEADER   0x70  /* black on light gray  (title/section bars) */
+#define ATTRIBUTE_BORDER   0x1F  /* bright white on blue (box borders)        */
 #define ATTRIBUTE_NORMAL   0x17  /* white on blue        (body text)          */
 #define ATTRIBUTE_BOLD     0x1F  /* bright white on blue (emphasized text)    */
 #define ATTRIBUTE_SELECTED 0x70  /* black on light gray  (list selection bar) */
