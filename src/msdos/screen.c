@@ -158,7 +158,7 @@ void screen_set_wifi_extended(AdapterConfigExtended *acx)
 
     /* Box around network list: top border row 2, inner rows 3-21, bottom border row 22.
        Fits MAX_WIFI_NETWORKS (18) entries + 1 "Enter a specific SSID" = 19 inner rows. */
-    screen_draw_box_titled(0, 2, screen_cols, 21, ATTRIBUTE_HEADER, false, "Available Networks");
+    screen_draw_box_titled(0, 2, screen_cols, 21, ATTRIBUTE_BORDER, false, "Available Networks");
 
     screen_status("Scanning networks...");
 }
@@ -218,8 +218,8 @@ void screen_set_wifi_sel_net(unsigned char nn)
 
     /* Clear the line inside the box, then restore the box borders */
     screen_clear_line(y);
-    screen_putc(0,              y, ATTRIBUTE_HEADER, BOX_V);
-    screen_putc(screen_cols-1,  y, ATTRIBUTE_HEADER, BOX_V);
+    screen_putc(0,              y, ATTRIBUTE_BORDER, BOX_V);
+    screen_putc(screen_cols-1,  y, ATTRIBUTE_BORDER, BOX_V);
     screen_puts(1, y, ATTRIBUTE_NORMAL, "<Enter a specific SSID>");
 
     screen_status("[ENTER] Select  [ESC] Re-scan  [S] Skip");
@@ -268,7 +268,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
     screen_clear();
 
     screen_header("FujiNet Config");
-    screen_draw_box_titled(x, 5, 44, 13, ATTRIBUTE_HEADER, true, "Network Info");
+    screen_draw_box_titled(x, 5, 44, 13, ATTRIBUTE_BORDER, true, "Network Info");
     screen_status("[R]econnect  Change [S]SID  [Any key] Return");
     screen_puts(x+5, 7, ATTRIBUTE_NORMAL,"      SSID:");
     screen_puts(x+5, 8, ATTRIBUTE_NORMAL,"  Hostname:");
@@ -362,7 +362,7 @@ void screen_select_slot(const char *e)
   screen_clear();
 
   screen_header("Mount to Drive Slot");
-  screen_draw_box_titled(0, 1, screen_cols, 12, ATTRIBUTE_HEADER, false, "Drive Slots");
+  screen_draw_box_titled(0, 1, screen_cols, 12, ATTRIBUTE_BORDER, false, "Drive Slots");
   screen_status("[ENTER] Read Only  [W] Read/Write  [E]ject  [ESC] Abort");
 
   if (create == false)
@@ -371,7 +371,7 @@ void screen_select_slot(const char *e)
     sprintf((char *)fullpath, "%s%s", path, (char *)(i + 1));
     fullpath[screen_cols - 2] = '\0';
 
-    screen_draw_box_titled(0, 14, screen_cols, 5, ATTRIBUTE_HEADER, false, "File Details");
+    screen_draw_box_titled(0, 14, screen_cols, 5, ATTRIBUTE_BORDER, false, "File Details");
 
     screen_puts(1, 15, ATTRIBUTE_BOLD, (const char *)fullpath);
 
@@ -500,7 +500,7 @@ void screen_select_slot_build_eos_directory_creating(void)
 static void sf_draw_file_top_border(bool pgup)
 {
     unsigned char row = FILES_START_Y - 1;
-    unsigned char a = ATTRIBUTE_HEADER;
+    unsigned char a = ATTRIBUTE_BORDER;
     unsigned char i;
 
     screen_putc(0, row, a, BOX_TL);
@@ -524,7 +524,7 @@ static void sf_draw_file_top_border(bool pgup)
 static void sf_draw_file_bot_border(bool pgdn)
 {
     unsigned char row = FILES_START_Y + ENTRIES_PER_PAGE;
-    unsigned char a = ATTRIBUTE_HEADER;
+    unsigned char a = ATTRIBUTE_BORDER;
     unsigned char i;
 
     screen_putc(0, row, a, BOX_BL);
@@ -551,10 +551,10 @@ void screen_select_file(void)
 
     screen_header("Disk Images");
 
-    screen_draw_box(0, 1, screen_cols, 5, ATTRIBUTE_HEADER, false);
+    screen_draw_box(0, 1, screen_cols, 5, ATTRIBUTE_BORDER, false);
 
     /* File list box: top border row 7 (FILES_START_Y-1), bottom border row 23. No shadow (row 24 = status bar). */
-    screen_draw_box(0, FILES_START_Y - 1, screen_cols, ENTRIES_PER_PAGE + 2, ATTRIBUTE_HEADER, false);
+    screen_draw_box(0, FILES_START_Y - 1, screen_cols, ENTRIES_PER_PAGE + 2, ATTRIBUTE_BORDER, false);
 
     if (copy_mode == false)
         screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C]opy  [ENTER] Choose  [ESC] Abort");
@@ -581,8 +581,8 @@ void screen_select_file_display(char *p, char *f)
 
     // Path — row 4 (clear first so a shorter new path doesn't leave old text behind)
     screen_clear_line(4);
-    screen_putc(0, 4, ATTRIBUTE_HEADER, BOX_V);
-    screen_putc(screen_cols - 1, 4, ATTRIBUTE_HEADER, BOX_V);
+    screen_putc(0, 4, ATTRIBUTE_BORDER, BOX_V);
+    screen_putc(screen_cols - 1, 4, ATTRIBUTE_BORDER, BOX_V);
     screen_puts(1, 4, ATTRIBUTE_NORMAL, "Path: ");
     screen_puts(7, 4, ATTRIBUTE_BOLD, p);
 
@@ -590,8 +590,8 @@ void screen_select_file_display(char *p, char *f)
     for (i = FILES_START_Y; i < FILES_START_Y + ENTRIES_PER_PAGE; i++)
     {
         screen_clear_line(i);
-        screen_putc(0,              i, ATTRIBUTE_HEADER, BOX_V);
-        screen_putc(screen_cols-1,  i, ATTRIBUTE_HEADER, BOX_V);
+        screen_putc(0,              i, ATTRIBUTE_BORDER, BOX_V);
+        screen_putc(screen_cols-1,  i, ATTRIBUTE_BORDER, BOX_V);
     }
 
     // Restore file list box borders (removes any stale PgUp/PgDn indicators)
@@ -817,9 +817,9 @@ void screen_draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned
     if (shadow)
     {
         for (i = 1; i < h; i++)
-            screen_putc(x+w, y+i, ATTRIBUTE_SHADOW, 0xDB); /* full block */
+            screen_putc(x+w, y+i, ATTRIBUTE_SHADOW, 0xB2); /* dark shade ▓ */
         for (i = 1; i <= w; i++)
-            screen_putc(x+i, y+h, ATTRIBUTE_SHADOW, 0xDB);
+            screen_putc(x+i, y+h, ATTRIBUTE_SHADOW, 0xB2);
     }
 }
 
@@ -880,8 +880,8 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
     screen_header("FujiNet Config");
 
-    screen_draw_box_titled(0, 2, screen_cols, 10, ATTRIBUTE_HEADER, false, "HOST SLOTS");
-    screen_draw_box_titled(0, 13, screen_cols, 10, ATTRIBUTE_HEADER, false, "DRIVE SLOTS");
+    screen_draw_box_titled(0, 2, screen_cols, 10, ATTRIBUTE_BORDER, false, "HOST SLOTS");
+    screen_draw_box_titled(0, 13, screen_cols, 10, ATTRIBUTE_BORDER, false, "DRIVE SLOTS");
 
     screen_hosts_and_devices_host_slots(&hostSlots[0]);
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
@@ -1047,9 +1047,9 @@ void screen_destination_host_slot(char *h, char *p)
     static char label[84];
     screen_clear();
     screen_header("Copy to Host Slot");
-    screen_draw_box_titled(0, 2, screen_cols, NUM_HOST_SLOTS + 2, ATTRIBUTE_HEADER, false, "Host Slots");
+    screen_draw_box_titled(0, 2, screen_cols, NUM_HOST_SLOTS + 2, ATTRIBUTE_BORDER, false, "Host Slots");
 
-    screen_draw_box_titled(0, 13, screen_cols, 4, ATTRIBUTE_HEADER, false, "Disk Image Details");
+    screen_draw_box_titled(0, 13, screen_cols, 4, ATTRIBUTE_BORDER, false, "Disk Image Details");
     sprintf(label, "Host: %s", h);
     screen_puts(1, 14, ATTRIBUTE_BOLD,   (const char *)label);
     sprintf(label, "Path: %s", p);
@@ -1093,7 +1093,7 @@ void screen_connect_wifi(NetConfig *nc)
     bar_clear(false);
 
     screen_header("Connecting to WiFi");
-    screen_draw_box_titled(bx, 8, 36, 5, ATTRIBUTE_HEADER, true, "Please Wait");
+    screen_draw_box_titled(bx, 8, 36, 5, ATTRIBUTE_BORDER, true, "Please Wait");
     screen_puts_center(10, ATTRIBUTE_NORMAL, "Connecting to:");
     screen_puts_center(11, ATTRIBUTE_BOLD,   nc->ssid);
     screen_status("[ESC] Abort");
