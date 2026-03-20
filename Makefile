@@ -4,6 +4,8 @@ PLATFORMS += apple2
 PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
+
+# Only in lib-experimental currently
 PLATFORMS += msdos
 PLATFORMS += msxrom
 
