@@ -77,7 +77,7 @@ unsigned char select_file_display(void)
 
   screen_select_file_display(path, filter);
 
-  if (!fuji_open_directory2(selected_host_slot, path, filter))
+  if (!fuji_open_directory_filter(selected_host_slot, path, filter))
   {
     screen_error("  COULD NOT OPEN DIRECTORY.");
     sf_subState = SF_DONE;
@@ -218,7 +218,6 @@ void select_file_choose(char visibleEntries)
 
 void select_file_link(void)
 {
-  bool result;
   char tnfsHostname[128];
   bar_clear(false);
 
