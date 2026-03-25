@@ -358,6 +358,8 @@ SSSubState input_select_slot_choose(void)
     case KEY_4:
     case KEY_5:
     case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
 	  return SS_CHOOSE;
     // case KEY_SMART_IV:
@@ -391,6 +393,12 @@ SSSubState input_select_slot_choose(void)
     case 'k':
     case 'K':
       bar_down();
+      return SS_CHOOSE;
+    case 'D':
+    case 'd':
+      screen_hosts_and_devices_toggle_view();
+      screen_select_slot(response);
+      screen_select_slot_choose();
       return SS_CHOOSE;
     default:
       return SS_CHOOSE;
@@ -516,6 +524,12 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_down();
     selected_host_slot = bar_get();
     return HD_HOSTS;
+  case 'D':
+  case 'd':
+    screen_hosts_and_devices_toggle_view();
+    screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+    screen_hosts_and_devices_hosts();
+    return HD_HOSTS;
   default:
     return HD_HOSTS;
   }
@@ -585,6 +599,12 @@ HDSubState input_hosts_and_devices_devices(void)
       return HD_DEVICES;
     case KEY_ESCAPE: // ESC
       return HD_DONE;
+    case 'D':
+    case 'd':
+      screen_hosts_and_devices_toggle_view();
+      screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+      screen_hosts_and_devices_devices();
+      return HD_DEVICES;
     default:
       return HD_DEVICES;
     }

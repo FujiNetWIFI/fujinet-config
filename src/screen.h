@@ -60,6 +60,8 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i);
 void screen_hosts_and_devices_eject(uint8_t ds);
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs);
 
+void screen_hosts_and_devices_toggle_view(void);
+
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
 //void screen_show_info(bool printerEnabled, AdapterConfig* ac);
@@ -106,16 +108,6 @@ void bar_clear(bool oldRow);
  * @param i item index to start display
  */
 void bar_set(uint8_t y, uint8_t c, uint8_t m, uint8_t i);
-
-/**
- * Set up bar and start display on row
- * @param y Y column for bar display
- * @param c # of columns for left
- * @param m number of items
- * @param i item index to start display
- * @param s s split s lines (used to allow for diskII separater)
- */
-void bar_set_split(uint8_t y, uint8_t c, uint8_t m, uint8_t i, uint8_t s);
 
 /**
  * Move bar upward until index 0

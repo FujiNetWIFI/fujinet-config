@@ -22,7 +22,7 @@
 #include <6502.h>
 #endif
 
-#define MAX_SMARTPORT	4
+#define MAX_SMARTPORT	8
 
 // https://retrocomputing.stackexchange.com/questions/8652/why-did-the-original-apple-e-have-two-sets-of-inverse-video-characters:
 // $00..$1F Inverse  Uppercase Letters
@@ -53,6 +53,7 @@ static const char *off="Off";
 
 static bool lowercase;
 static bool mousetext;
+static bool screenDeviceSmartport;
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
@@ -130,6 +131,7 @@ void screen_init(void)
       }
     }
   #endif
+  screenDeviceSmartport = true;
   clrscr();
   #ifndef __ORCAC__
     POKE(0x2000,0x00); // \
@@ -169,7 +171,7 @@ void screen_init(void)
     else
     {
       POKE(0xC051,0); // TEXT
-	  POKE(0xC056,0); // LORES (make AppleSqueezer happy)
+	    POKE(0xC056,0); // LORES (make AppleSqueezer happy)
     }
   #endif
 }
@@ -358,53 +360,81 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
   char host_slot;
   char separator;
 
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  if (screenDeviceSmartport)
   {
-    line = y + i;
-    if (i > MAX_SMARTPORT - 1) {
-      // skip over diskII heading
-      line++;
-    }
-
-    if (d[i].file[0]) {
-        switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
-          case MODE_READ:
-            rw_mode = 'R';
-            break;
-          case MODE_WRITE:
-            rw_mode = 'W';
-            break;
-          default:
-            // should not happen ... but we've got bugs
-            rw_mode = '?';
-            break;
-        }
-        host_slot = '1' + d[i].hostSlot;
-        separator = ':';
-    } else {
-        rw_mode = ' ';
-        host_slot = ' ';
-        separator = ' ';
-    }
-
-    gotoxy(0, line);
-    if (i < MAX_SMARTPORT)
-      cprintf("%d", i+1);
-    else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 15)
-      cprintf("NA");
-    else if (diskii_slotdrive[i-MAX_SMARTPORT].slot == 0)
-      cprintf("%d", i - MAX_SMARTPORT + 1);
-    else
+    for (i = 0; i < MAX_SMARTPORT; i++)
     {
-      if (get_ostype() == APPLE_IIIEM) // Satan Mode
-        cprintf("D%d", diskii_slotdrive[i - MAX_SMARTPORT].drive);
-      else
-        cprintf("S%dD%d", diskii_slotdrive[i - MAX_SMARTPORT].slot,
-	        diskii_slotdrive[i - MAX_SMARTPORT].drive);
+      line = y + i;
+      if (d[i].file[0]) {
+          switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
+            case MODE_READ:
+              rw_mode = 'R';
+              break;
+            case MODE_WRITE:
+              rw_mode = 'W';
+              break;
+            default:
+              // should not happen ... but we've got bugs
+              rw_mode = '?';
+              break;
+          }
+          host_slot = '1' + d[i].hostSlot;
+          separator = ':';
+      } else {
+          rw_mode = ' ';
+          host_slot = ' ';
+          separator = ' ';
+      }
+  
+      gotoxy(0, line);
+      cprintf("%d ", i+1);
+      cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
     }
-    cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
   }
-
+  else //diskII
+  {
+    for (i = 0; i < (MAX_DISKII); i++)
+    {
+      line = y + i;
+      if (d[i].file[0]) 
+      {
+          switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
+            case MODE_READ:
+              rw_mode = 'R';
+              break;
+            case MODE_WRITE:
+              rw_mode = 'W';
+              break;
+            default:
+              // should not happen ... but we've got bugs
+              rw_mode = '?';
+              break;
+          }
+          host_slot = '1' + d[i].hostSlot;
+          separator = ':';
+      } 
+      else
+      {
+          rw_mode = ' ';
+          host_slot = ' ';
+          separator = ' ';
+      }
+      gotoxy(0, line);
+      if (diskii_slotdrive[i].slot == 15)
+        cprintf("NA");
+      else if (diskii_slotdrive[i].slot == 0)
+        cprintf("%d", i + 1);
+      else
+      {
+        if (get_ostype() == APPLE_IIIEM) // Satan Mode
+          cprintf("D%d", diskii_slotdrive[i].drive);
+        else
+          cprintf("S%dD%d", diskii_slotdrive[i].slot,
+	          diskii_slotdrive[i].drive);
+      }
+      cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
+    }
+  }
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
@@ -418,13 +448,22 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   hline(40 - (sizeof(hl)-1));
   cputs(hl);
 
-  cputsxy(0,10,"DR-H");
-  hline(40 - wherex() - (sizeof(sd)-1));
-  cputs(sd);
+  cputsxy(0,10,"D");
+  screenDeviceSmartport ? hline(1) : hline(3);
+  cputs("R");
+  hline(1);
+  cputs("H");
 
-  gotoxy(0,15);
-  hline(40 - (sizeof(dd)-1));
-  cputs(dd);
+  if(screenDeviceSmartport)
+  {
+    hline(40 - wherex() - (sizeof(sd)-1));
+    cputs(sd);
+  }
+  else //diskII
+  {
+    hline(40 - wherex() - (sizeof(dd)-1));
+    cputs(dd);
+  }
 
   for (i=0;i<8;i++)
   {
@@ -451,11 +490,18 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("S","pDevs ");
   screen_print_menu("L","obby ");
   #ifdef __ORCAC__
-    screen_print_menu("ESC",":Exit");
+    screen_print_menu("ESC",":Exit\r\n");
   #else
-    screen_print_menu("ESC",":Boot");
+    screen_print_menu("ESC",":Boot\r\n");
   #endif
+  screen_print_menu("D", "rive list toggle SP or DiskII");
 }
+
+void screen_hosts_and_devices_toggle_view(void)
+{
+  screenDeviceSmartport = !screenDeviceSmartport; 
+}
+
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
@@ -469,7 +515,10 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-  bar_set_split(11,1,6,0,1);
+  if (screenDeviceSmartport)
+    bar_set(11,1,MAX_SMARTPORT,0);
+  else
+    bar_set(11,1,MAX_DISKII,0);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("E","ject  ");
@@ -477,19 +526,24 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("W","rite\r\n");
   screen_print_menu("TAB",":Host slots  ");
   screen_print_menu("L","obby ");
-  screen_print_menu("ESC", ":Boot");
+  screen_print_menu("ESC", ":Boot\r\n");
+  screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_hosts_and_devices_devices_selected(char selected_slot)
 {
-  bar_set_split(11,1,6,selected_slot,1);
+  if (screenDeviceSmartport)
+    bar_set(11,1,MAX_SMARTPORT,selected_slot);
+  else
+    bar_set(11,1,MAX_DISKII,selected_slot);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("E","ject  ");
   screen_print_menu("R","ead only  ");
   screen_print_menu("W","rite\r\n");
   screen_print_menu("TAB",":Host slots  ");
-  screen_print_menu("ESC", ":Boot");
+  screen_print_menu("ESC", ":Boot\r\n");
+  screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -656,14 +710,18 @@ void screen_select_slot(const char *e)
   clrscr();
 
   gotoxy(0,1);
-  hline(40 - (sizeof(ss)-1));
-  cputs(ss);
+  if(screenDeviceSmartport)
+  {
+    hline(40 - (sizeof(ss)-1));
+    cputs(ss);
+  }
+  else
+  {
+    hline(40 - (sizeof(ds)-1));
+    cputs(ds);
+  }
 
-  gotoxy(0,6);
-  hline(40 - (sizeof(ds)-1));
-  cputs(ds);
-
-  gotoxy(0,12);
+  gotoxy(0,13);
   cprintf("%-40s","File details");
   cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTime:",*e++,*e++,*e++,*e++,*e++,*e++);
 
@@ -674,18 +732,21 @@ void screen_select_slot(const char *e)
   cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(2,&deviceSlots[0],&deviceEnabled[0]);
-
-  bar_set_split(2,1,6,0,1);
+  if(screenDeviceSmartport)
+    bar_set(2,1,MAX_SMARTPORT,0);
+  else
+    bar_set(2,1,MAX_DISKII,0);
 }
 
 void screen_select_slot_choose(void)
 {
-  cclearxy(0,STATUS_BAR,120);
-  gotoxy(1,STATUS_BAR);
-  screen_print_menu("1-6"," Select drive or use arrow keys\r\n ");
+  cclearxy(0,STATUS_BAR-1,40*4);
+  gotoxy(1,STATUS_BAR-1);
+  screen_print_menu("1-8"," Select drive or use arrow keys\r\n ");
   screen_print_menu("RETURN/R",":Insert read only\r\n ");
   screen_print_menu("W",":Insert read/write  ");
-  screen_print_menu("ESC",":Abort");
+  screen_print_menu("ESC",":Abort\r\n ");
+  screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_select_file_new_name(void)
@@ -697,13 +758,11 @@ void screen_select_file_new_name(void)
 
 void screen_hosts_and_devices_long_filename(const char *f)
 {
-  // TODO: implement
+  cclearxy(0,STATUS_BAR-2,80);
   if (strlen(f)>31)
   {
-    cputsxy(0,STATUS_BAR-3,f);
+    cputsxy(0,STATUS_BAR-2,f);
   }
-  else
-    cclearxy(0,STATUS_BAR-3,120);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)
@@ -730,26 +789,39 @@ void screen_select_slot_mode(void)
 
 void screen_select_slot_eject(unsigned char ds)
 {
-    unsigned char o=1, to=2;
-    
-  cclearxy(o,2+ds,39);
+  unsigned char o, to;
+
+  if (screenDeviceSmartport)
+  {
+    o = 1;
+    to = 6; 
+  }
+  else
+  {
+    o = 4;
+    to = 8;
+  }
+  cclearxy(o,2+ds,39 - o);
   cputsxy(to,2+ds,empty);
   bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  if (ds > 3) // diskII split
+  unsigned char o, to;
+
+  if (screenDeviceSmartport)
   {
-      cclearxy(4,12+ds,35);
-      cputsxy(8,12+ds,empty);
+    o = 1;
+    to = 6; 
   }
   else
   {
-      cclearxy(1,11+ds,39);
-      cputsxy(5,11+ds,empty);
+    o = 4;
+    to = 8;
   }
-  
+  cclearxy(o,11+ds,39 - o);
+  cputsxy(to,11+ds,empty);
   bar_jump(bar_get());
 }
 

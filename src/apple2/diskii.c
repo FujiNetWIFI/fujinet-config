@@ -5,7 +5,7 @@
 #include <apple2.h>
 #endif
 #include <string.h>
-
+#include "../constants.h"
 
 
 /* FIXME - fujinet-bus-apple2.h isn't reachable */
@@ -14,8 +14,6 @@ extern int8_t sp_control(uint8_t dest, uint8_t ctrlcode);
 extern int8_t sp_status(uint8_t dest, uint8_t statcode);
 extern uint8_t sp_payload[];
 extern uint8_t sp_fuji_id;
-
-#define MAX_DISKII      2
 
 #define IWM_CTRL_CLEAR_ENSEEN   0x08
 #define IWM_STATUS_ENSEEN       0x08
