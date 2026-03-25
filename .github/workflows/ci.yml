@@ -31,39 +31,6 @@ jobs:
       - name: Build
         run: make ${{ matrix.platform }}/r2r
 
-      - name: Post-build steps for adam
-        if: matrix.platform == 'adam'
-        run: |
-
-      - name: Post-build steps for apple2
-        if: matrix.platform == 'apple2'
-        run: |
-
-      - name: Post-build steps for atari
-        if: matrix.platform == 'atari'
-        run: |
-
-      - name: Post-build steps for c64
-        if: matrix.platform == 'c64'
-        run: |
-
-      - name: Post-build steps for coco
-        if: matrix.platform == 'coco'
-        run: |
-
-      - name: Post-build steps for msxrom
-        if: matrix.platform == 'msxrom'
-        run: |
-
-      - name: Post-build steps for msdos
-        if: matrix.platform == 'msdos'
-        run: |
-          git clone https://github.com/FujiNetWIFI/fujinet-msdos.git
-          cd fujinet-msdos && make clean && make disk
-          mkdir -p /tmp/fn-msdos-files
-          mcopy -i fn-msdos.img '::*' /tmp/fn-msdos-files/
-          mcopy -i ../r2r/msdos/config.img /tmp/fn-msdos-files/* '::/'
-
       - name: Upload artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:

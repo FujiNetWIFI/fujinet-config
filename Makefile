@@ -125,3 +125,18 @@ LDFLAGS_EXTRA_ADAM = -lndos
 # MSX customization
 
 LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -Ca-Isrc/msx/header
+
+########################################
+# MS-DOS customization
+
+FUJINET_MSDOS_REPO = https://github.com/FujiNetWIFI/fujinet-msdos.git
+FUJINET_MSDOS_CACHE = $(CACHE_DIR)/fujinet-msdos
+
+msdos/disk-post::
+	@if [ ! -d $(FUJINET_MSDOS_CACHE) ]; then \
+	  git clone $(FUJINET_MSDOS_REPO) $(FUJINET_MSDOS_CACHE); \
+	fi
+	$(MAKE) -C $(FUJINET_MSDOS_CACHE) clean disk
+	mkdir -p $(CACHE_DIR)/msdos-files
+	mcopy -i $(FUJINET_MSDOS_CACHE)/fn-msdos.img '::*' $(CACHE_DIR)/msdos-files/
+	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
