@@ -62,11 +62,17 @@ obj
 dist.apple2/*.jar
 dist.apple2/*.dsk
 
+# MSX data
+!src/msx/font.bin
+
 # fujinet-lib will be downloaded by makefiles that use it
 fujinet-lib/*
+
+build-msdos.sh
 
 # IDE files
 .vscode/*
 *.o
 *.orig
 *.rej
+.claude/settings.json

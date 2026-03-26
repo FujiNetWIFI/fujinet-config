@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#if defined(BUILD_ATARI)
+#if defined(BUILD_ATARI) || defined(BUILD_MSDOS)
 #define NUM_DEVICE_SLOTS 8
 #elif defined(BUILD_APPLE2)
 #define MAX_SMARTPORT 8
@@ -13,9 +13,11 @@
 
 #ifdef _CMOC_VERSION_
 #define ENTRIES_PER_PAGE 10
-#else /* ! _CMOC_VERSION_ */
+#elif defined(BUILD_MSDOS)
+#define ENTRIES_PER_PAGE 13
+#else
 #define ENTRIES_PER_PAGE 15
-#endif /* CMOC_VERSION */
+#endif
 
 #if defined(BUILD_COCO) || defined(BUILD_ADAM)  \
   || defined(BUILD_APPLE2) || defined(BUILD_RC2014)

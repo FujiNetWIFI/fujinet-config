@@ -12,10 +12,7 @@
 void connect_wifi(void)
 {
 	unsigned char retries = 20;
-	NetConfig nc;
 	unsigned char s;
-
-        fuji_get_ssid(&nc);
 
 	state = SET_WIFI;
 
@@ -23,17 +20,18 @@ void connect_wifi(void)
 
 	while (retries > 0)
 	{
-	  // TODO: Write COCO specific version that just checks for a key, as input() blocks! grrr. -thom
-#ifndef _CMOC_VERSION_
-	  // check for esc key and abort
+		// check for esc key and abort
+#ifdef _CMOC_VERSION_
+		if (inkey() == KEY_BREAK)
+#else
 		if (input() == KEY_ABORT)
+#endif /* _CMOC_VERSION_ */
 		{
 			screen_error("CONNECTION ABORTED");
 			pause(150);
 			state=SET_WIFI;
 			return;
 		}
-#endif /* _CMOC_VERSION_ */
 		
 		fuji_get_wifi_status(&s);
 
@@ -44,9 +42,10 @@ void connect_wifi(void)
 			pause(150);
 			return;
 		case 3:
+			fuji_get_ssid(&nc);
 			screen_error("CONNECTION SUCCESS!");
 			state = HOSTS_AND_DEVICES;
-#ifdef BUILD_ADAM
+#if defined(BUILD_ADAM) || defined(BUILD_MSX)
                         screen_should_be_cleared=true;
 #endif
 			pause(60);

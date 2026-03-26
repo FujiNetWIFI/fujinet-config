@@ -19,10 +19,11 @@ jobs:
           - atari
           - c64
           - coco
-          # - msdos # MSDOS doesn't seem to build yet
+          - msxrom
+          - msdos
 
     container:
-      image: fozztexx/defoogi:1.4.3
+      image: fozztexx/defoogi:1.4.5
 
     steps:
       - uses: actions/checkout@v4

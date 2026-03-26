@@ -1,9 +1,16 @@
 PRODUCT = config
-PLATFORMS = coco apple2 atari c64 adam
+PLATFORMS += adam
+PLATFORMS += apple2
+PLATFORMS += atari
+PLATFORMS += c64
+PLATFORMS += coco
+
+# Only in lib-experimental currently
+PLATFORMS += msdos
+PLATFORMS += msxrom
 
 # Not currently in buildable state
 #PLATFORMS += dragon
-#PLATFORMS += msdos
 #PLATFORMS += pc6001
 #PLATFORMS += pc8801
 #PLATFORMS += pmd85
@@ -30,8 +37,7 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB = 4.9.0
-$(info FUJUNET_LIB=$(FUJINET_LIB))
+FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
 # even if the library isn’t present.
@@ -114,3 +120,23 @@ CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
 # Adam customization
 
 LDFLAGS_EXTRA_ADAM = -lndos
+
+########################################
+# MSX customization
+
+LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -Ca-Isrc/msx/header
+
+########################################
+# MS-DOS customization
+
+FUJINET_MSDOS_REPO = https://github.com/FujiNetWIFI/fujinet-msdos.git
+FUJINET_MSDOS_CACHE = $(CACHE_DIR)/fujinet-msdos
+
+msdos/disk-post::
+	@if [ ! -d $(FUJINET_MSDOS_CACHE) ]; then \
+	  git clone $(FUJINET_MSDOS_REPO) $(FUJINET_MSDOS_CACHE); \
+	fi
+	$(MAKE) -C $(FUJINET_MSDOS_CACHE) clean disk
+	mkdir -p $(CACHE_DIR)/msdos-files
+	mcopy -i $(FUJINET_MSDOS_CACHE)/fn-msdos.img '::*' $(CACHE_DIR)/msdos-files/
+	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'

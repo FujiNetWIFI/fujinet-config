@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "input.h"
 #include "system.h"
+#include "pause.h"
 
 char mode=0;
 
@@ -38,7 +39,7 @@ void select_slot_display()
     }
   else
     {
-      fuji_open_directory2(selected_host_slot,path,filter);
+      fuji_open_directory_filter(selected_host_slot,path,filter);
 
       fuji_set_directory_position(pos);
 
@@ -121,15 +122,19 @@ void select_slot_done()
   {
     strcat(filename,path);
 
-    fuji_open_directory2(selected_host_slot,path,filter);
+    fuji_open_directory_filter(selected_host_slot,path,filter);
 
     fuji_set_directory_position(pos);
 
     fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
     strcat(filename, response);
 
+#ifdef BUILD_MSDOS
+    pause(6);
+#endif
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
+#ifdef OBSOLETE
     fuji_set_directory_position(pos);
 
     fuji_read_directory(DIR_MAX_LEN, 0, response);
@@ -161,6 +166,8 @@ void select_slot_done()
       io_put_device_slots(&deviceSlots[0]);
     }*/
 #endif
+#endif // OBSOLETE
+
     fuji_close_directory();
   }
 

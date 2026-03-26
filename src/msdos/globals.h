@@ -1,23 +1,15 @@
-#error "Do not use, this file is obsolete, use the one in the parent directory"
-#ifdef _CMOC_VERSION_
+#ifdef BUILD_MSDOS
 /**
  * Global variables
  */
+#include <stdbool.h>
 
 #include "../typedefs.h"
-#include "../fuji_typedefs.h"
+#include "../constants.h"
+#include <fujinet-fuji.h>
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
-
-#define bool unsigned char
-
-#define NUM_DEVICE_SLOTS    4
-
-// # of files to display on the page. Moved from select_file.c to here, for Atari.
-#ifndef _CMOC_VERSION_
-#define ENTRIES_PER_PAGE 13
-#endif /* _CMOC_VERSION_ */
 
 #define COLOR_SETTING_NETWORK 0x66
 #define COLOR_SETTING_FAILED 0x33
@@ -25,13 +17,13 @@
 #define COLOR_CHECKING_NETWORK 0x26
 
 // Y position on screen where the list of hosts starts.
-#define HOSTS_START_Y 2
+#define HOSTS_START_Y 3
 
 // Y position on screen where the list of hosts ends
 #define HOSTS_END_Y (HOSTS_START_Y + NUM_HOST_SLOTS - 1)
 
 // Y position on screen where the device slots start.
-#define DEVICES_START_Y 13
+#define DEVICES_START_Y 14
 
 // Y position on screen where the device slots end.
 #define DEVICES_END_Y   (DEVICES_START_Y + NUM_DEVICE_SLOTS - 1)
@@ -41,10 +33,24 @@
 #define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + NUM_DEVICE_SLOTS-1)
 
 // Y position on screen where the list of available wireless networks start.
-#define NETWORKS_START_Y    4
+// Row 3 = first inner row of the "Available Networks" box (box top border at row 2).
+#define NETWORKS_START_Y    3
 
 // Y position of the start of the file list from host.
-#define FILES_START_Y   6
+#define FILES_START_Y   8
+
+// Display field widths for new-disk prompts.
+#define NEW_NAME_WIDTH    36   /* max filename chars shown/accepted */
+#define NEW_SECTORS_WIDTH  7   /* max sector-count digits (9999999) */
+
+// Rows used for new-disk prompts (below the file list box, above the status bar).
+#define NEW_PROMPT_Y  22
+#define NEW_INPUT_Y   23
+
+/**
+ * @brief Pointer to video memory
+ */
+extern unsigned char far *video;
 
 extern State state;
 extern char selected_host_slot;
@@ -81,4 +87,4 @@ extern bool mounting;
 extern unsigned char wifiEnabled;
 
 #endif /* GLOBALS_H */
-#endif /* _CMOC_VERSION_ */
+#endif /* BUILD_MSDOS */

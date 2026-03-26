@@ -67,7 +67,6 @@ typedef unsigned short DirectoryPosition;
 
 #define fuji_device_slot_to_device(ds) (ds + FUJI_SLOT_TO_DEV_OFFSET)
 #define fuji_open_directory_filter(hs, path, filter) fuji_open_directory2(hs, path, filter)
-//#define fuji_mount_all() (void)
 
 #if defined(BUILD_ADAM) || defined(BUILD_RC2014)
 #define FUJI_SLOT_TO_DEV_OFFSET 4
@@ -76,4 +75,3 @@ typedef unsigned short DirectoryPosition;
 #endif /* BUILD_ADAM || BUILD_RC2014 */
 
 #endif /* FUJI_TYPEDEFS_H */
-
