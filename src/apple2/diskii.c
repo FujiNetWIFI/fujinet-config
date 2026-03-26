@@ -136,4 +136,15 @@ void diskii_find()
   return;
 }
 
+bool diskii_found()
+{
+  uint8_t drive;
+
+  for (drive = 1; drive <= 2; drive++)
+    if (diskii_slotdrive[drive].slot != 15)
+      return true;
+  
+  return false;
+}
+
 #endif /* BUILD_APPLE2 */

@@ -53,7 +53,8 @@ static const char *off="Off";
 
 static bool lowercase;
 static bool mousetext;
-static bool screenDeviceSmartport;
+
+bool screenDeviceSmartport;
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
@@ -393,9 +394,9 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
   }
   else //diskII
   {
-    for (i = 0; i < (MAX_DISKII); i++)
+    for (i = MAX_SMARTPORT; i < (MAX_SMARTPORT + MAX_DISKII); i++)
     {
-      line = y + i;
+      line = y + i - MAX_SMARTPORT;
       if (d[i].file[0]) 
       {
           switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
@@ -420,17 +421,17 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
           separator = ' ';
       }
       gotoxy(0, line);
-      if (diskii_slotdrive[i].slot == 15)
-        cprintf("NA");
-      else if (diskii_slotdrive[i].slot == 0)
+      if (diskii_slotdrive[i - MAX_SMARTPORT].slot == 15)
+        cprintf("NA  ");
+      else if (diskii_slotdrive[i - MAX_SMARTPORT].slot == 0)
         cprintf("%d", i + 1);
       else
       {
         if (get_ostype() == APPLE_IIIEM) // Satan Mode
-          cprintf("D%d", diskii_slotdrive[i].drive);
+          cprintf("D%d  ", diskii_slotdrive[i - MAX_SMARTPORT].drive);
         else
-          cprintf("S%dD%d", diskii_slotdrive[i].slot,
-	          diskii_slotdrive[i].drive);
+          cprintf("S%dD%d", diskii_slotdrive[i - MAX_SMARTPORT].slot,
+	          diskii_slotdrive[i - MAX_SMARTPORT].drive);
       }
       cprintf("%c %c%c%s", rw_mode, host_slot, separator, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
     }
@@ -494,7 +495,8 @@ void screen_hosts_and_devices_hosts(void)
   #else
     screen_print_menu("ESC",":Boot\r\n");
   #endif
-  screen_print_menu("D", "rive list toggle SP or DiskII");
+  if (diskii_found())
+    screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_hosts_and_devices_toggle_view(void)
@@ -527,7 +529,8 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("TAB",":Host slots  ");
   screen_print_menu("L","obby ");
   screen_print_menu("ESC", ":Boot\r\n");
-  screen_print_menu("D", "rive list toggle SP or DiskII");
+  if (diskii_found())
+    screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_hosts_and_devices_devices_selected(char selected_slot)
@@ -535,7 +538,7 @@ void screen_hosts_and_devices_devices_selected(char selected_slot)
   if (screenDeviceSmartport)
     bar_set(11,1,MAX_SMARTPORT,selected_slot);
   else
-    bar_set(11,1,MAX_DISKII,selected_slot);
+    bar_set(11,1,MAX_DISKII,selected_slot - MAX_SMARTPORT);
   cclearxy(0,STATUS_BAR,120);
   gotoxy(0,STATUS_BAR);
   screen_print_menu("E","ject  ");
@@ -543,7 +546,8 @@ void screen_hosts_and_devices_devices_selected(char selected_slot)
   screen_print_menu("W","rite\r\n");
   screen_print_menu("TAB",":Host slots  ");
   screen_print_menu("ESC", ":Boot\r\n");
-  screen_print_menu("D", "rive list toggle SP or DiskII");
+  if (diskii_found())
+    screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -732,7 +736,7 @@ void screen_select_slot(const char *e)
   cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(2,&deviceSlots[0],&deviceEnabled[0]);
-  if(screenDeviceSmartport)
+  if (screenDeviceSmartport) 
     bar_set(2,1,MAX_SMARTPORT,0);
   else
     bar_set(2,1,MAX_DISKII,0);
@@ -746,7 +750,8 @@ void screen_select_slot_choose(void)
   screen_print_menu("RETURN/R",":Insert read only\r\n ");
   screen_print_menu("W",":Insert read/write  ");
   screen_print_menu("ESC",":Abort\r\n ");
-  screen_print_menu("D", "rive list toggle SP or DiskII");
+  if (diskii_found())
+    screen_print_menu("D", "rive list toggle SP or DiskII");
 }
 
 void screen_select_file_new_name(void)
@@ -800,7 +805,8 @@ void screen_select_slot_eject(unsigned char ds)
   {
     o = 4;
     to = 8;
-  }
+    ds -= MAX_SMARTPORT;
+  } 
   cclearxy(o,2+ds,39 - o);
   cputsxy(to,2+ds,empty);
   bar_jump(bar_get());
@@ -819,6 +825,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
   {
     o = 4;
     to = 8;
+    ds -= MAX_SMARTPORT;
   }
   cclearxy(o,11+ds,39 - o);
   cputsxy(to,11+ds,empty);
