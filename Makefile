@@ -6,8 +6,8 @@ PLATFORMS += c64
 PLATFORMS += coco
 
 # Only in lib-experimental currently
-PLATFORMS += msdos
-PLATFORMS += msxrom
+#PLATFORMS += msdos
+#PLATFORMS += msxrom
 
 # Not currently in buildable state
 #PLATFORMS += dragon
