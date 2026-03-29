@@ -6,8 +6,8 @@ PLATFORMS += c64
 PLATFORMS += coco
 
 # Only in lib-experimental currently
-PLATFORMS += msdos
-PLATFORMS += msxrom
+#PLATFORMS += msdos
+#PLATFORMS += msxrom
 
 # Not currently in buildable state
 #PLATFORMS += dragon
@@ -37,7 +37,8 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
+#FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
+FUJINET_LIB =
 
 # Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
 # even if the library isn’t present.
