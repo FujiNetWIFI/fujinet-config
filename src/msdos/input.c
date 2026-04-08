@@ -430,7 +430,7 @@ HDSubState input_hosts_and_devices_hosts(void)
         {
         case 'Y':
         case 'y':
-            //mount_and_boot_lobby();
+            mount_and_boot_lobby();
             return HD_DONE;
         default: // Anything but Y/y take to mean "no"
             screen_clear_line(23);
@@ -530,7 +530,7 @@ HDSubState input_hosts_and_devices_devices(void)
         {
         case 'Y':
         case 'y':
-//            mount_and_boot_lobby();
+            mount_and_boot_lobby();
             return HD_DONE;
         default: // Anything but Y/y take to mean "no"
             screen_clear_line(23);

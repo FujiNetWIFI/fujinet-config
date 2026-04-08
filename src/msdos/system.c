@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <i86.h>
 #include <string.h>
+#include <process.h>
+#include <dos.h>
+#include <direct.h>
 #include "screen.h"
 #include <fujinet-fuji.h>
 
@@ -25,11 +28,18 @@ extern unsigned short custom_sectorSize;
  */
 void system_boot(void)
 {
-    static union REGS r;
-    r.h.ah = 0x00;
-    r.h.al = screen_mode;
-    int86(0x10, (union REGS *)&r, (union REGS *)&r);
-    exit(0);
+    unsigned int total;
+    char drive_letter;
+    int drive_num;
+
+    drive_letter = system_find_drive_letter_for_slot(0);
+    if (drive_letter == '\0')
+        return;
+
+    drive_num = drive_letter - 'A' + 1;
+    _dos_setdrive((unsigned)drive_num, &total);
+    chdir("\\");
+    spawnlp(P_OVERLAY, "COMMAND.COM", "COMMAND.COM", "/C", "AUTOEXEC.BAT", NULL);
 }
 
 /**

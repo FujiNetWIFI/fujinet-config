@@ -6,6 +6,7 @@ PLATFORMS += c64
 PLATFORMS += coco
 
 # Only in lib-experimental currently
+# Use "make-exp <platform>" to build these.
 #PLATFORMS += msdos
 #PLATFORMS += msxrom
 
