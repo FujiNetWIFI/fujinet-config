@@ -369,24 +369,18 @@ SSSubState input_select_slot_choose(void)
     // case KEY_SMART_IV:
     case 'E':
     case 'e':
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;      
+      selected_device_slot=bar_get_device();
       select_slot_eject(selected_device_slot);
       return SS_CHOOSE;
     case 'R':
     case 'r':
     case KEY_RETURN:
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;
+      selected_device_slot=bar_get_device();
       mode = MODE_READ;
       return SS_DONE;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;
+      selected_device_slot=bar_get_device();
       mode = MODE_WRITE;
       return SS_DONE;
     case KEY_UP_ARROW:
@@ -485,6 +479,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_clear(false);
     // Switching view, reset selected
     selected_device_slot = 0;
+    if (!screenDeviceSmartport)
+      selected_device_slot += MAX_SMARTPORT;
     selected_host_slot = 0;
     return HD_DEVICES;
   case KEY_RETURN:
@@ -561,8 +557,10 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_4:
     case KEY_5:
     case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_TAB:
@@ -570,27 +568,23 @@ HDSubState input_hosts_and_devices_devices(void)
       bar_clear(false);
       // Switching view, reset selected
       selected_device_slot = 0;
+      if (!screenDeviceSmartport)
+        selected_device_slot += MAX_SMARTPORT;
       selected_host_slot = 0;
       return HD_HOSTS;
     case 'E':
     case 'e':
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;
+      selected_device_slot=bar_get_device();
       hosts_and_devices_eject(selected_device_slot);
       return HD_DEVICES;
     case 'R':
     case 'r':
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;
+      selected_device_slot=bar_get_device();
       hosts_and_devices_devices_set_mode(MODE_READ);
       return HD_DEVICES;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
-      if (!screenDeviceSmartport)
-        selected_device_slot += MAX_SMARTPORT;
+      selected_device_slot=bar_get_device();
       hosts_and_devices_devices_set_mode(MODE_WRITE);
       return HD_DEVICES;
     // case KEY_CLEAR:
@@ -602,7 +596,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'j':
     case 'J':
       bar_up();
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case 'l':
@@ -616,7 +610,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'k':
     case 'K':
       bar_down();
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_ESCAPE: // ESC

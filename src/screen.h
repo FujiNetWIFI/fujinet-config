@@ -148,6 +148,15 @@ void bar_update(void);
  */
 uint_fast8_t bar_get(void);
 
+#ifdef BUILD_APPLE2
+/**
+ * Get current bar position for devices
+ * used for apple2 devce view toggle
+ * @return bar index
+ */
+unsigned char bar_get_device(void);
+#endif
+
 #ifndef BUILD_MSDOS
 /**
  * Set up bar and start display on row

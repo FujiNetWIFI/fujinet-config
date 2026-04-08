@@ -22,8 +22,6 @@
 #include <6502.h>
 #endif
 
-#define MAX_SMARTPORT	8
-
 // https://retrocomputing.stackexchange.com/questions/8652/why-did-the-original-apple-e-have-two-sets-of-inverse-video-characters:
 // $00..$1F Inverse  Uppercase Letters
 // $20..$3F Inverse  Symbols/Numbers
@@ -58,7 +56,6 @@ bool screenDeviceSmartport;
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
-extern bool deviceEnabled[8];
 extern char copySpec[256];
 
 static void iputc(char c)
@@ -342,8 +339,8 @@ const char* screen_hosts_and_devices_device_slot(unsigned char hs, bool e, const
   UNUSED(hs);
   if (fn[0]!=0x00)
     return fn;
-  else if (e==false)
-    return &off[0];
+  //else if (e==false)  // device enable is not hooked up, assume always enabled
+  //  return &off[0];
   else
     return &empty[0];
 }
@@ -421,10 +418,8 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
           separator = ' ';
       }
       gotoxy(0, line);
-      if (diskii_slotdrive[i - MAX_SMARTPORT].slot == 15)
+      if (diskii_slotdrive[i - MAX_SMARTPORT].slot == 15 || diskii_slotdrive[i - MAX_SMARTPORT].slot == 0 )
         cprintf("NA  ");
-      else if (diskii_slotdrive[i - MAX_SMARTPORT].slot == 0)
-        cprintf("%d", i + 1);
       else
       {
         if (get_ostype() == APPLE_IIIEM) // Satan Mode
@@ -496,7 +491,7 @@ void screen_hosts_and_devices_hosts(void)
     screen_print_menu("ESC",":Boot\r\n");
   #endif
   if (diskii_found())
-    screen_print_menu("D", "rive list toggle SP or DiskII");
+    screen_print_menu("D", "rives toggle (SP or DiskII)");
 }
 
 void screen_hosts_and_devices_toggle_view(void)
@@ -530,7 +525,7 @@ void screen_hosts_and_devices_devices(void)
   screen_print_menu("L","obby ");
   screen_print_menu("ESC", ":Boot\r\n");
   if (diskii_found())
-    screen_print_menu("D", "rive list toggle SP or DiskII");
+  screen_print_menu("D", "rives toggle (SP or DiskII)");
 }
 
 void screen_hosts_and_devices_devices_selected(char selected_slot)
@@ -547,7 +542,7 @@ void screen_hosts_and_devices_devices_selected(char selected_slot)
   screen_print_menu("TAB",":Host slots  ");
   screen_print_menu("ESC", ":Boot\r\n");
   if (diskii_found())
-    screen_print_menu("D", "rive list toggle SP or DiskII");
+    screen_print_menu("D", "rives toggle (SP or DiskII)");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -732,7 +727,7 @@ void screen_select_slot(const char *e)
   s=(unsigned long *)e; // Cast the next four bytes as a long integer.
   cprintf("%8s %lu K\r\n\r\n","Size:",*s >> 10); // Quickly divide by 1024
 
-  e += sizeof(unsigned long) + 2; // I do not need the next two bytes.
+  e += sizeof(unsigned long) + 3; // I do not need the next two bytes.
   cprintf("%-40s",e);
 
   screen_hosts_and_devices_device_slots(2,&deviceSlots[0],&deviceEnabled[0]);
@@ -751,7 +746,7 @@ void screen_select_slot_choose(void)
   screen_print_menu("W",":Insert read/write  ");
   screen_print_menu("ESC",":Abort\r\n ");
   if (diskii_found())
-    screen_print_menu("D", "rive list toggle SP or DiskII");
+    screen_print_menu("D", "rives toggle (SP or DiskII)");
 }
 
 void screen_select_file_new_name(void)
@@ -801,7 +796,7 @@ void screen_select_slot_eject(unsigned char ds)
     o = 1;
     to = 6; 
   }
-  else
+  else //diskII
   {
     o = 4;
     to = 8;
@@ -821,7 +816,7 @@ void screen_hosts_and_devices_eject(unsigned char ds)
     o = 1;
     to = 6; 
   }
-  else
+  else //diskII
   {
     o = 4;
     to = 8;

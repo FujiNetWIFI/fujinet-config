@@ -5,6 +5,7 @@
 
 #include "../screen.h"
 #include "../typedefs.h"
+#include "../constants.h"
 
 #ifdef __ORCAC__
 #include <coniogs.h>
@@ -14,6 +15,7 @@
 
 #define CURRENT_LINE (*(char**)0x28)
 
+extern bool screenDeviceSmartport;
 /**
  * static local variables for bar y, max, and index.
  */
@@ -113,6 +115,19 @@ void bar_jump(unsigned char i)
  */
 unsigned char bar_get(void)
 {
+  return bar_i;
+}
+
+/**
+ * Get current bar position for devices
+ * used for apple2 devce view toggle
+ * @return bar index
+ */
+unsigned char bar_get_device(void)
+{
+  if (!screenDeviceSmartport)
+        return bar_i + MAX_SMARTPORT;
+
   return bar_i;
 }
 

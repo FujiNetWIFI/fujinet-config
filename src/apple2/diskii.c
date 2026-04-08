@@ -6,7 +6,7 @@
 #endif
 #include <string.h>
 #include "../constants.h"
-
+#include "../globals.h"
 
 /* FIXME - fujinet-bus-apple2.h isn't reachable */
 extern uint8_t sp_get_fuji_id();
@@ -101,7 +101,10 @@ void diskii_find()
 
       for (drive = 1; drive <= 2; drive++) {
         err = sp_control(dev_id, IWM_CTRL_CLEAR_ENSEEN);
-        if (err) {
+        if (err == 0x28) { // DEV_RELAY_SLIP specific error
+          continue;
+        }
+        else if (err) {
           // If err is set then might be old firmware and shouldn't hide Disk II slot
           diskii_slotdrive[drive - 1].slot = 0;
           diskii_slotdrive[drive - 1].drive = drive;
@@ -141,7 +144,7 @@ bool diskii_found()
   uint8_t drive;
 
   for (drive = 1; drive <= 2; drive++)
-    if (diskii_slotdrive[drive].slot != 15)
+    if (diskii_slotdrive[drive - 1].slot != 15)
       return true;
   
   return false;
