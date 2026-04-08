@@ -12,9 +12,9 @@
 #include "globals.h"
 
 HDSubState hd_subState=HD_HOSTS;
-DeviceSlot deviceSlots[8];
+DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 DeviceSlot temp_deviceSlot;
-bool deviceEnabled[8];
+bool deviceEnabled[NUM_DEVICE_SLOTS];
 HostSlot hostSlots[8];
 char selected_host_slot = 0;
 char selected_device_slot = 0;
@@ -247,7 +247,7 @@ void hosts_and_devices_done(void)
   gotoxy(SCR_X0, SCR_Y0);
   textcolor(LIST_TITLE_COLOR); cprintf("MOUNTING DEVICES...");
 #endif
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++) // 4 for apple for now, what about adam? 8 for atari?
+  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
@@ -256,7 +256,10 @@ void hosts_and_devices_done(void)
 #endif
 #ifdef BUILD_APPLE2
       s = i + 1;
-      cprintf("                DISK %d\r\n", s);
+      if (i < MAX_SMARTPORT)
+        cprintf("     SMARTPORT DRIVE %d\r\n", s);
+      else
+        cprintf("       DISK II DRIVE %d\r\n", s - MAX_SMARTPORT);
 #endif
 #ifdef BUILD_PMD85
       if (i == 2) s = 'T';

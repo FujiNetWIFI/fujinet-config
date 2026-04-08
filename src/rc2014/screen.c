@@ -5,8 +5,8 @@
  * Screen Routines
  */
 
-#include "screen.h"
-#include "globals.h"
+#include "../screen.h"
+#include "../globals.h"
 #include "bar.h"
 #include <conio.h>
 #include <sys/ioctl.h>
@@ -19,7 +19,6 @@
 extern bool copy_mode;
 extern char copy_host_name[32];
 extern unsigned char copy_host_slot;
-extern bool deviceEnabled[8];
 
 static const char *empty="EMPTY";
 static const char *off="OFF";

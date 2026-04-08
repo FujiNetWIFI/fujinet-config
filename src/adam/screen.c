@@ -22,7 +22,6 @@ bool screen_should_be_cleared=true;
 extern bool copy_mode;
 extern char copy_host_name;
 extern unsigned char copy_host_slot;
-extern bool deviceEnabled[8];
 
 // unsigned char nn;
 

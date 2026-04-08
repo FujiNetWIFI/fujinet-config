@@ -22,7 +22,6 @@ unsigned char *mousetext = (unsigned char *)0xC00E;
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
-extern bool deviceEnabled[8];
 
 void screen_init(void)
 {

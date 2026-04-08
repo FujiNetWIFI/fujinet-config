@@ -18,6 +18,7 @@
 #include "../globals.h"
 #include "../input.h"
 #include "../screen.h"
+#include "../constants.h"
 #include "mount_and_boot.h"
 
 #include "../set_wifi.h"
@@ -25,6 +26,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
+#include "diskii.h"
 
 #define KEY_RETURN       0x0D
 #define KEY_ESCAPE       0x1B
@@ -47,6 +49,8 @@
 #define STATUS_BAR 21 // defined in screen.c
 
 #define UNUSED(x) (void)(x);
+
+extern bool screenDeviceSmartport;
 
 /**
  * Get input from keyboard/joystick
@@ -201,7 +205,7 @@ SFSubState input_select_file_choose(void)
     if (entryType == ENTRY_TYPE_FOLDER)
       return SF_ADVANCE_FOLDER;
     else if (entryType == ENTRY_TYPE_LINK)
-      return SF_LINK;
+      return SF_LINK; 
     else
     {
       strncpy(source_path, path, 224);
@@ -358,22 +362,25 @@ SSSubState input_select_slot_choose(void)
     case KEY_4:
     case KEY_5:
     case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
 	  return SS_CHOOSE;
     // case KEY_SMART_IV:
     case 'E':
     case 'e':
-      select_slot_eject(bar_get());
+      selected_device_slot=bar_get_device();
+      select_slot_eject(selected_device_slot);
       return SS_CHOOSE;
     case 'R':
     case 'r':
     case KEY_RETURN:
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       mode = MODE_READ;
       return SS_DONE;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       mode = MODE_WRITE;
       return SS_DONE;
     case KEY_UP_ARROW:
@@ -391,6 +398,14 @@ SSSubState input_select_slot_choose(void)
     case 'k':
     case 'K':
       bar_down();
+      return SS_CHOOSE;
+    case 'D':
+    case 'd':
+      if (diskii_found()) {
+        screen_hosts_and_devices_toggle_view();
+        screen_select_slot(response);
+        screen_select_slot_choose();
+      }
       return SS_CHOOSE;
     default:
       return SS_CHOOSE;
@@ -464,6 +479,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_clear(false);
     // Switching view, reset selected
     selected_device_slot = 0;
+    if (!screenDeviceSmartport)
+      selected_device_slot += MAX_SMARTPORT;
     selected_host_slot = 0;
     return HD_DEVICES;
   case KEY_RETURN:
@@ -516,6 +533,14 @@ HDSubState input_hosts_and_devices_hosts(void)
     bar_down();
     selected_host_slot = bar_get();
     return HD_HOSTS;
+  case 'D':
+  case 'd':
+    if (diskii_found()) {
+      screen_hosts_and_devices_toggle_view();
+      screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+      screen_hosts_and_devices_hosts();
+    }
+    return HD_HOSTS;
   default:
     return HD_HOSTS;
   }
@@ -532,8 +557,10 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_4:
     case KEY_5:
     case KEY_6:
+    case KEY_7:
+    case KEY_8:
       bar_jump(k-KEY_1);
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_TAB:
@@ -541,20 +568,23 @@ HDSubState input_hosts_and_devices_devices(void)
       bar_clear(false);
       // Switching view, reset selected
       selected_device_slot = 0;
+      if (!screenDeviceSmartport)
+        selected_device_slot += MAX_SMARTPORT;
       selected_host_slot = 0;
       return HD_HOSTS;
     case 'E':
     case 'e':
-      hosts_and_devices_eject(bar_get());
+      selected_device_slot=bar_get_device();
+      hosts_and_devices_eject(selected_device_slot);
       return HD_DEVICES;
     case 'R':
     case 'r':
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_devices_set_mode(MODE_READ);
       return HD_DEVICES;
     case 'W':
     case 'w':
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_devices_set_mode(MODE_WRITE);
       return HD_DEVICES;
     // case KEY_CLEAR:
@@ -566,7 +596,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'j':
     case 'J':
       bar_up();
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case 'l':
@@ -580,11 +610,19 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'k':
     case 'K':
       bar_down();
-      selected_device_slot=bar_get();
+      selected_device_slot=bar_get_device();
       hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_ESCAPE: // ESC
       return HD_DONE;
+    case 'D':
+    case 'd':
+      if (diskii_found()) {
+        screen_hosts_and_devices_toggle_view();
+        screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
+        screen_hosts_and_devices_devices();
+      }
+      return HD_DEVICES;
     default:
       return HD_DEVICES;
     }
