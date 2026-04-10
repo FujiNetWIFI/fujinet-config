@@ -6,6 +6,7 @@ PLATFORMS += c64
 PLATFORMS += coco
 
 # Only in lib-experimental currently
+# Use make-exp <platform> to build them.
 #PLATFORMS += msdos
 #PLATFORMS += msxrom
 
@@ -142,3 +143,4 @@ msdos/disk-post::
 	mkdir -p $(CACHE_DIR)/msdos-files
 	mcopy -i $(FUJINET_MSDOS_CACHE)/fn-msdos.img '::*' $(CACHE_DIR)/msdos-files/
 	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
+	mcopy -i $(DISK) dist.msdos/AUTOEXEC.BAT '::/AUTOEXEC.BAT'
