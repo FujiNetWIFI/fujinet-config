@@ -302,7 +302,9 @@ class LibLocator:
         cmd = ["make", f"TARGETS={build_platform}"]
       else:
         cmd = ["make", f"{build_platform}/r2r"]
-      subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr)
+      clean_env = {k: v for k, v in os.environ.items() if k != 'FUJINET_LIB'}
+      clean_env['MAKEFLAGS'] = re.sub(r'\bFUJINET_LIB=\S*', '', clean_env.get('MAKEFLAGS', '')).strip()
+      subprocess.run(cmd, cwd=repoDir, check=True, stdout=sys.stderr, env=clean_env)
       self.findLibraryDir(repoDir)
 
     return
