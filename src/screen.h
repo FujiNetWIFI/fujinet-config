@@ -71,6 +71,8 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs);
 void screen_hosts_and_devices_long_filename(const char *f);
 void screen_hosts_and_devices_devices_clear_all(void);
 
+void screen_hosts_and_devices_toggle_view(void);
+
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp);
 
 void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *acx);
@@ -145,6 +147,15 @@ void bar_update(void);
  * @return bar index
  */
 uint_fast8_t bar_get(void);
+
+#ifdef BUILD_APPLE2
+/**
+ * Get current bar position for devices
+ * used for apple2 devce view toggle
+ * @return bar index
+ */
+unsigned char bar_get_device(void);
+#endif
 
 #ifndef BUILD_MSDOS
 /**
