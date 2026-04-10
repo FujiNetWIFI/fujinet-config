@@ -7,6 +7,9 @@
  */
 
 #include <stdlib.h>
+#include <process.h>
+#include <dos.h>
+#include <direct.h>
 #include <fujinet-fuji.h>
 #include "screen.h"
 #include "../system.h"
@@ -25,7 +28,19 @@ void mount_and_boot(void)
  */
 void mount_and_boot_lobby(void)
 {
+  unsigned int total;
+  char drive_letter;
+  int drive_num;
+
   screen_end();
   fuji_set_boot_mode(2);
-  system_boot();
+
+  drive_letter = system_find_drive_letter_for_slot(0);
+  if (drive_letter == '\0')
+    return;
+
+  drive_num = drive_letter - 'A' + 1;
+  _dos_setdrive((unsigned)drive_num, &total);
+  chdir("\\");
+  spawnlp(P_OVERLAY, "COMMAND.COM", "COMMAND.COM", "/C", "AUTOEXEC.BAT", NULL);
 }
