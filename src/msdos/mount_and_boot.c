@@ -6,41 +6,44 @@
  * @license gpl v. 3, see LICENSE for details.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <process.h>
 #include <dos.h>
 #include <direct.h>
+#include <i86.h>
 #include <fujinet-fuji.h>
-#include "screen.h"
 #include "../system.h"
+#include "screen.h"
 
-/**
- * @brief Mount all FujiNet device slots and exit the configurator.
- */
 void mount_and_boot(void)
 {
   fuji_mount_all();
   exit(0);
 }
 
-/**
- * @brief Set boot mode to lobby and reboot into it.
- */
 void mount_and_boot_lobby(void)
 {
   unsigned int total;
-  char drive_letter;
-  int drive_num;
+  unsigned int drive_num;
+  char lobby_drive;
+  union REGS regs;
 
   screen_end();
+  puts("Loading Lobby...");
+
+  lobby_drive = system_find_drive_letter_for_slot(0);
+
   fuji_set_boot_mode(2);
 
-  drive_letter = system_find_drive_letter_for_slot(0);
-  if (drive_letter == '\0')
-    return;
+  regs.h.ah = 0x0D;
+  int86(0x21, &regs, &regs);
 
-  drive_num = drive_letter - 'A' + 1;
-  _dos_setdrive((unsigned)drive_num, &total);
+  if (lobby_drive != '\0') {
+    drive_num = lobby_drive - 'A' + 1;
+    _dos_setdrive(drive_num, &total);
+  }
+
   chdir("\\");
   spawnlp(P_OVERLAY, "COMMAND.COM", "COMMAND.COM", "/C", "AUTOEXEC.BAT", NULL);
 }
