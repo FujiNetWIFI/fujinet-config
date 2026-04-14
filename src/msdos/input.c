@@ -523,7 +523,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'l':
         // boot lobby.
         memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,23,ATTRIBUTE_NORMAL,"Boot Lobby Y/N? ");
+        screen_puts(0,23,ATTRIBUTE_BOLD,"Boot Lobby Y/N? ");
         input_line(16,23,0,(char *)temp,2, false);
         screen_hosts_and_devices_devices();
         switch (temp[0])

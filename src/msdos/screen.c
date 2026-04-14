@@ -1144,10 +1144,14 @@ void screen_init(void)
 }
 
 /**
- * @brief Restore the hardware cursor on program exit.
+ * @brief Restore the video mode and hardware cursor on program exit.
  */
 void screen_end(void)
 {
+    static union REGS r;
+    r.h.ah = 0x00;
+    r.h.al = screen_mode;
+    int86(0x10, (union REGS *)&r, (union REGS *)&r);
     cursor(true);
 }
 
