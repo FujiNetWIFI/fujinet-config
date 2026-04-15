@@ -403,6 +403,8 @@ SSSubState input_select_slot_choose(void)
     case 'd':
       if (diskii_found()) {
         screen_hosts_and_devices_toggle_view();
+        fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+        fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
         screen_select_slot(response);
         screen_select_slot_choose();
       }
@@ -537,6 +539,8 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'd':
     if (diskii_found()) {
       screen_hosts_and_devices_toggle_view();
+      fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+      fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
       screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
       screen_hosts_and_devices_hosts();
     }
@@ -619,6 +623,8 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'd':
       if (diskii_found()) {
         screen_hosts_and_devices_toggle_view();
+        fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+        fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
         screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
         screen_hosts_and_devices_devices();
       }
