@@ -993,8 +993,8 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *dslot, const b
  */
 void screen_hosts_and_devices_devices_clear_all(void)
 {
-    screen_clear_line(11);
-    screen_puts(0, 11, ATTRIBUTE_NORMAL, "EJECTING ALL.. WAIT");
+    screen_clear_line(12);
+    screen_puts(0, 12, ATTRIBUTE_BOLD, "EJECTING ALL.. WAIT");
 }
 
 /**
