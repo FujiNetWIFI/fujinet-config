@@ -121,7 +121,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 void screen_set_wifi_select_network(unsigned char nn)
 {
   locate(0,14);
-  printf("        up/down TO SELECT       ");
+  printf("     up/down SELECT s SKIP     \n");
   printf("hIDDEN SSID rESCAN enter SELECT");
   bar_draw(0,false);
   bar_set(2,0,nn,0);
@@ -422,7 +422,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   sp += 32;  // start one line down.
 
   // Color the first column
-  for (int i = 0; i < 8; i++)
+  for (byte i = 0; i < 8; i++)
   {
 	  locate(0, i+1);
 	  printf("%u%-31s", i + 1, screen_upper((char *)p));
