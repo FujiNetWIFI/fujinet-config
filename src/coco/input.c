@@ -227,6 +227,10 @@ WSSubState input_set_wifi_select(void)
 	case 'R':
 	case 'r':
 		return WS_SCAN;
+	case 'S':
+	case 's':
+	    state = HOSTS_AND_DEVICES;
+    	return WS_DONE;
 	case KEY_UP_ARROW:
 		bar_up();
 		break;
