@@ -22,6 +22,7 @@
 #include "../select_file.h"
 #include "../select_slot.h"
 #include "../set_wifi.h"
+#include "../system.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -437,6 +438,25 @@ HDSubState input_hosts_and_devices_hosts(void)
             return HD_HOSTS;
         }
         return HD_HOSTS;
+    case 'T':
+    case 't':
+        memset((void *)temp, 0, sizeof(temp));
+        screen_puts(0,23,ATTRIBUTE_BOLD, "Install Config TSR on exit Y/N? ");
+        input_line(32,23,0,(char *)temp,2, false);
+        switch (temp[0])
+        {
+        case 'Y':
+        case 'y':
+            install_tsr = true;
+            break;
+        default:
+            install_tsr = false;
+            break;
+        }
+        system_save_tsr_setting();
+        screen_clear_line(23);
+        screen_hosts_and_devices_hosts();
+        return HD_HOSTS;
     case KEY_RETURN:
         selected_host_slot = bar_get();
         if (hostSlots[selected_host_slot][0] != 0)
@@ -536,6 +556,25 @@ HDSubState input_hosts_and_devices_devices(void)
             screen_clear_line(23);
             return HD_DEVICES;
         }
+        return HD_DEVICES;
+    case 'T':
+    case 't':
+        memset((void *)temp, 0, sizeof(temp));
+        screen_puts(0,23,ATTRIBUTE_BOLD,"Install Config TSR on exit Y/N? ");
+        input_line(32,23,0,(char *)temp,2, false);
+        switch (temp[0])
+        {
+        case 'Y':
+        case 'y':
+            install_tsr = true;
+            break;
+        default:
+            install_tsr = false;
+            break;
+        }
+        system_save_tsr_setting();
+        screen_clear_line(23);
+        screen_hosts_and_devices_devices();
         return HD_DEVICES;
     case KEY_ESCAPE:
         return HD_DONE;

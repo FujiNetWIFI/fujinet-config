@@ -86,5 +86,7 @@ extern bool mounting;
 
 extern unsigned char wifiEnabled;
 
+extern bool install_tsr;
+
 #endif /* GLOBALS_H */
 #endif /* BUILD_MSDOS */

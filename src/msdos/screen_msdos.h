@@ -52,6 +52,7 @@ void screen_show_info(int printerEnabled, AdapterConfig *ac);
 /* EDIT.EXE style UI helpers */
 void screen_header(const char *title);
 void screen_status(const char *text);
+void screen_status_tsr_indicator(const char *status_text);
 void screen_fill_line(unsigned char y, unsigned char a);
 void screen_draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char a, bool shadow);
 void screen_draw_box_titled(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char a, bool shadow, const char *title);

@@ -229,6 +229,14 @@ void hosts_and_devices_done(void)
 {
   char i;
   // char *msg[40];
+#ifdef BUILD_MSDOS
+  /* If the user armed the TSR option, install CFGTSR.EXE BEFORE the
+     mount-all loop below swaps the config disk image away from us. */
+  {
+    extern void install_tsr_now(void);
+    install_tsr_now();
+  }
+#endif
 #ifdef _CMOC_VERSION_
   cls(1);
   printf("MOUNTING DISKS...\n\n");
