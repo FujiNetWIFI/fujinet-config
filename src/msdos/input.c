@@ -22,6 +22,7 @@
 #include "../select_file.h"
 #include "../select_slot.h"
 #include "../set_wifi.h"
+#include "../system.h"
 
 unsigned char selected_network;
 extern bool copy_mode;
@@ -452,6 +453,7 @@ HDSubState input_hosts_and_devices_hosts(void)
             install_tsr = false;
             break;
         }
+        system_save_tsr_setting();
         screen_clear_line(23);
         screen_hosts_and_devices_hosts();
         return HD_HOSTS;
@@ -570,6 +572,7 @@ HDSubState input_hosts_and_devices_devices(void)
             install_tsr = false;
             break;
         }
+        system_save_tsr_setting();
         screen_clear_line(23);
         screen_hosts_and_devices_devices();
         return HD_DEVICES;

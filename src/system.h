@@ -37,6 +37,10 @@ int  find_drive_letter(int drive);
 char system_find_drive_letter_for_slot(uint8_t device_slot);
 void system_refresh_drive_letters(void);
 
+void install_tsr_now(void);
+void system_load_tsr_setting(void);
+void system_save_tsr_setting(void);
+
 extern char deviceDriveLetters[8];
 
 #endif /* BUILD_MSDOS */

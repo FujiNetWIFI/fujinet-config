@@ -24,6 +24,9 @@ bool backFromCopy=false;
 void setup(void)
 {
   screen_init();
+#ifdef BUILD_MSDOS
+  system_load_tsr_setting();
+#endif
 }
 
 void done(void)

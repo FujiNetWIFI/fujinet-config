@@ -8,6 +8,7 @@
 
 #include "../system.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <process.h>
 #include <i86.h>
@@ -23,18 +24,65 @@ bool install_tsr = false;
 extern unsigned short custom_numSectors;
 extern unsigned short custom_sectorSize;
 
+/* AppKey identity for persisting the "install TSR" setting.
+   Creator/App IDs are the registered FujiNet Config values. */
+#define AK_CREATOR_ID 0x0001
+#define AK_APP_ID     0x02
+#define AK_KEY_TSR    0
+
+/**
+ * @brief Load the persisted "install TSR" setting from its appkey.
+ *        A failed read (e.g. no SD card in the FujiNet) leaves
+ *        install_tsr at its default of false.
+ *
+ *        buf/count are static so their addresses are near pointers;
+ *        this build uses -zu (SS != DS) and auto locals would yield
+ *        far pointers that the fujinet-lib calls truncate.
+ */
+void system_load_tsr_setting(void)
+{
+    static uint8_t  buf[MAX_APPKEY_LEN + 2];
+    static uint16_t count;
+
+    count = 0;
+    fuji_set_appkey_details(AK_CREATOR_ID, AK_APP_ID, DEFAULT);
+    if (fuji_read_appkey(AK_KEY_TSR, &count, buf) && count >= 1)
+        install_tsr = (buf[0] != 0);
+}
+
+/**
+ * @brief Persist the current "install TSR" setting to its appkey.
+ *        Writes the single bool byte directly — a 0-byte write is
+ *        silently ignored over RS-232, so we always send one byte.
+ */
+void system_save_tsr_setting(void)
+{
+    fuji_set_appkey_details(AK_CREATOR_ID, AK_APP_ID, DEFAULT);
+    fuji_write_appkey(AK_KEY_TSR, 1, (uint8_t *)&install_tsr);
+}
+
 /**
  * @brief If the user armed the TSR option, install CFGTSR.EXE now.
  *        Must run BEFORE fuji_mount_all() swaps the config disk out from
  *        under us. Uses P_WAIT so control returns here after CFGTSR has
  *        called INT 21h AH=31h to stay resident.
+ *
+ *        CFGTSR.EXE lives on the config disk image, which is mapped to
+ *        device slot 0. config.exe may have been launched from a different
+ *        drive, so prepend slot 0's drive letter to the path.
  */
 void install_tsr_now(void)
 {
+    static char tsr_path[24];
+
     if (!install_tsr)
         return;
+
     screen_end();
-    spawnlp(P_WAIT, "CFGTSR.EXE", "CFGTSR.EXE", "/I", NULL);
+
+    sprintf(tsr_path, "%c:\\CFGTSR.EXE", deviceDriveLetters[0]);
+
+    spawnlp(P_WAIT, tsr_path, tsr_path, "/I", NULL);
     install_tsr = false;
 }
 
