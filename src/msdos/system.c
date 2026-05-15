@@ -9,16 +9,34 @@
 #include "../system.h"
 
 #include <stdlib.h>
+#include <process.h>
 #include <i86.h>
+#include <stdbool.h>
 #include <string.h>
 #include "screen.h"
 #include <fujinet-fuji.h>
 
 char response[256];
 char deviceDriveLetters[8];
+bool install_tsr = false;
 
 extern unsigned short custom_numSectors;
 extern unsigned short custom_sectorSize;
+
+/**
+ * @brief If the user armed the TSR option, install CFGTSR.EXE now.
+ *        Must run BEFORE fuji_mount_all() swaps the config disk out from
+ *        under us. Uses P_WAIT so control returns here after CFGTSR has
+ *        called INT 21h AH=31h to stay resident.
+ */
+void install_tsr_now(void)
+{
+    if (!install_tsr)
+        return;
+    screen_end();
+    spawnlp(P_WAIT, "CFGTSR.EXE", "CFGTSR.EXE", "/I", NULL);
+    install_tsr = false;
+}
 
 /**
  * @brief Reset the video mode and exit the configurator, triggering a soft boot.

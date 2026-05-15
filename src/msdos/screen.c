@@ -784,6 +784,28 @@ void screen_status(const char *text)
 }
 
 /**
+ * @brief If TSR install is armed, repaint the 'T' in "[T]SR" within the
+ *        already-drawn status bar with the bright-white-on-blue attribute
+ *        so the user can see the option is active.
+ */
+void screen_status_tsr_indicator(const char *status_text)
+{
+    const char *p;
+    unsigned char offset, start_col;
+
+    if (!install_tsr)
+        return;
+
+    p = strstr(status_text, "[T]");
+    if (!p)
+        return;
+
+    offset    = (unsigned char)(p - status_text) + 1; /* 'T' sits right after '[' */
+    start_col = (screen_cols >> 1) - ((unsigned char)strlen(status_text) >> 1);
+    screen_putc(start_col + offset, 24, ATTRIBUTE_BOLD, 'T');
+}
+
+/**
  * @brief Draw a box with optional drop shadow using CP437 line-drawing chars.
  * @param x     Left column
  * @param y     Top row
@@ -892,10 +914,13 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
  */
 void screen_hosts_and_devices_hosts(void)
 {
+    const char *status_text;
     if (screen_cols <= 40)
-        screen_status("[1-8] [E]dit [RET] Browse [TAB] Drives");
+        status_text = "[1-8] [E]dit [RET] Browse [TAB] Drives";
     else
-        screen_status("[1-8] [E]dit  [RETURN] Browse  [L]obby  [C]onfig  [TAB] Drives  [ESC] Exit");
+        status_text = "[1-8] [E]dit  [RET] Browse  [L]obby  [T]SR  [C]onfig  [TAB] Drives  [ESC] Exit";
+    screen_status(status_text);
+    screen_status_tsr_indicator(status_text);
 
     bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
 }
@@ -905,10 +930,13 @@ void screen_hosts_and_devices_hosts(void)
  */
 void screen_hosts_and_devices_devices(void)
 {
+    const char *status_text;
     if (screen_cols <= 40)
-        screen_status("[1-8] [E]ject [Del] Clear [TAB] Hosts");
+        status_text = "[1-8] [E]ject [Del] Clear [TAB] Hosts";
     else
-        screen_status("[1-8] [E]ject  [Del] Clear  [L]obby  [TAB] Hosts  [R]ead  [W]rite  [C]onfig");
+        status_text = "[1-8] [E]ject  [Del] Clr  [L]obby  [T]SR  [TAB] Hosts  [R]ead  [W]rite  [C]onfig";
+    screen_status(status_text);
+    screen_status_tsr_indicator(status_text);
 
     bar_set(DEVICES_START_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
 }
@@ -1145,10 +1173,17 @@ void screen_init(void)
 
 /**
  * @brief Restore the video mode and hardware cursor on program exit.
+ *        Idempotent — subsequent calls are no-ops so that anything printed
+ *        between the first reset and exit (e.g. CFGTSR's install message)
+ *        is not wiped by a second BIOS mode set from main.c's done().
  */
 void screen_end(void)
 {
+    static bool ended = false;
     static union REGS r;
+    if (ended)
+        return;
+    ended = true;
     r.h.ah = 0x00;
     r.h.al = screen_mode;
     int86(0x10, (union REGS *)&r, (union REGS *)&r);
