@@ -144,3 +144,6 @@ msdos/disk-post::
 	mcopy -i $(FUJINET_MSDOS_CACHE)/fn-msdos.img '::*' $(CACHE_DIR)/msdos-files/
 	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
 	mcopy -i $(DISK) dist.msdos/AUTOEXEC.BAT '::/AUTOEXEC.BAT'
+
+msxrom-exp msdos-exp::
+	$(MAKE) FUJINET_LIB=https://github.com/FozzTexx/fujinet-lib-experimental.git PLATFORMS=$(@:-exp=) $(@:-exp=)
