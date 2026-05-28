@@ -404,7 +404,7 @@ void screen_select_file_choose(char visibleEntries)
   bool occupied = any_slot_occupied();
 
   screen_should_be_cleared=true;
-  bar_set(2,2,visibleEntries,0); // TODO: Handle previous
+  bar_set(2,2,visibleEntries,prev_page ? visibleEntries-1 : 0);
 
   if (copy_mode==true)
   {

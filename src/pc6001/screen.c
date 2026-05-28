@@ -5,8 +5,8 @@
  * Screen Routines
  */
 
-#include "screen.h"
-#include "globals.h"
+#include "../screen.h"
+#include "../globals.h"
 #include "bar.h"
 #include <conio.h>
 #include <sys/ioctl.h>
@@ -209,7 +209,7 @@ void screen_select_file_choose(char visibleEntries)
 {
   bool slot_1_occupied = deviceSlots[0].file[0] != 0x00;
 
-  bar_set(2,2,visibleEntries,0); // TODO: Handle previous
+  bar_set(2,2,visibleEntries,prev_page ? visibleEntries-1 : 0);
 }
 
 void screen_select_file_filter(void)

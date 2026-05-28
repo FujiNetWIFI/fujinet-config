@@ -406,7 +406,7 @@ void screen_select_file_new_custom(void)
 
 void screen_select_file_choose(char visibleEntries)
 {
-  bar_set(3,2,visibleEntries,0); // TODO: Handle previous
+  bar_set(3,2,visibleEntries,prev_page ? visibleEntries-1 : 0);
   screen_clear_status();
   screen_gotoxy(0,STATUS_BAR);
   screen_print_menu("RETURN",":SELECT FILE TO MOUNT\r\n");
