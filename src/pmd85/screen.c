@@ -610,7 +610,7 @@ void screen_select_file_new_custom(void)
 
 void screen_select_file_choose(char visibleEntries)
 {
-	bar_set(SCR_Y0 + 3, SCR_X0, visibleEntries, 0); // TODO: Handle previous
+	bar_set(SCR_Y0 + 3, SCR_X0, visibleEntries, prev_page ? visibleEntries-1 : 0);
 
 	// screen_clear_status();
 	// gotoxy(SCR_X0 + 8, STATUS_BAR);

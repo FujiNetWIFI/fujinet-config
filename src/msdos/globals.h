@@ -78,6 +78,7 @@ extern bool deviceEnabled[NUM_DEVICE_SLOTS];
 extern bool backToFiles;
 extern bool backFromCopy;
 extern char _visibleEntries;
+extern bool prev_page;
 
 extern unsigned short custom_numSectors;
 extern unsigned short custom_sectorSize;

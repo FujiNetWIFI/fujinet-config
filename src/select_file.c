@@ -25,6 +25,7 @@ unsigned char entry_size[ENTRIES_PER_PAGE];
 unsigned short entry_timer = ENTRY_TIMER_DUR;
 bool long_entry_displayed = false;
 bool copy_mode = false;
+bool prev_page = false;
 
 extern unsigned char copy_host_slot;
 extern bool backToFiles;
@@ -58,7 +59,7 @@ void select_file_init(void)
 #endif
 
   sf_subState = SF_DISPLAY;
-  quick_boot = dir_eof = false;
+  quick_boot = dir_eof = prev_page = false;
   screen_select_file();
 }
 
@@ -184,6 +185,7 @@ void select_next_page(void)
   pos += ENTRIES_PER_PAGE;
   sf_subState = SF_DISPLAY;
   dir_eof = false;
+  prev_page = false;
 }
 
 void select_prev_page(void)
@@ -192,13 +194,14 @@ void select_prev_page(void)
   pos -= ENTRIES_PER_PAGE;
   sf_subState = SF_DISPLAY;
   dir_eof = false;
+  prev_page = true;
 }
 
 void select_file_filter(void)
 {
   screen_select_file_filter();
   input_line_filter(filter);
-  dir_eof = quick_boot = false;
+  dir_eof = quick_boot = prev_page = false;
   pos = 0;
   sf_subState = SF_DISPLAY;
 }
@@ -261,7 +264,7 @@ void select_file_advance(void)
   fuji_close_directory(); // have to use "e" before calling another io command, otherwise e gets wiped out
 
   pos = 0;
-  dir_eof = quick_boot = false;
+  dir_eof = quick_boot = prev_page = false;
 
   sf_subState = SF_DISPLAY; // and display the result.
 }
@@ -286,7 +289,7 @@ void select_file_devance(void)
   }
 
   pos = 0;
-  dir_eof = quick_boot = false;
+  dir_eof = quick_boot = prev_page = false;
 
   sf_subState = SF_DISPLAY; // And display the result.
 }

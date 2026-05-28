@@ -681,7 +681,7 @@ void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryTy
  */
 void screen_select_file_choose(char visibleEntries)
 {
-    bar_set(FILES_START_Y,1,visibleEntries,0);
+    bar_set(FILES_START_Y,1,visibleEntries,prev_page ? visibleEntries-1 : 0);
     _visibleEntries = visibleEntries;
 }
 
