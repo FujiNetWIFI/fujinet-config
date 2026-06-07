@@ -13,6 +13,11 @@ extern void system_build_directory(unsigned char ds, unsigned long numBlocks, ch
 #define MAX_WIFI_NETWORKS 16
 #endif
 
+#ifdef BUILD_COCO
+extern void system_enable_user_rom(void);
+extern bool system_slot0_is_rom(void);
+#endif /* BUILD_COCO */
+
 #ifdef BUILD_APPLE2
 extern void system_list_devs(void);
 #endif /* BUILD_APPLE2 */
