@@ -278,7 +278,9 @@ void hosts_and_devices_done(void)
       textcolor(LIST_VBAR_COLOR); cprintf("%c:", s);
       textcolor(TEXT_COLOR); cprintf("%s", deviceSlots[i].file);
 #endif
+#ifdef BUILD_APPLE2
       if(!(deviceSlots[i].mode & MODE_MOUNTED)) // skip if disk was already mounted
+#endif
       {
         fuji_mount_host_slot(deviceSlots[i].hostSlot);
         fuji_mount_disk_image(i, deviceSlots[i].mode);
