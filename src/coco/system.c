@@ -12,7 +12,7 @@ char response[256];
 
 void system_enable_user_rom(void)
 {
-  *FUJI_IO_REG = 5;
+  *FUJI_IO_REG = 7;
 }
 
 bool system_slot0_is_rom(void)
@@ -31,7 +31,7 @@ void system_boot(void)
   if (system_slot0_is_rom()) {
     printf("\nBOOTING USER ROM...\n");
     pause(120);                 
-    system_enable_user_rom();   // write 5 to the IO_CONTROL port. Firmware arms the CART trigger and triggers RESET.
+    system_enable_user_rom();   // write 7 (ROM_MODE | USERROM_ENABLE | AUTOSTART_ENABLE) to IO_CONTROL. Firmware arms the CART trigger and triggers RESET.
   }
   else
   {
