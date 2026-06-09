@@ -17,7 +17,7 @@
 #include "system.h"
 #include "debug.h"
 
-State state=HOSTS_AND_DEVICES;
+State state;
 bool backToFiles=false;
 bool backFromCopy=false;
 
