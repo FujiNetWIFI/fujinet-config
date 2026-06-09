@@ -1,5 +1,5 @@
 define cache_repo
-  cd $(CACHE_DIR) && git clone $1
+  mkdir -p $(CACHE_DIR) && cd $(CACHE_DIR) && git clone $1
 endef
 
 CONFIG_TOOLS_REPO = https://github.com/FujiNetWIFI/fujinet-tools.git
