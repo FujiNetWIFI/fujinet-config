@@ -140,7 +140,10 @@ bool fuji_get_device_slots(DeviceSlot *d, size_t size)
 
   io_command_and_response(&c,1);
 
-  memcpy(d,response,304);
+  /* Only copy the slots the caller has room for; the old hardcoded 304
+     (8 slots) overflowed deviceSlots[NUM_DEVICE_SLOTS=4] and wiped the
+     adjacent hostSlots array. */
+  memcpy(d,response,size * sizeof(DeviceSlot));
   return true;
 }
 #endif // fuji_get_device_slots
@@ -173,10 +176,11 @@ bool fuji_put_host_slots(HostSlot *h, size_t size)
 bool fuji_put_device_slots(DeviceSlot *d, size_t size)
 {
   unsigned char c[305]={0xF1};
+  unsigned short len = size * sizeof(DeviceSlot);
 
-  memcpy(&c[1],d,304);
+  memcpy(&c[1],d,len);
 
-  eos_write_character_device(FUJI_DEV,&c,sizeof(c));
+  eos_write_character_device(FUJI_DEV,&c,len+1);
   csleep(10);
 }
 #endif // fuji_put_device_slots
@@ -383,8 +387,11 @@ bool fuji_copy_file(uint8_t source_slot, uint8_t destination_slot, char *copy_sp
   char cf[259]={0xD8,0x00,0x00};
   DCB *dcb = NULL;
 
-  cf[1]=source_slot;
-  cf[2]=destination_slot;
+  /* perform_copy() passes 1-based slots (the 0xD8 convention on SIO,
+     where the firmware decrements), but the AdamNet firmware has always
+     used the slot bytes as 0-based. Convert back here. */
+  cf[1]=source_slot-1;
+  cf[2]=destination_slot-1;
   strcpy(&cf[3],copy_spec);
 
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
