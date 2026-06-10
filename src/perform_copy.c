@@ -17,11 +17,23 @@ extern bool copy_mode;
 
 void perform_copy(void)
 {
+  /*
+   * source_filename can be a full relative path (e.g. when the source
+   * was picked from a recursive filter search like "!Carnival"). The
+   * destination is the directory the user navigated to (path) plus only
+   * the basename of the source, so strip any leading directory portion.
+   */
+  char *base = strrchr(source_filename, '/');
+  if (base != NULL)
+    base++;
+  else
+    base = source_filename;
+
   strcpy(copySpec, source_path);
   strcat(copySpec, "|");
   strcat(copySpec, path);
-  strcat(copySpec,source_filename);
-  
+  strcat(copySpec, base);
+
   screen_perform_copy((char *)hostSlots[copy_host_slot],(char *)source_path,(char *)hostSlots[selected_host_slot],(char *)path);
 
   /**
