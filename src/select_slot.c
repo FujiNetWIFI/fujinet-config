@@ -132,6 +132,19 @@ void select_slot_done()
 #ifdef BUILD_MSDOS
     pause(6);
 #endif
+
+#ifdef BUILD_ADAM
+    /* The AdamNet SET DEVICE FILENAME (0xE2) wire format carries no
+       host slot or mode; the firmware reuses whatever the slot last
+       held. Write the updated slot table first so the 0xE2 below is
+       applied against the new host slot and mode. */
+    deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
+    deviceSlots[selected_device_slot].mode=mode;
+    memset(deviceSlots[selected_device_slot].file,0,FILE_MAXLEN);
+    strncpy((char *)deviceSlots[selected_device_slot].file,response,FILE_MAXLEN-1);
+    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+#endif
+
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
 
 #ifdef OBSOLETE

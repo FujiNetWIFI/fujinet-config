@@ -175,12 +175,20 @@ bool fuji_put_host_slots(HostSlot *h, size_t size)
 #ifndef fuji_put_device_slots
 bool fuji_put_device_slots(DeviceSlot *d, size_t size)
 {
-  unsigned char c[305]={0xF1};
-  unsigned short len = size * sizeof(DeviceSlot);
+  /* The firmware's WRITE DEVICE SLOTS expects all 8 firmware slots
+     (304 bytes) and NAKs anything shorter, leaving EOS retrying the
+     write forever. CONFIG only tracks 4 slots, so fetch the current
+     table and overlay ours. Clobbers response[]. */
+  unsigned char c[305];
+  unsigned char r=0xF2;
 
-  memcpy(&c[1],d,len);
+  io_command_and_response(&r,1);
 
-  eos_write_character_device(FUJI_DEV,&c,len+1);
+  c[0]=0xF1;
+  memcpy(&c[1],response,304);
+  memcpy(&c[1],d,size * sizeof(DeviceSlot));
+
+  eos_write_character_device(FUJI_DEV,&c,sizeof(c));
   csleep(10);
 }
 #endif // fuji_put_device_slots
