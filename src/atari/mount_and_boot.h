@@ -6,7 +6,9 @@
 void mount_and_boot(void);
 void mount_and_boot_all_devices(void);
 void mount_and_boot_all_hosts(void);
+void mount_and_boot_hisio(void);
 void mount_and_boot_lobby(void);
+void mount_and_boot_selected(void);
 
 #endif
 #endif

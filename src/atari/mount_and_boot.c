@@ -19,6 +19,33 @@ void mount_and_boot_lobby(void)
     cold_start();
 }
 
+void mount_and_boot_hisio(void)
+{
+    screen_mount_and_boot();
+    set_active_screen(SCREEN_MOUNT_AND_BOOT);
+    screen_clear();
+    screen_puts(3, 0, "MOUNTING HISIO BOOT");
+
+    if (!fuji_set_boot_mode(3))
+    {
+        screen_error("ERROR MOUNTING HISIO BOOT");
+        wait_a_moment();
+        state = HOSTS_AND_DEVICES;
+        return;
+    }
+
+    screen_puts(9, 22, "SUCCESSFUL! BOOTING");
+    cold_start();
+}
+
+void mount_and_boot_selected(void)
+{
+    if (hisio_boot_enabled)
+        mount_and_boot_hisio();
+    else
+        mount_and_boot();
+}
+
 void mount_and_boot(void)
 {
     screen_mount_and_boot();

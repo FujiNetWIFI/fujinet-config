@@ -51,4 +51,8 @@ extern bool long_entry_displayed;
 extern uint8_t system_create_type;
 extern bool prev_page;
 
+#ifdef BUILD_ATARI
+extern bool hisio_boot_enabled;
+#endif /* BUILD_ATARI */
+
 #endif /* GLOBALS_H */
