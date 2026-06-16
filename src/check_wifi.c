@@ -9,6 +9,8 @@
 
 extern NetConfig nc;
 
+unsigned char wifiEnabled = true;
+
 void check_wifi(void)
 {
   unsigned char status;
