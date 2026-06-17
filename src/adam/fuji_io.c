@@ -395,11 +395,8 @@ bool fuji_copy_file(uint8_t source_slot, uint8_t destination_slot, char *copy_sp
   char cf[259]={0xD8,0x00,0x00};
   DCB *dcb = NULL;
 
-  /* perform_copy() passes 1-based slots (the 0xD8 convention on SIO,
-     where the firmware decrements), but the AdamNet firmware has always
-     used the slot bytes as 0-based. Convert back here. */
-  cf[1]=source_slot-1;
-  cf[2]=destination_slot-1;
+  cf[1]=source_slot;
+  cf[2]=destination_slot;
   strcpy(&cf[3],copy_spec);
 
   eos_write_character_device(FUJI_DEV,cf,sizeof(cf));
