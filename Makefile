@@ -54,8 +54,8 @@ PLATFORM_COMBOS = \
   msxdos+=msx \
   dragon+=coco
 
-include atari-fastloader.mk
 include makefiles/toplevel-rules.mk
+include atari-fastloader.mk
 
 ########################################
 # Common things

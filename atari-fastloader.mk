@@ -1,5 +1,14 @@
 define cache_repo
-  mkdir -p $(CACHE_DIR) && cd $(CACHE_DIR) && git clone $1
+  url=$1; \
+  dir=$$(basename $$url .git); \
+  mkdir -p $(CACHE_DIR); \
+  if [ -d "$(CACHE_DIR)/$$dir/.git" ]; then \
+    echo "Updating $$dir"; \
+    git -C "$(CACHE_DIR)/$$dir" fetch --all --tags; \
+  else \
+    echo "Cloning $$url"; \
+    git -C "$(CACHE_DIR)" clone $$url; \
+  fi
 endef
 
 CONFIG_TOOLS_REPO = https://github.com/FujiNetWIFI/fujinet-tools.git
