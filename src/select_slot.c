@@ -16,6 +16,23 @@ char mode=0;
 bool create=false;
 SSSubState ss_subState;
 
+#ifdef BUILD_ATARI
+// Device slot 8 (index 7) is reserved for the cassette (C:) device.
+#define CASSETTE_DEVICE_SLOT 7
+
+// Read the name of the currently selected directory entry and report
+// whether it is a cassette (.cas) image.
+static bool selected_file_is_cassette(void)
+{
+  fuji_open_directory_filter(selected_host_slot,path,filter);
+  fuji_set_directory_position(pos);
+  fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+  fuji_close_directory();
+
+  return (strstr(response, ".cas")!=NULL) || (strstr(response, ".CAS")!=NULL);
+}
+#endif
+
 void select_slot_init()
 {
   if (quick_boot==true)
@@ -24,6 +41,18 @@ void select_slot_init()
       selected_device_slot=0;
       ss_subState=SS_DONE;
     }
+#ifdef BUILD_ATARI
+  else if (create==false && selected_file_is_cassette())
+    {
+      // A .cas image must live in device slot 8 and be mounted read-only
+      // so the firmware routes it to the C: cassette device. Force the
+      // slot and mode here and skip the slot picker so that selecting a
+      // cassette always behaves consistently.
+      selected_device_slot=CASSETTE_DEVICE_SLOT;
+      mode=MODE_READ;
+      ss_subState=SS_DONE;
+    }
+#endif
   else
     ss_subState=SS_DISPLAY;
 }
