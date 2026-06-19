@@ -41,7 +41,18 @@ void perform_copy(void)
    * be 1-8, not 0-7 like most things.  That's why we add one, since
    * config is tracking the slots as 0-7
    */
+#ifdef BUILD_ATARI
+  /*
+   * The Atari fujinet-lib fuji_copy_file() takes the slots 0-based and
+   * does the +1 itself (it documents "fujinet tracks 1-8, we do 0-7")
+   * before writing DAUX1/DAUX2, which the SIO firmware then decrements
+   * back. Adding one here too would double-increment and copy from/to
+   * the wrong host slot, so hand it the raw 0-based slots.
+   */
+  fuji_copy_file(copy_host_slot, selected_host_slot, copySpec);
+#else
   fuji_copy_file(copy_host_slot + 1, selected_host_slot + 1, copySpec);
+#endif
 
   copy_mode = false;
   
