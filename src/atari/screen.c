@@ -330,17 +330,16 @@ void screen_select_file(void)
 
   if (copy_mode == false)
   {
+    /* Row 0 is an ANTIC mode 6 (20-col) heading line - plain text only,
+       the inverse CH_KEY_C glyph won't render there, so the C-key cue
+       lives on the mode 2 command line (row 21) below. */
     screen_puts(4, 0, "DISK IMAGES");
     screen_puts(0, 21,
                 CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "opy");
   }
   else
   {
-    /* Row 0 is never overwritten while browsing the destination (file
-       entries start at FILES_START_Y), so the copy-mode banner here
-       stays visible the whole time, unlike the row 21 hint which the
-       "Next Page" line clobbers. Keep both so the C-key cue shows. */
-    screen_puts(0, 0, "COPY MODE - " CH_KEY_C "Do It! to copy here");
+    screen_puts(4, 0, "COPY MODE");
     screen_puts(0, 21,
                 CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "Do It!");
   }
