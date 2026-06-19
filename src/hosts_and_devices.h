@@ -16,5 +16,8 @@ void hosts_and_devices_eject(unsigned char ds);
 #ifdef BUILD_ADAM
 void hosts_and_devices_devices_enable_toggle(unsigned char ds);
 #endif /* BUILD_ADAM */
+#ifdef BUILD_ATARI
+void hosts_and_devices_hisio_toggle(void);
+#endif /* BUILD_ATARI */
 
 #endif /* HOSTS_AND_DEVICES */

@@ -495,6 +495,12 @@ void screen_error(const char *msg)
   screen_puts(0, 24, msg);
 }
 
+void screen_hosts_and_devices_hisio_state(void)
+{
+  screen_clear_line(12);
+  screen_puts(34, 12, hisio_boot_enabled ? CH_INV_H CH_INV_I CH_INV_S CH_INV_I CH_INV_O " " : CH_INV_H "ISIO ");
+}
+
 void screen_hosts_and_devices(HostSlot *, DeviceSlot *, unsigned char *)
 {
   screen_dlist_hosts_and_devices();
@@ -506,6 +512,7 @@ void screen_hosts_and_devices(HostSlot *, DeviceSlot *, unsigned char *)
 
   screen_puts(5, 0, "HOST LIST");
   screen_puts(4, 11, "DRIVE SLOTS");
+  screen_hosts_and_devices_hisio_state();
 
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
 
@@ -540,6 +547,7 @@ void screen_hosts_and_devices_devices(void)
 
   screen_clear_line(11);
   screen_puts(4, 11, "DRIVE SLOTS");
+  screen_hosts_and_devices_hisio_state();
 
   screen_puts(0, 22,
               CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_LABEL_L CH_INV_C CH_INV_L CH_INV_E CH_INV_A CH_INV_R CH_KEY_LABEL_R "All Slots" CH_KEY_LABEL_L CH_INV_L CH_KEY_LABEL_R "obby");

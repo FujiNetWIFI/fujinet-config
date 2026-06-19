@@ -274,7 +274,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 
   if (input_handle_console_keys() == 0x03) // "Option" key
   {
-    mount_and_boot();
+    mount_and_boot_selected();
   }
 
   k = input_ucase();
@@ -323,6 +323,9 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'E':
     hosts_and_devices_edit_host_slot(bar_get() - HOSTS_START_Y);
     return HD_HOSTS;
+  case 'H':
+    hosts_and_devices_hisio_toggle();
+    return HD_HOSTS;
   case 0x7F:
     return HD_DEVICES;
   case 'C':
@@ -361,7 +364,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     }
   case '!':
   case 'B': // Taken from original config. What is that checking for?
-    mount_and_boot();
+    mount_and_boot_selected();
   default:
     return HD_HOSTS;
   }
@@ -375,7 +378,7 @@ HDSubState input_hosts_and_devices_devices(void)
 
   if (input_handle_console_keys() == 0x03)
   {
-    mount_and_boot();
+    mount_and_boot_selected();
   }
 
   k = input_ucase();
@@ -427,6 +430,9 @@ HDSubState input_hosts_and_devices_devices(void)
     // Eject
     hosts_and_devices_eject(bar_get() - DEVICES_START_Y);
     return HD_DEVICES;
+  case 'H':
+    hosts_and_devices_hisio_toggle();
+    return HD_DEVICES;
   case 0x7F:
     return HD_HOSTS;
   case 'R':
@@ -461,7 +467,7 @@ HDSubState input_hosts_and_devices_devices(void)
         return HD_DEVICES;
       }
   case '!':
-    mount_and_boot();
+    mount_and_boot_selected();
   default:
     return HD_DEVICES;
   }
@@ -474,7 +480,7 @@ SFSubState input_select_file_choose(void)
 
   if (input_handle_console_keys() == 0x03)
   {
-    mount_and_boot();
+    mount_and_boot_selected();
   }
 
   k = input_ucase();
@@ -573,7 +579,7 @@ SFSubState input_select_file_choose(void)
     }
   case '!':
   case 'B':
-    mount_and_boot();
+    mount_and_boot_selected();
   default:
     return SF_CHOOSE;
   }
@@ -585,7 +591,7 @@ SSSubState input_select_slot_choose(void)
 //  unsigned char temp[30];
   if (input_handle_console_keys() == 0x03)
   {
-    mount_and_boot();
+    mount_and_boot_selected();
   }
 
   k = input_ucase();

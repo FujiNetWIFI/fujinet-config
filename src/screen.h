@@ -60,6 +60,10 @@ void screen_hosts_and_devices_host_slots(HostSlot *h);
 void screen_hosts_and_devices_devices(void);
 void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *d, const bool *e);
 
+#ifdef BUILD_ATARI
+void screen_hosts_and_devices_hisio_state(void);
+#endif /* BUILD_ATARI */
+
 #ifndef BUILD_MSDOS
 void screen_hosts_and_devices_devices_selected(char selected_slot);
 #endif /* !BUILD_MSDOS */

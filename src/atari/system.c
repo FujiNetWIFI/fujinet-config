@@ -4,7 +4,6 @@
 #include <string.h>
 
 static NewDisk newDisk;
-unsigned char wifiEnabled=true;
 char response[256];
 
 void system_boot(void)

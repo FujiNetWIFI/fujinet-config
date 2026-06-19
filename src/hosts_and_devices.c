@@ -12,6 +12,9 @@
 #include "globals.h"
 
 HDSubState hd_subState;
+#ifdef BUILD_ATARI
+bool hisio_boot_enabled = false;
+#endif /* BUILD_ATARI */
 DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 DeviceSlot temp_deviceSlot;
 bool deviceEnabled[NUM_DEVICE_SLOTS];
@@ -224,6 +227,14 @@ void hosts_and_devices_devices_enable_toggle(unsigned char ds)
   bar_update();
 }
 #endif /* BUILD_ADAM */
+
+#ifdef BUILD_ATARI
+void hosts_and_devices_hisio_toggle(void)
+{
+  hisio_boot_enabled = !hisio_boot_enabled;
+  screen_hosts_and_devices_hisio_state();
+}
+#endif /* BUILD_ATARI */
 
 void hosts_and_devices_done(void)
 {
