@@ -328,15 +328,19 @@ void screen_select_file(void)
   screen_clear();
   bar_clear(false);
 
-  screen_puts(4, 0, "DISK IMAGES");
-
   if (copy_mode == false)
   {
+    screen_puts(4, 0, "DISK IMAGES");
     screen_puts(0, 21,
                 CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "opy");
   }
   else
   {
+    /* Row 0 is never overwritten while browsing the destination (file
+       entries start at FILES_START_Y), so the copy-mode banner here
+       stays visible the whole time, unlike the row 21 hint which the
+       "Next Page" line clobbers. Keep both so the C-key cue shows. */
+    screen_puts(0, 0, "COPY MODE - " CH_KEY_C "Do It! to copy here");
     screen_puts(0, 21,
                 CH_KEY_LEFT CH_KEY_DELETE "Up Dir" CH_KEY_N "ew" CH_KEY_F "ilter" CH_KEY_C "Do It!");
   }
