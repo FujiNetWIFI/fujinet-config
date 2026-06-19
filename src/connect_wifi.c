@@ -6,6 +6,7 @@
 #include "typedefs.h"
 #include "globals.h"
 #include "compat.h"
+#include "constants.h"
 #include "screen.h"
 #include "input.h"
 
@@ -44,6 +45,10 @@ void connect_wifi(void)
 		case 3:
 			fuji_get_ssid(&nc);
 			screen_error("CONNECTION SUCCESS!");
+			wifiEnabled = true;
+#ifdef COLOR_SETTING_SUCCESSFUL
+			bar_set_color(COLOR_SETTING_SUCCESSFUL);
+#endif
 			state = HOSTS_AND_DEVICES;
 #if defined(BUILD_ADAM) || defined(BUILD_MSX)
                         screen_should_be_cleared=true;
