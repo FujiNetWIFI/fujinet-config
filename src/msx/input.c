@@ -292,7 +292,6 @@ SFSubState input_select_file_choose(void)
 	switch (k)
 	{
 	case KEY_UP_ARROW:
-	case KEY_LEFT_ARROW:
 		if ((bar_get() == 0) && (pos > 0))
 			return SF_PREV_PAGE;
     long_entry_displayed = false;
@@ -300,7 +299,6 @@ SFSubState input_select_file_choose(void)
     select_display_long_filename();
     break;
 	case KEY_DOWN_ARROW:
-	case KEY_RIGHT_ARROW:
 		if ((bar_get() == 14) && (dir_eof == false))
 			return SF_NEXT_PAGE;
     long_entry_displayed = false;
@@ -336,16 +334,23 @@ SFSubState input_select_file_choose(void)
 		pos += bar_get();
 		select_file_set_source_filename();
 		return SF_COPY;
-	// case ',':
-	// case '<':
-	// 	if (pos > 0)
-	// 		return SF_PREV_PAGE;
- //    break;
-	// case '.':
-	// case '>':
-	// 	if (dir_eof == false)
-	// 		return SF_NEXT_PAGE;
- //    break;
+	case 'B':
+	case 'b':
+  	mount_and_boot();
+  	state = HOSTS_AND_DEVICES;
+  	return SF_DONE;
+	case KEY_LEFT_ARROW:
+	case ',':
+	case '<':
+		if (pos > 0)
+			return SF_PREV_PAGE;
+		break;
+	case KEY_RIGHT_ARROW:
+	case '.':
+	case '>':
+		if (dir_eof == false)
+			return SF_NEXT_PAGE;
+		break;
 	}
   return SF_CHOOSE;
 }
