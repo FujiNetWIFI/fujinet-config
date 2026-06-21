@@ -48,6 +48,8 @@ extern unsigned char copy_host_slot;
 static const char *empty="-empty-";
 static const char *off="-off-";
 
+char *filter_str;
+
 bool any_slot_occupied()
 {
   bool occupied = false;
@@ -575,11 +577,13 @@ void screen_select_file(void)
 
 void screen_select_file_display(char *p, char *f)
 {
+  filter_str = f;
+
   gotoxy(1,1);
   if (f[0]==0x00)
     cprintf("%30s",p);
   else
-    cprintf("%-8s|%20s",f,p);
+    cprintf("\"%.28s\"",f);
 
   // Clear prev/next
   vdp_vfill(0x1200, 0x00, 256);
@@ -662,6 +666,8 @@ void screen_select_file_filter(void)
 {
   show_status("Enter filter");
   hide_menu();
+  gotoxy(1,22);
+  cputs(filter_str);
 }
 
 void screen_select_file_new_type(void)
