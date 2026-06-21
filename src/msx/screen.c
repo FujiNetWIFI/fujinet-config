@@ -565,7 +565,7 @@ void screen_select_file(void)
   clrscr();
   bar_clear(false);
 
-  draw_card(0, 19, 0, hostSlots[selected_host_slot], false);
+  draw_card(0, 18, 0, hostSlots[selected_host_slot], false);
 
   hide_menu();
   show_status("Opening...");
@@ -581,10 +581,13 @@ void screen_select_file_display(char *p, char *f)
   else
     cprintf("%-8s|%20s",f,p);
 
+  // Clear prev/next
+  vdp_vfill(0x1200, 0x00, 256);
+
   // TODO: swap for optimized function
   uint16_t patt_addr = 0x200 + 8;
   uint16_t attr_addr = MODE2_ATTR + 0x200 + 8;
-  for (uint8_t y = 0; y < ENTRIES_PER_PAGE+1; y++) {
+  for (uint8_t y = 0; y < ENTRIES_PER_PAGE; y++) {
     vdp_vfill(patt_addr,0,240);
     vdp_vwrite(row_pattern+8, attr_addr, 30<<3);
     attr_addr += 0x100;
@@ -606,29 +609,30 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_prev(void)
 {
-  // textcolor(WHITE);
-  // textbackground(BLUE);
+  textcolor(WHITE);
+  textbackground(BLACK);
   // gotoxy(2,2); cprintf("%-28s","...");
 
   // TODO: replace with optimized function
-  gotoxy(2,2); cputs("...");
-  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0200 + 16, 24);
+  gotoxy(1,18); cputs("< prev");
+  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0200 + 16, 24);
 }
 
 void screen_select_file_next(void)
 {
-  // textcolor(WHITE);
-  // textbackground(BLUE);
+  textcolor(WHITE);
+  textbackground(BLACK);
   // gotoxy(2,17); cprintf("%-28s","...");
 
   // TODO: replace with optimized function
-  gotoxy(2,17); cputs("...");
-  vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x1100 + 16, 24);
+  gotoxy(25,18); cputs("next >");
+  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x1100 + 16, 24);
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
 {
   gotoxy(2,y+2);
+  textcolor(WHITE);
   textbackground(BLUE);
   cprintf("%.28s",e);
 
