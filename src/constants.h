@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#if defined(BUILD_ATARI) || defined(BUILD_MSDOS)
+#if defined(BUILD_ATARI) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM)
 #define NUM_DEVICE_SLOTS 8
 #elif defined(BUILD_APPLE2)
 #define MAX_SMARTPORT 8
