@@ -1,9 +1,10 @@
     PUBLIC _pause
+    PUBLIC _pausesec
     EXTERN _system_fps
 
-; void pause(uint8_t seconds)
+; void pausesec(uint8_t seconds)
 ; ticks are 60fps in Japan/Korea/USA/Brazil and 50fps in Europe
-_pause:
+_pausesec:
     ld   a, l
     or   a
     ret  z                         ; no delay
@@ -18,3 +19,14 @@ halt_loop:
     dec  l                         ; one second
     jr   nz, sec_loop
     ret
+
+; void pause(uint8_t jiffies)
+_pause:
+	ld	a, l
+	or	a
+	ret	z
+pause_loop:
+	halt
+	dec l
+	jr	nz, pause_loop
+	ret
