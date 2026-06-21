@@ -214,7 +214,6 @@ void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark
 void set_mode_default(void)
 {
   vdp_set_mode(2);
-  // style_white_on_blue();
   style_white_on_black();
   clrscr();
 }
@@ -328,13 +327,15 @@ void screen_set_wifi_password(void)
 
 void screen_connect_wifi(NetConfig *nc)
 {
+  char message[33];
+
   vdp_noblank();
-  style_white_on_black();
-  clrscr();
+  set_mode_default();
+  draw_logo(12,9);
 
   hide_menu();
-  sprintf(response,"     Connecting to network\n  %s",nc->ssid);
-  show_status(response);
+  sprintf(message, "Connecting to %s...", nc->ssid);
+  show_status(message);
 
   vdp_blank();
 }
