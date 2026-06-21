@@ -30,11 +30,9 @@ extern bool screen_should_be_cleared;
  */
 unsigned char input()
 {
-  char c = cgetc();
-  // gotoxy(0,0); cprintf("%02X",c);
-  return c;
-
-  // return cgetc();
+  if (kbhit())
+    return cgetc();
+  return 0;
 }
 
 unsigned char input_ucase(void)
@@ -62,7 +60,7 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   gotoxy(x,y);
   cursor_pos(x,y);
 
-  while (key = input()) {
+  while (key = cgetc()) {
     if (key == KEY_RETURN) {
    	  cursor(false);
    	  break;
@@ -94,7 +92,9 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
 
 WSSubState input_set_wifi_select(void)
 {
-  unsigned char k=input();
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
 
   switch(k)
   {
@@ -137,8 +137,9 @@ void input_line_set_wifi_password(char *c)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  unsigned char k = input();
-  debugf("input(%d) received", k);
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
 
   switch (k)
   {
@@ -206,7 +207,10 @@ HDSubState input_hosts_and_devices_hosts(void)
 
 HDSubState input_hosts_and_devices_devices(void)
 {
-  unsigned char k=input();
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
+
   switch(k)
     {
     case KEY_UP_ARROW:
@@ -287,7 +291,9 @@ void input_line_filter(char *c)
 SFSubState input_select_file_choose(void)
 {
 	unsigned entryType;
-	unsigned char k = input();
+	unsigned char k = 0;
+	while (k == 0)
+	  k = input();
 
 	switch (k)
 	{
@@ -357,7 +363,10 @@ SFSubState input_select_file_choose(void)
 
 unsigned char input_select_file_new_type(void)
 {
-  unsigned char k = input();
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
+
   // TODO: Actually define disk types
 	switch (k)
 	{
@@ -374,7 +383,10 @@ unsigned char input_select_file_new_type(void)
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
-  unsigned char k = input();
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
+
   // TODO: Actually define disk types
 	switch (k)
 	{
@@ -402,9 +414,9 @@ void input_select_file_new_name(char *c)
 
 SSSubState input_select_slot_choose(void)
 {
-  unsigned char k;
-
-  k=input();
+  unsigned char k = 0;
+	while (k == 0)
+	  k = input();
 
   switch(k)
     {
@@ -484,9 +496,11 @@ DHSubState input_destination_host_slot_choose(void)
 
 SISubState input_show_info(void)
 {
-	char c;
-	c = input();
-	switch (c)
+	unsigned char k = 0;
+	while (k == 0)
+	  k = input();
+
+	switch (k)
 	{
 	case 'e':
 	case 'E':
