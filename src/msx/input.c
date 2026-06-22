@@ -4,7 +4,9 @@
 
 #include <conio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../input.h"
 #include "../globals.h"
 #include "../system.h"
@@ -285,7 +287,8 @@ void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char
 
 void input_line_filter(char *c)
 {
-  input_line(1,22,0,c,30,false);
+  uint8_t o = strnlen(c, 30);
+  input_line(1,22,o,c,30,false);
 }
 
 SFSubState input_select_file_choose(void)
