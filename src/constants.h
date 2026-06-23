@@ -15,6 +15,14 @@
 #define ENTRIES_PER_PAGE 10
 #elif defined(BUILD_MSDOS)
 #define ENTRIES_PER_PAGE 13
+#elif defined(BUILD_ATARI)
+/* 14, not 15. The file list occupies rows FILES_START_Y(6)..6+EPP-1 and
+   the "Next Page" line sits at FILES_START_Y+EPP, which the directory
+   refresh clears each time. With 15 that row is 21 - the same row as the
+   first command line - so refreshing the listing wiped the [C]opy hint.
+   14 puts Next Page on row 20 and leaves both command lines (21,22)
+   untouched by the clear. */
+#define ENTRIES_PER_PAGE 14
 #else
 #define ENTRIES_PER_PAGE 15
 #endif

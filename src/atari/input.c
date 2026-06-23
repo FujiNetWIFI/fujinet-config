@@ -546,6 +546,7 @@ SFSubState input_select_file_choose(void)
   case '+':
     if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
     {
+      copy_mode = false; // Leaving file selection abandons any in-progress copy.
       state = HOSTS_AND_DEVICES;
       return SF_DONE;
     }
@@ -558,6 +559,7 @@ SFSubState input_select_file_choose(void)
       return SF_NEXT_PAGE;
     return SF_CHOOSE;
   case KCODE_ESCAPE:
+    copy_mode = false; // Aborting file selection cancels any in-progress copy.
     state = HOSTS_AND_DEVICES;
     return SF_DONE;
   case 'F':
