@@ -201,6 +201,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'S':
   case 's':
     show_status("Dropping into BASIC...");
+    boot_to_basic();
     return HD_DONE;
   default:
     return HD_HOSTS;
