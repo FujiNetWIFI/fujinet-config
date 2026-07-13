@@ -1,17 +1,20 @@
 #ifdef _CMOC_VERSION_
 
+#include <coco.h>
 #include "mount_and_boot.h"
 #include "../screen.h"
 #include "../typedefs.h"
 #include "../globals.h"
 #include "../system.h"
+#include "../pause.h"
 
 void mount_and_boot_lobby(void)
 {
 	if (screen_mount_and_boot_lobby())
 	{
 		fuji_set_boot_mode(2);
-		system_boot();
+		pause(120);
+		coldStart();
 	}
 	else
 	{
