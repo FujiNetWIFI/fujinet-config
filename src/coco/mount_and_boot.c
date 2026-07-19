@@ -12,27 +12,31 @@ void mount_and_boot_lobby(void)
 {
 	if (screen_mount_and_boot_lobby())
 	{
+#ifdef DRAGON
+		fuji_set_boot_mode(4);
+#else
 		fuji_set_boot_mode(2);
 		pause(120);
 		coldStart();
+#endif		
 	}
 	else
 	{
-    if (hd_subState == HD_HOSTS)
-    {
-      screen_hosts_and_devices_hosts();
-    }
-    else if (hd_subState == HD_DEVICES)
-    {
-      screen_hosts_and_devices_devices();
-    }
+		if (hd_subState == HD_HOSTS)
+		{
+			screen_hosts_and_devices_hosts();
+		}
+		else if (hd_subState == HD_DEVICES)
+		{
+			screen_hosts_and_devices_devices();
+		}
 	}
 }
 
 void mount_and_boot(void)
 {
-  fuji_mount_all();
-  exit(1);
+	fuji_mount_all();
+	exit(1);
 }
 
 #endif

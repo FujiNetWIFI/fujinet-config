@@ -40,7 +40,9 @@ void system_boot(void)
 
   // If the ROM detection code runs on a Rev0000 FujiNet, 
   // The ROM boot won't happen, so just do a cold start to boot the system normally.
+#ifndef DRAGON
   coldStart();
+#endif
   exit(0);
 }
 
