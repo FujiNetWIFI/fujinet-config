@@ -16,9 +16,9 @@ void mount_and_boot_lobby(void)
 		fuji_set_boot_mode(4);
 #else
 		fuji_set_boot_mode(2);
+#endif		
 		pause(120);
 		coldStart();
-#endif		
 	}
 	else
 	{
