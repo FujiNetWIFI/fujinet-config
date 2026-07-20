@@ -19,6 +19,7 @@ jobs:
           - atari
           - c64
           - coco
+          - dragon
           #- msxrom
           #- msdos
 
