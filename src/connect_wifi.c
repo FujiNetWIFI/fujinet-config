@@ -9,7 +9,6 @@
 #include "constants.h"
 #include "screen.h"
 #include "input.h"
-#include "key_codes.h"
 
 void connect_wifi(void)
 {
