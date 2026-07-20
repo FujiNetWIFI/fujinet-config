@@ -1,21 +1,9 @@
 #include <cmoc.h>
 #include <coco.h>
 
-// 0x6600 (giving the buffer 512 bytes of headroom below 0x8000/ROM) is
-// the confirmed-safe address on real CoCo hardware. An experiment moving
-// this up to 0x6800 -- intended to buy more headroom against
-// config.bin's own runtime heap/stack growth (its measured code+data+bss
-// footprint ends at 0x63A5, and its own build allows it to use memory up
-// to 0x7C00, see LDFLAGS_EXTRA_COCO's --limit=7C00) -- instead hung the
-// machine completely (no logo, no CONFIG boot) on real hardware. That
-// means something critical (likely HDB-DOS's own reserved control
-// structures) sits closer to 0x7E00-0x8000 than assumed, and the
-// original 512-byte gap below 0x8000 was load-bearing. Do not move this
-// toward 0x8000 again without hardware evidence of what's actually
-// reserved up there. The known-but-unfixed issue this was trying to
-// address: config.bin's own memory usage can still grow up into the
-// tail of this buffer during its startup, corrupting the bottom rows of
-// the logo -- see the conversation/commit history for the diagnosis.
+// Confirmed-safe on real CoCo hardware (512 bytes headroom below 0x8000/ROM).
+// Moving this toward 0x8000 hung real hardware in testing -- don't, without
+// hardware evidence of what's actually reserved up there.
 #define SCREEN_BUFFER (byte*) 0x6600
 
 #define LOGO_FULL_SIZE 6144
@@ -69,36 +57,13 @@ extern void zx0_decompress(void);
 
 #define LOGO_DECOMPRESSED_SIZE 4048
 
-/* The ZX0-compressed logo (516 bytes) is kept out of cfgload.bin's own
- * image to keep it off this program's size budget, and instead loaded
- * into LOGO_SCRATCH before cfgload.bin ever runs -- decompressed from
- * there into the screen buffer and then never touched again.
+/* The ZX0-compressed logo is loaded into LOGO_SCRATCH before cfgload.bin
+ * runs: over DriveWire on Dragon (LOGO.DWL via dwload_clone()), via
+ * LOADM"LOGO" in autoexec.bas on CoCo (DriveWire mount for LOGO.DWL never
+ * reaches the FujiNet server on real CoCo hardware).
  *
- * Both platforms load it as a plain LOADM-style machine-language binary
- * (lwasm --dragon, embedding the load address in a DECB-format header)
- * to the address it was assembled at:
- * - Dragon: fetched over DriveWire (LOGO.DWL, via dwload_clone(), which
- *   parses that same header itself -- see dwload_cmoc.c).
- * - CoCo: LOADM"LOGO" in autoexec.bas, *before* LOADM"CFGLOAD":EXEC --
- *   real hardware testing found that CoCo's real DriveWire mount request
- *   for LOGO.DWL never reaches the FujiNet server at all (confirmed via
- *   server logs), even though the same fetch works in emulation and the
- *   DW ROM vectors are correct. A prior attempt at reading it from
- *   cfgload.bin itself via disk.c's DSKCON-based file access worked, but
- *   only after a long chain of fixes for disk.c's call chain nesting
- *   deep enough on real hardware to land return addresses on top of the
- *   still-visible splash screen buffer -- loading it via BASIC's own
- *   already-proven LOADM (same mechanism CFGLOAD.BIN/CONFIG.BIN use)
- *   sidesteps all of that, at the cost of a missing/corrupt LOGO.BIN now
- *   being autoexec.bas's problem instead of something draw_logo() can
- *   gracefully skip past.
- *
- * LOGO_SCRATCH just has to *agree* with the org logo_data.asm/
- * logo_data_coco.asm was assembled with, or unpack_zx0() decompresses
- * whatever unrelated bytes happen to already be at the wrong address.
- * Must clear cfgload.bin's own program_end (see the Makefile's cfgload
- * rules for each platform's --org/--limit) -- check this after changing
- * either program's own static footprint. */
+ * Must match the org logo_data.asm/logo_data_coco.asm was assembled with,
+ * and clear cfgload.bin's own program_end. */
 #ifdef DRAGON
 #define LOGO_SCRATCH ((unsigned char *) 0x2600)
 #else
@@ -107,9 +72,7 @@ extern void zx0_decompress(void);
 
 static void unpack_zx0(const unsigned char *src, unsigned char *dst)
 {
-    /* CMOC uses U as this function's frame pointer (and expects Y preserved
-     * too), but zx0_decompress uses U as its write cursor and clobbers Y.
-     * Save/restore both around the call so the frame is intact on return. */
+    /* zx0_decompress uses U/Y internally; save/restore CMOC's frame pointer. */
     asm
     {
         pshs u,y
@@ -153,48 +116,32 @@ void runm(const char *filename)
 void draw_logo()
 {
 #ifdef DRAGON
-    // Fetch the still-compressed logo into scratch RAM (load-only, don't
-    // execute -- it's data, not code). If this fails, we just skip the
-    // logo and continue straight to loading STAGE2.DWL; a missing splash
-    // isn't worth aborting the boot over.
+    // Load-only fetch; a missing splash isn't worth aborting the boot over.
     if (dwload_clone("LOGO.DWL", 0) != 0) {
         return;
     }
 #endif
-    // On CoCo, LOGO.BIN is already loaded into LOGO_SCRATCH by the time
-    // this runs -- LOADM"LOGO" in autoexec.bas, before LOADM"CFGLOAD":EXEC.
+    // On CoCo, LOGO.BIN is already loaded into LOGO_SCRATCH via autoexec.bas.
 
-    // To save space, we trimmed the top of the logo that is 0xff (white) and the bottom.
-    // Below calculates where to draw the trimmed logo on screen to preserve the original location
+    // Top/bottom trimmed to save space; adjust the draw offset to compensate.
     unpack_zx0(LOGO_SCRATCH, SCREEN_BUFFER+LOGO_FULL_SIZE-LOGO_BOTTOM_TRIMMED_BYTES-LOGO_DECOMPRESSED_SIZE);
 }
 
-// Show the fujinet splash screen,
-// Then load config.bin
 int main(void)
 {
-    // Reset text mode to default
     width(32);
-
-    // Setup graphics mode and clear screen
     pmode(4, SCREEN_BUFFER);
     pcls(0xff);
     screen(1, 1);
 
-    // Draw the logo
     draw_logo();
 
 #ifdef DRAGON
-    // Hand off to the second-stage loader (org=c00, see stage2.c) rather
-    // than fetching CONFIG.DWL directly from here: this program is too
-    // big (needs pmode/pcls/screen/the ZX0 decompressor) to sit at a low
-    // enough org to leave CONFIG.DWL much headroom below the screen
-    // buffer without the instability we saw testing low orgs for a
-    // program this size. stage2.c has none of that and can safely sit
-    // much lower.
+    // Hand off to the second-stage loader (see stage2.c) instead of
+    // fetching CONFIG.DWL directly -- this program is too big to sit at
+    // a low enough org to leave CONFIG.DWL headroom.
     dwload_clone("STAGE2.DWL",1);
 #else
-    // Load config
     runm("CONFIG");
 #endif
 

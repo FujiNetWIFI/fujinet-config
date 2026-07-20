@@ -1,17 +1,10 @@
 typedef unsigned char uint8_t;
 typedef unsigned int uint16_t;
 
-#include "dw_cmd_ids.h"
+/* CMOC clone of the DWLOAD core behavior. Bypasses BASIC's command-line
+ * parser state. */
 
-/*
- * CMOC clone of the DWLOAD core behavior:
- * - Mounts a named object through DriveWire OP_NAMEOBJ_MOUNT
- * - Reads DECB stream sectors via DoRead vector
- * - Loads BASIC or ML content
- * - Optionally executes entry point
- *
- * Note: This intentionally bypasses BASIC command-line parser state.
- */
+#define OP_READEX ('R' + 128)
 
 #define DW_OP_NAMEOBJ_MOUNT 0x01
 #define DW_DNUM_ADDR 0x0012
@@ -79,12 +72,8 @@ static int dw_ok(void)
 
 static int dw_write_packet(const uint8_t *s, uint16_t l)
 {
-    /* U is this function's CMOC frame pointer (needed to resolve :s/:l),
-     * but the DriveWire ROM vector is not CMOC code and gives no guarantee
-     * it leaves U alone. Save/restore it (and Y, per CMOC's calling
-     * convention) around the call so a clobber there can't corrupt our
-     * stack frame on return -- see the same class of bug fixed for
-     * zx0_decompress in cfgload.c. */
+    /* Save/restore U/Y: the DriveWire ROM vector isn't CMOC code and may
+     * clobber CMOC's frame pointer/callee-saved registers. */
     asm
     {
         pshs x,y,u
@@ -102,7 +91,7 @@ static int dw_write_packet(const uint8_t *s, uint16_t l)
 
 static int dw_read_packet(uint8_t *s, uint16_t l)
 {
-    /* See dw_write_packet: preserve U across the external ROM call. */
+    /* See dw_write_packet. */
     asm
     {
         pshs x,y,u
@@ -131,11 +120,8 @@ static int dw_read_sector(uint16_t lsn, uint8_t *buf)
 }
 #endif
 
-// Must match fujinet-firmware's lib/bus/drivewire/drivewire.cpp
-// drivewire_checksum() exactly: a plain sum over all `len` bytes. (The old
-// DriveWire 3 spec PDF's sample code has an off-by-one that skips the last
-// byte -- FujiNet's server does not reproduce that bug, so neither should
-// this.)
+// Must match fujinet-firmware's drivewire_checksum(): a plain sum over all
+// `len` bytes.
 uint16_t drivewire_checksum(uint8_t *buf, unsigned short len)
 {
     uint16_t chk = 0;
@@ -248,15 +234,8 @@ int dwload_clone(const char *filename, uint8_t execute_nonzero)
         //return 2;
     }
 
-    /* The server (op_namedobj_mnt in fujinet-firmware) always writes back
-     * a single 0x01 acknowledgment byte after processing the mount
-     * request. This read must happen regardless of what's in it -- left
-     * unread, that byte sits in the stream and becomes the first byte of
-     * the next read (the sector 0 header), shifting every subsequent byte
-     * by one position and losing the true last byte of the sector off the
-     * end of the buffer. That's the actual cause of the checksum mismatch
-     * we were chasing: not a computation or transmission bug, but this
-     * dropped ack byte from the mount step. */
+    /* Server always sends back a 1-byte ack after the mount request;
+     * must be read or it shifts every subsequent stream read by one byte. */
     dw_read_packet(&drive, 1);
 
     dw_arg_uint8_t = drive;
@@ -327,32 +306,11 @@ int dwload_clone(const char *filename, uint8_t execute_nonzero)
                 exec_addr = be16(&ddb[1]);
                 poke16(BASIC_EXEC_PTR, exec_addr);
                 if (execute_nonzero && (uint8_t) (exec_addr >> 8) != 0xFF) {
-                    /* Must be a true jump, not a C function call (which
-                     * compiles to JSR and pushes a return address onto
-                     * *this* program's stack). CMOC's exit() doesn't
-                     * reset the stack pointer at program entry -- it just
-                     * captures whatever S was into INISTK and restores it
-                     * on exit(). A JSR-based launch means the launched
-                     * program inherits S from deep inside our own call
-                     * chain, so its entire runtime stack (used throughout
-                     * its whole session) lives in the launcher's own
-                     * small stack region. That's harmless during normal
-                     * operation, but by the time the launched program
-                     * calls exit(), ordinary stack churn has long since
-                     * overwritten the return address we pushed here, and
-                     * exit()'s RTS jumps into garbage -- this is exactly
-                     * what caused config.dwl to crash after exiting when
-                     * chain-loaded through cfgload.bin/STAGE2.DWL, but
-                     * not when loaded directly as AUTOLOAD.DWL.
-                     *
-                     * Fix: restore S to *our own* entry-time value
-                     * (INISTK, captured by our own CRT startup) before
-                     * jumping, so the launched program inherits the same
-                     * clean stack state we ourselves were given -- no
-                     * matter how many chained stages deep we are, the
-                     * final program always ends up with the stack state
-                     * the original bootloader provided, so its exit()
-                     * returns exactly where a direct boot would have. */
+                    /* True jump, not a call: restore S to our own
+                     * entry-time value (INISTK) first so the launched
+                     * program inherits a clean stack instead of ours,
+                     * which would leave garbage under its return address
+                     * by the time it calls exit(). */
                     asm
                     {
 INISTK                  IMPORT
