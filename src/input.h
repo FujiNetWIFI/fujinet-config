@@ -78,8 +78,8 @@ void input_select_slot_build_eos_directory_label(char *c);
 #define KEY_ABORT 0x1b
 #endif /* BUILD_PMD85 */
 
-#if defined(BUILD_MSDOS) || defined(BUILD_COCO) || defined(BUILD_MSXROM)
+#if defined(BUILD_MSDOS) || defined(BUILD_COCO) || defined(BUILD_MSXROM) || defined(BUILD_DRAGON)
 #include "key_codes.h"
-#endif /* BUILD_MSDOS || BUILD_COCO || BUILD_MSXROM  */
+#endif /* BUILD_MSDOS || BUILD_COCO || BUILD_MSXROM || BUILD_DRAGON */
 
 #endif /* INPUT_H */

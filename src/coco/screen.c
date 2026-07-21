@@ -507,6 +507,25 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_init(void)
 {
+  // cfgload.bin's splash logo leaves the video hardware (PIA/SAM
+  // registers) switched to PMODE4 graphics, displaying its own
+  // screen buffer. width(32) below does NOT undo this on a real CoCo
+  // 2 -- it's a no-op except on CoCo 3 (see CMOC's width.c, which
+  // checks for the GIME signature at $FFF8 before doing anything).
+  // Since this program's own memory usage (heap, stack, etc.) is
+  // free to grow into that leftover graphics buffer's address range
+  // once it's running, and nothing else ever tells the hardware to
+  // stop displaying it, whatever ends up there becomes visible
+  // on-screen noise. Switch back to normal text mode explicitly, as
+  // the very first thing this program does, so nothing it does
+  // afterward can still be shown through stale graphics hardware
+  // state. Also clear it immediately: the low-res text screen memory
+  // this now displays hasn't been touched since before cfgload.bin
+  // switched to graphics mode, so without this it would briefly flash
+  // the original "DISK EXTENDED COLOR BASIC..." boot banner.
+  screen(0, 1);
+  cls(1);
+
   asm {
     lda $011A
       sta orig_casflag

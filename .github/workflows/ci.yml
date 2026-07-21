@@ -19,11 +19,12 @@ jobs:
           - atari
           - c64
           - coco
+          - dragon
           #- msxrom
           #- msdos
 
     container:
-      image: fozztexx/defoogi:1.4.5
+      image: fozztexx/defoogi:1.4.7
 
     steps:
       - uses: actions/checkout@v4
