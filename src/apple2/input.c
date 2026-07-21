@@ -10,6 +10,7 @@
 #include <conio.h>
 #include <apple2.h>
 #include <peekpoke.h>
+#include <joystick.h>
 #endif
 #include <string.h>
 #include <stdbool.h>
@@ -52,6 +53,46 @@
 
 extern bool screenDeviceSmartport;
 
+#ifndef __ORCAC__
+void input_joystick_init(void)
+{
+  joy_install(joy_static_stddrv);
+}
+
+/**
+ * Poll the joystick and synthesize a keycode from it.
+ * Edge-triggered: a direction/button only fires once per deflection,
+ * the stick must return to center (or the button be released) before
+ * it can fire again.
+ * @return synthesized keycode, or 0 if nothing new to report
+ */
+unsigned char input_handle_joystick(void)
+{
+  static unsigned char joy_last = 0;
+  unsigned char v = joy_read(JOY_1);
+  unsigned char key = 0;
+
+  if (v != joy_last)
+  {
+    if (JOY_UP(v))
+      key = KEY_UP_ARROW;
+    else if (JOY_DOWN(v))
+      key = KEY_DOWN_ARROW;
+    else if (JOY_LEFT(v))
+      key = KEY_LEFT_ARROW;
+    else if (JOY_RIGHT(v))
+      key = KEY_RIGHT_ARROW;
+    else if (JOY_BTN_1(v))
+      key = KEY_RETURN;
+    else if (JOY_BTN_2(v))
+      key = KEY_ESCAPE;
+  }
+
+  joy_last = v;
+  return key;
+}
+#endif /* __ORCAC__ */
+
 /**
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
@@ -60,8 +101,12 @@ unsigned char input(void)
 {
   if (kbhit())
     return cgetc();
-  
+
+#ifndef __ORCAC__
+  return input_handle_joystick();
+#else
   return 0;
+#endif
 }
 
 unsigned char input_ucase(void)
@@ -192,7 +237,7 @@ DHSubState input_destination_host_slot_choose(void)
 SFSubState input_select_file_choose(void)
 {
   unsigned entryType;
-  unsigned char k = cgetc();
+  unsigned char k = input();
 
   switch (k)
   {
@@ -348,7 +393,7 @@ SSSubState input_select_slot_choose(void)
   // cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
   unsigned char k;
 
-  k=cgetc();
+  k=input();
 
   switch(k)
     {
@@ -443,9 +488,11 @@ unsigned char input_select_slot_mode(char *mode)
 SISubState input_show_info(void)
 {
   char c;
-  c =cgetc();
+  c = input();
   switch (c)
   {
+  case 0:
+    return SI_SHOWINFO;
   case 'c':
   case 'C':
     state = SET_WIFI;
@@ -462,7 +509,7 @@ SISubState input_show_info(void)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  unsigned char k=cgetc();
+  unsigned char k=input();
 
   switch (k)
   {
