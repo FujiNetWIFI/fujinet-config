@@ -59,33 +59,80 @@ void input_joystick_init(void)
   joy_install(joy_static_stddrv);
 }
 
+/* Poll counts (not real time -- plain Apple II has no timer accessible from
+ * cc65) approximating a typematic feel: a short pause after the first move,
+ * then a faster repeat while the stick stays deflected.
+ */
+#define JOY_REPEAT_DELAY 200
+#define JOY_REPEAT_RATE   40
+
 /**
  * Poll the joystick and synthesize a keycode from it.
- * Edge-triggered: a direction/button only fires once per deflection,
- * the stick must return to center (or the button be released) before
- * it can fire again.
+ * Directions repeat while held, after an initial delay (typematic-style).
+ * Buttons stay edge-triggered: they fire once per press and need a release
+ * before firing again.
  * @return synthesized keycode, or 0 if nothing new to report
  */
 unsigned char input_handle_joystick(void)
 {
   static unsigned char joy_last = 0;
+  static unsigned char joy_dir_key = 0;
+  static unsigned char joy_repeat_count = 0;
+  static bool joy_repeat_armed = false;
   unsigned char v = joy_read(JOY_1);
   unsigned char key = 0;
+  unsigned char dir_key = 0;
 
-  if (v != joy_last)
+  if (JOY_UP(v))
+    dir_key = KEY_UP_ARROW;
+  else if (JOY_DOWN(v))
+    dir_key = KEY_DOWN_ARROW;
+  else if (JOY_LEFT(v))
+    dir_key = KEY_LEFT_ARROW;
+  else if (JOY_RIGHT(v))
+    dir_key = KEY_RIGHT_ARROW;
+
+  if (dir_key != 0)
   {
-    if (JOY_UP(v))
-      key = KEY_UP_ARROW;
-    else if (JOY_DOWN(v))
-      key = KEY_DOWN_ARROW;
-    else if (JOY_LEFT(v))
-      key = KEY_LEFT_ARROW;
-    else if (JOY_RIGHT(v))
-      key = KEY_RIGHT_ARROW;
-    else if (JOY_BTN_1(v))
-      key = KEY_RETURN;
-    else if (JOY_BTN_2(v))
-      key = KEY_ESCAPE;
+    if (dir_key != joy_dir_key)
+    {
+      key = dir_key;
+      joy_dir_key = dir_key;
+      joy_repeat_count = 0;
+      joy_repeat_armed = false;
+    }
+    else
+    {
+      ++joy_repeat_count;
+      if (!joy_repeat_armed)
+      {
+        if (joy_repeat_count >= JOY_REPEAT_DELAY)
+        {
+          key = dir_key;
+          joy_repeat_count = 0;
+          joy_repeat_armed = true;
+        }
+      }
+      else if (joy_repeat_count >= JOY_REPEAT_RATE)
+      {
+        key = dir_key;
+        joy_repeat_count = 0;
+      }
+    }
+  }
+  else
+  {
+    joy_dir_key = 0;
+    joy_repeat_count = 0;
+    joy_repeat_armed = false;
+
+    if (v != joy_last)
+    {
+      if (JOY_BTN_1(v))
+        key = KEY_RETURN;
+      else if (JOY_BTN_2(v))
+        key = KEY_ESCAPE;
+    }
   }
 
   joy_last = v;
