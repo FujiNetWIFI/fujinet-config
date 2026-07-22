@@ -62,6 +62,10 @@ void input_select_slot_build_eos_directory_label(char *c);
 #define KEY_ABORT CH_ESC
 #endif
 
+#ifdef BUILD_APPLE2
+void input_joystick_init(void);
+#endif
+
 #ifdef BUILD_C64
 #define KEY_ABORT 0x5F
 #endif

@@ -16,6 +16,7 @@
 #include "typedefs.h"
 #include "system.h"
 #include "debug.h"
+#include "input.h"
 
 State state;
 bool backToFiles=false;
@@ -26,6 +27,9 @@ void setup(void)
   screen_init();
 #ifdef BUILD_MSDOS
   system_load_tsr_setting();
+#endif
+#ifdef BUILD_APPLE2
+  input_joystick_init();
 #endif
 }
 
