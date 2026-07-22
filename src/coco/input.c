@@ -27,18 +27,16 @@ bool mounting = false;
 extern unsigned short entry_timer;
 extern HDSubState hd_subState;
 
-/* --- CoCo analog joystick support --- */
 #define JOY_CENTER   31
 #define JOY_HALF     16
-#define JOY_LOW_TH   (JOY_CENTER - JOY_HALF)   /* 15 */
-#define JOY_HIGH_TH  (JOY_CENTER + JOY_HALF)   /* 47 */
+#define JOY_LOW_TH   (JOY_CENTER - JOY_HALF)
+#define JOY_HIGH_TH  (JOY_CENTER + JOY_HALF)
 
-/* Auto-repeat timing (getTimer() ticks, ~60Hz) */
 #define JOY_REPEAT_DELAY     25
 #define JOY_REPEAT_INTERVAL  6
 
-/* Position reads are ignored until a button is pressed at least once, so a
-   disconnected (floating) analog stick can't produce phantom movement. */
+/* Positions are ignored until a button is pressed at least once, so a
+   floating (disconnected) analog stick can't produce phantom movement. */
 static bool joy_right_selected = false;
 static bool joy_left_selected = false;
 static bool joy_btn_released = true;
@@ -78,8 +76,7 @@ unsigned char input_ucase()
 	return 0;
 }
 
-/* Returns a bitmask: 1=up 2=down 4=left 8=right 16=btn1 32=btn2.
-   Zero until a button has been pressed at least once. */
+/* Bitmask: 1=up 2=down 4=left 8=right 16=btn1 32=btn2. */
 static byte readJoystick(void)
 {
 	byte value = 0;
@@ -126,10 +123,10 @@ static byte readJoystick(void)
 			if (rbtn2) value |= 32;
 		}
 
-		if (v <= JOY_LOW_TH)  value |= 1; /* up */
-		if (v >= JOY_HIGH_TH) value |= 2; /* down */
-		if (h <= JOY_LOW_TH)  value |= 4; /* left */
-		if (h >= JOY_HIGH_TH) value |= 8; /* right */
+		if (v <= JOY_LOW_TH)  value |= 1;
+		if (v >= JOY_HIGH_TH) value |= 2;
+		if (h <= JOY_LOW_TH)  value |= 4;
+		if (h >= JOY_HIGH_TH) value |= 8;
 	}
 
 	return value;
@@ -142,14 +139,13 @@ unsigned char input_handle_joystick(void)
 	byte dir = value & 0x0F;
 	byte btn = value & 0x30;
 
-	/* Buttons: one keycode per press, debounced on release. */
 	if (btn)
 	{
 		if (joy_btn_released)
 		{
 			joy_btn_released = false;
-			/* The very first press only activates the joystick; swallow it
-			   so the user can't accidentally navigate with the wake-up press. */
+			/* First press only activates the joystick; swallow it so the
+			   wake-up press can't accidentally navigate. */
 			if (!was_active)
 				return 0;
 			if (value & 16) return KEY_ENTER;
@@ -159,7 +155,7 @@ unsigned char input_handle_joystick(void)
 	}
 	joy_btn_released = true;
 
-	/* Only up/down/left are used for navigation. Left returns to parent. */
+	/* Left maps to parent-dir; right is unused. */
 	if (dir & 1)  dir = 1;
 	else if (dir & 2) dir = 2;
 	else if (dir & 4) dir = 4;
@@ -188,7 +184,6 @@ unsigned char input_handle_joystick(void)
 	return 0;
 }
 
-/* Blocking read that also polls the joystick, used in place of waitkey(true). */
 static byte waitkey_joystick(void)
 {
 	byte k;
