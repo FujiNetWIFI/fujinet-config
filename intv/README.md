@@ -1,0 +1,119 @@
+# FujiNet CONFIG for Intellivision
+
+An IntyBASIC program that sets up WiFi, manages the 8 FujiNet host slots,
+browses directories on a mounted host, and boots a selected ROM — the
+Intellivision counterpart to the CONFIG program on every other FujiNet
+platform. It's meant to replace the placeholder demo currently baked into
+`fujinet-firmware/pico/intellivision/firmware/rom.h` as the RP2040
+cartridge's boot ROM.
+
+## Layout
+
+| File | Purpose |
+|---|---|
+| `config.bas` | Entry point and top-level state dispatcher |
+| `constants.bas` | Screen/color/input constants, scratch-RAM map, RAM budget notes |
+| `fujinet.bas` | Mailbox transport (`fn_transact`, `fn_param`, ...) |
+| `fujicmd.bas` | Fuji-device (`0x70`) command wrappers built on `fujinet.bas` |
+| `screen.bas` | Low-level text drawing (`scr_puts`, `scr_recolor`, ...) |
+| `input.bas` | Edge-detected controller input + the character-grid text editor |
+| `scroll.bas` | Bounce-scrolling for filenames too long to fit on screen |
+| `st_wifi.bas` | `ST_CHECK_WIFI` / `ST_CONNECT_WIFI` / `ST_SET_WIFI` |
+| `st_hosts.bas` | `ST_HOSTS` — the 8 host slots, list/select/edit |
+| `st_file.bas` | `ST_SELECT_FILE` — directory browsing, paging, `.cfg` suppression |
+| `st_info.bas` | `ST_INFO` — SSID/IP/firmware version display |
+| `st_boot.bas` | `ST_BOOT` — `SET_DEVICE_FULLPATH` + `MOUNT_IMAGE`, progress bar |
+| `mkromh.py` | Packs `config.bin` into firmware's `_bootrom[]` array format |
+
+## Scope
+
+Covers WiFi setup (scan, custom SSID, on-screen character-grid password
+entry, connect), the 8 host slots (list, mount, rename), directory
+browsing (paging, subfolder navigation, `.cfg`-sibling suppression,
+bounce-scrolling long filenames), and boot. Deliberately out of scope for
+this pass: the device-slot screen, mount/eject, read/write mode toggles,
+copy-file, new-disk, and appkeys — none of them are needed to get from
+power-on to a booted game, which is this program's whole job.
+
+## Build
+
+```sh
+export PATH=/path/to/intybasic:/path/to/as1600:$PATH   # if not already on PATH
+make            # config.bin (+ .cfg) and config.rom
+```
+
+`config.bin`/`config.cfg` are the PiRTO II / SD-flashable format; `config.rom`
+is Intellicart format, for jzIntv.
+
+## Test in jzIntv
+
+`run.sh` builds if needed and launches the FujiNet-patched jzIntv
+(`~/Workspace/jzintv-20200712-src`) against a real `fujinet-firmware`
+instance over BoIP:
+
+```sh
+./run.sh                                    # localhost:9995 by default
+FUJINET_TARGET=host:port ./run.sh
+./run.sh --fujinet-debug                    # trace mailbox/FujiBus frames
+```
+
+Everything up through choosing a file to boot is fully testable this way —
+`fujinet.c` (the jzIntv side) proxies the mailbox exactly like the real
+RP2040 does. The boot step itself (`MOUNT_IMAGE`) triggers the ESP32
+pushing a ROM to `FUJI_DEVICEID_DBC`, which the emulator can't act on the
+way real hardware does (it can't reload the running cart), but it can
+still capture what gets pushed:
+
+```sh
+./run.sh --fujinet-bootdump=/tmp/boot-test
+# after choosing a file: /tmp/boot-test.rom (+ .cfg, if the file has one)
+diff /tmp/boot-test.rom /path/to/source/game.bin   # should be identical
+```
+
+That validates the whole ESP32-side media-type path (extension detection,
+`.cfg` sibling lookup, chunking) byte-for-byte without hardware.
+
+## Flash to hardware
+
+```sh
+make rom.h
+cp config_rom.h /path/to/fujinet-firmware/pico/intellivision/firmware/rom.h
+cd /path/to/fujinet-firmware/pico/intellivision/firmware
+mkdir -p build && cd build
+PICO_SDK_PATH=/usr/share/pico-sdk cmake -G Ninja ..
+ninja
+# flash build/fuji_intv.uf2 to the RP2040 in BOOTSEL mode
+```
+
+This **replaces** the current placeholder boot ROM (5 Card Stud) baked
+into `rom.h` — that placeholder's own header comment already called it "a
+stand-in for real hardware testing until the SD config/loader program
+exists." There's no menu to choose between them; whatever's in `rom.h`
+when the firmware is built is what boots. If you want the two to coexist
+(e.g. a keypad chord at power-on to fall into the old PiRTO SD menu
+instead), that's a small addition to `Inty_cart_main()` in `inty_cart.c`,
+not something this program does on its own.
+
+## Known limitations
+
+- **WiFi network list is capped at 9 entries** (`WIFI_SCAN_SHOWN` in
+  `st_wifi.bas`) — there's no paging for scan results the way there is for
+  the file browser. A network past the 9th can still be reached via
+  "OTHER (ENTER SSID)".
+- **Network-pushed `.cfg` mapping supports `[mapping]` segments only** —
+  no `[memattr]` RAM segments, no `p`-prefixed HACK/MACRO lines (see
+  `parse_cfg_mapping()` in `inty_cart.c`). The local-SD PiRTO menu's own
+  parser (`load_cfg()`) still supports the full format; this is specific
+  to the network path.
+- **`.rom` (Intellicart) bank-switched images are not supported** — a
+  non-bankswitched `.rom` (the common case) decodes and boots correctly;
+  one that relies on live bank-switching to reach code outside its listed
+  segments will not run correctly. See the "ROM boot receiver" section
+  comment in `inty_cart.c`.
+- **A failed or interrupted network boot needs a power cycle.** The
+  original design staged the whole transfer separately from the live
+  `ROM[]` so a failure could leave CONFIG running to report it; a real
+  build against the RP2040's actual ~264KB SRAM budget showed that doesn't
+  fit (a 64KB scratch buffer alone overflowed `.bss` by 54KB). ROM data is
+  instead decoded directly into the live `ROM[]` as it streams in — the
+  same tradeoff the existing local-SD boot path already accepts.
