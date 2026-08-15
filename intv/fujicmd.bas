@@ -27,6 +27,7 @@
 
     CONST FUJICMD_GET_ADAPTERCONFIG_EXTENDED = $C4
     CONST FUJICMD_GET_WIFISTATUS             = $FA
+    CONST FUJICMD_GET_WIFI_ENABLED           = $EA
     CONST FUJICMD_GET_SSID                   = $FE
     CONST FUJICMD_SCAN_NETWORKS              = $FD
     CONST FUJICMD_GET_SCAN_RESULT            = $FC
@@ -73,6 +74,31 @@ END
 fj_get_wifi_status: PROCEDURE
     mb_dev = FUJI_DEVICEID
     mb_cmd = FUJICMD_GET_WIFISTATUS
+    mb_nparam = 0
+    #fn_txlen = 0
+    GOSUB fn_transact
+END
+
+' ---------------------------------------------------------------------------
+' fj_get_wifi_enabled: no params. Reply byte 0 is 0 only if WiFi is switched
+' off outright in the FujiNet's own stored config.
+' ---------------------------------------------------------------------------
+fj_get_wifi_enabled: PROCEDURE
+    mb_dev = FUJI_DEVICEID
+    mb_cmd = FUJICMD_GET_WIFI_ENABLED
+    mb_nparam = 0
+    #fn_txlen = 0
+    GOSUB fn_transact
+END
+
+' ---------------------------------------------------------------------------
+' fj_get_ssid: no params. Reply is the STORED SSIDConfig -- ssid[33] +
+' password[64], NUL-padded -- independent of whether the radio has
+' associated yet. Byte 0 = 0 means no network is configured.
+' ---------------------------------------------------------------------------
+fj_get_ssid: PROCEDURE
+    mb_dev = FUJI_DEVICEID
+    mb_cmd = FUJICMD_GET_SSID
     mb_nparam = 0
     #fn_txlen = 0
     GOSUB fn_transact

@@ -60,14 +60,14 @@ include atari-fastloader.mk
 ########################################
 # Common things
 
-CFLAGS = -DBUILD_$(PLATFORM_UC)
+CFLAGS = -DBUILD_$(PLATFORM_UC) --intermediate
 CFLAGS_EXTRA_CC65 = -Os
 CFLAGS_EXTRA_Z88DK = -Os
 
 ########################################
 # CoCo customization
-
-LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
+CFLAGS_EXTRA_COCO = --intermediate
+LDFLAGS_EXTRA_COCO = --intermediate --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
 # logo_zx0.asm is shared with Dragon; LOGO.BIN is loaded via BASIC's LOADM
 # (see coco/disk-post), not over DriveWire.

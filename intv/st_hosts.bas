@@ -3,9 +3,10 @@
 ' jump to the info screen.
 '
 ' Keys: disc/1-8 move the cursor, BTN mounts+browses the selected slot,
-' ENTER edits its name, 9 goes to the info screen. (Not CLEAR for edit --
-' CLEAR is free for a future "clear slot" action, and there's no need for
-' a "back" key here since this is the program's home screen.)
+' ENTER edits its name, 9 goes to the info screen, 0 mounts and boots the
+' FujiNet Game Lobby ROM from ec.tnfs.io (st_lobby.bas). (Not CLEAR for
+' edit -- CLEAR is free for a future "clear slot" action, and there's no
+' need for a "back" key here since this is the program's home screen.)
 
     DIM hosts_shown, hd_i, hd_row, hd_col, hd_color
 
@@ -16,6 +17,7 @@ do_hosts: PROCEDURE
         GOSUB scr_clear
         PRINT AT screenpos(0,0) COLOR COL_NORMAL,"HOST SLOTS"
         GOSUB hosts_draw_list
+        PRINT AT screenpos(0,10) COLOR COL_HILIGHT,"0=PLAY GAME LOBBY"
         PRINT AT screenpos(0,11) COLOR COL_DIM,"BTN=OPEN ENT=EDT 9=I"
         hosts_shown = 1
     END IF
@@ -33,6 +35,11 @@ do_hosts: PROCEDURE
     IF in_key >= KEYPAD_1 AND in_key <= KEYPAD_8 THEN
         sel_row = in_key - 1
         GOSUB hosts_draw_list
+    END IF
+
+    IF in_key = KEYPAD_0 THEN
+        GOSUB hosts_launch_lobby
+        RETURN
     END IF
 
     IF in_key = KEYPAD_9 THEN

@@ -29,6 +29,7 @@
     ' own guidance ("Beyond that, add segments manually: ASM ORG $D000").
     ASM ORG $D000
     INCLUDE "st_boot.bas"
+    INCLUDE "st_lobby.bas"
 
 cfg_start:
     GOSUB scr_clear

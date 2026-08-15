@@ -77,22 +77,17 @@ That validates the whole ESP32-side media-type path (extension detection,
 
 ```sh
 make rom.h
-cp config_rom.h /path/to/fujinet-firmware/pico/intellivision/firmware/rom.h
+cp config_rom.h /path/to/fujinet-firmware/pico/intellivision/firmware/include/fujiconfigrom.h
 cd /path/to/fujinet-firmware/pico/intellivision/firmware
-mkdir -p build && cd build
-PICO_SDK_PATH=/usr/share/pico-sdk cmake -G Ninja ..
-ninja
-# flash build/fuji_intv.uf2 to the RP2040 in BOOTSEL mode
+cmake -B build -DPICO_BOARD=fujicard -DCMAKE_BUILD_TYPE=Release -G Ninja
+ninja -C build
+# flash the resulting Minty_fujicard.uf2 to the RP2040 in BOOTSEL mode
 ```
 
-This **replaces** the current placeholder boot ROM (5 Card Stud) baked
-into `rom.h` — that placeholder's own header comment already called it "a
-stand-in for real hardware testing until the SD config/loader program
-exists." There's no menu to choose between them; whatever's in `rom.h`
-when the firmware is built is what boots. If you want the two to coexist
-(e.g. a keypad chord at power-on to fall into the old PiRTO SD menu
-instead), that's a small addition to `Inty_cart_main()` in `inty_cart.c`,
-not something this program does on its own.
+This is the **only** boot ROM the Minty-based FujiNet cartridge firmware
+runs — `RunFujiConfig()` in `src/fujiboot.c` loads it unconditionally, in
+place of Minty's own SD/flash launcher (which this firmware build doesn't
+include at all). There's no menu, no chord, no fallback.
 
 ## Known limitations
 

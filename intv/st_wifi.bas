@@ -12,26 +12,65 @@
     CONST WIFI_STATUS_CONNECT_FAILED  = 4
     CONST WIFI_STATUS_CONNECTION_LOST = 5
     CONST WIFI_SCAN_SHOWN = 9          ' rows 1..9; row 10 is "OTHER"
-    CONST WIFI_CONNECT_TRIES = 30      ' ~30 status polls, a few seconds
+    CONST WIFI_CONNECT_TRIES = 20      ' status polls, ~2s apart -> ~40s
+    CONST LINK_WAIT_FRAMES = 900       ' ~15s for the ESP32 to boot+enumerate
 
     DIM num_nets, ws_i, ws_row, ws_color, ws_tries, wifi_status
-    DIM ws_delay
+    DIM ws_delay, ws_abort
 
 ' ws_pause: block for ws_delay frames (no PAUSE statement in IntyBASIC).
 ws_pause: PROCEDURE
-    FOR ws_delay = 0 TO 119
+    ws_i = ws_delay
+    WHILE ws_i > 0
         WAIT
-    NEXT ws_delay
+        ws_i = ws_i - 1
+    WEND
 END
 
 ' ---------------------------------------------------------------------------
-' do_check_wifi: query current status. Already connected -> straight to the
-' host slots screen; otherwise go set one up.
+' do_check_wifi: wait for the ESP32-S3 link, then decide where to go.
+' WiFi disabled or already connected -> hosts; a stored SSID -> wait for it
+' to come up (ST_CONNECT_WIFI); nothing stored, no link, or any abort ->
+' scan. Mirrors src/check_wifi.c in the C ports.
 ' ---------------------------------------------------------------------------
 do_check_wifi: PROCEDURE
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"FUJINET CONFIG  INTV"
+
+    ' scan screen is the fallback for every exit that isn't usable WiFi
+    ws_sub = WS_SCAN
+    state = ST_SET_WIFI
+
+    ' The RP2040 publishes ESP32 link state at FN_LINK every service pass;
+    ' at power-on the ESP32 may still be booting/enumerating. Poll that
+    ' cheaply (no transaction, no mailbox timeout) until it comes up.
+    IF (PEEK(FN_LINK) AND 255) = 0 THEN
+        PRINT AT screenpos(0,5) COLOR COL_DIM,"WAITING FOR FUJINET "
+        PRINT AT screenpos(0,11) COLOR COL_DIM,"PRESS KEY TO SKIP   "
+        #fn_t = 0
+        WHILE ((PEEK(FN_LINK) AND 255) = 0) AND (#fn_t < LINK_WAIT_FRAMES)
+            WAIT
+            GOSUB in_poll
+            IF (in_btn <> 0) OR (in_key <> KEYPAD_NONE) THEN
+                #fn_t = LINK_WAIT_FRAMES
+            ELSE
+                #fn_t = #fn_t + 1
+            END IF
+        WEND
+        IF (PEEK(FN_LINK) AND 255) = 0 THEN RETURN
+        s_row = 11 : GOSUB scr_row_clear
+    END IF
+
+    s_row = 5 : GOSUB scr_row_clear
     PRINT AT screenpos(2,5) COLOR COL_DIM,"CHECKING WIFI..."
+
+    GOSUB fj_get_wifi_enabled
+    IF fn_ok THEN
+        IF (PEEK(FN_RX) AND 255) = 0 THEN
+            state = ST_HOSTS
+            RETURN
+        END IF
+    END IF
 
     GOSUB fj_get_wifi_status
     wifi_status = 0
@@ -39,9 +78,18 @@ do_check_wifi: PROCEDURE
 
     IF wifi_status = WIFI_STATUS_CONNECTED THEN
         state = ST_HOSTS
-    ELSE
-        ws_sub = WS_SCAN
-        state = ST_SET_WIFI
+        RETURN
+    END IF
+
+    ' Not up yet: a stored SSID means wait for it rather than rescanning.
+    GOSUB fj_get_ssid
+    IF fn_ok THEN
+        IF (PEEK(FN_RX) AND 255) <> 0 THEN
+            FOR ws_i = 0 TO 32
+                POKE (SC_SSID + ws_i), PEEK(FN_RX + ws_i) AND 255
+            NEXT ws_i
+            state = ST_CONNECT_WIFI
+        END IF
     END IF
 END
 
@@ -166,7 +214,7 @@ ws_do_done: PROCEDURE
     ws_sub = WS_SCAN   ' reset for next time this screen is entered
     IF fn_ok = 0 THEN
         PRINT AT screenpos(2,3) COLOR COL_ERROR,"SAVE FAILED"
-        GOSUB ws_pause
+        ws_delay = 120 : GOSUB ws_pause
     ELSE
         state = ST_CONNECT_WIFI
     END IF
@@ -174,29 +222,43 @@ END
 
 ' ---------------------------------------------------------------------------
 ' do_connect_wifi: poll GET_WIFISTATUS until connected, a definite failure,
-' or WIFI_CONNECT_TRIES polls elapse. Each poll is its own mailbox
-' transaction (so this already paces itself at roughly one per WAIT-bounded
-' round trip; no extra delay needed between tries).
+' or WIFI_CONNECT_TRIES polls elapse, pacing ~2s between polls -- this
+' firmware only ever returns 3/6, so the retry budget is the real exit.
+' Any keypress skips straight to the scan screen.
 ' ---------------------------------------------------------------------------
 do_connect_wifi: PROCEDURE
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"CONNECTING..."
     s_row = 3 : s_col = 2 : s_max = 17 : s_col_color = COL_VALUE
     #s_src = SC_SSID : GOSUB scr_puts
+    PRINT AT screenpos(0,11) COLOR COL_DIM,"PRESS KEY TO SKIP   "
 
+    ws_abort = 0
     ws_tries = 0
     wifi_status = 0
-    WHILE (ws_tries < WIFI_CONNECT_TRIES) AND (wifi_status <> WIFI_STATUS_CONNECTED) AND (wifi_status <> WIFI_STATUS_CONNECT_FAILED)
+    WHILE (ws_abort = 0) AND (ws_tries < WIFI_CONNECT_TRIES) AND (wifi_status <> WIFI_STATUS_CONNECTED) AND (wifi_status <> WIFI_STATUS_CONNECT_FAILED)
         GOSUB fj_get_wifi_status
         IF fn_ok THEN wifi_status = PEEK(FN_RX) AND 255
         ws_tries = ws_tries + 1
+        IF wifi_status <> WIFI_STATUS_CONNECTED THEN
+            FOR ws_i = 0 TO 119
+                WAIT
+                GOSUB in_poll
+                IF (in_btn <> 0) OR (in_key <> KEYPAD_NONE) THEN
+                    ws_abort = 1
+                    ws_i = 119
+                END IF
+            NEXT ws_i
+        END IF
     WEND
 
     IF wifi_status = WIFI_STATUS_CONNECTED THEN
         state = ST_HOSTS
     ELSE
-        PRINT AT screenpos(2,6) COLOR COL_ERROR,"CONNECT FAILED"
-        GOSUB ws_pause
+        IF ws_abort = 0 THEN
+            PRINT AT screenpos(2,6) COLOR COL_ERROR,"CONNECT FAILED"
+            ws_delay = 120 : GOSUB ws_pause
+        END IF
         ws_sub = WS_SCAN
         state = ST_SET_WIFI
     END IF

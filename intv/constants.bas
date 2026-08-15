@@ -136,7 +136,7 @@
     DIM host_slot, sel_row
 
     ' -------------------------------------------------------------------
-    ' Scratch RAM ($9000-$97FF) -- ours, outside the mailbox proper ($9800+).
+    ' Scratch RAM ($9000-$97FF) -- ours, outside the mailbox proper ($9C00+).
     ' Holds state that must survive across multiple mailbox transactions,
     ' since the mailbox's own TX/RX buffers are overwritten by every call.
     ' -------------------------------------------------------------------

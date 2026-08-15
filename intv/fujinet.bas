@@ -7,43 +7,46 @@
 ' device or appkeys directly (ROM transfer is handled entirely by the ESP32
 ' media-type layer via MOUNT_IMAGE), so those blocks are dropped here.
 '
-' MEMATTR intentionally stops at $97FF, short of the $9800-$9FFF mailbox
-' itself: on real hardware the RP2040 maps that whole window as RAM
-' unconditionally (inty_cart.c hardcodes it, independent of what this .cfg
-' says), so declaring less here doesn't affect real hardware or what POKE
-' can reach at runtime. But jzIntv's --fujinet peripheral emulation
-' registers its own handler for $9800-$9FFF *after* the cart's generic
-' MEMATTR RAM, and its layered bus dispatch lets whichever peripheral
-' registered first answer a given address -- so declaring the full
-' $8000-$9FFF range here would silently shadow the emulator's FujiNet
-' peripheral with inert RAM, and the mailbox would never come up under
-' --fujinet even though it works on real hardware.
-    ASM MEMATTR $8000, $97FF, "+RWN"
+' MEMATTR goes all the way to $9BFF, unlike the original PiRTO II layout
+' (which stopped at $97FF, short of the mailbox). On a Minty cartridge
+' $8000-$9FFF is JLP RAM, and the mailbox now lives at the *top* of that
+' window ($9C00-$9F3F) instead of claiming the whole thing -- see
+' fuji_mailbox.h and cartridge.c's window generalization. Declaring RAM
+' through $9BFF here (not $9FFF) deliberately stops short of the mailbox
+' range for the same reason the original comment gave: jzIntv's --fujinet
+' peripheral emulation registers its own handler for $9C00-$9F3F *after*
+' the cart's generic MEMATTR RAM, and its layered bus dispatch lets
+' whichever peripheral registered first answer a given address -- so
+' declaring the mailbox range here would silently shadow the emulator's
+' FujiNet peripheral with inert RAM, and the mailbox would never come up
+' under --fujinet even though it works on real hardware.
+    ASM MEMATTR $8000, $9BFF, "+RWN"
 
-    CONST FN_MAGIC0     = $9800
-    CONST FN_MAGIC1     = $9801
-    CONST FN_SEQ        = $9803
-    CONST FN_ACKSEQ     = $9804
-    CONST FN_DEVICE     = $9805
-    CONST FN_CMD        = $9806
-    CONST FN_NPARAM     = $9807
-    CONST FN_TXLEN_LO   = $9808
-    CONST FN_TXLEN_HI   = $9809
-    CONST FN_ERR        = $980B
-    CONST FN_RXLEN_LO   = $980C
-    CONST FN_RXLEN_HI   = $980D
-    CONST FN_REPLY_CMD  = $980E
-    CONST FN_PARAM_SIZE = $9810
-    CONST FN_PARAM_VAL  = $9820
-    CONST FN_TX         = $9840
-    CONST FN_RX         = $9940
+    CONST FN_MAGIC0     = $9C00
+    CONST FN_MAGIC1     = $9C01
+    CONST FN_SEQ        = $9C03
+    CONST FN_ACKSEQ     = $9C04
+    CONST FN_DEVICE     = $9C05
+    CONST FN_CMD        = $9C06
+    CONST FN_NPARAM     = $9C07
+    CONST FN_TXLEN_LO   = $9C08
+    CONST FN_TXLEN_HI   = $9C09
+    CONST FN_ERR        = $9C0B
+    CONST FN_RXLEN_LO   = $9C0C
+    CONST FN_RXLEN_HI   = $9C0D
+    CONST FN_REPLY_CMD  = $9C0E
+    CONST FN_LINK       = $9C0F   ' RP2040-published: 1 = ESP32-S3 CDC link up
+    CONST FN_PARAM_SIZE = $9C10
+    CONST FN_PARAM_VAL  = $9C20
+    CONST FN_TX         = $9C40
+    CONST FN_RX         = $9D40   ' RX is now 512 bytes max (was 1536) -- see fuji_mailbox.h
 
     ' Boot-progress cells (RP2040-published), used by st_boot.bas while
     ' polling a MOUNT_IMAGE transaction that may run far longer than an
     ' ordinary mailbox round trip. See fuji_mailbox.h for the full layout.
-    CONST FN_BOOT_STATE = $9818
-    CONST FN_BOOT_PCT   = $9819
-    CONST FN_BOOT_ERR   = $981A
+    CONST FN_BOOT_STATE = $9C18
+    CONST FN_BOOT_PCT   = $9C19
+    CONST FN_BOOT_ERR   = $9C1A
     CONST FUJI_BOOT_FAILED = $80   ' FN_BOOT_STATE value; mirrors fuji_mailbox.h
 
     CONST FUJICMD_ACK = $06

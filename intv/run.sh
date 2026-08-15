@@ -9,7 +9,7 @@
 set -e
 
 cd "$(dirname "$0")"
-SDL_AUDIODRIVER=pulseaudio
+export SDL_AUDIODRIVER=${SDL_AUDIODRIVER:-pulseaudio}
 JZINTV_DIR=${JZINTV_DIR:-$HOME/Workspace/jzintv-20200712-src}
 JZINTV=${JZINTV:-$JZINTV_DIR/bin/jzintv}
 EXEC_BIN=${EXEC_BIN:-$JZINTV_DIR/rom/exec.bin}
