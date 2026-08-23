@@ -80,8 +80,7 @@ fj_get_wifi_status: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
-' fj_get_wifi_enabled: no params. Reply byte 0 is 0 only if WiFi is switched
-' off outright in the FujiNet's own stored config.
+' fj_get_wifi_enabled: no params. Reply byte 0 = 0 if WiFi disabled in config.
 ' ---------------------------------------------------------------------------
 fj_get_wifi_enabled: PROCEDURE
     mb_dev = FUJI_DEVICEID
@@ -92,9 +91,8 @@ fj_get_wifi_enabled: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
-' fj_get_ssid: no params. Reply is the STORED SSIDConfig -- ssid[33] +
-' password[64], NUL-padded -- independent of whether the radio has
-' associated yet. Byte 0 = 0 means no network is configured.
+' fj_get_ssid: no params. Reply = STORED ssid[33]+password[64]; byte 0 = 0
+' means none configured.
 ' ---------------------------------------------------------------------------
 fj_get_ssid: PROCEDURE
     mb_dev = FUJI_DEVICEID

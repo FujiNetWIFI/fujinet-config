@@ -14,9 +14,10 @@
 
     CONST BOOT_TIMEOUT_FRAMES = 3600   ' ~60s at 60Hz
 
-    DIM bt_hstart, bt_t, bt_seq, bt_pct, bt_lastpct
+    DIM bt_hstart, bt_t, bt_seq, bt_pct, bt_lastpct, bt_isboot
 
 do_boot: PROCEDURE
+    bt_isboot = 0
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"BOOTING"
 
@@ -72,6 +73,8 @@ boot_mount_with_progress: PROCEDURE
         END IF
     WEND
 
+    bt_isboot = 0
+
     IF bt_t >= BOOT_TIMEOUT_FRAMES THEN
         fn_ok = 0
         mb_err = 0
@@ -80,7 +83,14 @@ boot_mount_with_progress: PROCEDURE
 
     IF (PEEK(FN_REPLY_CMD) AND 255) <> FUJICMD_ACK THEN
         fn_ok = 0
-        mb_err = PEEK(FN_ERR) AND 255
+        ' FN_BOOT_STATE/ERR survive a NAK -- prefer the RP2040's boot
+        ' verdict over FN_ERR (which is 0/FB_OK in exactly this case)
+        IF (PEEK(FN_BOOT_STATE) AND 255) = FUJI_BOOT_FAILED THEN
+            mb_err = PEEK(FN_BOOT_ERR) AND 255
+            bt_isboot = 1
+        ELSE
+            mb_err = PEEK(FN_ERR) AND 255
+        END IF
         RETURN
     END IF
 
@@ -98,6 +108,7 @@ boot_mount_with_progress: PROCEDURE
     IF (PEEK(FN_BOOT_STATE) AND 255) = FUJI_BOOT_FAILED THEN
         fn_ok = 0
         mb_err = PEEK(FN_BOOT_ERR) AND 255
+        bt_isboot = 1
         RETURN
     END IF
 
@@ -123,6 +134,15 @@ boot_fail: PROCEDURE
     PRINT AT screenpos(0,8) COLOR COL_DIM,"ERR CODE:"
     #s_val = mb_err
     PRINT AT screenpos(10,8) COLOR COL_VALUE,<.3>#s_val
+    ' named reasons mirror FUJI_BOOT_ERR_* (0xEE is jzIntv's, not this namespace)
+    IF bt_isboot = 1 THEN
+        IF mb_err = 1 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"BAD ROM HEADER"
+        IF mb_err = 2 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"TRUNCATED XFER"
+        IF mb_err = 3 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"NO MAPPING"
+        IF mb_err = 4 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"JLP CONFLICT"
+        IF mb_err = 5 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"BAD CFG FILE"
+        IF mb_err = 6 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"RAM TOO BIG"
+    END IF
     PRINT AT screenpos(0,11) COLOR COL_ERROR,"BOOT FAILED         "
     FOR bt_t = 0 TO 119
         WAIT

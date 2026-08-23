@@ -28,22 +28,18 @@ ws_pause: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
-' do_check_wifi: wait for the ESP32-S3 link, then decide where to go.
-' WiFi disabled or already connected -> hosts; a stored SSID -> wait for it
-' to come up (ST_CONNECT_WIFI); nothing stored, no link, or any abort ->
-' scan. Mirrors src/check_wifi.c in the C ports.
+' do_check_wifi: wait for the ESP32 link, then: disabled/connected -> hosts;
+' stored SSID -> ST_CONNECT_WIFI; anything else -> scan. Per src/check_wifi.c.
 ' ---------------------------------------------------------------------------
 do_check_wifi: PROCEDURE
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"FUJINET CONFIG  INTV"
 
-    ' scan screen is the fallback for every exit that isn't usable WiFi
+    ' fallback for every exit that isn't usable WiFi
     ws_sub = WS_SCAN
     state = ST_SET_WIFI
 
-    ' The RP2040 publishes ESP32 link state at FN_LINK every service pass;
-    ' at power-on the ESP32 may still be booting/enumerating. Poll that
-    ' cheaply (no transaction, no mailbox timeout) until it comes up.
+    ' FN_LINK is a free poll -- the ESP32 may still be booting at power-on
     IF (PEEK(FN_LINK) AND 255) = 0 THEN
         PRINT AT screenpos(0,5) COLOR COL_DIM,"WAITING FOR FUJINET "
         PRINT AT screenpos(0,11) COLOR COL_DIM,"PRESS KEY TO SKIP   "
@@ -81,7 +77,7 @@ do_check_wifi: PROCEDURE
         RETURN
     END IF
 
-    ' Not up yet: a stored SSID means wait for it rather than rescanning.
+    ' stored SSID -> wait for it rather than rescanning
     GOSUB fj_get_ssid
     IF fn_ok THEN
         IF (PEEK(FN_RX) AND 255) <> 0 THEN
@@ -221,10 +217,8 @@ ws_do_done: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
-' do_connect_wifi: poll GET_WIFISTATUS until connected, a definite failure,
-' or WIFI_CONNECT_TRIES polls elapse, pacing ~2s between polls -- this
-' firmware only ever returns 3/6, so the retry budget is the real exit.
-' Any keypress skips straight to the scan screen.
+' do_connect_wifi: poll GET_WIFISTATUS ~2s apart until connected or the try
+' budget runs out (firmware only returns 3/6); any keypress skips to scan.
 ' ---------------------------------------------------------------------------
 do_connect_wifi: PROCEDURE
     GOSUB scr_clear
