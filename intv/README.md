@@ -21,6 +21,7 @@ cartridge's boot ROM.
 | `st_wifi.bas` | `ST_CHECK_WIFI` / `ST_CONNECT_WIFI` / `ST_SET_WIFI` |
 | `st_hosts.bas` | `ST_HOSTS` — the 8 host slots, list/select/edit |
 | `st_file.bas` | `ST_SELECT_FILE` — directory browsing, paging, `.cfg` suppression |
+| `st_copy.bas` | Filter (keypad 4) and copy-file (keypad 5) for the file browser |
 | `st_info.bas` | `ST_INFO` — SSID/IP/firmware version display |
 | `st_boot.bas` | `ST_BOOT` — `SET_DEVICE_FULLPATH` + `MOUNT_IMAGE`, progress bar |
 | `mkromh.py` | Packs `config.bin` into firmware's `_bootrom[]` array format |
@@ -30,10 +31,27 @@ cartridge's boot ROM.
 Covers WiFi setup (scan, custom SSID, on-screen character-grid password
 entry, connect), the 8 host slots (list, mount, rename), directory
 browsing (paging, subfolder navigation, `.cfg`-sibling suppression,
-bounce-scrolling long filenames), and boot. Deliberately out of scope for
-this pass: the device-slot screen, mount/eject, read/write mode toggles,
-copy-file, new-disk, and appkeys — none of them are needed to get from
-power-on to a booted game, which is this program's whole job.
+bounce-scrolling long filenames, filtering), copying a file between host
+slots, and boot. Deliberately out of scope: the device-slot screen,
+mount/eject, read/write mode toggles, new-disk, and appkeys — none of them
+are needed to get from power-on to a booted game, which is this program's
+whole job.
+
+### File browser keys
+
+| Key | Action |
+|---|---|
+| disc ↑/↓ | move the highlight |
+| BTN | enter folder / boot file (or, mid-copy, copy here) |
+| `1` | up one directory |
+| `2` / `3` | previous / next page |
+| `4` | set the filter (a `!name` pattern searches subdirectories on TNFS) |
+| `5` | mark the highlighted file for copying; press again in the destination directory to copy |
+| CLEAR | back to the host slots (cancels an in-progress copy) |
+
+Copying reuses the host-slot screen as its destination picker: after `5`,
+that screen re-renders as "COPY TO HOST", and picking a slot mounts it and
+drops you into its root to choose a destination directory.
 
 ## Build
 

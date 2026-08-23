@@ -11,6 +11,10 @@
 '     which both transaction_get() a fixed MAX_FILENAME_LEN=256-byte
 '     buffer, must be sent as a full 256-byte NUL-padded payload -- not a
 '     short "path\0filter\0" -- or the transaction NAKs.
+'   - COPY_FILE is the exception to that rule: it never calls
+'     transaction_get() at all, reading packet.dataAsString() instead, so
+'     its payload must be sent at its EXACT length -- padding it out would
+'     bury NULs inside the destination filename.
 '   - SET_SSID requires nparam>=1 (rs232Fuji.cpp:241), though the param
 '     value itself is ignored; payload is SSIDConfig, ssid[33]+password[64]
 '     = 97 bytes exactly.
@@ -41,6 +45,7 @@
     CONST FUJICMD_CLOSE_DIRECTORY            = $F5
     CONST FUJICMD_SET_DIRECTORY_POSITION     = $E4
     CONST FUJICMD_SET_DEVICE_FULLPATH        = $E2
+    CONST FUJICMD_COPY_FILE                  = $D8
 
     CONST MODE_READ = 1
 
@@ -198,12 +203,18 @@ END
 
 ' ---------------------------------------------------------------------------
 ' fj_open_directory: fc_hs = host slot, #fn_src = address of a NUL-
-' terminated path (e.g. SC_PATH). No filter is ever sent -- .cfg-sibling
-' suppression happens client-side in st_file.bas, since the firmware's
-' wildcard matcher (util_wildcard_match: only '*'/'?', no alternation or
-' negation) cannot express "*.bin or *.rom but not *.cfg" in one pattern.
-' Builds and sends the full 256-byte NUL-padded payload transaction_get()
-' requires (see header comment).
+' terminated path (e.g. SC_PATH). The wire format is "path\0filter\0" NUL-
+' padded to exactly 256 bytes -- fujiDevice.cpp's
+' fujicore_open_directory_success splits at the first NUL and treats
+' everything after it as the pattern.
+'
+' The filter is always taken from SC_FILTER (empty = no pattern), so every
+' call site -- page draw, re-read of the selected row, folder advance --
+' automatically stays on the same view. Note this is only HALF the
+' filtering: .cfg-sibling suppression still happens client-side in
+' st_file.bas, because the firmware's wildcard matcher (util_wildcard_match:
+' only '*'/'?', no alternation or negation) cannot express "not *.cfg" in a
+' pattern, no matter what the user typed.
 ' ---------------------------------------------------------------------------
 fj_open_directory: PROCEDURE
     mb_dev = FUJI_DEVICEID
@@ -216,8 +227,10 @@ fj_open_directory: PROCEDURE
     #fn_txlen = 0
     GOSUB fn_putstr                       ' copies path+NUL, advances #fn_txlen
 
-    POKE (FN_TX + #fn_txlen), 0           ' empty filter string
-    #fn_txlen = #fn_txlen + 1
+    ' Safe to clobber #fn_src now -- the caller's path is already staged.
+    #fn_src = SC_FILTER : ls_max = FILTER_LEN : GOSUB fn_strlen
+    fn_len = fn_len + 1                   ' include the filter's own NUL
+    GOSUB fn_putstr
 
     FOR fc_i = #fn_txlen TO 255
         POKE (FN_TX + fc_i), 0
@@ -320,5 +333,28 @@ fj_mount_image: PROCEDURE
     pm_i = 0 : pm_size = 1 : #pm_val = fc_ds   : GOSUB fn_param
     pm_i = 1 : pm_size = 1 : #pm_val = fc_mode : GOSUB fn_param
     #fn_txlen = 0
+    GOSUB fn_transact
+END
+
+' ---------------------------------------------------------------------------
+' fj_copy_file: fc_hs = SOURCE host slot, fc_ds = DESTINATION host slot,
+' both ALREADY 1-BASED -- unlike every other command here, COPY_FILE numbers
+' the slots 1-8 rather than 0-7 (fujiDevice.cpp's fujicore_copy_file_success
+' rejects 0 outright and then decrements). st_copy.bas adds the one.
+'
+' The caller stages the copySpec ("sourcefullpath|destfullpath") into FN_TX
+' and sets #fn_txlen to its EXACT byte count -- no NUL terminator and no
+' padding, unlike OPEN_DIRECTORY/SET_DEVICE_FULLPATH. Those two are read by
+' the firmware with transaction_get() into a fixed 256-byte buffer;
+' COPY_FILE instead reads packet.dataAsString() (rs232Fuji.cpp), which
+' returns exactly the bytes sent, so a trailing NUL would end up inside the
+' destination filename.
+' ---------------------------------------------------------------------------
+fj_copy_file: PROCEDURE
+    mb_dev = FUJI_DEVICEID
+    mb_cmd = FUJICMD_COPY_FILE
+    mb_nparam = 2
+    pm_i = 0 : pm_size = 1 : #pm_val = fc_hs : GOSUB fn_param
+    pm_i = 1 : pm_size = 1 : #pm_val = fc_ds : GOSUB fn_param
     GOSUB fn_transact
 END

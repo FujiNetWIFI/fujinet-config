@@ -7,6 +7,12 @@
 ' FujiNet Game Lobby ROM from ec.tnfs.io (st_lobby.bas). (Not CLEAR for
 ' edit -- CLEAR is free for a future "clear slot" action, and there's no
 ' need for a "back" key here since this is the program's home screen.)
+'
+' This screen doubles as the copy destination picker (src/config's separate
+' DESTINATION_HOST_SLOT state): when st_copy.bas sets copy_mode it re-enters
+' here, and the only differences are cosmetic plus a narrower key set --
+' BTN's mount-and-browse path is already exactly what a destination browse
+' needs. CLEAR is bound only in that mode, to cancel the copy.
 
     DIM hosts_shown, hd_i, hd_row, hd_col, hd_color
 
@@ -15,10 +21,16 @@ do_hosts: PROCEDURE
         GOSUB fj_read_host_slots
         sel_row = 0
         GOSUB scr_clear
-        PRINT AT screenpos(0,0) COLOR COL_NORMAL,"HOST SLOTS"
-        GOSUB hosts_draw_list
-        PRINT AT screenpos(0,10) COLOR COL_HILIGHT,"0=PLAY GAME LOBBY"
-        PRINT AT screenpos(0,11) COLOR COL_DIM,"BTN=OPEN ENT=EDT 9=I"
+        IF copy_mode = 1 THEN
+            PRINT AT screenpos(0,0) COLOR COL_HILIGHT,"COPY TO HOST"
+            GOSUB hosts_draw_list
+            PRINT AT screenpos(0,11) COLOR COL_DIM,"BTN=DEST  CLR=CANCEL"
+        ELSE
+            PRINT AT screenpos(0,0) COLOR COL_NORMAL,"HOST SLOTS"
+            GOSUB hosts_draw_list
+            PRINT AT screenpos(0,10) COLOR COL_HILIGHT,"0=PLAY GAME LOBBY"
+            PRINT AT screenpos(0,11) COLOR COL_DIM,"BTN=OPEN ENT=EDT 9=I"
+        END IF
         hosts_shown = 1
     END IF
 
@@ -37,20 +49,30 @@ do_hosts: PROCEDURE
         GOSUB hosts_draw_list
     END IF
 
-    IF in_key = KEYPAD_0 THEN
-        GOSUB hosts_launch_lobby
-        RETURN
-    END IF
+    ' Lobby, info and rename are all meaningless mid-copy -- the only
+    ' choices there are "which host" and "cancel".
+    IF copy_mode = 1 THEN
+        IF in_key = KEYPAD_CLEAR THEN
+            copy_mode = 0
+            hosts_shown = 0    ' redraw as the ordinary host list
+            RETURN
+        END IF
+    ELSE
+        IF in_key = KEYPAD_0 THEN
+            GOSUB hosts_launch_lobby
+            RETURN
+        END IF
 
-    IF in_key = KEYPAD_9 THEN
-        hosts_shown = 0
-        state = ST_INFO
-        RETURN
-    END IF
+        IF in_key = KEYPAD_9 THEN
+            hosts_shown = 0
+            state = ST_INFO
+            RETURN
+        END IF
 
-    IF in_key = KEYPAD_ENTER THEN
-        GOSUB hosts_edit_selected
-        RETURN
+        IF in_key = KEYPAD_ENTER THEN
+            GOSUB hosts_edit_selected
+            RETURN
+        END IF
     END IF
 
     IF in_btn <> 0 THEN

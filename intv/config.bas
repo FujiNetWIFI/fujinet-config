@@ -30,8 +30,15 @@
     ASM ORG $D000
     INCLUDE "st_boot.bas"
     INCLUDE "st_lobby.bas"
+    INCLUDE "st_copy.bas"
 
 cfg_start:
+    ' fj_open_directory reads SC_FILTER on every call, and cart RAM comes up
+    ' with undefined contents -- clear it before anything can send garbage as
+    ' a search pattern. (sf_init clears it again per browse; this is the
+    ' cold-boot floor.)
+    POKE (SC_FILTER), 0
+
     GOSUB scr_clear
     GOSUB fn_wait_mailbox
     IF fn_ok = 0 THEN

@@ -129,11 +129,18 @@
     CONST DIR_MAX_LEN      = 36    ' short-form entry length from READ_DIR_ENTRY
     CONST NUM_HOST_SLOTS   = 8
     CONST HOST_NAME_LEN    = 32
+    CONST FILTER_LEN       = 32    ' matches src/select_file.c's char filter[32]
 
     ' Cross-module selection state (device slot 0 is the only one this
     ' program ever uses -- see the plan doc's scope: no device-slot screen).
+    '
+    ' copy_mode mirrors src/select_file.c's bool of the same name: 0 = an
+    ' ordinary browse, 1 = a copy is in flight and the host list / file
+    ' browser are picking the DESTINATION. copy_host_slot remembers the
+    ' source host across that hand-off (src/perform_copy.c:13).
     CONST DEVICE_SLOT = 0
     DIM host_slot, sel_row
+    DIM copy_mode, copy_host_slot
 
     ' -------------------------------------------------------------------
     ' Scratch RAM ($9000-$97FF) -- ours, outside the mailbox proper ($9C00+).
@@ -151,7 +158,9 @@
     CONST SC_EPOS  = $93D0  '  32  per-visible-row ABSOLUTE directory position, 10 x 2 LE
     CONST SC_PSTK  = $93F0  '  20  page-start position stack, 10 x 2 LE (prev-page)
     CONST SC_BOOTPATH = $9410  ' 256  full path (SC_PATH + chosen filename) for SET_DEVICE_FULLPATH
-    ' $9510-$97FF free
+    CONST SC_FILTER = $9510  '  32  active directory filter, NUL-terminated ("" = none)
+    CONST SC_SRC    = $9530  ' 224  copy source: full path of the marked file
+    ' $9610-$97FF free
 
     ' Directory-browsing state shared between st_hosts.bas (which resets it
     ' on mount) and st_file.bas.

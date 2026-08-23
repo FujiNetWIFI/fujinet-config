@@ -4,6 +4,11 @@
 ' non-directory entry builds its full path into SC_BOOTPATH and hands off
 ' to ST_BOOT.
 '
+' Keypad 4 (filter) and 5 (copy) are handled by st_copy.bas -- their bodies
+' live in the $D000 segment because the default $5000-$6FFF one is
+' essentially full (see config.bas). sf_draw_hint lives there too, since the
+' footer text it paints is mostly about those two features.
+'
 ' Nothing here ever caches a filename across frames -- only its length
 ' (SC_ELEN), directory flag (SC_EDIR) and absolute directory position
 ' (SC_EPOS) survive a page draw. Anywhere the real name is needed again
@@ -23,6 +28,11 @@ END
 
 sf_init: PROCEDURE
     sel_row = 0
+    ' Entering a browse always starts unfiltered, exactly as
+    ' select_file_init() does in src/select_file.c. sf_init is only ever
+    ' reached from st_hosts.bas's mount path, so this covers both an
+    ' ordinary browse and the destination browse of a copy.
+    POKE (SC_FILTER), 0
     sf_sub = SF_DISPLAY
 END
 
@@ -40,6 +50,9 @@ sf_display: PROCEDURE
     sf_hstart = 0
     IF fn_len > SCREEN_COLS THEN sf_hstart = fn_len - SCREEN_COLS
     s_row = 0 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_DIM
+    ' While a copy is in flight this browse is picking the DESTINATION --
+    ' highlight the path so it can't be mistaken for an ordinary browse.
+    IF copy_mode = 1 THEN s_col_color = COL_HILIGHT
     #s_src = SC_PATH + sf_hstart : GOSUB scr_puts
 
     PRINT AT screenpos(0,11) COLOR COL_DIM,"LOADING...          "
@@ -110,10 +123,8 @@ sf_display: PROCEDURE
         RETURN
     END IF
 
-    IF num_rows = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_DIM,"<EMPTY>     CLR=BACK"
-    ELSE
-        PRINT AT screenpos(0,11) COLOR COL_DIM,"1=UP 2=PRV 3=NXT CLR"
+    GOSUB sf_draw_hint
+    IF num_rows > 0 THEN
         sel_row = 0
         s_row = FILES_START_ROW : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
         GOSUB scr_recolor
@@ -166,7 +177,12 @@ sf_choose: PROCEDURE
     IF in_key = KEYPAD_1 THEN GOSUB sf_start_devance : RETURN
     IF in_key = KEYPAD_2 THEN GOSUB sf_start_prev : RETURN
     IF in_key = KEYPAD_3 THEN GOSUB sf_start_next : RETURN
+    IF in_key = KEYPAD_4 THEN GOSUB sf_do_filter : RETURN
+    IF in_key = KEYPAD_5 THEN GOSUB sf_do_copy : RETURN
     IF in_key = KEYPAD_CLEAR THEN
+        ' Leaving file selection abandons an in-progress copy, matching
+        ' src/atari/input.c's ESC/back handling.
+        copy_mode = 0
         state = ST_HOSTS
         RETURN
     END IF
@@ -257,7 +273,15 @@ sf_choose_entry: PROCEDURE
     IF sf_isdir = 1 THEN
         GOSUB sf_advance
     ELSE
-        GOSUB sf_pick_boot
+        ' Mid-copy, "select a file" means copy here, not boot -- booting
+        ' would abandon the copy and leave CONFIG entirely. Same rule as
+        ' select_file_done() in src/select_file.c, which routes to
+        ' PERFORM_COPY instead of the boot path whenever copy_mode is set.
+        IF copy_mode = 1 THEN
+            GOSUB cp_perform
+        ELSE
+            GOSUB sf_pick_boot
+        END IF
     END IF
 END
 
