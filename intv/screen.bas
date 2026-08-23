@@ -65,6 +65,29 @@ scr_dec: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
+' scr_hilite_digits: recolor every ASCII digit already drawn on row s_row to
+' s_col_color, leaving every other cell alone. Used on the key-hint footers
+' so the key you press reads at a glance against its label -- IntyBASIC's
+' PRINT applies one color to a whole literal, and splitting each hint into
+' per-colored PRINT AT fragments would cost far more ROM than one pass over
+' the row.
+'
+' Cards are ASCII-32 (see the header), so '0'-'9' are cards 16-25, and the
+' screen word is card*8 + color -- hence the /8 to recover the card. Only
+' call this on rows whose digits are all key names; a row showing arbitrary
+' text (a filter, a filename) would get its digits highlighted too.
+' ---------------------------------------------------------------------------
+scr_hilite_digits: PROCEDURE
+    FOR s_i = 0 TO SCREEN_COLS - 1
+        #s_val = #BACKTAB(s_row * SCREEN_COLS + s_i)
+        s_c = (#s_val / 8) AND 255
+        IF s_c >= 16 AND s_c <= 25 THEN
+            #BACKTAB(s_row * SCREEN_COLS + s_i) = (#s_val AND $FFF8) + s_col_color
+        END IF
+    NEXT s_i
+END
+
+' ---------------------------------------------------------------------------
 ' scr_recolor: change only the COLOR of s_max already-drawn characters on
 ' row s_row starting at column s_col, to s_col_color -- the card (glyph)
 ' underneath is left untouched. Used to re-highlight a cursor row without

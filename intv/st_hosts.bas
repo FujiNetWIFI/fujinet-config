@@ -28,8 +28,13 @@ do_hosts: PROCEDURE
         ELSE
             PRINT AT screenpos(0,0) COLOR COL_NORMAL,"HOST SLOTS"
             GOSUB hosts_draw_list
-            PRINT AT screenpos(0,10) COLOR COL_HILIGHT,"0=PLAY GAME LOBBY"
+            PRINT AT screenpos(0,10) COLOR COL_DIM,"0=PLAY GAME LOBBY"
             PRINT AT screenpos(0,11) COLOR COL_DIM,"BTN=OPEN ENT=EDT 9=I"
+            ' keys yellow, labels blue -- same rule as the file browser's
+            ' footer (st_copy.bas's sf_hint_keys).
+            s_col_color = COL_HILIGHT
+            s_row = 10 : GOSUB scr_hilite_digits
+            s_row = 11 : GOSUB scr_hilite_digits
         END IF
         hosts_shown = 1
     END IF

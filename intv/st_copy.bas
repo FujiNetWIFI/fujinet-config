@@ -22,7 +22,7 @@
 '
 ' There is no confirmation step, matching every other platform's CONFIG.
 
-    DIM cp_i, cp_len, cp_dlen, cp_base
+    DIM cp_i, cp_len, cp_dlen, cp_base, cp_ok, cp_cfg
     DIM #cp_total
 
 ' ---------------------------------------------------------------------------
@@ -36,7 +36,8 @@
 ' ---------------------------------------------------------------------------
 sf_draw_hint: PROCEDURE
     IF copy_mode = 1 THEN
-        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"5=COPY HERE  CLR=CAN"
+        PRINT AT screenpos(0,11) COLOR COL_DIM,"5=COPY HERE  CLR=CAN"
+        GOSUB sf_hint_keys
         RETURN
     END IF
 
@@ -44,9 +45,12 @@ sf_draw_hint: PROCEDURE
         ' An empty page is far more often the filter's doing than a genuinely
         ' empty directory, so point at the filter key rather than just "back".
         PRINT AT screenpos(0,11) COLOR COL_DIM,"<EMPTY> 4=FILTER CLR"
+        GOSUB sf_hint_keys
         RETURN
     END IF
 
+    ' NOT digit-highlighted: the filter is arbitrary user text, and a pattern
+    ' like "*.b1n" would come out with a stray yellow character.
     IF (PEEK(SC_FILTER) AND 255) <> 0 THEN
         PRINT AT screenpos(0,11) COLOR COL_DIM,"F:"
         s_row = 11 : s_col = 2 : s_max = 18 : s_col_color = COL_VALUE
@@ -55,6 +59,13 @@ sf_draw_hint: PROCEDURE
     END IF
 
     PRINT AT screenpos(0,11) COLOR COL_DIM,"1UP2PV3NX4FL5CP CLR "
+    GOSUB sf_hint_keys
+END
+
+' sf_hint_keys: yellow keys, blue labels, on the footer just drawn.
+sf_hint_keys: PROCEDURE
+    s_row = 11 : s_col_color = COL_HILIGHT
+    GOSUB scr_hilite_digits
 END
 
 ' ---------------------------------------------------------------------------
@@ -147,6 +158,53 @@ sf_do_copy: PROCEDURE
 END
 
 ' ---------------------------------------------------------------------------
+' ---------------------------------------------------------------------------
+' cp_copy_sibling: re-send the copySpec still sitting in FN_TX with both
+' ends' extensions swapped to .cfg, so a .bin arrives at the destination
+' with the memory map it needs. Sets cp_cfg = 1 if a sibling was copied.
+'
+' Not .bin-specific, because the firmware's own lookup isn't: diskTypeROM
+' .cpp replaces the BASENAME's extension with ".cfg" for any ROM it mounts
+' (.bin/.rom/.int/.itv), then retries ".CFG" for case-sensitive hosts. This
+' does the same, and writes the destination lowercase either way since
+' that's the spelling the firmware tries first.
+'
+' A miss is the normal case, not a failure -- most .rom files have no
+' sibling at all, and a .bin without one still boots off the emulator's
+' size-guess table. So a NAK here never touches cp_ok.
+'
+' Patching in place only works because every extension involved is exactly
+' 4 characters, which keeps #cp_total (and therefore #fn_txlen, which
+' fn_transact re-reads) correct. Anything else is skipped rather than
+' rebuilt -- none of the Intellivision ROM extensions are affected.
+' ---------------------------------------------------------------------------
+cp_copy_sibling: PROCEDURE
+    IF cp_len < 5 THEN RETURN
+    IF cp_len - 4 <= cp_base THEN RETURN            ' ".bin" with no basename
+    IF (PEEK(SC_SRC + cp_len - 4) AND 255) <> 46 THEN RETURN   ' no 4-char ext
+
+    ' destination always lowercase; source lowercase on the first attempt
+    POKE (FN_TX + #cp_total - 3), 99  : POKE (FN_TX + cp_len - 3), 99   ' c
+    POKE (FN_TX + #cp_total - 2), 102 : POKE (FN_TX + cp_len - 2), 102  ' f
+    POKE (FN_TX + #cp_total - 1), 103 : POKE (FN_TX + cp_len - 1), 103  ' g
+
+    fc_hs = copy_host_slot + 1
+    fc_ds = host_slot + 1
+    GOSUB fj_copy_file
+    IF fn_ok = 1 THEN
+        cp_cfg = 1
+        RETURN
+    END IF
+
+    ' retry the SOURCE as .CFG -- a case-sensitive host may spell it that way
+    POKE (FN_TX + cp_len - 3), 67    ' C
+    POKE (FN_TX + cp_len - 2), 70    ' F
+    POKE (FN_TX + cp_len - 1), 71    ' G
+    GOSUB fj_copy_file
+    IF fn_ok = 1 THEN cp_cfg = 1
+END
+
+' ---------------------------------------------------------------------------
 ' cp_perform: issue the copy into the directory currently being browsed.
 '
 ' The copySpec is "sourcefullpath|destfullpath", staged straight into FN_TX
@@ -195,11 +253,19 @@ cp_perform: PROCEDURE
     fc_hs = copy_host_slot + 1
     fc_ds = host_slot + 1
     GOSUB fj_copy_file
+    cp_ok = fn_ok
 
-    IF fn_ok = 1 THEN
-        PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPIED              "
-    ELSE
+    cp_cfg = 0
+    IF cp_ok = 1 THEN GOSUB cp_copy_sibling
+
+    IF cp_ok = 0 THEN
         PRINT AT screenpos(0,11) COLOR COL_ERROR,"COPY FAILED         "
+    ELSE
+        IF cp_cfg = 1 THEN
+            PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPIED + CFG        "
+        ELSE
+            PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPIED              "
+        END IF
     END IF
     ws_delay = 120 : GOSUB ws_pause
 
