@@ -1,0 +1,6 @@
+*.asm
+*.lst
+*.bin
+*.cfg
+*.rom
+config_rom.h

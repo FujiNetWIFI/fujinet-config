@@ -67,6 +67,7 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
+CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
 LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
 # logo_zx0.asm is shared with Dragon; LOGO.BIN is loaded via BASIC's LOADM
@@ -122,11 +123,6 @@ EXTRA_INCLUDE_ATARI = src/atari/asminc
 # Commodore 64 customization
 
 CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
-
-########################################
-# CoCo customization
-
-CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
 
 ########################################
 # Dragon customization
