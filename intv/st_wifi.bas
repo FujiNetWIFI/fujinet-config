@@ -175,6 +175,7 @@ ws_do_select: PROCEDURE
 END
 
 ws_do_custom: PROCEDURE
+    GOSUB grid_video
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"ENTER NETWORK NAME"
     POKE (SC_SSID), 0
@@ -190,6 +191,7 @@ ws_do_custom: PROCEDURE
 END
 
 ws_do_password: PROCEDURE
+    GOSUB grid_video
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"ENTER PASSWORD"
     #ge_dst = SC_PASS : g_max = 64

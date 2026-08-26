@@ -49,24 +49,30 @@ sf_display: PROCEDURE
     #fn_src = SC_PATH : ls_max = 192 : GOSUB fn_strlen
     sf_hstart = 0
     IF fn_len > SCREEN_COLS THEN sf_hstart = fn_len - SCREEN_COLS
-    s_row = 0 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_DIM
+    s_row = 0 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_NORMAL
     ' While a copy is in flight this browse is picking the DESTINATION --
     ' highlight the path so it can't be mistaken for an ordinary browse.
     IF copy_mode = 1 THEN s_col_color = COL_HILIGHT
     #s_src = SC_PATH + sf_hstart : GOSUB scr_puts
 
-    PRINT AT screenpos(0,11) COLOR COL_DIM,"LOADING...          "
+    ' Row 11 is the dark green command bar. COL_ERROR (red) reads poorly on
+    ' it, so failures are yellow here instead. Every print to that row wipes
+    ' its advance bit, hence the sf_bar after each (see csbar.bas).
+    PRINT AT screenpos(0,11) COLOR COL_NORMAL,"LOADING...          "
+    GOSUB sf_bar
 
     fc_hs = host_slot : GOSUB fj_mount_host
     IF fn_ok = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"MOUNT ERROR CLR=BACK"
-        num_rows = 0 : sf_sub = SF_CHOOSE : RETURN
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"MOUNT ERROR CLR=BACK"
+        num_rows = 0 : GOSUB sf_apply_stack
+        sf_sub = SF_CHOOSE : RETURN
     END IF
 
     #fn_src = SC_PATH : GOSUB fj_open_directory
     IF fn_ok = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"DIR ERROR   CLR=BACK"
-        num_rows = 0 : sf_sub = SF_CHOOSE : RETURN
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"DIR ERROR   CLR=BACK"
+        num_rows = 0 : GOSUB sf_apply_stack
+        sf_sub = SF_CHOOSE : RETURN
     END IF
 
     IF #dp_start > 0 THEN
@@ -95,12 +101,21 @@ sf_display: PROCEDURE
                     sf_row = FILES_START_ROW + num_rows
                     POKE (SC_EPOS + num_rows * 2), (#sf_abs - 1) AND 255
                     POKE (SC_EPOS + num_rows * 2 + 1), ((#sf_abs - 1) / 256) AND 255
+                    ' SC_EDIR is a type enum, not just a flag: 0 = plain file,
+                    ' 1 = folder, 2 = cartridge (.rom/.bin). Everywhere that
+                    ' already reads it asks "= 1", i.e. "is this a folder",
+                    ' so 2 falls through those tests as a file, correctly.
                     sf_isdir = 0
                     IF fn_len > 0 THEN
                         IF (PEEK(FN_RX + fn_len - 1) AND 255) = 47 THEN sf_isdir = 1
                     END IF
+                    IF sf_isdir = 0 THEN
+                        GOSUB sf_is_cart
+                        IF fc_c = 1 THEN sf_isdir = 2
+                    END IF
                     POKE (SC_EDIR + num_rows), sf_isdir
                     POKE (SC_ELEN + num_rows), fn_len
+                    cb_row = sf_row : cb_i = sf_isdir : GOSUB sf_draw_glyph
                     s_row = sf_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
                     #s_src = FN_RX : GOSUB scr_puts
                     num_rows = num_rows + 1
@@ -126,12 +141,16 @@ sf_display: PROCEDURE
     GOSUB sf_draw_hint
     IF num_rows > 0 THEN
         sel_row = 0
-        s_row = FILES_START_ROW : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
+        ' Black on the cyan bar; the bar itself is a background, applied by
+        ' sf_apply_stack below rather than by recolouring the text.
+        s_row = FILES_START_ROW : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
         GOSUB scr_recolor
-        sc_row = FILES_START_ROW : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+        sc_row = FILES_START_ROW : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
+        #sc_adv = CS_ADVANCE
         sc_active = 0 : sc_idle = 0
     END IF
 
+    GOSUB sf_apply_stack
     sf_sub = SF_CHOOSE
 END
 
@@ -195,7 +214,16 @@ sf_choose: PROCEDURE
     IF num_rows > 0 THEN GOSUB scroll_step
 END
 
+' ---------------------------------------------------------------------------
+' sf_move_up / sf_move_down: the selection bar is a pair of color stack
+' advance bits (csbar.bas), so moving it means clearing them off the old row
+' and setting them on the new one -- the glyph and filename underneath are
+' never redrawn. #sc_adv has to be cleared before scroll_reset repaints the row
+' being left, or that repaint would put the bar's advance bit straight back.
+' ---------------------------------------------------------------------------
 sf_move_up: PROCEDURE
+    GOSUB sf_bar_clr
+    #sc_adv = 0
     sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
     GOSUB scroll_reset
     s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
@@ -203,12 +231,16 @@ sf_move_up: PROCEDURE
 
     sel_row = sel_row - 1
 
-    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
+    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
     GOSUB scr_recolor
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
+    #sc_adv = CS_ADVANCE
+    GOSUB sf_bar_set
 END
 
 sf_move_down: PROCEDURE
+    GOSUB sf_bar_clr
+    #sc_adv = 0
     sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
     GOSUB scroll_reset
     s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
@@ -216,9 +248,11 @@ sf_move_down: PROCEDURE
 
     sel_row = sel_row + 1
 
-    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
+    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
     GOSUB scr_recolor
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
+    #sc_adv = CS_ADVANCE
+    GOSUB sf_bar_set
 END
 
 ' ---------------------------------------------------------------------------

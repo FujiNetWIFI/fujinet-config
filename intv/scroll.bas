@@ -18,17 +18,25 @@
 
     DIM sc_row, sc_col, sc_max, sc_color
     DIM sc_off, sc_len, sc_dir, sc_tick, sc_hold, sc_idle, sc_active
+    ' #sc_adv: CS_ADVANCE while sc_row is the HIGHLIGHTED row, 0 while
+    ' repainting a row being left. The file browser's selection bar is a color
+    ' stack advance bit sitting in the row's first drawn cell, and a repaint
+    ' here would otherwise wipe it -- the bar would collapse a second or two
+    ' after the cursor landed, once IDLE_FRAMES elapsed and scrolling began.
+    DIM #sc_adv, #sc_bit
 
 ' ---------------------------------------------------------------------------
 ' scroll_draw: paint sc_max cells of SC_ENTRY, starting at byte sc_off,
 ' onto row sc_row/column sc_col, in color sc_color, space-padded.
 ' ---------------------------------------------------------------------------
 scroll_draw: PROCEDURE
+    #sc_bit = #sc_adv          ' only the first cell carries the advance bit
     FOR s_i = 0 TO sc_max - 1
         s_c = 32
         IF sc_off + s_i < sc_len THEN s_c = PEEK(SC_ENTRY + sc_off + s_i) AND 255
         IF s_c < 32 OR s_c > 126 THEN s_c = 32
-        #BACKTAB(sc_row * SCREEN_COLS + sc_col + s_i) = (s_c - 32) * 8 + sc_color
+        #BACKTAB(sc_row * SCREEN_COLS + sc_col + s_i) = (s_c - 32) * 8 + sc_color + #sc_bit
+        #sc_bit = 0
     NEXT s_i
 END
 

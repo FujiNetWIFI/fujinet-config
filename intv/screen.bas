@@ -17,6 +17,7 @@
 
     DIM s_row, s_col, s_i, s_c, s_len, s_max, s_col_color
     DIM #s_src, #s_val
+    DIM #s_bg          ' FGBG background bits for scr_fgbg_row (fgbg.bas)
 
 ' ---------------------------------------------------------------------------
 ' scr_clear: blank the whole 20x12 screen.

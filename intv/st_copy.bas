@@ -22,7 +22,7 @@
 '
 ' There is no confirmation step, matching every other platform's CONFIG.
 
-    DIM cp_i, cp_len, cp_dlen, cp_base, cp_ok, cp_cfg
+    DIM cp_i, cp_len, cp_dlen, cp_base, cp_ok, cp_cfg, sf_clr_col
     DIM #cp_total
 
 ' ---------------------------------------------------------------------------
@@ -36,16 +36,16 @@
 ' ---------------------------------------------------------------------------
 sf_draw_hint: PROCEDURE
     IF copy_mode = 1 THEN
-        PRINT AT screenpos(0,11) COLOR COL_DIM,"5=COPY HERE  CLR=CAN"
-        GOSUB sf_hint_keys
+        PRINT AT screenpos(0,11) COLOR COL_NORMAL,"5=COPY HERE  CLR=CAN"
+        sf_clr_col = 13 : GOSUB sf_hint_keys
         RETURN
     END IF
 
     IF num_rows = 0 THEN
         ' An empty page is far more often the filter's doing than a genuinely
         ' empty directory, so point at the filter key rather than just "back".
-        PRINT AT screenpos(0,11) COLOR COL_DIM,"<EMPTY> 4=FILTER CLR"
-        GOSUB sf_hint_keys
+        PRINT AT screenpos(0,11) COLOR COL_NORMAL,"<EMPTY> 4=FILTER CLR"
+        sf_clr_col = 17 : GOSUB sf_hint_keys
         RETURN
     END IF
 
@@ -55,17 +55,27 @@ sf_draw_hint: PROCEDURE
         PRINT AT screenpos(0,11) COLOR COL_DIM,"F:"
         s_row = 11 : s_col = 2 : s_max = 18 : s_col_color = COL_VALUE
         #s_src = SC_FILTER : GOSUB scr_puts
+        GOSUB sf_bar
         RETURN
     END IF
 
-    PRINT AT screenpos(0,11) COLOR COL_DIM,"1UP2PV3NX4FL5CP CLR "
-    GOSUB sf_hint_keys
+    PRINT AT screenpos(0,11) COLOR COL_NORMAL,"1UP2PV3NX4FL5CP CLR "
+    sf_clr_col = 16 : GOSUB sf_hint_keys
 END
 
-' sf_hint_keys: yellow keys, blue labels, on the footer just drawn.
+' sf_hint_keys: yellow keys, white labels, on the dark green footer. The
+' digits scr_hilite_digits finds cover 1-5; CLR is letters, so the caller
+' passes its column in sf_clr_col (or 0 if this footer has no CLR). Both
+' helpers mask with AND $FFF8 and so leave the row's advance bit alone -- but
+' the PRINT that came first did not, hence sf_bar.
 sf_hint_keys: PROCEDURE
     s_row = 11 : s_col_color = COL_HILIGHT
     GOSUB scr_hilite_digits
+    IF sf_clr_col > 0 THEN
+        s_row = 11 : s_col = sf_clr_col : s_max = 3 : s_col_color = COL_HILIGHT
+        GOSUB scr_recolor
+    END IF
+    GOSUB sf_bar
 END
 
 ' ---------------------------------------------------------------------------
@@ -83,6 +93,13 @@ sf_do_filter: PROCEDURE
     FOR cp_i = 0 TO FILTER_LEN - 1
         POKE (SC_EDIT + cp_i), PEEK(SC_FILTER + cp_i) AND 255
     NEXT cp_i
+
+    ' grid_entry runs its own loop inline, with state still ST_SELECT_FILE, so
+    ' config.bas's switch never sees it and the browser's green/blue/cyan stack
+    ' would still be programmed underneath. grid_video swaps in the grid's own
+    ' palette; the main loop restores this screen's on return, and
+    ' sf_sub = SF_DISPLAY below forces the full repaint that goes with it.
+    GOSUB grid_video
 
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"ENTER FILTER"
@@ -118,7 +135,8 @@ sf_do_copy: PROCEDURE
     IF num_rows = 0 THEN RETURN
 
     IF (PEEK(SC_EDIR + sel_row) AND 255) = 1 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"CANNOT COPY A FOLDER"
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"CANNOT COPY A FOLDER"
+        GOSUB sf_bar
         ws_delay = 90 : GOSUB ws_pause
         GOSUB sf_draw_hint
         RETURN
@@ -135,7 +153,8 @@ sf_do_copy: PROCEDURE
     #fn_src = FN_RX : ls_max = 128 : GOSUB fn_strlen
 
     IF cp_len + fn_len > 223 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"PATH TOO LONG       "
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"PATH TOO LONG       "
+        GOSUB sf_bar
         ws_delay = 90 : GOSUB ws_pause
         GOSUB sf_draw_hint
         RETURN
@@ -234,13 +253,15 @@ cp_perform: PROCEDURE
     ' its FOR loop would run 256 times on a length of 0.
     #cp_total = cp_len + 1 + cp_dlen + cp_len - cp_base
     IF (#cp_total > 256) OR (cp_base >= cp_len) OR (cp_dlen = 0) THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"PATH TOO LONG       "
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"PATH TOO LONG       "
+        GOSUB sf_bar
         ws_delay = 120 : GOSUB ws_pause
         GOSUB sf_draw_hint
         RETURN
     END IF
 
-    PRINT AT screenpos(0,11) COLOR COL_DIM,"COPYING...          "
+    PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPYING...          "
+    GOSUB sf_bar
 
     #fn_txlen = 0
     #fn_src = SC_SRC : fn_len = cp_len : GOSUB fn_putstr
@@ -259,12 +280,15 @@ cp_perform: PROCEDURE
     IF cp_ok = 1 THEN GOSUB cp_copy_sibling
 
     IF cp_ok = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"COPY FAILED         "
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"COPY FAILED         "
+        GOSUB sf_bar
     ELSE
         IF cp_cfg = 1 THEN
             PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPIED + CFG        "
+            GOSUB sf_bar
         ELSE
             PRINT AT screenpos(0,11) COLOR COL_NORMAL,"COPIED              "
+            GOSUB sf_bar
         END IF
     END IF
     ws_delay = 120 : GOSUB ws_pause
