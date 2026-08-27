@@ -19,7 +19,7 @@
 ' BTN's mount-and-browse path is already exactly what a destination browse
 ' needs. CLEAR is bound only in that mode, to cancel the copy.
 
-    DIM hosts_shown, hd_i, hd_row, hd_col, hd_color
+    DIM hosts_shown, hd_i, hd_row, hd_col, hd_color, hd_new
 
 do_hosts: PROCEDURE
     IF hosts_shown = 0 THEN
@@ -68,17 +68,20 @@ do_hosts: PROCEDURE
 
     GOSUB in_poll
 
+    ' hosts_set_sel (selbar.bas) owns sel_row and recolours only the two rows
+    ' that change -- do NOT assign sel_row here, and do NOT call
+    ' hosts_draw_list, which repaints all eight rows and takes several frames.
     IF in_disc = DISC_UP AND sel_row > 0 THEN
-        sel_row = sel_row - 1
-        GOSUB hosts_draw_list
+        hd_new = sel_row - 1
+        GOSUB hosts_set_sel
     END IF
     IF in_disc = DISC_DOWN AND sel_row < NUM_HOST_SLOTS - 1 THEN
-        sel_row = sel_row + 1
-        GOSUB hosts_draw_list
+        hd_new = sel_row + 1
+        GOSUB hosts_set_sel
     END IF
     IF in_key >= KEYPAD_1 AND in_key <= KEYPAD_8 THEN
-        sel_row = in_key - 1
-        GOSUB hosts_draw_list
+        hd_new = in_key - 1
+        GOSUB hosts_set_sel
     END IF
 
     ' Lobby, info and rename are all meaningless mid-copy -- the only
@@ -134,8 +137,18 @@ END
 '
 ' Selection is the whole row going black-on-tan rather than the '>' cursor it
 ' used to be, which is what freed column 0 and bought the hostname field its
-' 18th character. Every row is redrawn on each cursor move, as before -- cheap,
-' since the names come from SC_HOSTS scratch RAM and not the mailbox.
+' 18th character.
+'
+' This is the FULL draw and runs once, on entry. It is NOT how the bar moves:
+' at ~40 BACKTAB cell operations per row it costs the better part of seven
+' frames, and #BACKTAB is the live display list, so calling it on every cursor
+' move had the list visibly repainting in pieces. (The names coming from
+' SC_HOSTS scratch RAM rather than the mailbox is beside the point -- the cost
+' is the cell writes.) hosts_set_sel in selbar.bas moves the bar instead, by
+' recolouring only the two rows that changed.
+'
+' Each row's text must be final before scr_fgbg_row stamps its background, and
+' that stamp must happen exactly once per row -- see fgbg.bas.
 ' ---------------------------------------------------------------------------
 hosts_draw_list: PROCEDURE
     FOR hd_i = 0 TO NUM_HOST_SLOTS - 1

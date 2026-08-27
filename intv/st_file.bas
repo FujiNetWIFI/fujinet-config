@@ -16,7 +16,7 @@
 ' re-fetched by seeking back to that row's recorded position. See the plan
 ' doc's ".cfg" and long-filename-scrolling sections for the full rationale.
 
-    DIM sf_i, sf_row, sf_isdir, sf_hstart
+    DIM sf_i, sf_row, sf_isdir, sf_hstart, sf_orow
     DIM sf_ch1, sf_ch2, sf_ch3, sf_ch4
     DIM #sf_abs, #dp_next
 
@@ -218,41 +218,65 @@ END
 ' sf_move_up / sf_move_down: the selection bar is a pair of color stack
 ' advance bits (csbar.bas), so moving it means clearing them off the old row
 ' and setting them on the new one -- the glyph and filename underneath are
-' never redrawn. #sc_adv has to be cleared before scroll_reset repaints the row
-' being left, or that repaint would put the bar's advance bit straight back.
+' never redrawn.
+'
+' *** The four advance-bit stores happen FIRST, and back to back. ***
+' #BACKTAB is the live STIC display list; nothing here is double-buffered.
+' Between sf_bar_clr and sf_bar_set the screen carries only two of its four
+' advance bits, and EVERY row below the bar then renders one color stack
+' position out of phase -- a whole-screen colour shift, not a local glitch. The
+' cosmetic half (sf_move_finish) is ~57 BACKTAB operations at ~264 cycles each,
+' ~15000 against the ~13518 an NTSC frame leaves the CPU (jzintv
+' doc/programming/interrupts.txt:127), so with the clear and the set at opposite
+' ends of it at least one frame was GUARANTEED to be scanned out inside that
+' window on every press of the disc. The four stores on their own run right
+' after WAIT and in_poll, still inside vblank or the very top of active display,
+' and cannot straddle a frame in any way that shows: the bar simply appears on
+' the new row.
+'
+' Clearing and setting adjacently is safe because for a +/-1 move they never
+' touch the same cell: clr hits (old,1) and (old+1,0), set hits (new,1) and
+' (new+1,0). Moving up that is (old-1,1) and (old,0) -- column 0, which neither
+' scroll_draw nor scr_recolor writes (both start at column 1).
 ' ---------------------------------------------------------------------------
 sf_move_up: PROCEDURE
     GOSUB sf_bar_clr
-    #sc_adv = 0
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
-    GOSUB scroll_reset
-    s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
-    GOSUB scr_recolor
-
+    sf_orow = FILES_START_ROW + sel_row
     sel_row = sel_row - 1
-
-    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
-    GOSUB scr_recolor
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
-    #sc_adv = CS_ADVANCE
     GOSUB sf_bar_set
+    GOSUB sf_move_finish
 END
 
 sf_move_down: PROCEDURE
     GOSUB sf_bar_clr
-    #sc_adv = 0
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
-    GOSUB scroll_reset
-    s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
-    GOSUB scr_recolor
-
+    sf_orow = FILES_START_ROW + sel_row
     sel_row = sel_row + 1
+    GOSUB sf_bar_set
+    GOSUB sf_move_finish
+END
+
+' sf_move_finish: the cosmetic half, shared by both directions -- repaint the
+' row just left (sf_orow) back to content colour, then recolour the newly
+' selected row black so it reads on the cyan bar, and re-point scroll.bas at it.
+' Everything here is safe to straddle a frame: the worst a tear can show is part
+' of one row in the other row's text colour, for one frame.
+'
+' #sc_adv still has to be cleared before scroll_reset repaints the row being
+' left -- scroll_draw stamps it into the first cell it writes, which is exactly
+' that row's bar cell. That cell is already cleared by now, so the stamp is a
+' confirmed no-op rather than a re-arm. Both scr_recolor calls mask AND $FFF8
+' and so leave the advance bits set above untouched (see csbar.bas).
+sf_move_finish: PROCEDURE
+    #sc_adv = 0
+    sc_row = sf_orow : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
+    GOSUB scroll_reset
+    s_row = sf_orow : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
+    GOSUB scr_recolor
 
     s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
     GOSUB scr_recolor
     sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
     #sc_adv = CS_ADVANCE
-    GOSUB sf_bar_set
 END
 
 ' ---------------------------------------------------------------------------

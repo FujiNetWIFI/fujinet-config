@@ -32,6 +32,7 @@
     INCLUDE "st_lobby.bas"
     INCLUDE "st_copy.bas"
     INCLUDE "fgbg.bas"
+    INCLUDE "selbar.bas"
 
     ' $D000-$DFFF filled up in turn once csbar.bas landed, and the compiler
     ' quietly auto-continued into $E000 -- which is NOT one of the two areas

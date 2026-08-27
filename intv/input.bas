@@ -32,9 +32,24 @@ in_poll: PROCEDURE
     IF CONT.RIGHT THEN in_disc = DISC_RIGHT
 
     IF in_disc <> 0 THEN
-        IF in_disc <> in_pdisc THEN
-            in_rdelay = IN_REPEAT_DELAY
+        IF in_disc <> in_pdisc AND in_pdisc = 0 THEN
+            in_rdelay = IN_REPEAT_DELAY     ' fresh press from neutral -- fire now
         ELSE
+            ' Same direction held, OR slid/wobbled to a neighbour without
+            ' releasing. Both go through the repeat gate, and that "OR" is the
+            ' point: the disc has 16 positions and the diagonals set TWO
+            ' cardinal bits, so ENE and NE read as both UP and RIGHT (jzintv
+            ' src/pads/pads.c, "Pad bit 1 is set for SSE through NE / Pad bit 2
+            ' is set for ENE through NW"). The tests above are last-match-wins,
+            ' so a thumb parked near that boundary alternates in_disc between
+            ' DISC_UP and DISC_RIGHT frame to frame. Treating a changed
+            ' direction as a fresh press fired the handler every other frame
+            ' instead of every seventh, which is what turned the list screens'
+            ' redraw into a continuous flicker.
+            '
+            ' The cost is that changing direction without releasing the disc
+            ' waits up to IN_REPEAT_RATE frames (~0.1s) instead of acting at
+            ' once. Not perceptible, and it stops the cursor racing.
             IF in_rdelay > 0 THEN
                 in_rdelay = in_rdelay - 1
                 in_disc = 0
@@ -212,6 +227,14 @@ END
 ' neighbouring cells' glyphs are white too, and it matches "yellow = selected"
 ' everywhere else in CONFIG. The action row has no MOB and recolours to yellow.
 grid_draw_cursor: PROCEDURE
+    ' grid_entry's loop calls this every frame, so the common case is "nothing
+    ' moved" -- and the un-highlight/re-highlight pair would then write the SAME
+    ' cell twice, straight into the live BACKTAB. Bail before touching it, and
+    ' before re-issuing SPRITE: the MOB registers are shadowed in RAM and
+    ' blitted by the ISR each frame, so one write persists. The g_px = 255
+    ' first-call sentinel still works -- 255 can never equal g_x.
+    IF g_x = g_px AND g_y = g_py THEN RETURN
+
     IF g_px <> 255 THEN
         IF g_py = GRID_ROWS THEN
             ga_idx = g_px : GOSUB grid_action_col

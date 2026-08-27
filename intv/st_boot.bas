@@ -132,7 +132,11 @@ boot_draw_progress: PROCEDURE
         END IF
     NEXT s_i
 
-    s_row = 6 : GOSUB scr_row_clear
+    ' No scr_row_clear first: <.3> right-aligns with SPACES to three characters
+    ' (IntyBASIC manual, PRINT), so it always overwrites columns 8-10 whatever
+    ' the previous value was, and the '%' is fixed at column 11. Nothing else
+    ' writes row 6. Blanking it first only bought a one-frame flash of the
+    ' percentage on every tick, straight into the live BACKTAB.
     #s_val = bt_pct
     PRINT AT screenpos(8,6) COLOR COL_VALUE,<.3>#s_val
     PRINT AT screenpos(11,6) COLOR COL_VALUE,"%"
