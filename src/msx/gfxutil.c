@@ -1,6 +1,7 @@
 #include "gfxutil.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <video/tms99x8.h>
 
 #define CHAR_ADDR 0x1800
 #define ROW(y) y<<5
@@ -182,6 +183,24 @@ void reset_row_lengths(void)
 {
   for (uint8_t i=0; i < sizeof(row_lengths) / sizeof(row_lengths[0]); i++) {
     row_lengths[i] = 32;
+  }
+}
+
+/**
+ * Restore the default row colors in the attribute table over a block of text
+ * that is w characters wide and h rows tall, with its top left cell at (x, y).
+ *
+ * The block is copied straight out of row_pattern at the matching column, so
+ * the gradient stays lined up with the rest of the row.
+ */
+void gfx_fill_attr(uint8_t x, uint8_t y, uint8_t w, uint8_t h)
+{
+  uint16_t coff = x << 3;
+  uint16_t addr = MODE2_ATTR + (y << 8) + coff;
+
+  while (h--) {
+    vdp_vwrite(row_pattern + coff, addr, w << 3);
+    addr += 0x100;
   }
 }
 
