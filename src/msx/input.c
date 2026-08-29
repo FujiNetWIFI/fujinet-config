@@ -16,6 +16,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
+#include "device_slots.h"
 #include "key_codes.h"
 #include "cursor.h"
 #include "msx_debug.h"
@@ -236,8 +237,13 @@ HDSubState input_hosts_and_devices_devices(void)
     case KEY_6:
     case KEY_7:
     case KEY_8:
-      bar_jump(k-KEY_1);
-      selected_device_slot=bar_get();
+      // The list is only as long as the mountable slot count, so ignore
+      // digits past the end of it.
+      if ((unsigned char)(k-KEY_1) < msx_visible_device_slots())
+      {
+        bar_jump(k-KEY_1);
+        selected_device_slot=bar_get();
+      }
       //hosts_and_devices_long_filename();
       return HD_DEVICES;
     case 'B':
@@ -418,6 +424,7 @@ void input_select_file_new_name(char *c)
 
 SSSubState input_select_slot_choose(void)
 {
+  unsigned char ds;
   unsigned char k = 0;
 	while (k == 0)
 	  k = input();
@@ -431,11 +438,15 @@ SSSubState input_select_slot_choose(void)
       return SS_DONE;
     case KEY_UP_ARROW:
     case KEY_LEFT_ARROW:
-      bar_up();
+      ds = msx_next_mount_slot(bar_get(), false);
+      if (ds != MSX_NO_SLOT)
+        bar_jump(ds);
       return SS_CHOOSE;
     case KEY_DOWN_ARROW:
     case KEY_RIGHT_ARROW:
-      bar_down();
+      ds = msx_next_mount_slot(bar_get(), true);
+      if (ds != MSX_NO_SLOT)
+        bar_jump(ds);
       return SS_CHOOSE;
     case KEY_1:
     case KEY_2:
@@ -445,7 +456,9 @@ SSSubState input_select_slot_choose(void)
     case KEY_6:
     case KEY_7:
     case KEY_8:
-      bar_jump(k-KEY_1);
+      // Ignore digits for rows the image cannot be mounted into.
+      if (msx_mount_slot_allowed(k-KEY_1))
+        bar_jump(k-KEY_1);
       return SS_CHOOSE;
     // case 'E':
     // case 'e':
@@ -454,11 +467,15 @@ SSSubState input_select_slot_choose(void)
     case 'R':
     case 'r':
     case KEY_RETURN:
+      if (!msx_mount_slot_allowed(bar_get()))
+        return SS_CHOOSE;
       mode = MODE_READ;
       selected_device_slot=bar_get();
       return SS_DONE;
     case 'W':
     case 'w':
+      if (!msx_mount_slot_allowed(bar_get()))
+        return SS_CHOOSE;
       mode = MODE_WRITE;
       selected_device_slot=bar_get();
       return SS_DONE;

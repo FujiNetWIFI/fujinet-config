@@ -4,7 +4,7 @@ PLATFORMS += apple2
 PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
-PLATFORMS += dragon
+# PLATFORMS += dragon
 
 # Only in lib-experimental currently
 # Use make-exp <platform> to build them.
@@ -189,5 +189,30 @@ msdos/disk-post::
 	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
 	mcopy -i $(DISK) dist.msdos/AUTOEXEC.BAT '::/AUTOEXEC.BAT'
 
-msxrom-exp msdos-exp::
-	$(MAKE) FUJINET_LIB=https://github.com/FozzTexx/fujinet-lib-experimental.git PLATFORMS=$(@:-exp=) $(@:-exp=)
+FUJINET_LIB_EXP_REPO = https://github.com/FozzTexx/fujinet-lib-experimental.git
+
+msdos-exp::
+	$(MAKE) FUJINET_LIB=$(FUJINET_LIB_EXP_REPO) PLATFORMS=$(@:-exp=) $(@:-exp=)
+
+########################################
+# MSX customization
+
+# fujinet-lib main regressed the MSX transport in 902032d ("Changed
+# fuji_bus_call to use varargs"): sccz80 mis-passes the arguments, so the
+# header leaves the MSX corrupted - device 0x70 arrives as 0x10 and command
+# 0xEA as 0xC4 - and the firmware never answers, so CONFIG sits on the splash
+# spinning on IO_STATUS. Pin to the last commit known to talk to the firmware.
+# When that is fixed upstream, drop this and fold msxrom back into msdos-exp.
+# The pin has to live here because $(CACHE_DIR) is gitignored, so a checkout
+# made by hand in the cache would silently revert to main the next time the
+# cache is cleared.
+MSXROM_FNLIB_REV = b0a7959
+MSXROM_FNLIB_CACHE = $(CACHE_DIR)/fujinet-lib-msx-$(MSXROM_FNLIB_REV)
+
+msxrom-exp::
+	@if [ ! -d $(MSXROM_FNLIB_CACHE) ]; then \
+	  git clone $(FUJINET_LIB_EXP_REPO) $(MSXROM_FNLIB_CACHE) && \
+	  git -C $(MSXROM_FNLIB_CACHE) checkout --detach $(MSXROM_FNLIB_REV); \
+	fi
+	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
+	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom

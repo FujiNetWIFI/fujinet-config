@@ -10,6 +10,9 @@
 #include "input.h"
 #include "system.h"
 #include "pause.h"
+#ifdef BUILD_MSXROM
+#include "msx/device_slots.h"
+#endif /* BUILD_MSXROM */
 
 char mode=0;
 
@@ -64,6 +67,9 @@ void select_slot_display()
       char dispPath[42];
       memset(dispPath,0,42);
       strncpy(&dispPath[11],path,DIR_MAX_LEN);
+#ifdef BUILD_MSXROM
+      msx_set_mount_is_rom(false); // a newly created image is always a disk
+#endif
       screen_select_slot(dispPath);
     }
   else
@@ -73,6 +79,15 @@ void select_slot_display()
       fuji_set_directory_position(pos);
 
       fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+
+#ifdef BUILD_MSXROM
+      /* The slot picker needs to know whether a ROM is on its way in, so
+         read the raw entry name before the formatted one below and rewind
+         the directory for that second read. */
+      fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+      msx_set_mount_is_rom(msx_device_slot_is_rom(response));
+      fuji_set_directory_position(pos);
+#endif
 
 #ifdef BUILD_PMD85
       fuji_read_directory(120, 0x80, response); // up to 3 lines of 40 chars each

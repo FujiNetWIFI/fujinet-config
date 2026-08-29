@@ -10,6 +10,9 @@
 #include "input.h"
 #include "constants.h"
 #include "globals.h"
+#ifdef BUILD_MSXROM
+#include "msx/device_slots.h"
+#endif /* BUILD_MSXROM */
 
 HDSubState hd_subState;
 #ifdef BUILD_ATARI
@@ -55,7 +58,9 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   {
     // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
-    for (o = 0; o<NUM_DEVICE_SLOTS; o++)
+    // Walk backwards: on platforms where an eject pulls the slots below it
+    // up a position, going forwards would step over a slot that just moved.
+    for (o = NUM_DEVICE_SLOTS; o-- > 0; )
     {
       if ( deviceSlots[o].hostSlot == i )
       {
@@ -95,7 +100,19 @@ void hosts_and_devices_long_filename(void)
 
 void hosts_and_devices_eject(unsigned char ds)
 {
+#ifdef BUILD_MSXROM
+  bool was_rom = msx_device_slot_is_rom((const char *)deviceSlots[ds].file);
+#endif /* BUILD_MSXROM */
+
   fuji_unmount_disk_image(ds);
+
+#ifdef BUILD_MSXROM
+  // A ROM row only exists while that ROM is mounted, so ejecting one
+  // takes its row away and everything below it moves up a slot.
+  if (was_rom)
+    msx_compact_device_slots(ds);
+#endif /* BUILD_MSXROM */
+
 #ifdef OBSOLETE
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
