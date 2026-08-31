@@ -16,6 +16,9 @@ cartridge's boot ROM.
 | `fujinet.bas` | Mailbox transport (`fn_transact`, `fn_param`, ...) |
 | `fujicmd.bas` | Fuji-device (`0x70`) command wrappers built on `fujinet.bas` |
 | `screen.bas` | Low-level text drawing (`scr_puts`, `scr_recolor`, ...) |
+| `fgbg.bas` | `scr_fgbg_row` — per-cell backgrounds for the foreground/background screens |
+| `csbar.bas` | The file browser's colour-stack selection bar and file-type glyphs |
+| `selbar.bas` | Moving the host / WiFi selection bars without redrawing the list |
 | `input.bas` | Edge-detected controller input + the character-grid text editor |
 | `scroll.bas` | Bounce-scrolling for filenames too long to fit on screen |
 | `st_wifi.bas` | `ST_CHECK_WIFI` / `ST_CONNECT_WIFI` / `ST_SET_WIFI` |
@@ -24,6 +27,7 @@ cartridge's boot ROM.
 | `st_copy.bas` | Filter (keypad 4) and copy-file (keypad 5) for the file browser |
 | `st_info.bas` | `ST_INFO` — SSID/IP/firmware version display |
 | `st_boot.bas` | `ST_BOOT` — `SET_DEVICE_FULLPATH` + `MOUNT_IMAGE`, progress bar |
+| `st_lobby.bas` | Keypad 0 — mount and boot the FujiNet Game Lobby ROM |
 | `mkromh.py` | Packs `config.bin` into firmware's `_bootrom[]` array format |
 
 ## Scope

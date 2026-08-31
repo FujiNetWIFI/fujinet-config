@@ -16,7 +16,7 @@
 ' re-fetched by seeking back to that row's recorded position. See the plan
 ' doc's ".cfg" and long-filename-scrolling sections for the full rationale.
 
-    DIM sf_i, sf_row, sf_isdir, sf_hstart
+    DIM sf_i, sf_row, sf_isdir, sf_hstart, sf_orow
     DIM sf_ch1, sf_ch2, sf_ch3, sf_ch4
     DIM #sf_abs, #dp_next
 
@@ -49,24 +49,30 @@ sf_display: PROCEDURE
     #fn_src = SC_PATH : ls_max = 192 : GOSUB fn_strlen
     sf_hstart = 0
     IF fn_len > SCREEN_COLS THEN sf_hstart = fn_len - SCREEN_COLS
-    s_row = 0 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_DIM
+    s_row = 0 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_NORMAL
     ' While a copy is in flight this browse is picking the DESTINATION --
     ' highlight the path so it can't be mistaken for an ordinary browse.
     IF copy_mode = 1 THEN s_col_color = COL_HILIGHT
     #s_src = SC_PATH + sf_hstart : GOSUB scr_puts
 
-    PRINT AT screenpos(0,11) COLOR COL_DIM,"LOADING...          "
+    ' Row 11 is the dark green command bar. COL_ERROR (red) reads poorly on
+    ' it, so failures are yellow here instead. Every print to that row wipes
+    ' its advance bit, hence the sf_bar after each (see csbar.bas).
+    PRINT AT screenpos(0,11) COLOR COL_NORMAL,"LOADING...          "
+    GOSUB sf_bar
 
     fc_hs = host_slot : GOSUB fj_mount_host
     IF fn_ok = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"MOUNT ERROR CLR=BACK"
-        num_rows = 0 : sf_sub = SF_CHOOSE : RETURN
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"MOUNT ERROR CLR=BACK"
+        num_rows = 0 : GOSUB sf_apply_stack
+        sf_sub = SF_CHOOSE : RETURN
     END IF
 
     #fn_src = SC_PATH : GOSUB fj_open_directory
     IF fn_ok = 0 THEN
-        PRINT AT screenpos(0,11) COLOR COL_ERROR,"DIR ERROR   CLR=BACK"
-        num_rows = 0 : sf_sub = SF_CHOOSE : RETURN
+        PRINT AT screenpos(0,11) COLOR COL_HILIGHT,"DIR ERROR   CLR=BACK"
+        num_rows = 0 : GOSUB sf_apply_stack
+        sf_sub = SF_CHOOSE : RETURN
     END IF
 
     IF #dp_start > 0 THEN
@@ -95,12 +101,21 @@ sf_display: PROCEDURE
                     sf_row = FILES_START_ROW + num_rows
                     POKE (SC_EPOS + num_rows * 2), (#sf_abs - 1) AND 255
                     POKE (SC_EPOS + num_rows * 2 + 1), ((#sf_abs - 1) / 256) AND 255
+                    ' SC_EDIR is a type enum, not just a flag: 0 = plain file,
+                    ' 1 = folder, 2 = cartridge (.rom/.bin). Everywhere that
+                    ' already reads it asks "= 1", i.e. "is this a folder",
+                    ' so 2 falls through those tests as a file, correctly.
                     sf_isdir = 0
                     IF fn_len > 0 THEN
                         IF (PEEK(FN_RX + fn_len - 1) AND 255) = 47 THEN sf_isdir = 1
                     END IF
+                    IF sf_isdir = 0 THEN
+                        GOSUB sf_is_cart
+                        IF fc_c = 1 THEN sf_isdir = 2
+                    END IF
                     POKE (SC_EDIR + num_rows), sf_isdir
                     POKE (SC_ELEN + num_rows), fn_len
+                    cb_row = sf_row : cb_i = sf_isdir : GOSUB sf_draw_glyph
                     s_row = sf_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
                     #s_src = FN_RX : GOSUB scr_puts
                     num_rows = num_rows + 1
@@ -126,12 +141,16 @@ sf_display: PROCEDURE
     GOSUB sf_draw_hint
     IF num_rows > 0 THEN
         sel_row = 0
-        s_row = FILES_START_ROW : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
+        ' Black on the cyan bar; the bar itself is a background, applied by
+        ' sf_apply_stack below rather than by recolouring the text.
+        s_row = FILES_START_ROW : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
         GOSUB scr_recolor
-        sc_row = FILES_START_ROW : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+        sc_row = FILES_START_ROW : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
+        #sc_adv = CS_ADVANCE
         sc_active = 0 : sc_idle = 0
     END IF
 
+    GOSUB sf_apply_stack
     sf_sub = SF_CHOOSE
 END
 
@@ -195,30 +214,69 @@ sf_choose: PROCEDURE
     IF num_rows > 0 THEN GOSUB scroll_step
 END
 
+' ---------------------------------------------------------------------------
+' sf_move_up / sf_move_down: the selection bar is a pair of color stack
+' advance bits (csbar.bas), so moving it means clearing them off the old row
+' and setting them on the new one -- the glyph and filename underneath are
+' never redrawn.
+'
+' *** The four advance-bit stores happen FIRST, and back to back. ***
+' #BACKTAB is the live STIC display list; nothing here is double-buffered.
+' Between sf_bar_clr and sf_bar_set the screen carries only two of its four
+' advance bits, and EVERY row below the bar then renders one color stack
+' position out of phase -- a whole-screen colour shift, not a local glitch. The
+' cosmetic half (sf_move_finish) is ~57 BACKTAB operations at ~264 cycles each,
+' ~15000 against the ~13518 an NTSC frame leaves the CPU (jzintv
+' doc/programming/interrupts.txt:127), so with the clear and the set at opposite
+' ends of it at least one frame was GUARANTEED to be scanned out inside that
+' window on every press of the disc. The four stores on their own run right
+' after WAIT and in_poll, still inside vblank or the very top of active display,
+' and cannot straddle a frame in any way that shows: the bar simply appears on
+' the new row.
+'
+' Clearing and setting adjacently is safe because for a +/-1 move they never
+' touch the same cell: clr hits (old,1) and (old+1,0), set hits (new,1) and
+' (new+1,0). Moving up that is (old-1,1) and (old,0) -- column 0, which neither
+' scroll_draw nor scr_recolor writes (both start at column 1).
+' ---------------------------------------------------------------------------
 sf_move_up: PROCEDURE
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
-    GOSUB scroll_reset
-    s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
-    GOSUB scr_recolor
-
+    GOSUB sf_bar_clr
+    sf_orow = FILES_START_ROW + sel_row
     sel_row = sel_row - 1
-
-    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
-    GOSUB scr_recolor
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+    GOSUB sf_bar_set
+    GOSUB sf_move_finish
 END
 
 sf_move_down: PROCEDURE
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
-    GOSUB scroll_reset
-    s_row = sc_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
-    GOSUB scr_recolor
-
+    GOSUB sf_bar_clr
+    sf_orow = FILES_START_ROW + sel_row
     sel_row = sel_row + 1
+    GOSUB sf_bar_set
+    GOSUB sf_move_finish
+END
 
-    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_HILIGHT
+' sf_move_finish: the cosmetic half, shared by both directions -- repaint the
+' row just left (sf_orow) back to content colour, then recolour the newly
+' selected row black so it reads on the cyan bar, and re-point scroll.bas at it.
+' Everything here is safe to straddle a frame: the worst a tear can show is part
+' of one row in the other row's text colour, for one frame.
+'
+' #sc_adv still has to be cleared before scroll_reset repaints the row being
+' left -- scroll_draw stamps it into the first cell it writes, which is exactly
+' that row's bar cell. That cell is already cleared by now, so the stamp is a
+' confirmed no-op rather than a re-arm. Both scr_recolor calls mask AND $FFF8
+' and so leave the advance bits set above untouched (see csbar.bas).
+sf_move_finish: PROCEDURE
+    #sc_adv = 0
+    sc_row = sf_orow : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_NORMAL
+    GOSUB scroll_reset
+    s_row = sf_orow : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = COL_NORMAL
     GOSUB scr_recolor
-    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = COL_HILIGHT
+
+    s_row = FILES_START_ROW + sel_row : s_col = 1 : s_max = SCREEN_COLS - 1 : s_col_color = CS_BLACK
+    GOSUB scr_recolor
+    sc_row = FILES_START_ROW + sel_row : sc_col = 1 : sc_max = SCREEN_COLS - 1 : sc_color = CS_BLACK
+    #sc_adv = CS_ADVANCE
 END
 
 ' ---------------------------------------------------------------------------

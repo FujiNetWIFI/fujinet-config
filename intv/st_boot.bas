@@ -27,7 +27,7 @@ do_boot: PROCEDURE
     s_row = 2 : s_col = 0 : s_max = SCREEN_COLS : s_col_color = COL_VALUE
     #s_src = SC_BOOTPATH + bt_hstart : GOSUB scr_puts
 
-    PRINT AT screenpos(0,11) COLOR COL_DIM,"DO NOT POWER OFF"
+    PRINT AT screenpos(0,11) COLOR COL_NORMAL,"DO NOT POWER OFF"
 
     fc_ds = DEVICE_SLOT : fc_hs = host_slot : fc_mode = MODE_READ
     #fn_src = SC_BOOTPATH
@@ -116,32 +116,44 @@ boot_mount_with_progress: PROCEDURE
 END
 
 ' boot_draw_progress: 20-cell bar on row 5, percentage on row 6.
+'
+' Filled cells are the solid GRAM block (constants.bas's GLYPH_BLOCK, uploaded
+' at cfg_start and shared with the character grid's cursor) rather than the '#'
+' this used to draw, so the bar reads as one unbroken run with no gaps between
+' cells. A color stack GRAM cell is card*8 + GRAM_SELECT + foreground, the same
+' form csbar.bas's sf_draw_glyph uses.
 boot_draw_progress: PROCEDURE
     s_row = 5
     FOR s_i = 0 TO SCREEN_COLS - 1
-        s_c = 32
-        IF s_i < (bt_pct * SCREEN_COLS) / 100 THEN s_c = 35   ' '#'
-        #BACKTAB(s_row * SCREEN_COLS + s_i) = (s_c - 32) * 8 + COL_HILIGHT
+        IF s_i < (bt_pct * SCREEN_COLS) / 100 THEN
+            #BACKTAB(s_row * SCREEN_COLS + s_i) = GLYPH_BLOCK * 8 + GRAM_SELECT + COL_HILIGHT
+        ELSE
+            #BACKTAB(s_row * SCREEN_COLS + s_i) = CS_BLACK   ' card 0 = blank
+        END IF
     NEXT s_i
 
-    s_row = 6 : GOSUB scr_row_clear
+    ' No scr_row_clear first: <.3> right-aligns with SPACES to three characters
+    ' (IntyBASIC manual, PRINT), so it always overwrites columns 8-10 whatever
+    ' the previous value was, and the '%' is fixed at column 11. Nothing else
+    ' writes row 6. Blanking it first only bought a one-frame flash of the
+    ' percentage on every tick, straight into the live BACKTAB.
     #s_val = bt_pct
     PRINT AT screenpos(8,6) COLOR COL_VALUE,<.3>#s_val
     PRINT AT screenpos(11,6) COLOR COL_VALUE,"%"
 END
 
 boot_fail: PROCEDURE
-    PRINT AT screenpos(0,8) COLOR COL_DIM,"ERR CODE:"
+    PRINT AT screenpos(0,8) COLOR COL_NORMAL,"ERR CODE:"
     #s_val = mb_err
     PRINT AT screenpos(10,8) COLOR COL_VALUE,<.3>#s_val
     ' named reasons mirror FUJI_BOOT_ERR_* (0xEE is jzIntv's, not this namespace)
     IF bt_isboot = 1 THEN
-        IF mb_err = 1 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"BAD ROM HEADER"
-        IF mb_err = 2 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"TRUNCATED XFER"
-        IF mb_err = 3 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"NO MAPPING"
-        IF mb_err = 4 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"JLP CONFLICT"
-        IF mb_err = 5 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"BAD CFG FILE"
-        IF mb_err = 6 THEN PRINT AT screenpos(0,9) COLOR COL_DIM,"RAM TOO BIG"
+        IF mb_err = 1 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"BAD ROM HEADER"
+        IF mb_err = 2 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"TRUNCATED XFER"
+        IF mb_err = 3 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"NO MAPPING"
+        IF mb_err = 4 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"JLP CONFLICT"
+        IF mb_err = 5 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"BAD CFG FILE"
+        IF mb_err = 6 THEN PRINT AT screenpos(0,9) COLOR COL_NORMAL,"RAM TOO BIG"
     END IF
     PRINT AT screenpos(0,11) COLOR COL_ERROR,"BOOT FAILED         "
     FOR bt_t = 0 TO 119

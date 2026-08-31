@@ -32,9 +32,24 @@ in_poll: PROCEDURE
     IF CONT.RIGHT THEN in_disc = DISC_RIGHT
 
     IF in_disc <> 0 THEN
-        IF in_disc <> in_pdisc THEN
-            in_rdelay = IN_REPEAT_DELAY
+        IF in_disc <> in_pdisc AND in_pdisc = 0 THEN
+            in_rdelay = IN_REPEAT_DELAY     ' fresh press from neutral -- fire now
         ELSE
+            ' Same direction held, OR slid/wobbled to a neighbour without
+            ' releasing. Both go through the repeat gate, and that "OR" is the
+            ' point: the disc has 16 positions and the diagonals set TWO
+            ' cardinal bits, so ENE and NE read as both UP and RIGHT (jzintv
+            ' src/pads/pads.c, "Pad bit 1 is set for SSE through NE / Pad bit 2
+            ' is set for ENE through NW"). The tests above are last-match-wins,
+            ' so a thumb parked near that boundary alternates in_disc between
+            ' DISC_UP and DISC_RIGHT frame to frame. Treating a changed
+            ' direction as a fresh press fired the handler every other frame
+            ' instead of every seventh, which is what turned the list screens'
+            ' redraw into a continuous flicker.
+            '
+            ' The cost is that changing direction without releasing the disc
+            ' waits up to IN_REPEAT_RATE frames (~0.1s) instead of acting at
+            ' once. Not perceptible, and it stops the cursor racing.
             IF in_rdelay > 0 THEN
                 in_rdelay = in_rdelay - 1
                 in_disc = 0
@@ -93,9 +108,34 @@ END
     DIM g_x, g_y, g_px, g_py, g_len, g_max, g_ch, ga_idx
     DIM #ge_dst
 
+' ---------------------------------------------------------------------------
+' grid_video: program the grid's color stack. Called by each of the four
+' callers BEFORE its scr_clear, so no frame of the outgoing screen is ever
+' reinterpreted under the new palette.
+'
+' Three runs, three slots, one spare -- and unlike the file browser both
+' boundaries are at fixed rows, so there are no selection-dependent edge
+' cases and nothing has to be re-armed as the cursor moves.
+'
+' vid_now is left at a sentinel that can never equal vid_want (0-3), so
+' config.bas's main loop always re-establishes the real screen's profile when
+' grid_entry returns. Safe because every caller redraws on the way out.
+' ---------------------------------------------------------------------------
+grid_video: PROCEDURE
+    MODE 0,CS_BLUE,CS_DARKGREEN,CS_PURPLE,CS_BLACK : BORDER CS_BLUE
+    vid_now = 255
+    WAIT
+END
+
 grid_entry: PROCEDURE
     GOSUB grid_draw_charset
     GOSUB grid_draw_actions
+    ' Rows 0-2 blue (p0), 3-9 dark green (p1), 10-11 purple (p2). One pass is
+    ' enough: the caller's scr_clear zeroed every word, and neither advance
+    ' cell is ever written again -- the charset starts at GRID_COL0 and the
+    ' action buttons at GRID_ACT_COL0, both column 2.
+    #BACKTAB(GRID_PANEL_ROW * SCREEN_COLS) = CS_ADVANCE
+    #BACKTAB(GRID_ACTION_ROW * SCREEN_COLS) = CS_ADVANCE
 
     g_len = 0
     WHILE (g_len < g_max - 1) AND ((PEEK(#ge_dst + g_len) AND 255) <> 0)
@@ -148,6 +188,8 @@ grid_entry: PROCEDURE
             END IF
         END IF
     LOOP
+
+    SPRITE 0, 0, 0, 0      ' or the cursor block lingers over the next screen
 END
 
 ' grid_draw_charset: paints all 96 cells (95 real chars + one always-blank).
@@ -156,42 +198,67 @@ grid_draw_charset: PROCEDURE
         FOR g_x = 0 TO GRID_COLS - 1
             g_ch = 32 + g_y * GRID_COLS + g_x
             IF g_ch > 126 THEN g_ch = 32
-            #BACKTAB((GRID_ROW0 + g_y) * SCREEN_COLS + GRID_COL0 + g_x) = (g_ch - 32) * 8 + COL_VALUE
+            #BACKTAB((GRID_ROW0 + g_y) * SCREEN_COLS + GRID_COL0 + g_x) = (g_ch - 32) * 8 + COL_NORMAL
         NEXT g_x
     NEXT g_y
 END
 
+' White, not COL_DIM: COL_DIM is blue, which was invisible on the blue bar
+' originally specified for this row and still poor on the purple one.
 grid_draw_actions: PROCEDURE
-    PRINT AT screenpos(GRID_ACT_COL0, GRID_ACTION_ROW) COLOR COL_DIM,"SPC"
-    PRINT AT screenpos(GRID_ACT_COL1, GRID_ACTION_ROW) COLOR COL_DIM,"DEL"
-    PRINT AT screenpos(GRID_ACT_COL2, GRID_ACTION_ROW) COLOR COL_DIM," OK"
-    PRINT AT screenpos(GRID_ACT_COL3, GRID_ACTION_ROW) COLOR COL_DIM,"ESC"
+    PRINT AT screenpos(GRID_ACT_COL0, GRID_ACTION_ROW) COLOR COL_NORMAL,"SPC"
+    PRINT AT screenpos(GRID_ACT_COL1, GRID_ACTION_ROW) COLOR COL_NORMAL,"DEL"
+    PRINT AT screenpos(GRID_ACT_COL2, GRID_ACTION_ROW) COLOR COL_NORMAL," OK"
+    PRINT AT screenpos(GRID_ACT_COL3, GRID_ACTION_ROW) COLOR COL_NORMAL,"ESC"
 END
 
 ' grid_draw_cursor: un-highlight the previous cell (g_px/g_py), highlight
 ' the current one (g_x/g_y). g_px=255 on the very first call skips the
 ' un-highlight (nothing has been drawn as "selected" yet).
+'
+' On the charset the highlight is real inverse video, done with MOB 0 rather
+' than a colour change. A sprite with SPR_BEHIND set is drawn everywhere it is
+' visible EXCEPT where the card underneath has a foreground pixel
+' (jzintv src/stic/stic.c:1710 -- mb_msk = vs_msk & ~(pr_msk & bt_msk)). So a
+' solid yellow block parked behind the cell fills it, and the glyph is punched
+' out of it in whatever the card's own foreground colour is -- which is why the
+' selected cell is recoloured to CS_DARKGREEN. Yellow rather than white: white
+' leaves nothing to see if the block is even slightly misaligned, because the
+' neighbouring cells' glyphs are white too, and it matches "yellow = selected"
+' everywhere else in CONFIG. The action row has no MOB and recolours to yellow.
 grid_draw_cursor: PROCEDURE
+    ' grid_entry's loop calls this every frame, so the common case is "nothing
+    ' moved" -- and the un-highlight/re-highlight pair would then write the SAME
+    ' cell twice, straight into the live BACKTAB. Bail before touching it, and
+    ' before re-issuing SPRITE: the MOB registers are shadowed in RAM and
+    ' blitted by the ISR each frame, so one write persists. The g_px = 255
+    ' first-call sentinel still works -- 255 can never equal g_x.
+    IF g_x = g_px AND g_y = g_py THEN RETURN
+
     IF g_px <> 255 THEN
         IF g_py = GRID_ROWS THEN
             ga_idx = g_px : GOSUB grid_action_col
-            s_row = GRID_ACTION_ROW : s_max = 3 : s_col_color = COL_DIM
+            s_row = GRID_ACTION_ROW : s_max = 3 : s_col_color = COL_NORMAL
             GOSUB scr_recolor
         ELSE
             g_ch = 32 + g_py * GRID_COLS + g_px
             IF g_ch > 126 THEN g_ch = 32
-            #BACKTAB((GRID_ROW0 + g_py) * SCREEN_COLS + GRID_COL0 + g_px) = (g_ch - 32) * 8 + COL_VALUE
+            #BACKTAB((GRID_ROW0 + g_py) * SCREEN_COLS + GRID_COL0 + g_px) = (g_ch - 32) * 8 + COL_NORMAL
         END IF
     END IF
 
     IF g_y = GRID_ROWS THEN
+        SPRITE 0, 0, 0, 0
         ga_idx = g_x : GOSUB grid_action_col
         s_row = GRID_ACTION_ROW : s_max = 3 : s_col_color = COL_HILIGHT
         GOSUB scr_recolor
     ELSE
         g_ch = 32 + g_y * GRID_COLS + g_x
         IF g_ch > 126 THEN g_ch = 32
-        #BACKTAB((GRID_ROW0 + g_y) * SCREEN_COLS + GRID_COL0 + g_x) = (g_ch - 32) * 8 + COL_HILIGHT
+        #BACKTAB((GRID_ROW0 + g_y) * SCREEN_COLS + GRID_COL0 + g_x) = (g_ch - 32) * 8 + CS_DARKGREEN
+        SPRITE 0, SPR_VISIBLE + GRID_MOB_X0 + (GRID_COL0 + g_x) * 8, \
+                  SPR_ZOOMY2 + GRID_MOB_Y0 + (GRID_ROW0 + g_y) * 8, \
+                  SPR_BEHIND + (256 + GLYPH_BLOCK) * 8 + CS_YELLOW
     END IF
 
     g_px = g_x : g_py = g_y

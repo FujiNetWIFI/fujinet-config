@@ -15,7 +15,7 @@
     CONST WIFI_CONNECT_TRIES = 20      ' status polls, ~2s apart -> ~40s
     CONST LINK_WAIT_FRAMES = 900       ' ~15s for the ESP32 to boot+enumerate
 
-    DIM num_nets, ws_i, ws_row, ws_color, ws_tries, wifi_status
+    DIM num_nets, ws_i, ws_row, ws_color, ws_tries, wifi_status, ws_new
     DIM ws_delay, ws_abort
 
 ' ws_pause: block for ws_delay frames (no PAUSE statement in IntyBASIC).
@@ -112,50 +112,36 @@ ws_do_scan: PROCEDURE
 
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"SELECT NETWORK"
+    ' sel_row BEFORE the draw, not after: ws_draw_list picks the highlighted row
+    ' from it, and it survives from whatever screen ran last (a cancelled
+    ' grid_entry re-enters here with it still on the OTHER row, and
+    ' do_connect_wifi's failure path can arrive with a file-browser row in it).
+    ' Latent while every cursor move redrew the whole list and hid it;
+    ' load-bearing now that ws_set_sel only ever touches two rows again.
+    sel_row = 0
     GOSUB ws_draw_list
     PRINT AT screenpos(0,11) COLOR COL_DIM,"DISC=MOVE  BTN=PICK "
 
-    sel_row = 0
     ws_sub = WS_SELECT
 END
 
-' ---------------------------------------------------------------------------
-' ws_draw_list: rows 1..num_nets show scanned SSIDs (re-fetched one at a
-' time -- never cached), row (num_nets+1) is the fixed "OTHER" entry.
-' ---------------------------------------------------------------------------
-ws_draw_list: PROCEDURE
-    FOR ws_i = 0 TO num_nets - 1
-        ws_row = 1 + ws_i
-        ws_color = COL_NORMAL
-        IF ws_i = sel_row THEN ws_color = COL_HILIGHT
-
-        fc_i = ws_i : GOSUB fj_get_scan_result
-        IF fn_ok THEN
-            s_row = ws_row : s_col = 1 : s_max = 18 : s_col_color = ws_color
-            #s_src = FN_RX : GOSUB scr_puts
-        END IF
-    NEXT ws_i
-
-    ws_row = 1 + num_nets
-    ws_color = COL_DIM
-    IF sel_row = num_nets THEN ws_color = COL_HILIGHT
-    PRINT AT screenpos(1, ws_row) COLOR ws_color,"OTHER (ENTER SSID)"
-
-    FOR ws_i = ws_row + 1 TO 10
-        s_row = ws_i : GOSUB scr_row_clear
-    NEXT ws_i
-END
+' ws_draw_list lives in selbar.bas (the $D000 segment) alongside ws_set_sel --
+' the default segment has no room for it, and it is now called from here only.
 
 ws_do_select: PROCEDURE
     GOSUB in_poll
 
+    ' ws_set_sel (selbar.bas) owns sel_row and recolours only the two rows that
+    ' change -- do NOT call ws_draw_list here, which re-fetches every SSID over
+    ' the mailbox and leaves the list frozen half-drawn for the better part of
+    ' a second.
     IF in_disc = DISC_UP AND sel_row > 0 THEN
-        sel_row = sel_row - 1
-        GOSUB ws_draw_list
+        ws_new = sel_row - 1
+        GOSUB ws_set_sel
     END IF
     IF in_disc = DISC_DOWN AND sel_row < num_nets THEN
-        sel_row = sel_row + 1
-        GOSUB ws_draw_list
+        ws_new = sel_row + 1
+        GOSUB ws_set_sel
     END IF
 
     IF in_btn <> 0 THEN
@@ -175,6 +161,7 @@ ws_do_select: PROCEDURE
 END
 
 ws_do_custom: PROCEDURE
+    GOSUB grid_video
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"ENTER NETWORK NAME"
     POKE (SC_SSID), 0
@@ -190,6 +177,7 @@ ws_do_custom: PROCEDURE
 END
 
 ws_do_password: PROCEDURE
+    GOSUB grid_video
     GOSUB scr_clear
     PRINT AT screenpos(0,0) COLOR COL_NORMAL,"ENTER PASSWORD"
     #ge_dst = SC_PASS : g_max = 64

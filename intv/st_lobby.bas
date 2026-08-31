@@ -48,7 +48,10 @@ hosts_launch_lobby: PROCEDURE
     fc_hs = host_slot
     GOSUB fj_mount_host
     IF fn_ok = 0 THEN
+        ' Returns with state still ST_HOSTS, so the screen is live in FGBG and
+        ' row 11 has just lost its purple to the PRINT.
         PRINT AT screenpos(0,11) COLOR COL_ERROR,"MOUNT FAILED        "
+        s_row = 11 : #s_bg = BG_PURPLE : GOSUB scr_fgbg_row
         RETURN
     END IF
 

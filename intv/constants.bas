@@ -29,7 +29,62 @@
     CONST CS_GREEN      = $0005
     CONST CS_YELLOW     = $0006
     CONST CS_WHITE      = $0007
+    ' 8-15 are BACKGROUND ONLY here: a GROM card's foreground is bits 0-2 plus
+    ' bit 12, and bit 12 doubles as the Colored Squares selector, so the STIC
+    ' requires foreground bit 3 to be 0 for GROM cards. Color stack REGISTERS
+    ' take the full 0-15 though, which is how CS_CYAN reaches the screen.
+    CONST CS_CYAN       = $0009
+    CONST CS_PURPLE     = $000F
     CONST CS_ADVANCE    = $2000   ' Advance the color stack by one position.
+
+    ' MOB (sprite) register bits, from the same standard IntyBASIC constants.bas
+    ' this file is otherwise derived from. Only the character grid uses a MOB --
+    ' see input.bas's inverse-video cursor.
+    '
+    ' *** SPR_BEHIND is bit 13 of the ATTRIBUTE register and means PRIORITY. ***
+    ' The IntyBASIC manual (manual.txt:944) calls it "Change color stack", which
+    ' is the BACKTAB meaning copy-pasted into the SPRITE section by mistake. The
+    ' STIC's own documentation is unambiguous -- jzintv/doc/programming/
+    ' stic.txt:247, "PRIO: if set, the MOB appears behind background cards".
+
+    ' GRAM cards. The program defines no others, so 0-2 are the whole set.
+    ' These live here, not in csbar.bas which supplies their bitmaps, because
+    ' input.bas uses GLYPH_BLOCK and is INCLUDEd long before csbar.bas.
+    CONST GLYPH_FOLDER  = 0
+    CONST GLYPH_CART    = 1
+    ' GLYPH_BLOCK is shared: input.bas parks it behind the character grid's
+    ' selected cell as an inverse-video MOB, and st_boot.bas draws it straight
+    ' into BACKTAB for the boot progress bar.
+    CONST GLYPH_BLOCK   = 2
+    CONST GRAM_SELECT   = $0800   ' bit 11: take the card from GRAM, not GROM
+
+    CONST SPR_HIT       = $0100   ' X reg: collision detection (unused here)
+    CONST SPR_VISIBLE   = $0200   ' X reg
+    CONST SPR_ZOOMY2    = $0100   ' Y reg: 1x card-pixel tall (MOBs are half-pixel by default)
+    CONST SPR_BEHIND    = $2000   ' A reg bit 13 = PRIO
+
+    ' Foreground/background (FGBG) mode backgrounds, ORed into a BACKTAB word
+    ' on top of the usual card*8+foreground. FGBG gives every cell its own
+    ' background from all 16 colors, at the price of only GROM cards 0-63
+    ' (ASCII 32-95, no lowercase) -- see fgbg.bas. ST_HOSTS and ST_INFO use it.
+    '
+    ' *** The bit order is NOT what the IntyBASIC manual says. ***
+    ' manual.txt:965-967 claims $1000 is background bit 2 and $2000 bit 3;
+    ' the hardware has them the other way round. Ground truth is jzIntv's
+    ' decoder, src/stic/stic.c:1481:
+    '     bg_clr = ((card >> 9) & 0xB) | ((card >> 11) & 0x4)
+    ' i.e. background bits 3,2,1,0 come from word bits 12,13,10,9 -- which is
+    ' what jzintv/doc/programming/stic.txt:465-470 documents. So:
+    '     bg bit 0 = $0200   bg bit 1 = $0400
+    '     bg bit 2 = $2000   bg bit 3 = $1000
+    ' Following the manual instead would render DARKGREEN (4) as grey (8).
+    CONST BG_BLUE       = $0200   '  1
+    CONST BG_RED        = $0400   '  2
+    CONST BG_TAN        = $0600   '  3
+    CONST BG_DARKGREEN  = $2000   '  4
+    CONST BG_GREEN      = $2200   '  5
+    CONST BG_YELLOW     = $2400   '  6
+    CONST BG_PURPLE     = $3600   ' 15
 
     ' Disc directions (8-way, used for menu/grid navigation).
     CONST DISC_UP     = $0004
@@ -114,17 +169,34 @@
     ' a gap.
     ' -------------------------------------------------------------------
     CONST GRID_VALUE_ROW  = 1
-    CONST GRID_ROW0       = 3
+    CONST GRID_PANEL_ROW  = 3    ' dark green starts here: a blank row of padding
+    CONST GRID_ROW0       = 4
     CONST GRID_COL0       = 2
     CONST GRID_ROWS       = 6
     CONST GRID_COLS       = 16
-    CONST GRID_ACTION_ROW = 10
+    CONST GRID_ACTION_ROW = 11
     CONST GRID_ACT_COL0   = 2    ' SPC
     CONST GRID_ACT_COL1   = 7    ' DEL
     CONST GRID_ACT_COL2   = 12   ' OK
     CONST GRID_ACT_COL3   = 17   ' ESC
 
-    CONST ENTRIES_PER_PAGE = 10
+    ' Pixel offset from background card (0,0) to MOB coordinates, for the
+    ' inverse-video cursor. Measured against the emulator by pinning the cursor
+    ' on a known cell and reading back where the block landed: both axes are
+    ' offset by 8, i.e. MOB (8,8) is the top-left card. Don't infer this from
+    ' the IntyBASIC manual's coordinate ranges (X 0-168, Y 0-95) -- they imply
+    ' an asymmetry that isn't there.
+    CONST GRID_MOB_X0     = 8
+    CONST GRID_MOB_Y0     = 8
+
+    ' 9, not 10, and the row below the last entry (row 10) is left permanently
+    ' blank. That spacer is load-bearing, not cosmetic: the file browser draws
+    ' in color stack mode as RED / content / selected / content / RED, which
+    ' fits the 4-entry stack exactly -- but only while a content row exists
+    ' BOTH above and below the selection bar. Row 10 is what guarantees the
+    ' lower one when the bottom entry is selected. See csbar.bas.
+    CONST ENTRIES_PER_PAGE = 9
+    CONST FILES_SPACER_ROW = 10
     CONST FILES_START_ROW  = 1
     CONST DIR_MAX_LEN      = 36    ' short-form entry length from READ_DIR_ENTRY
     CONST NUM_HOST_SLOTS   = 8
@@ -141,6 +213,12 @@
     CONST DEVICE_SLOT = 0
     DIM host_slot, sel_row
     DIM copy_mode, copy_host_slot
+
+    ' Video mode currently programmed into the STIC, and the one the current
+    ' state wants: 0 = color stack (IntyBASIC's default, black backgrounds),
+    ' 1 = FGBG (ST_HOSTS only). config.bas's main loop issues MODE only when
+    ' these differ, since MODE costs a frame and clobbers PRINT's color.
+    DIM vid_now, vid_want
 
     ' -------------------------------------------------------------------
     ' Scratch RAM ($9000-$97FF) -- ours, outside the mailbox proper ($9C00+).

@@ -5,7 +5,8 @@ LIBDIR    ?= $(HOME)/Workspace/IntyBASIC/intybasic/
 PRODUCT = config
 SOURCES = config.bas constants.bas fujinet.bas fujicmd.bas screen.bas \
           scroll.bas input.bas st_wifi.bas st_hosts.bas st_file.bas \
-          st_info.bas st_boot.bas st_lobby.bas st_copy.bas
+          st_info.bas st_boot.bas st_lobby.bas st_copy.bas fgbg.bas \
+          selbar.bas csbar.bas
 
 .PHONY: all clean run rom.h
 all: $(PRODUCT).bin $(PRODUCT).rom
