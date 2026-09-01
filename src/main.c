@@ -27,6 +27,10 @@ void setup(void)
   screen_init();
 #ifdef BUILD_MSDOS
   system_load_tsr_setting();
+  /* Unit -> drive letter is fixed once FUJINET.SYS loads, so scan DOS's
+     drives once here. install_tsr_now() and the device slot renderers then
+     just read the table. */
+  system_refresh_drive_letters();
 #endif
 #ifdef BUILD_APPLE2
   input_joystick_init();

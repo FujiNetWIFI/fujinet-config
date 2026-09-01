@@ -72,6 +72,17 @@ static unsigned char far *screen_get_video_segment_address(void)
 
 /**
  * @brief place a character on screen, at x, y, with selected attribute
+ *
+ *        Writes straight to video memory rather than going through the BIOS.
+ *        Doing this via INT 10h cost two interrupts per character, and a full
+ *        hosts-and-devices repaint is well over a thousand characters.
+ *        screen_clear(), bar.c and input_line() already write through the same
+ *        far pointer.
+ *
+ *        Unlike the old BIOS path this does not move the hardware cursor. That
+ *        is fine: the cursor is hidden everywhere except inside input_line(),
+ *        which positions it explicitly with gotoxy().
+ *
  * @param x Column (00-screen_cols-1)
  * @param y Line (00-24)
  * @param a The color attribute
@@ -79,21 +90,14 @@ static unsigned char far *screen_get_video_segment_address(void)
  */
 void screen_putc(unsigned char x, unsigned char y, unsigned char a, const char c)
 {
-    static union REGS r;
+    unsigned int vo;
 
-    /* Set cursor position */
-    r.h.ah = 0x02;
-    r.h.bh = 0;
-    r.h.dh = y;
-    r.h.dl = x;
-    int86(0x10,(union REGS *)&r,(union REGS *)&r);
+    if (x >= screen_cols || y > 24)
+        return;
 
-    r.h.ah = 0x09;
-    r.h.al = c;
-    r.h.bh = 0;
-    r.h.bl = a;
-    r.x.cx = 1;
-    int86(0x10,(union REGS *)&r,(union REGS *)&r);
+    vo = ((unsigned int)y * screen_cols + x) << 1;
+    video[vo]     = c;
+    video[vo + 1] = a;
 }
 
 /**
@@ -117,6 +121,12 @@ void screen_puts_center(unsigned char y, unsigned char a, const char *s)
 void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *s)
 {
     char c=0;
+    unsigned int vo;
+
+    if (y > 24)
+        return;
+
+    vo = ((unsigned int)y * screen_cols + x) << 1;
 
     while (c = *s++)
     {
@@ -124,9 +134,14 @@ void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *
         {
             x=0;
             y++;
+            if (y > 24)
+                return;
+            vo = (unsigned int)y * screen_cols << 1;
         }
 
-        screen_putc(x++,y,a,c);
+        video[vo++] = c;
+        video[vo++] = a;
+        x++;
     }
 }
 
@@ -872,7 +887,9 @@ void screen_draw_box_titled(unsigned char x, unsigned char y, unsigned char w, u
 void screen_clear(void)
 {
     unsigned short i;
-    for (i = 0; i < 4000; i += 2)
+    unsigned short cells = (unsigned short)screen_cols * 25 * 2;
+
+    for (i = 0; i < cells; i += 2)
     {
         video[i]   = 0x20;             /* space character */
         video[i+1] = ATTRIBUTE_NORMAL; /* white on blue   */
@@ -1133,22 +1150,20 @@ void screen_connect_wifi(NetConfig *nc)
  */
 void screen_clear_line(unsigned char y)
 {
-    static union REGS r;
+    unsigned char x;
+    unsigned int vo;
 
-    /* Set cursor position */
-    r.h.ah = 0x02;
-    r.h.bh = 0;
-    r.h.dh = y;
-    r.h.dl = 0;
-    int86(0x10,(union REGS *)&r,(union REGS *)&r);
+    if (y > 24)
+        return;
+
+    vo = (unsigned int)y * screen_cols << 1;
 
     /* Plot spaces with desktop background attribute */
-    r.h.ah = 0x09;
-    r.h.al = 0x20; // Blank character.
-    r.h.bh = 0;
-    r.h.bl = ATTRIBUTE_NORMAL;
-    r.x.cx = screen_cols;
-    int86(0x10,(union REGS *)&r,(union REGS *)&r);
+    for (x = 0; x < screen_cols; x++)
+    {
+        video[vo++] = 0x20;             /* Blank character. */
+        video[vo++] = ATTRIBUTE_NORMAL;
+    }
 }
 
 /**

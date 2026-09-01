@@ -32,7 +32,7 @@ void mount_and_boot_lobby(void)
   screen_end();
   puts("Loading Lobby...");
 
-  lobby_drive = system_find_drive_letter_for_slot(0);
+  lobby_drive = deviceDriveLetters[0];
 
   fuji_set_boot_mode(2);
 
