@@ -240,6 +240,7 @@ void select_file_link(void)
 
   strcpy((char *)hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
   fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+  slots_dirty = true;
 
   selected_host_slot = NUM_HOST_SLOTS-1;
   strcpy(selected_host_name, tnfsHostname);

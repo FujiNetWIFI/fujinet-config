@@ -54,6 +54,9 @@ void msx_compact_device_slots(uint8_t ds)
 
   // Nothing left to pull into the last slot.
   fuji_unmount_disk_image(MSX_MAX_SLOTS - 1);
+
+  // Everything above moved slots on the FujiNet; our copy no longer matches.
+  slots_dirty = true;
 }
 
 void msx_set_mount_is_rom(bool is_rom)

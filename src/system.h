@@ -39,7 +39,6 @@ typedef struct {
 #define FUJI_SIGNATURE "FUJI"
 
 int  find_drive_letter(int drive);
-char system_find_drive_letter_for_slot(uint8_t device_slot);
 void system_refresh_drive_letters(void);
 
 void install_tsr_now(void);

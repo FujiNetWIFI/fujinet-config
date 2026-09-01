@@ -78,7 +78,11 @@ void select_slot_display()
 
       fuji_set_directory_position(pos);
 
-      fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+      if (slots_dirty)
+        {
+          fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+          slots_dirty = false;
+        }
 
 #ifdef BUILD_MSXROM
       /* The slot picker needs to know whether a ROM is on its way in, so
@@ -104,6 +108,7 @@ void select_slot_display()
 
 void select_slot_eject(unsigned char ds)
 {
+  slots_dirty = true;
   fuji_unmount_disk_image(ds);
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
@@ -127,6 +132,11 @@ void select_slot_done()
   bool mnt = false;
   // int i;
 #endif
+
+  // Every path below changes the device slot table on the FujiNet - through
+  // fuji_set_device_filename() at least - and the firmware also owns the
+  // MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
+  slots_dirty = true;
 
   memset(filename,0,sizeof(filename));
 
