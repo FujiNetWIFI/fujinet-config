@@ -208,6 +208,25 @@ void input_cursor(char x, char y)
 	screen_put(x, y, 0xAF); // Blue cursor
 }
 
+#ifndef DRAGON
+// SHIFT-0 toggles $011A between 0 (lowercase allowed) and nonzero (forced
+// uppercase) -- same flag screen_init()/screen_end() save/restore. No
+// Dragon equivalent address confirmed yet, so this is CoCo-only.
+void input_case_indicator(void)
+{
+	byte case_flag;
+
+	asm
+	{
+		lda $011A
+		sta :case_flag
+	}
+
+	locate(24, 13);
+	printf("case:%s", case_flag ? "ABC" : "abc");
+}
+#endif
+
 void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool password)
 {
 	int o = strlen(c);
@@ -235,7 +254,19 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
 	{
 		locate(x, y);
 		input_cursor(x, y);
-		k = (char)waitkey(false);
+
+		k = 0;
+		while (!k)
+		{
+#ifndef DRAGON
+			if (password)
+			{
+				input_case_indicator();
+				locate(x, y);
+			}
+#endif
+			k = inkey();
+		}
 
 		switch (k)
 		{
