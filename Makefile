@@ -4,7 +4,7 @@ PLATFORMS += apple2
 PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
-# PLATFORMS += dragon
+PLATFORMS += dragon
 
 # Only in lib-experimental currently
 # Use make-exp <platform> to build them.
@@ -123,6 +123,45 @@ EXTRA_INCLUDE_ATARI = src/atari/asminc
 # Commodore 64 customization
 
 CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
+
+########################################
+# Dragon customization
+
+CFLAGS_EXTRA_DRAGON = --verbose -Wno-assign-in-condition --dragon -DDRAGON
+# Boot chain: AUTOLOAD.DWL (cfgload.bin, splash) -> STAGE2.DWL -> CONFIG.DWL.
+# Two loader stages because cfgload.bin (splash + ZX0 decompressor) is too
+# big to sit at a low org reliably on real hardware; stage2.c is a tiny
+# fetch-and-launch stub that can sit low instead. CONFIG.DWL's org must
+# clear stage2's actual footprint (see STAGE2_DWL_DRAGON below), and
+# dwload_clone() must tail-jump rather than call into the next stage or
+# the launched program inherits a stack it corrupts on exit.
+LDFLAGS_EXTRA_DRAGON = --dragon --verbose --limit=7fff --org=1600 -i
+
+dragon/disk-post::
+	cp $(CFGLOAD_BIN_DRAGON) $(R2R_PD)/AUTOLOAD.DWL
+	cp $(R2R_PD)/config.bin $(R2R_PD)/CONFIG.DWL
+
+
+CFGLOAD_DRAGON = src/coco/cfgload/cfgload.c src/coco/cfgload/dwload_cmoc.c src/coco/cfgload/logo_zx0.asm
+CFGLOAD_BIN_DRAGON = r2r/dragon/cfgload.bin
+LOGO_DWL_DRAGON = r2r/dragon/LOGO.DWL
+STAGE2_DRAGON = src/coco/cfgload/stage2.c src/coco/cfgload/dwload_cmoc.c
+STAGE2_DWL_DRAGON = r2r/dragon/STAGE2.DWL
+DISK_EXTRA_DEPS_DRAGON := $(CFGLOAD_BIN_DRAGON) $(LOGO_DWL_DRAGON) $(STAGE2_DWL_DRAGON)
+
+# limit must clear cfgload's own usage and stay under SCREEN_BUFFER (0x6600);
+# LOGO_SCRATCH in cfgload.c must sit at or above this limit.
+$(CFGLOAD_BIN_DRAGON):: $(CFGLOAD_DRAGON) | $(R2R_PD)
+	cmoc -i -DDRAGON --dragon --limit=2600 --org=1600 -o $@ $^
+
+# logo_data.asm's org must match LOGO_SCRATCH in cfgload.c.
+$(LOGO_DWL_DRAGON):: src/coco/cfgload/logo_data.asm | $(R2R_PD)
+	lwasm --dragon -o $@ $<
+
+# limit=1600 is also CONFIG.DWL's own org (LDFLAGS_EXTRA_DRAGON) -- that
+# memory is free for CONFIG.DWL once stage2 has fetched and executed it.
+$(STAGE2_DWL_DRAGON):: $(STAGE2_DRAGON) | $(R2R_PD)
+	cmoc -i -DDRAGON --dragon --limit=6600 --org=c00 -o $@ $^
 
 ########################################
 # Dragon customization
