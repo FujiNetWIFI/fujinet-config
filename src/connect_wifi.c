@@ -50,7 +50,7 @@ void connect_wifi(void)
 			bar_set_color(COLOR_SETTING_SUCCESSFUL);
 #endif
 			state = HOSTS_AND_DEVICES;
-#if defined(BUILD_ADAM) || defined(BUILD_MSX)
+#if defined(BUILD_ADAM) || defined(BUILD_MSXROM)
                         screen_should_be_cleared=true;
 #endif
 			pause(60);

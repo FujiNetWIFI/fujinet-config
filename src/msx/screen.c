@@ -15,6 +15,7 @@
 #include "../screen.h"
 #include "../constants.h"
 #include "../globals.h"
+#include "device_slots.h"
 #include "gfxutil.h"
 #include "cursor.h"
 #include "stdarg.h"
@@ -28,7 +29,8 @@ static const uint8_t *KEY_ADDRESSES[] = {
 #define MAX(x, y)  ((x) > (y) ? (x) : (y))
 
 #define MENU_LINE 23
-#define MAX_DISK_SLOTS (8)
+#define DEVICES_Y 10
+#define LONG_FILENAME_Y 18
 
 // #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
 #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_BLACK)
@@ -54,7 +56,7 @@ bool any_slot_occupied()
 {
   bool occupied = false;
 
-  for (char i = 0; (i < MAX_DISK_SLOTS) && (!occupied); i++)
+  for (char i = 0; (i < MSX_MAX_SLOTS) && (!occupied); i++)
     occupied = deviceSlots[i].file[0] != 0x00;
 
   return occupied;
@@ -295,9 +297,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
   cputc(' ');
   cputs(ds);
 
-  // TODO: swap for optimized function
-  uint16_t addr = MODE2_ATTR + 0x100 + 0x100*n + 32;
-  vdp_vwrite(row_pattern + 8, addr, 26<<3);
+  gfx_fill_attr(4, n+1, 26, 1);
 }
 
 void screen_set_wifi_select_network(unsigned char nn)
@@ -354,7 +354,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
     screen_should_be_cleared = false;
 
     screen_hosts_and_devices_host_slots(h);
-    screen_hosts_and_devices_device_slots(10,d,e);
+    screen_hosts_and_devices_device_slots(DEVICES_Y,d,e);
 
     vdp_blank();
   }
@@ -370,9 +370,15 @@ void screen_hosts_and_devices_hosts(void)
 
 void screen_hosts_and_devices_devices(void)
 {
+  uint8_t n = msx_visible_device_slots();
+
   show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
   watermark_visible = false;
-  bar_set(10, 3, 8, selected_device_slot);
+
+  if (selected_device_slot >= n)
+    selected_device_slot = n-1;
+
+  bar_set(DEVICES_Y, 3, n, selected_device_slot);
 }
 
 const char* screen_hosts_and_devices_device_slot(uint8_t hs, bool e, const char *fn)
@@ -405,13 +411,13 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   draw_card(0, 10, 1, "Hosts", true);
 }
 
-void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+static void draw_device_slots(unsigned char y, DeviceSlot *d, bool *e, uint8_t n)
 {
   // bool has_disks = false;
   // uint8_t disk_n = 0;
   // uint8_t slot_n = 0;
 
-  for (char i=0;i<MAX_DISK_SLOTS;i++)
+  for (char i=0;i<n;i++)
   {
     gotoxy(1,i+y+1);
     char icon = ' ';
@@ -431,7 +437,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
         // has_disks = true;
       // }
     }
-    else if (strstr(filename, ".rom") != NULL || strstr(filename, ".ROM") != NULL || strstr(filename, ".bin") != NULL || strstr(filename, ".BIN") != NULL) {
+    else if (msx_device_slot_is_rom(filename)) {
       icon = 0x89;
       // label = '1'+slot_n;
       // slot_n++;
@@ -455,7 +461,13 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
     }
   }
 
-  draw_card(y, 10, 1, "Devices", false);
+  draw_card(y, n+2, 1, "Devices", false);
+}
+
+void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
+{
+  // Four disk rows, plus a row for each ROM that is currently mounted.
+  draw_device_slots(y, d, e, msx_visible_device_slots());
 }
 
 
@@ -484,22 +496,20 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 
 void screen_hosts_and_devices_eject(uint8_t ds)
 {
-  // vdp_vfill(0x0c00+(ds<<8)+8,0x00,248);
-  // textcolor(BLACK);
-  // textbackground(WHITE);
-  //
-  // gotoxy(3,11+ds);
-  // TODO: use optimized function
-  // cputs(empty);
-  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0B00 + ds*0x100 + 16, 24);
-  // bar_jump(bar_get());
+  uint8_t n;
 
-  uint16_t offset = 0x0B00 + ds*0x100 + 16;
-  vdp_vfill(offset-8, 0, 240);
-  gotoxy(3,11+ds);
-  cputs(empty);
-  vdp_vwrite(row_pattern+8, MODE2_ATTR + offset, 232);
-  bar_jump(bar_get());
+  // Ejecting a ROM shrinks the list and pulls the slots below it up one
+  // row, so the whole card is repainted rather than just the ejected row.
+  vdp_noblank();
+  vdp_vfill(DEVICES_Y*0x100, 0, (MSX_MAX_SLOTS+2)*0x100);
+  screen_hosts_and_devices_device_slots(DEVICES_Y, deviceSlots, deviceEnabled);
+  vdp_blank();
+
+  n = msx_visible_device_slots();
+  if (selected_device_slot >= n)
+    selected_device_slot = n-1;
+
+  bar_set(DEVICES_Y, 3, n, selected_device_slot);
 }
 
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
@@ -507,12 +517,10 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
   // textcolor(BLACK);
   // textbackground(WHITE);
 
-  // TODO: Use optimized function
-  uint16_t offset = 0x0100 + hs*0x100;
-  vdp_vfill(offset, 0, 240);
+  vdp_vfill(0x0100 + hs*0x100, 0, 240);
   gotoxy(3,1+hs);
   cputs(empty);
-  vdp_vwrite(row_pattern, MODE2_ATTR + offset, 240);
+  gfx_fill_attr(0, hs+1, 30, 1);
   bar_jump(bar_get());
 }
 
@@ -522,7 +530,7 @@ void screen_hosts_and_devices_long_filename(char *f)
   // vdp_vfill(0x1100,0x00,1024); // Clear area first
   if (strlen(f)>31)
   {
-    gotoxy(0,17);
+    gotoxy(0,LONG_FILENAME_Y);
     cprintf("%s",f);
   }
 }
@@ -591,15 +599,12 @@ void screen_select_file_display(char *p, char *f)
   // Clear prev/next
   vdp_vfill(0x1200, 0x00, 256);
 
-  // TODO: swap for optimized function
   uint16_t patt_addr = 0x200 + 8;
-  uint16_t attr_addr = MODE2_ATTR + 0x200 + 8;
   for (uint8_t y = 0; y < ENTRIES_PER_PAGE; y++) {
     vdp_vfill(patt_addr,0,240);
-    vdp_vwrite(row_pattern+8, attr_addr, 30<<3);
-    attr_addr += 0x100;
     patt_addr += 0x100;
   }
+  gfx_fill_attr(1, 2, 30, ENTRIES_PER_PAGE);
 }
 
 void screen_select_file_display_long_filename(char *e)
@@ -620,9 +625,7 @@ void screen_select_file_prev(void)
   textbackground(BLACK);
   // gotoxy(2,2); cprintf("%-28s","...");
 
-  // TODO: replace with optimized function
   gotoxy(1,18); cputs("< prev");
-  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x0200 + 16, 24);
 }
 
 void screen_select_file_next(void)
@@ -631,9 +634,7 @@ void screen_select_file_next(void)
   textbackground(BLACK);
   // gotoxy(2,17); cprintf("%-28s","...");
 
-  // TODO: replace with optimized function
   gotoxy(25,18); cputs("next >");
-  // vdp_vwrite(row_pattern+8, MODE2_ATTR + 0x1100 + 16, 24);
 }
 
 void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
@@ -643,9 +644,7 @@ void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryTy
   textbackground(BLUE);
   cprintf("%.28s",e);
 
-  // TODO: swap for optimized function
-  uint16_t addr = MODE2_ATTR + 0x200 + 0x100*y + 16;
-  vdp_vwrite(row_pattern + 8, addr, 28<<3);
+  gfx_fill_attr(2, y+2, 28, 1);
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -712,16 +711,22 @@ void screen_select_slot(char *e)
 
   // TODO: Also need to display filename?
 
-  screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
+  // Mounting a ROM when every slot is full gets one spare row to land in.
+  uint8_t n = msx_mount_target_slots();
 
-  bar_set(0,3,8,0);
+  draw_device_slots(0,&deviceSlots[0],&deviceEnabled[0],n);
+
+  bar_set(0,3,n,msx_first_mount_slot());
 
   vdp_blank();
 }
 
 void screen_select_slot_choose(void)
 {
-  show_status("Choose where to mount");
+  if (msx_mount_replaces_rom())
+    show_status("ROM slots full - replace which?");
+  else
+    show_status("Choose where to mount");
   if (create) {
     show_menu(5, 'r',"_read-only", 0,NULL, 0,NULL, 0,NULL, 'w',"r/_w");
   }

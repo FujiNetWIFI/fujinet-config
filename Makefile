@@ -67,6 +67,7 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
+CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
 LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
 # logo_zx0.asm is shared with Dragon; LOGO.BIN is loaded via BASIC's LOADM
@@ -124,9 +125,43 @@ EXTRA_INCLUDE_ATARI = src/atari/asminc
 CFLAGS_EXTRA_C64 = -DUSE_EDITSTRING
 
 ########################################
-# CoCo customization
+# Dragon customization
 
-CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
+CFLAGS_EXTRA_DRAGON = --verbose -Wno-assign-in-condition --dragon -DDRAGON
+# Boot chain: AUTOLOAD.DWL (cfgload.bin, splash) -> STAGE2.DWL -> CONFIG.DWL.
+# Two loader stages because cfgload.bin (splash + ZX0 decompressor) is too
+# big to sit at a low org reliably on real hardware; stage2.c is a tiny
+# fetch-and-launch stub that can sit low instead. CONFIG.DWL's org must
+# clear stage2's actual footprint (see STAGE2_DWL_DRAGON below), and
+# dwload_clone() must tail-jump rather than call into the next stage or
+# the launched program inherits a stack it corrupts on exit.
+LDFLAGS_EXTRA_DRAGON = --dragon --verbose --limit=7fff --org=1600 -i
+
+dragon/disk-post::
+	cp $(CFGLOAD_BIN_DRAGON) $(R2R_PD)/AUTOLOAD.DWL
+	cp $(R2R_PD)/config.bin $(R2R_PD)/CONFIG.DWL
+
+
+CFGLOAD_DRAGON = src/coco/cfgload/cfgload.c src/coco/cfgload/dwload_cmoc.c src/coco/cfgload/logo_zx0.asm
+CFGLOAD_BIN_DRAGON = r2r/dragon/cfgload.bin
+LOGO_DWL_DRAGON = r2r/dragon/LOGO.DWL
+STAGE2_DRAGON = src/coco/cfgload/stage2.c src/coco/cfgload/dwload_cmoc.c
+STAGE2_DWL_DRAGON = r2r/dragon/STAGE2.DWL
+DISK_EXTRA_DEPS_DRAGON := $(CFGLOAD_BIN_DRAGON) $(LOGO_DWL_DRAGON) $(STAGE2_DWL_DRAGON)
+
+# limit must clear cfgload's own usage and stay under SCREEN_BUFFER (0x6600);
+# LOGO_SCRATCH in cfgload.c must sit at or above this limit.
+$(CFGLOAD_BIN_DRAGON):: $(CFGLOAD_DRAGON) | $(R2R_PD)
+	cmoc -i -DDRAGON --dragon --limit=2600 --org=1600 -o $@ $^
+
+# logo_data.asm's org must match LOGO_SCRATCH in cfgload.c.
+$(LOGO_DWL_DRAGON):: src/coco/cfgload/logo_data.asm | $(R2R_PD)
+	lwasm --dragon -o $@ $<
+
+# limit=1600 is also CONFIG.DWL's own org (LDFLAGS_EXTRA_DRAGON) -- that
+# memory is free for CONFIG.DWL once stage2 has fetched and executed it.
+$(STAGE2_DWL_DRAGON):: $(STAGE2_DRAGON) | $(R2R_PD)
+	cmoc -i -DDRAGON --dragon --limit=6600 --org=c00 -o $@ $^
 
 ########################################
 # Dragon customization
@@ -193,5 +228,30 @@ msdos/disk-post::
 	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
 	mcopy -i $(DISK) dist.msdos/AUTOEXEC.BAT '::/AUTOEXEC.BAT'
 
-msxrom-exp msdos-exp::
-	$(MAKE) FUJINET_LIB=https://github.com/FozzTexx/fujinet-lib-experimental.git PLATFORMS=$(@:-exp=) $(@:-exp=)
+FUJINET_LIB_EXP_REPO = https://github.com/FozzTexx/fujinet-lib-experimental.git
+
+msdos-exp::
+	$(MAKE) FUJINET_LIB=$(FUJINET_LIB_EXP_REPO) PLATFORMS=$(@:-exp=) $(@:-exp=)
+
+########################################
+# MSX customization
+
+# fujinet-lib main regressed the MSX transport in 902032d ("Changed
+# fuji_bus_call to use varargs"): sccz80 mis-passes the arguments, so the
+# header leaves the MSX corrupted - device 0x70 arrives as 0x10 and command
+# 0xEA as 0xC4 - and the firmware never answers, so CONFIG sits on the splash
+# spinning on IO_STATUS. Pin to the last commit known to talk to the firmware.
+# When that is fixed upstream, drop this and fold msxrom back into msdos-exp.
+# The pin has to live here because $(CACHE_DIR) is gitignored, so a checkout
+# made by hand in the cache would silently revert to main the next time the
+# cache is cleared.
+MSXROM_FNLIB_REV = b0a7959
+MSXROM_FNLIB_CACHE = $(CACHE_DIR)/fujinet-lib-msx-$(MSXROM_FNLIB_REV)
+
+msxrom-exp::
+	@if [ ! -d $(MSXROM_FNLIB_CACHE) ]; then \
+	  git clone $(FUJINET_LIB_EXP_REPO) $(MSXROM_FNLIB_CACHE) && \
+	  git -C $(MSXROM_FNLIB_CACHE) checkout --detach $(MSXROM_FNLIB_REV); \
+	fi
+	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
+	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom

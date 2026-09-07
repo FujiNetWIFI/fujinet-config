@@ -27,6 +27,22 @@ bool mounting = false;
 extern unsigned short entry_timer;
 extern HDSubState hd_subState;
 
+#define JOY_CENTER   31
+#define JOY_HALF     16
+#define JOY_LOW_TH   (JOY_CENTER - JOY_HALF)
+#define JOY_HIGH_TH  (JOY_CENTER + JOY_HALF)
+
+#define JOY_REPEAT_DELAY     25
+#define JOY_REPEAT_INTERVAL  6
+
+/* Positions are ignored until a button is pressed at least once, so a
+   floating (disconnected) analog stick can't produce phantom movement. */
+static bool joy_right_selected = false;
+static bool joy_left_selected = false;
+static bool joy_btn_released = true;
+static byte joy_last_dir = 0;
+static word joy_next_repeat = 0;
+
 /**
  * @brief this routine is needed because waitkey() and readline()
  *        always emit uppercase. argh!
@@ -60,9 +76,126 @@ unsigned char input_ucase()
 	return 0;
 }
 
+/* Bitmask: 1=up 2=down 4=left 8=right 16=btn1 32=btn2. */
+static byte readJoystick(void)
+{
+	byte value = 0;
+	bool lbtn1, lbtn2, rbtn1, rbtn2;
+	byte h, v;
+
+	byte buttons = readJoystickButtons();
+
+	/* The enum in coco.h has the button masks wrong; use raw masks. */
+	lbtn1 = (buttons & 0x02) == 0;
+	lbtn2 = (buttons & 0x08) == 0;
+	rbtn1 = (buttons & 0x01) == 0;
+	rbtn2 = (buttons & 0x04) == 0;
+
+	if (lbtn1 || lbtn2)
+	{
+		joy_left_selected = true;
+		joy_right_selected = false;
+	}
+	else if (rbtn1 || rbtn2)
+	{
+		joy_right_selected = true;
+		joy_left_selected = false;
+	}
+
+	if (!joy_left_selected && !joy_right_selected)
+		return 0;
+
+	{
+		const byte *joy = readJoystickPositions();
+
+		if (joy_left_selected)
+		{
+			h = joy[JOYSTK_LEFT_HORIZ];
+			v = joy[JOYSTK_LEFT_VERT];
+			if (lbtn1) value |= 16;
+			if (lbtn2) value |= 32;
+		}
+		else
+		{
+			h = joy[JOYSTK_RIGHT_HORIZ];
+			v = joy[JOYSTK_RIGHT_VERT];
+			if (rbtn1) value |= 16;
+			if (rbtn2) value |= 32;
+		}
+
+		if (v <= JOY_LOW_TH)  value |= 1;
+		if (v >= JOY_HIGH_TH) value |= 2;
+		if (h <= JOY_LOW_TH)  value |= 4;
+		if (h >= JOY_HIGH_TH) value |= 8;
+	}
+
+	return value;
+}
+
 unsigned char input_handle_joystick(void)
 {
+	bool was_active = joy_left_selected || joy_right_selected;
+	byte value = readJoystick();
+	byte dir = value & 0x0F;
+	byte btn = value & 0x30;
+
+	if (btn)
+	{
+		if (joy_btn_released)
+		{
+			joy_btn_released = false;
+			/* First press only activates the joystick; swallow it so the
+			   wake-up press can't accidentally navigate. */
+			if (!was_active)
+				return 0;
+			if (value & 16) return KEY_ENTER;
+			if (value & 32) return KEY_BREAK;
+		}
+		return 0;
+	}
+	joy_btn_released = true;
+
+	/* Left maps to parent-dir; right is unused. */
+	if (dir & 1)  dir = 1;
+	else if (dir & 2) dir = 2;
+	else if (dir & 4) dir = 4;
+	else { joy_last_dir = 0; return 0; }
+
+	if (dir != joy_last_dir)
+	{
+		joy_last_dir = dir;
+		joy_next_repeat = getTimer() + JOY_REPEAT_DELAY;
+	}
+	else if ((int)(getTimer() - joy_next_repeat) >= 0)
+	{
+		joy_next_repeat = getTimer() + JOY_REPEAT_INTERVAL;
+	}
+	else
+	{
+		return 0;
+	}
+
+	switch (dir)
+	{
+	case 1: return KEY_UP_ARROW;
+	case 2: return KEY_DOWN_ARROW;
+	case 4: return KEY_LEFT_ARROW;
+	}
 	return 0;
+}
+
+static byte waitkey_joystick(void)
+{
+	byte k;
+	for (;;)
+	{
+		k = inkey();
+		if (k)
+			return k;
+		k = input_handle_joystick();
+		if (k)
+			return k;
+	}
 }
 
 // Old cursor position
@@ -214,7 +347,7 @@ void input_select_slot_build_eos_directory_label(char *c) {}
 
 WSSubState input_set_wifi_select(void)
 {
-	char k = waitkey(true);
+	char k = waitkey_joystick();
 
 	switch (k)
 	{
@@ -256,7 +389,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 {
 	locate(31, 14);
 
-	char k = waitkey(true);
+	char k = waitkey_joystick();
 
 	switch (k)
 	{
@@ -317,7 +450,7 @@ HDSubState input_hosts_and_devices_devices(void)
 {
 	locate(31, 15);
 
-	char k = waitkey(true);
+	char k = waitkey_joystick();
 
 	switch (k)
 	{
@@ -384,6 +517,8 @@ SFSubState input_select_file_choose(void)
 	{
 		word now = getTimer();
     	k = inkey();
+		if (!k)
+			k = input_handle_joystick();
 
 		switch (k)
 		{
@@ -482,7 +617,7 @@ SFSubState input_select_file_choose(void)
 SSSubState input_select_slot_choose(void)
 {
 	locate(31, 14);
-	char c = waitkey(true);
+	char c = waitkey_joystick();
 	switch (c)
 	{
 	case KEY_BREAK: // BREAK
@@ -531,7 +666,7 @@ unsigned char input_select_slot_mode(char *mode)
  */
 SISubState input_show_info(void)
 {
-	char c = waitkey(true);
+	char c = waitkey_joystick();
 	switch (c)
 	{
 	case 'c':
@@ -554,7 +689,7 @@ DHSubState input_destination_host_slot_choose(void)
 {
 	locate(31, 14);
 
-	char k = waitkey(true);
+	char k = waitkey_joystick();
 
 	switch (k)
 	{

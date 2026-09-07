@@ -1,14 +1,23 @@
 #include "../system.h"
 #include "sp.h"
 #include "../globals.h"
+#include <string.h>
+#ifndef __ORCAC__
 #include <conio.h>
 #include <apple2.h>
-#include <peekpoke.h> // For the insanity in io_boot()
-#include <string.h>
+#include <peekpoke.h>
+#include <6502.h>
+#endif
 
 static NewDisk newDisk;
 uint8_t system_create_type;
 char response[256];
+
+#ifndef __ORCAC__
+// From FujiNet Lib
+extern uint8_t sp_is_init;
+extern uint8_t sp_dispatch_address[2];
+#endif
 
 void system_boot(void)
 {
@@ -28,14 +37,14 @@ void system_boot(void)
 
   ostype = get_ostype() & 0xF0;
   //clrscr();
-  cprintf("\r\nRESTARTING...");
+  cputs("\r\nRestarting...");
 
   // Wait for fujinet disk ii states to be ready
   for (i = 0; i < 2000; i++)
     {
       if (i % 250 == 0)
         {
-          cprintf(".");
+          cputc('.');
         }
     }
 
@@ -46,9 +55,20 @@ void system_boot(void)
       asm("STA $FFDF");
       asm("JMP $F4EE");  // jmp to A3 reset entry
     }
-  else  // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
+  else
     {
       POKE(0xC00E,0); // CLRALTCHAR
+
+      if (sp_is_init)
+        {
+          struct regs r;
+
+          cprintf(" from slot %d", sp_dispatch_address[1] & 0x07);
+
+          r.pc = sp_dispatch_address[1] << 8;  // $Cn00
+          _sys(&r);  // No return
+        }
+      // Massive brute force hack that takes advantage of MMU quirk. Thank you xot.
 
       // Make the simulated 6502 RESET result in a cold start.
       // INC $03F4

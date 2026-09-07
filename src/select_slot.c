@@ -10,6 +10,9 @@
 #include "input.h"
 #include "system.h"
 #include "pause.h"
+#ifdef BUILD_MSXROM
+#include "msx/device_slots.h"
+#endif /* BUILD_MSXROM */
 
 char mode=0;
 
@@ -64,6 +67,9 @@ void select_slot_display()
       char dispPath[42];
       memset(dispPath,0,42);
       strncpy(&dispPath[11],path,DIR_MAX_LEN);
+#ifdef BUILD_MSXROM
+      msx_set_mount_is_rom(false); // a newly created image is always a disk
+#endif
       screen_select_slot(dispPath);
     }
   else
@@ -72,7 +78,20 @@ void select_slot_display()
 
       fuji_set_directory_position(pos);
 
-      fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+      if (slots_dirty)
+        {
+          fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+          slots_dirty = false;
+        }
+
+#ifdef BUILD_MSXROM
+      /* The slot picker needs to know whether a ROM is on its way in, so
+         read the raw entry name before the formatted one below and rewind
+         the directory for that second read. */
+      fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+      msx_set_mount_is_rom(msx_device_slot_is_rom(response));
+      fuji_set_directory_position(pos);
+#endif
 
 #ifdef BUILD_PMD85
       fuji_read_directory(120, 0x80, response); // up to 3 lines of 40 chars each
@@ -89,6 +108,7 @@ void select_slot_display()
 
 void select_slot_eject(unsigned char ds)
 {
+  slots_dirty = true;
   fuji_unmount_disk_image(ds);
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
@@ -112,6 +132,11 @@ void select_slot_done()
   bool mnt = false;
   // int i;
 #endif
+
+  // Every path below changes the device slot table on the FujiNet - through
+  // fuji_set_device_filename() at least - and the firmware also owns the
+  // MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
+  slots_dirty = true;
 
   memset(filename,0,sizeof(filename));
 

@@ -473,20 +473,23 @@ void screen_select_slot(char *e)
   vdp_noblank();
   clrscr();
 
-  gotoxy(0,7);
-  cprintf("%32s","FILE DETAILS");
-  cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",*e++,*e++,*e++,*e++,*e++,*e++);
-
-  s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-
-  cprintf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
-
-  e += sizeof(unsigned long) + 2; // I do not need the last two bytes.
-
-  gotoxy(0,0);
-  cprintf("%32s",e);
-
   screen_hosts_and_devices_device_slots(0,&deviceSlots[0],&deviceEnabled[0]);
+
+  if (create==false)
+  {
+    gotoxy(0,7);
+    cprintf("%32s","FILE DETAILS");
+    cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",
+            (unsigned char)e[0],(unsigned char)e[1],(unsigned char)e[2],
+            (unsigned char)e[3],(unsigned char)e[4],(unsigned char)e[5]);
+
+    s=(unsigned long *)&e[6]; // Cast the next four bytes as a long integer.
+
+    cprintf("%8s %lu K\n","SIZE:",*s >> 10); // Quickly divide by 1024
+
+    gotoxy(0,0);
+    cprintf("%32s",&e[13]); // Filename follows the date, size, isdir, trunc and type.
+  }
 
   vdp_vfill(MODE2_ATTR,0xF4,256);
   vdp_vfill(MODE2_ATTR+0x100,0x1F,0x400);

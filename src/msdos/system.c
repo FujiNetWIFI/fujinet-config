@@ -146,13 +146,37 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
 }
 
 /**
- * @brief Refresh the cached drive-letter table for all 8 FujiNet device slots.
+ * @brief Build the cached drive-letter table for all 8 FujiNet device slots.
+ *
+ *        One pass over DOS drives C:-Z: fills every entry, because
+ *        find_drive_letter() hands back the device slot the drive belongs to.
+ *        The previous shape asked that question once per slot and so paid for
+ *        the whole C:-Z: walk eight times over - 192 IOCTL calls where 24 do.
+ *
+ *        The result is cached for the life of the program. FUJINET.SYS declares
+ *        num_units at CONFIG.SYS time and DOS hands out its drive letters right
+ *        then; mounting, ejecting or changing a slot's mode never moves a unit
+ *        to a different letter, so there is nothing to invalidate.
  */
 void system_refresh_drive_letters(void)
 {
-    uint8_t slot;
-    for (slot = 0; slot < 8; slot++)
-        deviceDriveLetters[slot] = system_find_drive_letter_for_slot(slot);
+    static bool drive_letters_valid = false;
+    int drive;
+    int unit;
+
+    if (drive_letters_valid)
+        return;
+
+    memset((void *)deviceDriveLetters, 0, sizeof(deviceDriveLetters));
+
+    for (drive = 3; drive <= 26; drive++)
+    {
+        unit = find_drive_letter(drive);
+        if (unit >= 0 && unit < 8)
+            deviceDriveLetters[unit] = (char)('A' + drive - 1);
+    }
+
+    drive_letters_valid = true;
 }
 
 /**
@@ -193,30 +217,3 @@ int find_drive_letter(int drive)
   return -1; /* Not found */
 }
 
-
-/**
- * @brief Find the DOS drive letter assigned to a given FujiNet device slot.
- *
- * Iterates drives C: through Z: (DOS drive numbers 3-26), calling
- * find_drive_letter() for each, and returns the first matching drive letter.
- *
- * @param device_slot  FujiNet device slot index (0-based, 0-7).
- * @return             Uppercase drive letter ('C'-'Z') if a match is found,
- *                     or '\0' if no mounted drive maps to that slot.
- */
-char system_find_drive_letter_for_slot(uint8_t device_slot)
-{
-    int drive;
-    char drive_letter = '\0';
-
-    for (drive = 3; drive <= 26; drive++)
-    {
-        if (find_drive_letter(drive) == (int) device_slot)
-        {
-            drive_letter = 'A' + drive - 1;
-            break;
-        }
-    }
-
-    return drive_letter;
-}

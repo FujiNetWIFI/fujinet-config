@@ -10,6 +10,9 @@
 #include "input.h"
 #include "constants.h"
 #include "globals.h"
+#ifdef BUILD_MSXROM
+#include "msx/device_slots.h"
+#endif /* BUILD_MSXROM */
 
 HDSubState hd_subState;
 #ifdef BUILD_ATARI
@@ -17,6 +20,18 @@ bool hisio_boot_enabled = false;
 #endif /* BUILD_ATARI */
 DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
 DeviceSlot temp_deviceSlot;
+// Set whenever something we did could have changed the host or device slot
+// tables on the FujiNet, so that the screens below re-read them exactly once
+// instead of on every sub-state transition.
+bool slots_dirty = true;
+#ifdef BUILD_MSDOS
+// Suppresses the per-eject device slot re-read while clear-all walks every
+// slot, so the sweep costs one read instead of one per slot. Only safe where
+// screen_hosts_and_devices_eject() does not render from deviceSlots - it just
+// blanks the one row on MS-DOS, whereas MSX and CoCo repaint the whole list
+// from the table and would show stale rows mid-sweep.
+static bool bulk_eject = false;
+#endif /* BUILD_MSDOS */
 bool deviceEnabled[NUM_DEVICE_SLOTS];
 HostSlot hostSlots[8];
 char selected_host_slot = 0;
@@ -55,7 +70,9 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   {
     // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
-    for (o = 0; o<NUM_DEVICE_SLOTS; o++)
+    // Walk backwards: on platforms where an eject pulls the slots below it
+    // up a position, going forwards would step over a slot that just moved.
+    for (o = NUM_DEVICE_SLOTS; o-- > 0; )
     {
       if ( deviceSlots[o].hostSlot == i )
       {
@@ -65,6 +82,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   }
 
   fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+  slots_dirty = true;
 
   // Need to re-render both hosts and devices because some devices
   // may have been eject if they belonged to old host
@@ -95,14 +113,29 @@ void hosts_and_devices_long_filename(void)
 
 void hosts_and_devices_eject(unsigned char ds)
 {
+#ifdef BUILD_MSXROM
+  bool was_rom = msx_device_slot_is_rom((const char *)deviceSlots[ds].file);
+#endif /* BUILD_MSXROM */
+
   fuji_unmount_disk_image(ds);
+
+#ifdef BUILD_MSXROM
+  // A ROM row only exists while that ROM is mounted, so ejecting one
+  // takes its row away and everything below it moves up a slot.
+  if (was_rom)
+    msx_compact_device_slots(ds);
+#endif /* BUILD_MSXROM */
+
 #ifdef OBSOLETE
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
   deviceSlots[ds].mode = 0;
   fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
 #endif // OBSOLETE
-  fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+#ifdef BUILD_MSDOS
+  if (!bulk_eject)
+#endif /* BUILD_MSDOS */
+    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_eject(ds);
 #ifdef OBSOLETE
   hosts_and_devices_long_filename();
@@ -116,8 +149,19 @@ void hosts_and_devices_devices_clear_all(void)
   screen_hosts_and_devices_devices_clear_all();
 
   // grouping this assumes same number of device and host slots..
+#ifdef BUILD_MSDOS
+  bulk_eject = true;
+#endif /* BUILD_MSDOS */
+
   for (i = 0; i < NUM_DEVICE_SLOTS; i++)
     hosts_and_devices_eject(i);
+
+#ifdef BUILD_MSDOS
+  bulk_eject = false;
+  // The loop above skipped its per-slot reads, so let the caller's loop do a
+  // single one before it repaints.
+  slots_dirty = true;
+#endif /* BUILD_MSDOS */
 
   hd_subState = HD_DEVICES;
 }
@@ -128,7 +172,11 @@ void hosts_and_devices_devices(void)
 
   fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
   screen_hosts_and_devices_devices();
+#ifndef BUILD_MSDOS
+  // screen_hosts_and_devices_long_filename() is an empty stub on MS-DOS, so
+  // the GET DEVICE FULLPATH round trip behind it would paint nothing.
   hosts_and_devices_long_filename();
+#endif /* !BUILD_MSDOS */
 
   while (hd_subState == HD_DEVICES)
     hd_subState = input_hosts_and_devices_devices();
@@ -158,6 +206,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   fuji_set_device_filename(m, selected_host_slot, selected_device_slot, temp_filename);
 
   fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  slots_dirty = true;
 
   // Make sure host slot is mounted or it will fail mounting disk
   fuji_mount_host_slot(deviceSlots[selected_device_slot].hostSlot);
@@ -304,6 +353,10 @@ void hosts_and_devices_done(void)
 
 void hosts_and_devices(void)
 {
+  // We may be arriving back from SELECT_FILE / SELECT_SLOT / SHOW_INFO, so
+  // always start from a fresh copy of both slot tables.
+  slots_dirty = true;
+
   if (quick_boot == true)
     hd_subState = HD_DONE;
   else
@@ -319,9 +372,17 @@ void hosts_and_devices(void)
   while (state == HOSTS_AND_DEVICES)
   {
 #ifndef BUILD_PMD85
-    fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
-    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
-    fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+    // Re-reading both tables costs two FujiNet round trips, and this loop runs
+    // again on every sub-state change - every TAB between the panes included.
+    // Only pay for it when something has actually changed them.
+    if (slots_dirty)
+    {
+      fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+      fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+      fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+      slots_dirty = false;
+    }
+
     screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
 #endif
 

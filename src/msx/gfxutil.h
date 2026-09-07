@@ -27,5 +27,6 @@ extern uint8_t row_lengths[24];
 
 void gfx_putcxy(char c, uint8_t x, uint8_t y);
 void gfx_putsxy(char *s, uint8_t x, uint8_t y);
+void gfx_fill_attr(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 
 #endif // MSX_GFXUTIL_H

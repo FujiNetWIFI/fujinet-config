@@ -32,6 +32,7 @@ extern bool backToFiles;
 extern bool backFromCopy;
 
 extern bool screen_should_be_cleared;
+extern bool slots_dirty;
 extern unsigned char numNetworks;
 extern unsigned char wifiEnabled;
 extern char _visibleEntries;
