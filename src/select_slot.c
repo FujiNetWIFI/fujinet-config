@@ -13,11 +13,34 @@
 #ifdef BUILD_MSXROM
 #include "msx/device_slots.h"
 #endif /* BUILD_MSXROM */
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+#include "coco/strendswith.h"
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 char mode=0;
 
 bool create=false;
 SSSubState ss_subState;
+
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+// system_slot0_is_rom() (coco/system.c) only ever looks at device slot 0, so
+// a .CCC/.ROM always goes there, skipping the normal slot picker -- there's
+// no disk device for a cart ROM to occupy.
+static bool selected_rom_image = false;
+
+// Read the name of the currently selected directory entry and report
+// whether it is a ROM cartridge image.
+static bool selected_file_is_rom_image(void)
+{
+  fuji_open_directory_filter(selected_host_slot,path,filter);
+  fuji_set_directory_position(pos);
+  fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+  fuji_close_directory();
+
+  return strendswith(response, ".ccc") || strendswith(response, ".CCC") ||
+         strendswith(response, ".rom") || strendswith(response, ".ROM");
+}
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 #ifdef BUILD_ATARI
 // Device slot 8 (index 7) is reserved for the cassette (C:) device.
@@ -56,8 +79,21 @@ void select_slot_init()
       ss_subState=SS_DONE;
     }
 #endif
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+  else if (create==false && (selected_rom_image = selected_file_is_rom_image()))
+    {
+      selected_device_slot=0;
+      mode=MODE_READ;
+      ss_subState=SS_DONE;
+    }
+#endif
   else
-    ss_subState=SS_DISPLAY;
+    {
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+      selected_rom_image = false;
+#endif
+      ss_subState=SS_DISPLAY;
+    }
 }
 
 void select_slot_display()
@@ -267,6 +303,11 @@ void select_slot_done()
 #endif // OBSOLETE
 
     fuji_close_directory();
+
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+    if (selected_rom_image && system_confirm_and_boot_user_rom(filename))
+      return; // Firmware is resetting into the cart -- nothing left to do here.
+#endif
   }
 
  not_created:
