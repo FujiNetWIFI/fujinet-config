@@ -87,7 +87,7 @@ onerom_done@
 
 void system_enable_user_rom(void)
 {
- // if (onerom_load_cart())
+  if (onerom_load_cart())
   {
     // A One ROM answered and already loaded the cartridge image - jump
     // straight into it, mirroring how the real FUJI_IO_REG write below never
@@ -201,9 +201,9 @@ bool system_confirm_and_boot_user_rom(const char *filename)
 
   if (k == 'N' || k == 'n')
     return false;
-onerom_load_cart();
+
   printf("\nBOOTING CART ROM...\n");
-  pause(120);
+  //pause(120);
   system_enable_user_rom();
   return true;
 }
