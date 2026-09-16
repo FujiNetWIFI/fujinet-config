@@ -590,16 +590,7 @@ bool screen_mount_and_boot_lobby(void)
 	locate(0, 15);
 	printf(" BOOT TO LOBBY? y/n");
 
-	k = waitkey(true);
-
-	switch (k)
-	{
-	case 'Y':
-	case 'y':
-		return true;
-	default:
-		return false;
-	}
+  return (k = inkey()) == 'Y' || k == 'y';
 }
 
 void screen_end(void)
