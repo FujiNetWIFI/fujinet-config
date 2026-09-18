@@ -28,7 +28,10 @@ cartridge's boot ROM.
 | `st_info.bas` | `ST_INFO` — SSID/IP/firmware version display |
 | `st_boot.bas` | `ST_BOOT` — `SET_DEVICE_FULLPATH` + `MOUNT_IMAGE`, progress bar |
 | `st_lobby.bas` | Keypad 0 — mount and boot the FujiNet Game Lobby ROM |
+| `ecs.bas` | Mattel ECS keyboard: detection, matrix scan, ASCII decode |
 | `mkromh.py` | Packs `config.bin` into firmware's `_bootrom[]` array format |
+| `ecs_check.py` | Validates `ecs.bas`'s tables and scan against jzIntv's emulation |
+| `lib/` | Vendored IntyBASIC 1.4.2 prologue/epilogue (must match the compiler) |
 
 ## Scope
 
@@ -57,6 +60,49 @@ Copying reuses the host-slot screen as its destination picker: after `5`,
 that screen re-renders as "COPY TO HOST", and picking a slot mounts it and
 drops you into its root to choose a destination directory.
 
+## ECS keyboard
+
+If a Mattel ECS is attached, its keyboard works everywhere, alongside the
+controller rather than instead of it — nothing about the controller
+behaviour changes, and on a base Intellivision none of this code runs at
+all (`ECS.AVAILABLE` is checked once at boot and gates every scan).
+
+| Key | Action |
+|---|---|
+| arrows ↑/↓ | move the selection (same auto-repeat as the disc) |
+| RETURN | the action button: open a host, enter a folder, boot a file |
+| ESC | back / cancel a copy — and cancel out of text entry |
+| `0`-`9` | the existing keypad shortcuts, unchanged |
+| a letter, on the host screen | start renaming that slot, seeded with the character you typed |
+
+and while entering text (host names, filters, SSIDs, passwords):
+
+| Key | Action |
+|---|---|
+| letters/digits/symbols | type, straight into the field |
+| SHIFT + key | uppercase, and the ECS's own symbol layer |
+| ← | backspace (held, it repeats) |
+| ↑/↓/→ | still move the character-grid cursor |
+| RETURN | accept |
+| ESC | cancel |
+
+The character grid is still there and still does everything it used to.
+That matters because the ECS keyboard has no `!`, `@`, `&`, `[`, `_` or `~`
+anywhere on it — those characters are only reachable through the grid.
+
+The ECS's shifted layer is its own and looks nothing like a PC's: SHIFT plus
+`1`-`0` gives `= " # $ + - / * ( )`, and `%`, `'`, `^` and `?` live on SHIFT
+plus the four arrow keys. `ecs.bas` decodes exactly that layout, which is
+what makes typing `=` on a PC keyboard in `fujinet-go-intv-desktop` produce
+`=` here: the frontend resolves host keys by *character* and sends whichever
+ECS chord carries it.
+
+`ecs_check.py` validates the two 56-entry decode tables and the scan itself
+against jzIntv's `src/cfg/mapping.c` and a port of its `pad_eval_keyboard()`,
+covering all 47 keys both plain and with SHIFT held. Run it after touching
+either table — a wrong entry compiles perfectly and simply types the wrong
+letter.
+
 ## Build
 
 ```sh
@@ -66,6 +112,12 @@ make            # config.bin (+ .cfg) and config.rom
 
 `config.bin`/`config.cfg` are the PiRTO II / SD-flashable format; `config.rom`
 is Intellicart format, for jzIntv.
+
+`lib/` vendors the IntyBASIC **1.4.2** prologue and epilogue, and `LIBDIR`
+points at it. They have to be the pair matching the compiler: a 1.5.x
+prologue against the 1.4.2 binary miscompiles, and IntyBASIC does not fall
+back or search if `LIBDIR` is wrong — it prints `Unable to include prologue`
+and exits 2.
 
 ## Test in jzIntv
 
@@ -77,7 +129,13 @@ instance over BoIP:
 ./run.sh                                    # localhost:9995 by default
 FUJINET_TARGET=host:port ./run.sh
 ./run.sh --fujinet-debug                    # trace mailbox/FujiBus frames
+ECS=1 ./run.sh                              # attach an ECS, for the keyboard
 ```
+
+With `ECS=1`, **press F7 inside jzIntv** to switch it to keymap 2, its ECS
+keyboard map. Until you do, host keypresses still go to the hand controller
+and nothing will type. `ECS=1` needs an `ecs.bin`; it defaults to the one in
+the jzIntv tree's `rom/`, override with `ECS_BIN`.
 
 Everything up through choosing a file to boot is fully testable this way —
 `fujinet.c` (the jzIntv side) proxies the mailbox exactly like the real

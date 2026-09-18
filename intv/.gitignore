@@ -4,3 +4,4 @@
 *.cfg
 *.rom
 config_rom.h
+!lib/*.asm
