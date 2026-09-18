@@ -24,12 +24,20 @@
 ' in_poll: call once per frame (after WAIT). Sets in_disc/in_btn/in_key.
 ' ---------------------------------------------------------------------------
 in_poll: PROCEDURE
+    ' The ECS keyboard, when there is one, is folded into the same three
+    ' outputs below rather than given a path of its own -- so every screen
+    ' gets arrow-key navigation, RETURN-to-select and the digit shortcuts
+    ' without knowing the keyboard exists. ecs_scan also sets in_char /
+    ' in_bs / in_esc, which only grid_entry looks at.
+    IF ecs_on THEN GOSUB ecs_scan
+
     ' --- disc, with auto-repeat while held in one direction ---
     in_disc = 0
     IF CONT.UP THEN in_disc = DISC_UP
     IF CONT.DOWN THEN in_disc = DISC_DOWN
     IF CONT.LEFT THEN in_disc = DISC_LEFT
     IF CONT.RIGHT THEN in_disc = DISC_RIGHT
+    IF ek_disc <> 0 THEN in_disc = ek_disc
 
     IF in_disc <> 0 THEN
         IF in_disc <> in_pdisc AND in_pdisc = 0 THEN
@@ -63,10 +71,12 @@ in_poll: PROCEDURE
     IF CONT.DOWN THEN in_pdisc = DISC_DOWN
     IF CONT.LEFT THEN in_pdisc = DISC_LEFT
     IF CONT.RIGHT THEN in_pdisc = DISC_RIGHT
+    IF ek_disc <> 0 THEN in_pdisc = ek_disc
 
     ' --- action buttons, edge-triggered (no repeat) ---
     in_braw = 0
     IF CONT.B0 OR CONT.B1 OR CONT.B2 THEN in_braw = 1
+    IF ek_btn <> 0 THEN in_braw = 1
     IF in_braw <> 0 AND in_pbtn = 0 THEN
         in_btn = 1
     ELSE
@@ -80,6 +90,7 @@ in_poll: PROCEDURE
         in_key = CONT.KEY
     END IF
     in_pkey = CONT.KEY
+    IF in_key = KEYPAD_NONE THEN in_key = ek_key
 END
 
 ' =============================================================================
@@ -163,11 +174,35 @@ grid_entry: PROCEDURE
         END IF
         IF g_y = GRID_ROWS AND g_x > 3 THEN g_x = 3
 
-        IF in_key = KEYPAD_0 THEN g_ch = 32 : GOSUB grid_append
-        IF in_key = KEYPAD_CLEAR THEN GOSUB grid_backspace
-        IF in_key = KEYPAD_ENTER THEN
+        ' ECS keyboard. ESC cancels here even though the controller's CLEAR
+        ' still backspaces -- the note above about deliberately having no
+        ' keypad shortcut for cancel is about CLEAR being the ONLY
+        ' backspace, so an accidental press must not discard the edit. With
+        ' a keyboard, backspace has moved to the left arrow, which frees ESC
+        ' to mean what it means everywhere else.
+        IF in_esc <> 0 THEN
+            fn_ok = 0
+            EXIT DO
+        END IF
+        IF in_ret <> 0 THEN
             fn_ok = 1
             EXIT DO
+        END IF
+        IF in_bs <> 0 THEN GOSUB grid_backspace
+
+        ' The ELSE is load-bearing: an ECS digit sets in_char AND in_key, and
+        ' KEYPAD_0 means "space" down there, so without it typing "0" would
+        ' append both a "0" and a space.
+        IF in_char <> 0 THEN
+            g_ch = in_char
+            GOSUB grid_append
+        ELSE
+            IF in_key = KEYPAD_0 THEN g_ch = 32 : GOSUB grid_append
+            IF in_key = KEYPAD_CLEAR THEN GOSUB grid_backspace
+            IF in_key = KEYPAD_ENTER THEN
+                fn_ok = 1
+                EXIT DO
+            END IF
         END IF
 
         IF in_btn <> 0 THEN

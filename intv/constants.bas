@@ -118,6 +118,23 @@
     CONST KEYPAD_NONE   = 12
 
     ' -------------------------------------------------------------------
+    ' Mattel ECS keyboard (ecs.bas). The ECS's second PSG sits at $00F0;
+    ' $00F8 is its control register, whose bits 6 and 7 are the direction
+    ' bits for the two I/O ports ($00FE and $00FF), 1 = output. The
+    ' prologue leaves it at $38 with both ports as inputs, which is
+    ' hand-controller mode -- so each of these keeps the $38 mixer bits and
+    ' just adds the one direction bit the scan needs. Verified against
+    ' jzIntv's src/pads/pads.c:406-443, which latches a write to a port
+    ' only while that port is already configured as an output.
+    ' -------------------------------------------------------------------
+    CONST ECS_PSG_CTRL    = $00F8
+    CONST ECS_PSG_PA      = $00FE   ' drives the matrix row, active low
+    CONST ECS_PSG_PB      = $00FF   ' reads the matrix column, active low
+    CONST ECS_CTRL_IDLE   = $38     ' both ports input -- the prologue's value
+    CONST ECS_CTRL_NORMAL = $78     ' port A output: normal scan
+    CONST ECS_CTRL_TRANS  = $B8     ' port B output: transposed scan
+
+    ' -------------------------------------------------------------------
     ' Application-level state machine (mirrors fujinet-config's src/main.c)
     ' -------------------------------------------------------------------
     ' 0-based: `ON state GOSUB label1,...,labelN` in IntyBASIC uses `state`
@@ -219,6 +236,16 @@
     ' 1 = FGBG (ST_HOSTS only). config.bas's main loop issues MODE only when
     ' these differ, since MODE costs a frame and clobbers PRINT's color.
     DIM vid_now, vid_want
+
+    ' ECS keyboard state (ecs.bas). Declared here, ahead of every INCLUDE
+    ' that touches it, because input.bas folds these into in_poll but
+    ' ecs.bas -- which owns them -- is included much later, in the $F000
+    ' segment. ecs_init gives them their inert values; see the warning
+    ' there about ek_key, which must start at KEYPAD_NONE and not 0.
+    DIM ecs_on
+    DIM ek_disc, ek_btn, ek_key, ek_ch, ek_pch
+    DIM ek_code, ek_shift, ek_bits, ek_r, ek_c, ek_bsdelay
+    DIM in_char, in_bs, in_esc, in_ret
 
     ' -------------------------------------------------------------------
     ' Scratch RAM ($9000-$97FF) -- ours, outside the mailbox proper ($9C00+).

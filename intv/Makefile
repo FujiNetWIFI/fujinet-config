@@ -1,12 +1,16 @@
 INTYBASIC ?= intybasic
 AS1600    ?= as1600
-LIBDIR    ?= $(HOME)/Workspace/IntyBASIC/intybasic/
+LIBDIR    ?= lib/
 
 PRODUCT = config
 SOURCES = config.bas constants.bas fujinet.bas fujicmd.bas screen.bas \
           scroll.bas input.bas st_wifi.bas st_hosts.bas st_file.bas \
           st_info.bas st_boot.bas st_lobby.bas st_copy.bas fgbg.bas \
-          selbar.bas csbar.bas
+          selbar.bas csbar.bas ecs.bas
+
+# A failed intybasic/as1600 run must not leave a truncated target behind:
+# make would then treat it as up to date and assemble the stale file.
+.DELETE_ON_ERROR:
 
 .PHONY: all clean run rom.h
 all: $(PRODUCT).bin $(PRODUCT).rom

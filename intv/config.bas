@@ -18,7 +18,6 @@
     INCLUDE "st_wifi.bas"
     INCLUDE "st_hosts.bas"
     INCLUDE "st_file.bas"
-    INCLUDE "st_info.bas"
 
     ' The default $5000-$6FFF segment (8K words) is essentially full as of
     ' st_wifi.bas/st_hosts.bas/st_file.bas -- st_boot.bas pushed total size
@@ -28,6 +27,15 @@
     ' instructions), give it an explicit segment per the IntyBASIC manual's
     ' own guidance ("Beyond that, add segments manually: ASM ORG $D000").
     ASM ORG $D000
+
+    ' st_info.bas sits here rather than up with the other st_* files purely
+    ' for space: folding the ECS keyboard into in_poll and st_hosts.bas took
+    ' the $6000 page down to 24 free words, and a spill from there lands in
+    ' $7000 -- the exact failure the note above is about. st_info is the
+    ' easiest module to move, being self-contained and reached only through
+    ' the ON state GOSUB. The page now has ~500 words free, more than before
+    ' the keyboard work started.
+    INCLUDE "st_info.bas"
     INCLUDE "st_boot.bas"
     INCLUDE "st_lobby.bas"
     INCLUDE "st_copy.bas"
@@ -43,6 +51,14 @@
     ASM ORG $F000
     INCLUDE "csbar.bas"
 
+    ' The ECS keyboard driver. Here rather than up with input.bas because
+    ' the $5000/$6000 region input.bas lands in has only a few hundred
+    ' words left, and a spill from there lands in $7000 -- see the note on
+    ' the ASM ORG $D000 above for why that produces a cart EXEC refuses to
+    ' boot. in_poll reaches ecs_scan by a plain cross-segment GOSUB, which
+    ' is already how st_file.bas calls into csbar.bas.
+    INCLUDE "ecs.bas"
+
 cfg_start:
     ' fj_open_directory reads SC_FILTER on every call, and cart RAM comes up
     ' with undefined contents -- clear it before anything can send garbage as
@@ -50,6 +66,7 @@ cfg_start:
     ' cold-boot floor.)
     POKE (SC_FILTER), 0
 
+    GOSUB ecs_init           ' detect the ECS; everything else keys off ecs_on
     GOSUB cb_define_glyphs   ' file-browser folder/cartridge cards into GRAM
     GOSUB scr_clear
     GOSUB fn_wait_mailbox

@@ -20,6 +20,9 @@
 ' needs. CLEAR is bound only in that mode, to cancel the copy.
 
     DIM hosts_shown, hd_i, hd_row, hd_col, hd_color, hd_new
+    ' Set by the ECS type-to-edit path below: the character that opened the
+    ' editor, which becomes the first character of the new name.
+    DIM hosts_seed
 
 do_hosts: PROCEDURE
     IF hosts_shown = 0 THEN
@@ -37,7 +40,11 @@ do_hosts: PROCEDURE
             s_row = 9 : #s_bg = BG_DARKGREEN : GOSUB scr_fgbg_row
             ' no lobby line mid-copy -- row 10 just extends the list block
             s_row = 10 : #s_bg = BG_DARKGREEN : GOSUB scr_fgbg_row
-            PRINT AT screenpos(0,11) COLOR COL_NORMAL,"BTN=DEST  CLR=CANCEL"
+            IF ecs_on THEN
+                PRINT AT screenpos(0,11) COLOR COL_NORMAL,"RET=DEST  ESC=CANCEL"
+            ELSE
+                PRINT AT screenpos(0,11) COLOR COL_NORMAL,"BTN=DEST  CLR=CANCEL"
+            END IF
             s_col_color = COL_HILIGHT : s_row = 11
             s_col = 0  : s_max = 3 : GOSUB scr_recolor     ' BTN
             s_col = 10 : s_max = 3 : GOSUB scr_recolor     ' CLR
@@ -56,7 +63,11 @@ do_hosts: PROCEDURE
             ' keys yellow, labels white -- same rule as the file browser's
             ' footer (st_copy.bas's sf_hint_keys), but BTN and ENT aren't
             ' digits, so scr_hilite_digits can't find them.
-            PRINT AT screenpos(0,11) COLOR COL_NORMAL,"BTN=OPEN ENT=EDT 9=I"
+            IF ecs_on THEN
+                PRINT AT screenpos(0,11) COLOR COL_NORMAL,"RET=OPEN ABC=EDT 9=I"
+            ELSE
+                PRINT AT screenpos(0,11) COLOR COL_NORMAL,"BTN=OPEN ENT=EDT 9=I"
+            END IF
             s_col_color = COL_HILIGHT : s_row = 11
             s_col = 0  : s_max = 3 : GOSUB scr_recolor     ' BTN
             s_col = 9  : s_max = 3 : GOSUB scr_recolor     ' ENT
@@ -105,6 +116,19 @@ do_hosts: PROCEDURE
         END IF
 
         IF in_key = KEYPAD_ENTER THEN
+            GOSUB hosts_edit_selected
+            RETURN
+        END IF
+
+        ' ECS keyboard: the keypad's ENTER has no counterpart on the ECS
+        ' (RETURN is already the action button, i.e. "open this host"), so
+        ' typing is the way into a rename -- and the character typed becomes
+        ' the first character of the new name, which is what you wanted
+        ' anyway. Digits are excluded because they already mean something
+        ' here (1-8 pick a slot, 9 info, 0 lobby), and so is space, since a
+        ' hostname starting with one is never intended.
+        IF in_char > 32 AND (in_char < 48 OR in_char > 57) THEN
+            hosts_seed = in_char
             GOSUB hosts_edit_selected
             RETURN
         END IF
@@ -183,6 +207,14 @@ hosts_edit_selected: PROCEDURE
     FOR hd_i = 0 TO HOST_NAME_LEN - 1
         POKE (SC_EDIT + hd_i), PEEK(SC_HOSTS + sel_row * HOST_NAME_LEN + hd_i) AND 255
     NEXT hd_i
+
+    ' Reached by typing rather than by pressing ENTER: start a fresh name
+    ' from the character that got us here, rather than editing the old one.
+    IF hosts_seed <> 0 THEN
+        POKE (SC_EDIT), hosts_seed
+        POKE (SC_EDIT + 1), 0
+        hosts_seed = 0
+    END IF
 
     ' The grid runs its own loop inline, with state still ST_HOSTS, so
     ' config.bas's mode switch never sees it -- and the 6x16 charset it offers
