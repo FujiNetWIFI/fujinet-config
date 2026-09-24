@@ -52,11 +52,17 @@
 #define UNUSED(x) (void)(x);
 
 extern bool screenDeviceSmartport;
+bool joystick_exists;
 
 #ifndef __ORCAC__
 void input_joystick_init(void)
 {
+  unsigned char j;
+  
   joy_install(joy_static_stddrv);
+
+  j = joy_read(JOY_1);
+  joystick_exists = !(JOY_DOWN(j) && JOY_RIGHT(j));
 }
 
 /* Poll counts (not real time -- plain Apple II has no timer accessible from
@@ -150,10 +156,10 @@ unsigned char input(void)
     return cgetc();
 
 #ifndef __ORCAC__
-  return input_handle_joystick();
-#else
-  return 0;
+  if(joystick_exists)
+     return input_handle_joystick();
 #endif
+  return 0;
 }
 
 unsigned char input_ucase(void)
