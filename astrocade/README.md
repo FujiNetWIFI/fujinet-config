@@ -25,7 +25,7 @@ boot ROM.
 | `hosts.inc` | Host slots: list, mount, rename (streamed `WRITE_HOST_SLOTS`), lobby, copy-mode skin |
 | `browse.inc` | `ST_SELECT_FILE`: paging, subfolders, `.cfg` suppression, filter, copy hooks |
 | `copy.inc` | `COPY_FILE` between hosts, `.cfg` sibling, return-to-source |
-| `info.inc` | Adapter info (SSID / IP / firmware version) |
+| `info.inc` | Adapter info (SSID / IP / firmware version); keypad `1` re-enters WiFi setup |
 | `boot.inc` | `SET_DEVICE_FULLPATH` + `MOUNT_IMAGE` with a progress bar, then the ROM swap |
 | `lib/` | Vendored copies of the bring-up's `fujilib.inc` (mailbox transport), `fujidisp.inc` and `HVGLIB.H` — keep in step with `fujinet-firmware/pico/astrocade/testrom/` |
 | `tools/` | Vendored `checkrom.py` (layout enforcement) and `mkromh.py` (firmware packer) |
@@ -47,6 +47,8 @@ Player-1 hand controller plus the 24-key keypad.
 |---|---|---|
 | everywhere | ↑/↓ move, trigger selects | ↑/↓ keys mirror the stick |
 | hosts | | `1`–`8` jump to a slot, `=` rename, `9` info, `0` lobby |
+| info | | `1` change WiFi network, trigger / `CE` back |
+| network select | | trigger picks, `CE` rescans, `0` skips to the hosts |
 | file browser | ←/→ = previous / next page | `1` up a dir, `2`/`3` pages, `4` filter, `5` mark / copy-here, `CE` back |
 | text editor | move the grid cursor, trigger places | digits type directly, `CE` = backspace, `=` = accept; CASE toggles lowercase |
 

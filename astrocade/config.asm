@@ -51,9 +51,10 @@ FULLLEN EQU     120             ; re-read width for paths that must open
 DEVSLOT EQU     0
 
 ; ---- RAM map (screen RAM above the 80 visible lines) ------------------
-; The V_SRC/V_SSID union is safe by construction: the WiFi screens are
-; unreachable once ST_HOSTS has been entered, and copy (the V_SRC user)
-; can only start from the file browser.
+; The V_SRC/V_SSID union is safe by construction: after power-on the WiFi
+; screens are reachable only via the info screen, which the host page
+; offers only in normal mode; V_SRC is live only mid-copy (copy mode) and
+; is otherwise rebuilt right before a boot.
 V_PATH  EQU     4C80H           ; 192  current dir path, NUL-term, leading '/'
 V_SRC   EQU     4D40H           ; 224  copy-source full path / boot path
 V_SSID  EQU     4D40H           ;  33  \ union with V_SRC (wifi phase only)

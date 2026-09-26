@@ -3,8 +3,10 @@
 ; Mirrors the INTV flow: at power-on decide between going straight to the
 ; host list (wifi disabled or already connected), waiting out a connect on
 ; the stored SSID, or running the scan / select / password / save chain.
-; The WiFi screens are unreachable once ST_HOSTS has been entered, which
-; is what makes the V_SSID/V_PASS union with V_SRC safe.
+; Afterwards WSCAN is reachable again from the info screen (keypad 1),
+; which the host page only offers in normal mode -- never mid-copy, when
+; V_SRC is live -- so the V_SSID/V_PASS union with V_SRC stays safe.
+; Keypad 0 on the network list leaves for the host page.
 
 ; ---- ST_CHECK_WIFI ----------------------------------------------------
 CKWIFI: LD      HL,TTITLE
@@ -151,6 +153,8 @@ WSLOOP: CALL    INWAIT
         JR      Z,WSSEL
         CP      EVCE
         JP      Z,WSCAN
+        CP      EVD0
+        JP      Z,HOSTPG
         JR      WSLOOP
 
 WSMU:   LD      A,(V_CUR)
@@ -240,7 +244,7 @@ TCFAIL: DB      "CONNECT FAILED",0
 TSELN:  DB      "SELECT NETWORK",0
 TSCAN:  DB      "SCANNING...",0
 TOTHER: DB      "OTHER (ENTER SSID)",0
-TWSFOOT: DB     "T:PICK  CE:RESCAN",0
+TWSFOOT: DB     "T:PICK CE:SCAN 0:ESC",0
 TESSID: DB      "ENTER SSID",0
 TEPASS: DB      "ENTER PASSWORD",0
 TSAVING: DB     "SAVING...",0

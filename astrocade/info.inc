@@ -3,7 +3,8 @@
 ; One GET_ADAPTERCONFIG_EXTENDED; the 240-byte reply fits slice 0 and is
 ; rendered straight from the window: ssid at +0 (drawn with the lowercase-
 ; capable blitter -- SSIDs are case-sensitive), fn_version at +125,
-; sLocalIP at +140.
+; sLocalIP at +140. Keypad 1 leaves for the network picker (WSCAN), the
+; way every other port's info screen reaches SET_WIFI.
 
 INFOPG: LD      HL,TINFO
         CALL    UTITLE
@@ -43,7 +44,10 @@ INLOOP: CALL    INWAIT
         CP      EVTRIG
         JR      Z,INBACK
         CP      EVCE
-        JR      NZ,INLOOP
+        JR      Z,INBACK
+        CP      EVD0+1
+        JP      Z,WSCAN
+        JR      INLOOP
 INBACK: JP      HOSTPG
 
 ; INLBL: label at HL on list row B. INVAL: LINBUF on list row B.
@@ -61,5 +65,5 @@ TINFO:  DB      "FUJINET INFO",0
 TLSSID: DB      "SSID",0
 TLIP:   DB      "IP",0
 TLVER:  DB      "VERSION",0
-TIFOOT: DB      "T:BACK",0
+TIFOOT: DB      "1:WIFI  T:BACK",0
 EINFO:  DB      "INFO ERR",0
