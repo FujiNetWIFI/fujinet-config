@@ -31,7 +31,7 @@ SFRSET: CALL    SRST1
 ; ---- page draw --------------------------------------------------------
 SFDRAW: CALL    UCLRA
         LD      HL,V_PATH       ; title row = tail of the path
-        LD      B,26
+        LD      B,FOOTCOL
         CALL    UTAIL
         LD      HL,LINBUF
         LD      DE,TITLEY*256+2
@@ -434,9 +434,9 @@ STY1:   LD      A,C
 STY0:   XOR     A
         RET
 
-TEMPTD: DB      "<EMPTY> 4:FLT 1:UP CE",0
-TSFOOT: DB      "1:UP 2/3:PG 4:FLT 5:CPY CE",0
-TSCFOOT: DB     "5:COPY HERE  CE:CANCEL",0
-TEFILT: DB      "FILTER (!NAME=SUBDIRS)",0
+TEMPTD: DB      "EMPTY 4:FLT 1:UP CE",0
+TSFOOT: DB      "1:UP 4:FLT 5:CPY CE",0
+TSCFOOT: DB     "5:COPY HERE CE:ESC",0
+TEFILT: DB      "FILTER !NAME=DIRS",0
 TPLONG: DB      "PATH TOO LONG",0
 EODIR:  DB      "DIR ERR",0

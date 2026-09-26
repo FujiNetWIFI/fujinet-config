@@ -32,7 +32,7 @@ BOOTGO: LD      (V_TMP+6),A
         LD      HL,TBOOT
         CALL    UTITLE
         LD      HL,V_SRC
-        LD      B,26
+        LD      B,NAMELEN
         CALL    UTAIL
         LD      B,0
         LD      C,OPTDIM

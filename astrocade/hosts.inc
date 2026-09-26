@@ -50,7 +50,7 @@ HPD1:   PUSH    BC
         OR      A
         JR      NZ,HPD2
         LD      HL,TEMPTY
-HPD2:   LD      B,NAMELEN-2
+HPD2:   LD      B,17            ; x=LISTX+12: 17 columns to the edge
         CALL    CPYSAN
         POP     BC
         PUSH    BC
@@ -310,8 +310,8 @@ PFOLD:  CP      'a'
 THOSTS: DB      "FUJINET HOSTS",0
 TCPYH:  DB      "COPY TO HOST",0
 TEMPTY: DB      "--------",0
-THFOOT: DB      "T:OPEN =:EDIT 9:INF 0:LOB",0
-THCFOOT: DB     "T:PICK DEST  CE:CANCEL",0
+THFOOT: DB      "=:EDIT 9:INF 0:LOBBY",0
+THCFOOT: DB     "T:PICK DEST CE:ESC",0
 TEHOST: DB      "HOST NAME",0
 TLOBBY: DB      "GAME LOBBY",0
 TLOBH:  DB      "ec.tnfs.io",0

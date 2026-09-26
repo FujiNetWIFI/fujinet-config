@@ -106,7 +106,7 @@ WSD1:   LD      A,(V_NNET)
         JR      C,WSDN          ; failed row stays blank
         PUSH    BC
         LD      HL,FNRDATA
-        LD      B,20
+        LD      B,16            ; stops short of the bars at x=138
         CALL    CPYSAN
         POP     BC
         PUSH    BC
@@ -233,7 +233,7 @@ WPASS:  XOR     A
         JP      WSCAN
 
 TTITLE: DB      "FUJINET CONFIG",0
-TWAIT:  DB      "WAITING FOR NETWORK LINK",0
+TWAIT:  DB      "WAITING FOR LINK",0
 TCONN:  DB      "CONNECTING",0
 TABORT: DB      "ANY INPUT CANCELS",0
 TCFAIL: DB      "CONNECT FAILED",0

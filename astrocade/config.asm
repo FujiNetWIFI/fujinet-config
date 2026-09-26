@@ -31,11 +31,18 @@
 ; 8-pixel text rows: title, eight list rows, footer.
 LINES   EQU     80
 NROWS   EQU     8
-TITLEY  EQU     1               ; y of the title row
-LISTY0  EQU     10              ; y of list row 0
-FOOTY   EQU     73              ; y of the footer row
+TITLEY  EQU     0               ; y of the title row
+LISTY0  EQU     8               ; y of list row 0
+FOOTY   EQU     72              ; y of the footer row (STRDIS cells are
+                                ; 8 lines: 72-79 is the last one that stays
+                                ; off scanline 80 = 4C80H = V_PATH)
 LISTX   EQU     8               ; x (pixels) where list text starts
-NAMELEN EQU     24              ; display width of a directory entry
+; STRDIS uses the BIOS large font (descriptor 0206H: 8x8 frame), so text
+; advances 8 pixels a character: 20 columns from x=2, 19 from LISTX. A
+; string that runs past x=160 WRAPS to x=0 eight lines down -- from the
+; footer that is scanline 80, i.e. V_PATH. Every width below respects that.
+FOOTCOL EQU     20              ; footer / title columns (from x=2)
+NAMELEN EQU     19              ; display width of a directory entry
 LISTLEN EQU     36              ; READ_DIR_ENTRY maxlen for listings: enough
                                 ; that the .cfg/.bin/'/' suffix survives the
                                 ; crunch, and (being != 31) keeps the firmware

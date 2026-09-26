@@ -1,8 +1,8 @@
 ; ui.inc -- screen scaffolding shared by every state.
 ;
-; The layout is ten 8-pixel rows: title (y=1), eight list rows starting at
+; The layout is ten 8-pixel rows: title (y=0), eight list rows starting at
 ; LISTY0, footer (y=FOOTY). List text goes through LINBUF + STRDIS at its
-; native 6-pixel pitch (26 columns); the selection cursor is a chevron in
+; native 8-pixel pitch (20 columns); the selection cursor is a chevron in
 ; the byte-aligned gutter column, drawn with the font.inc blitter so moving
 ; it never needs the row's text again (directory rows would otherwise cost
 ; a mailbox round trip apiece to repaint).
@@ -23,7 +23,7 @@ MSET:   LD      (HL),A
 UCLRA:  LD      HL,NORMEM
         LD      BC,LINES*BYTEPL
         JR      UCLR0
-UCLRL:  LD      HL,NORMEM+9*BYTEPL
+UCLRL:  LD      HL,NORMEM+8*BYTEPL
         LD      BC,64*BYTEPL
         JR      UCLR0
 UCLRF:  LD      HL,NORMEM+72*BYTEPL
@@ -40,10 +40,14 @@ UTITLE: PUSH    HL
         SYSTEM  STRDIS
         RET
 
-; UFOOT: replace the footer with the string at HL.
+; UFOOT: replace the footer with the string at HL, clipped to FOOTCOL:
+; anything longer would wrap onto scanline 80 and overwrite V_PATH.
 UFOOT:  PUSH    HL
         CALL    UCLRF
         POP     HL
+        LD      B,FOOTCOL
+        CALL    CPYSAN
+        LD      HL,LINBUF
         LD      DE,FOOTY*256+2
         LD      C,OPTFB
         SYSTEM  STRDIS
