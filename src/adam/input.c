@@ -33,6 +33,7 @@ extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
 extern bool screen_should_be_cleared;
+extern bool any_slot_occupied();
 
 /**
  * Get input from keyboard/joystick
@@ -371,8 +372,14 @@ SFSubState input_select_file_choose(void)
       if (copy_mode == false)
       {
         quick_boot=true;
-        pos+=bar_get();
-        state=SELECT_SLOT;
+        // F6 reads BOOT once a slot is mounted: boot as-is rather than mount the highlighted file
+        if (any_slot_occupied())
+          state=HOSTS_AND_DEVICES;
+        else
+        {
+          pos+=bar_get();
+          state=SELECT_SLOT;
+        }
       }
       smartkeys_sound_play(SOUND_CONFIRM);
       return SF_DONE;
