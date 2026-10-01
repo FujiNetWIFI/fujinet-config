@@ -64,8 +64,12 @@ void select_slot_display()
 {
   if (create==true)
     {
+#ifdef BUILD_COCO
+      char dispPath[11 + DIR_MAX_LEN + 1];
+#else
       char dispPath[42];
-      memset(dispPath,0,42);
+#endif
+      memset(dispPath,0,sizeof(dispPath));
       strncpy(&dispPath[11],path,DIR_MAX_LEN);
 #ifdef BUILD_MSXROM
       msx_set_mount_is_rom(false); // a newly created image is always a disk
@@ -145,7 +149,11 @@ void select_slot_done()
     create=false; // we're done with this until next time.
     screen_select_file_new_creating();
     system_create_new(selected_host_slot,selected_device_slot,selected_size,path);
+#ifdef BUILD_COCO
+    memcpy(deviceSlots[selected_device_slot].file,path,FILE_MAXLEN);
+#else
     memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
+#endif
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 

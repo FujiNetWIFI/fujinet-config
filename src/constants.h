@@ -11,8 +11,10 @@
 #define NUM_DEVICE_SLOTS 4
 #endif
 
-#ifdef _CMOC_VERSION_
+#if defined(_CMOC_VERSION_) && defined(DRAGON)
 #define ENTRIES_PER_PAGE 10
+#elif defined(_CMOC_VERSION_)
+#define ENTRIES_PER_PAGE 12
 #elif defined(BUILD_MSDOS)
 #define ENTRIES_PER_PAGE 13
 #elif defined(BUILD_ATARI)
@@ -33,7 +35,10 @@
 //#warning "FujiNet firmware should be updated to use new directory entry structure"
 #endif
 
-#ifdef LEGACY_DIR_ENTRY
+#if defined(BUILD_COCO)
+/* The adapter ellipsizes into maxlen-1 bytes including the NUL: 40 visible characters. */
+#define DIR_MAX_LEN 42
+#elif defined(LEGACY_DIR_ENTRY)
 #define DIR_MAX_LEN 31
 #else
 #define DIR_MAX_LEN 36
