@@ -76,3 +76,4 @@ build-msdos.sh
 *.orig
 *.rej
 .claude/settings.json
+__pycache__/

@@ -1,10 +1,18 @@
 #include <cmoc.h>
 #include <coco.h>
+#ifndef DRAGON
+#include "../launch/entry.h"
+#endif
 
+#ifdef DRAGON
 // Confirmed-safe on real CoCo hardware (512 bytes headroom below 0x8000/ROM).
 // Moving this toward 0x8000 hung real hardware in testing -- don't, without
 // hardware evidence of what's actually reserved up there.
 #define SCREEN_BUFFER (byte*) 0x6600
+#else
+// The hirestxt screen buffer, so the apps (loaded at 0x2600+) never touch the logo.
+#define SCREEN_BUFFER (byte*) 0x0E00
+#endif
 
 #define LOGO_FULL_SIZE 6144
 #define LOGO_BOTTOM_TRIMMED_BYTES 320
@@ -129,6 +137,9 @@ void draw_logo()
 
 int main(void)
 {
+#ifndef DRAGON
+    ENTRY_DATA->magic[0] = 0;  // drop any stale handoff from before a reset
+#endif
     width(32);
     pmode(4, SCREEN_BUFFER);
     pcls(0xff);
@@ -142,7 +153,7 @@ int main(void)
     // a low enough org to leave CONFIG.DWL headroom.
     dwload_clone("STAGE2.DWL",1);
 #else
-    runm("CONFIG");
+    runm("WIFI");
 #endif
 
    return 0;

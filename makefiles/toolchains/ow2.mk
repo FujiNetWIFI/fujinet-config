@@ -5,14 +5,19 @@ AR_DEFAULT ?= wlib
 
 include $(MWD)/tc-common.mk
 
-CFLAGS += -0 -bt=dos -ms -s -osh -zu -fr=$(basename $@).err
+CFLAGS += -0 -bt=dos -fr=$(basename $@).err
 ASFLAGS +=
 LDFLAGS += SYSTEM dos
 ifneq ($(FUJINET_LIB),__UNDEFINED__)
   LDFLAGS += LIBPATH $(FUJINET_LIB_DIR)
 endif
 
-CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+DSTRING_OPEN = \"
+DSTRING_CLOSE = \"
+CFLAGS += -DGIT_VERSION=$(DSTRING_OPEN)$(GIT_VERSION)$(DSTRING_CLOSE)
+ifneq ($(FUJINET_LIB_VERSION),)
+  CFLAGS += -DFNLIB_VERSION_FULL=\"$(FUJINET_LIB_VERSION)\"
+endif
 
 define include-dir-flag
   -I$1

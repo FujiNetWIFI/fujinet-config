@@ -28,8 +28,11 @@ bool system_slot0_is_rom(void)
 
 void system_boot(void)
 {
+  static const char msg[] = "\rBOOTING USER ROM...\r";
+
   if (system_slot0_is_rom()) {
-    printf("\nBOOTING USER ROM...\n");
+    // putstr, not printf: keeps the printf library out of apps that never print.
+    putstr(msg, sizeof(msg) - 1);
     pause(120);                 
     system_enable_user_rom();   // write 7 (ROM_MODE | USERROM_ENABLE | AUTOSTART_ENABLE) to IO_CONTROL. Firmware arms the CART trigger and triggers RESET.
   }
