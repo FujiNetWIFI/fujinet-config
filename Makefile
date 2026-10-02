@@ -6,8 +6,8 @@ PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
 
-# Only in lib-experimental currently
-# Use make-exp <platform> to build them.
+# Only in fujinet-lib-experimental currently
+# Build them with make msdos-exp or make msxrom-exp.
 #PLATFORMS += msdos
 #PLATFORMS += msxrom
 
@@ -37,13 +37,8 @@ SRC_DIRS = src src/%PLATFORM%
 # - a zip file with an archived fujinet-lib
 # - a URL to a git repo
 # - empty which will use whatever is the latest
-# - undefined, no fujinet-lib will be used
 #FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 FUJINET_LIB =
-
-# Some platforms don’t use FUJINET_LIB; set this to allow builds to continue
-# even if the library isn’t present.
-FUJINET_LIB_OPTIONAL = 1
 
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
@@ -197,8 +192,8 @@ msdos-exp::
 ########################################
 # MSX customization
 
-# fujinet-lib main regressed the MSX transport in 902032d ("Changed
-# fuji_bus_call to use varargs"): sccz80 mis-passes the arguments, so the
+# fujinet-lib-experimental main regressed the MSX transport in 902032d
+# ("Changed fuji_bus_call to use varargs"): sccz80 mis-passes the arguments, so the
 # header leaves the MSX corrupted - device 0x70 arrives as 0x10 and command
 # 0xEA as 0xC4 - and the firmware never answers, so CONFIG sits on the splash
 # spinning on IO_STATUS. Pin to the last commit known to talk to the firmware.
