@@ -62,6 +62,14 @@ void screen_handoff(void)
   }
 }
 
+void screen_leave_hires(void)
+{
+  closeHiResTextScreen();
+  width(32);
+  pmode(0, 0);
+  screen(0, 0);
+}
+
 void screen_loading(const char *what)
 {
   char s[SCREEN_COLS];
@@ -82,16 +90,6 @@ void screen_loading(const char *what)
   x = (SCREEN_COLS - (byte)strlen(s)) / 2;
   while (*p)
     writeCharAt_42cols(x++, 0, (byte)*p++);
-}
-
-void screen_end(void)
-{
-  screen_handoff();
-  closeHiResTextScreen();
-  width(32);
-  pmode(0, 0);
-  screen(0, 0);
-  cls(255);
 }
 
 static void put_cell(byte x, byte y, byte c)

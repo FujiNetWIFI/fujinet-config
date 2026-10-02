@@ -1,7 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * Hosts and devices screen, the lobby prompt and the mounting screen.
+ * Hosts and devices screen, the lobby prompt and the exit to the text screen for mounting.
  */
 
 #include "coco_screen.h"
@@ -78,9 +78,7 @@ void screen_hosts_and_devices_long_filename(const char *f)
 
 void screen_mount_and_boot(void)
 {
-  screen_clear();
-  screen_title("FujiNet Config");
-  moveCursor(0, 2);
+  screen_leave_hires();
 }
 
 bool screen_mount_and_boot_lobby(void)

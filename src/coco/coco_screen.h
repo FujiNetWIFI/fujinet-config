@@ -56,8 +56,9 @@ extern byte colorset;
 extern byte redraw_row;
 #define COLOR_CSS() (colorset >> 1)
 #define COLOR_INVERTED() (!(colorset & 1))
+void screen_leave_hires(void);
 void color_load(void);
-void color_toggle(void);
+void color_step(int dir);
 
 void screen_handoff(void);
 void screen_loading(const char *what);

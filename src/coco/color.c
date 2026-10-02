@@ -1,7 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * Color set toggle (space bar in menus), saved in an app key. Callers redraw.
+ * Color set change (SHIFT-LEFT/RIGHT in menus), saved in an app key. Callers redraw.
  * 0 green on black, 1 black on green, 2 white on black, 3 black on white.
  */
 
@@ -24,10 +24,9 @@ void color_load(void)
     colorset = buf[0];
 }
 
-void color_toggle(void)
+void color_step(int dir)
 {
-  if (++colorset >= 4)
-    colorset = 0;
+  colorset = (colorset + (dir > 0 ? 1 : 3)) & 3;
 
   screen(1, COLOR_CSS());
   setScreenInverted(COLOR_INVERTED());

@@ -45,7 +45,7 @@ int main(void)
       break;
     case DONE:
       fuji_set_boot_config(0);
-      screen_end();
+      screen_handoff();
       system_boot();
       break;
     default:

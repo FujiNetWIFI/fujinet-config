@@ -71,11 +71,8 @@ SFSubState input_select_file_choose(void)
   {
     word now = getTimer();
     k = inkey();
-    if (k == ' ')
-    {
-      color_toggle();
+    if (input_color_key(k))
       k = KEY_REDRAW;
-    }
     if (!k)
       k = input_handle_joystick();
 
