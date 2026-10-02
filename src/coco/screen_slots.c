@@ -62,6 +62,12 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, c
     host = dslot->hostSlot == 0xFF ? ' ' : dslot->hostSlot + '1';
     mode = dslot->file[0] ? device_slot_mode(dslot->mode) : ' ';
     put_row(y + i, '0' + i, host, mode, dslot->file[0] ? (char *)dslot->file : text_empty, 7);
+    if (mode == 'W')
+    {
+      setBoldMode(TRUE);
+      screen_put(LIST_X + 5, y + i, 'W');
+      setBoldMode(FALSE);
+    }
   }
 }
 

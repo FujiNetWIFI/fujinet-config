@@ -16,7 +16,7 @@ byte colorset;
 
 void color_load(void)
 {
-  uint8_t buf[64];
+  uint8_t buf[MAX_APPKEY_LEN + 2];
   uint16_t count = 0;
 
   fuji_set_appkey_details(AK_CREATOR_ID, AK_APP_ID, DEFAULT);
