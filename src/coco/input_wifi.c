@@ -78,7 +78,7 @@ WSSubState input_set_wifi_select(void)
 /*
  *  'C' - Change SSID
  *  'R' - Reconnect Wifi
- *  Space - change colors
+ *  SHIFT-LEFT/RIGHT - change colors
  *  Any other key - return to main hosts and devices screen
  */
 SISubState input_show_info(void)

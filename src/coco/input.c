@@ -173,17 +173,25 @@ unsigned char input_handle_joystick(void)
 	return 0;
 }
 
+bool input_color_key(byte k)
+{
+	if (k == KEY_SHIFT_RIGHT_ARROW)
+		color_step(1);
+	else if (k == KEY_SHIFT_LEFT_ARROW)
+		color_step(-1);
+	else
+		return false;
+	return true;
+}
+
 byte waitkey_joystick(void)
 {
 	byte k;
 	for (;;)
 	{
 		k = inkey();
-		if (k == ' ')
-		{
-			color_toggle();
+		if (input_color_key(k))
 			return KEY_REDRAW;
-		}
 		if (k)
 			return k;
 		k = input_handle_joystick();
