@@ -5,6 +5,8 @@
 
 #define FUJI_DEV 0x0F
 
+char response[1024]; // one EOS block; system_build_directory writes whole blocks from it
+
 void system_boot(void)
 {
   eos_init();
