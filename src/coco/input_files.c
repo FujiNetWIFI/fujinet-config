@@ -33,7 +33,9 @@ unsigned long input_select_file_new_size(unsigned char t)
   char c[16];
 
   memset(c, 0, sizeof(c));
+  input_digits_only = true;
   input_line(MENU_X, STATUS_Y, 0, c, 16, false);
+  input_digits_only = false;
 
   return (long)atol(c);
 }
@@ -63,6 +65,7 @@ void input_select_slot_build_eos_directory_label(char *c)
 SFSubState input_select_file_choose(void)
 {
   char k;
+  byte r;
   unsigned entryType = 0;
 
   scroll_reset(true);
@@ -71,8 +74,11 @@ SFSubState input_select_file_choose(void)
   {
     word now = getTimer();
     k = inkey();
-    if (input_color_key(k))
+    r = input_color_key(k);
+    if (r == 2)
       k = KEY_REDRAW;
+    else if (r)
+      k = 0;
     if (!k)
       k = input_handle_joystick();
 

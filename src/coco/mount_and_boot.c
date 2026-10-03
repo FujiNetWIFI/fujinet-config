@@ -2,7 +2,7 @@
 
 #include <coco.h>
 #include "mount_and_boot.h"
-#include "../screen.h"
+#include "coco_screen.h"
 #include "../typedefs.h"
 #include "../globals.h"
 #include "../system.h"
@@ -14,6 +14,7 @@ void mount_and_boot_lobby(void)
 	{
 		fuji_set_boot_mode(2);
 		pause(120);
+		screen_leave_graphics();
 		coldStart();
 	}
 	else

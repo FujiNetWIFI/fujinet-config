@@ -103,7 +103,8 @@ endif
 CO = build/config/coco/src
 COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/fuji_compat.o $(CO)/coco/launch/runm.o \
   $(CO)/coco/launch/entry.o $(CO)/coco/bar.o $(CO)/coco/color.o $(CO)/coco/die.o $(CO)/coco/input.o \
-  $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o
+  $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o \
+  $(CO)/coco/text_hires.o
 COCO_WIFI_OBJS = $(CO)/coco/wifi/wifi.o $(CO)/check_wifi.o $(CO)/connect_wifi.o \
   $(CO)/set_wifi.o $(CO)/show_info.o $(CO)/coco/screen_wifi.o $(CO)/coco/input_wifi.o
 COCO_MAIN_OBJS = $(CO)/coco/cfg/main.o $(CO)/hosts_and_devices.o $(CO)/coco/mount_and_boot.o \
@@ -113,15 +114,29 @@ COCO_FILES_OBJS = $(CO)/coco/files/main.o $(CO)/coco/files/globals.o $(CO)/selec
   $(CO)/coco/scroll.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_files.o \
   $(CO)/coco/input_files.o
 COCO_SPLIT_BINS = r2r/coco/wifi.bin r2r/coco/main.bin r2r/coco/files.bin
+
+# CoCo 3 apps (WIFI3, MAIN3, FILES3): the same sources with -DCOCO3, which swaps the
+# hirestxt backend for the GIME one (src/coco/text_gime.c). cfgload picks the set.
+CO3 = build/config/coco3/src
+COCO3_COMMON_OBJS = $(subst $(CO)/,$(CO3)/,$(subst text_hires,text_gime,$(COCO_COMMON_OBJS)))
+COCO3_SPLIT_BINS = r2r/coco/wifi3.bin r2r/coco/main3.bin r2r/coco/files3.bin
+
+$(CO3)/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(CFLAGS) -DCOCO3 --intdir=$(dir $@) -o $@ $<
+
 ifeq ($(PLATFORM),coco)
-DISK_EXECUTABLES = $(COCO_SPLIT_BINS)
+DISK_EXECUTABLES = $(COCO_SPLIT_BINS) $(COCO3_SPLIT_BINS)
 endif
 
 r2r/coco/wifi.bin: $(COCO_WIFI_OBJS) $(COCO_COMMON_OBJS)
 r2r/coco/main.bin: $(COCO_MAIN_OBJS) $(COCO_COMMON_OBJS)
 r2r/coco/files.bin: $(COCO_FILES_OBJS) $(COCO_COMMON_OBJS)
+r2r/coco/wifi3.bin: $(subst $(CO)/,$(CO3)/,$(COCO_WIFI_OBJS)) $(COCO3_COMMON_OBJS)
+r2r/coco/main3.bin: $(subst $(CO)/,$(CO3)/,$(COCO_MAIN_OBJS)) $(COCO3_COMMON_OBJS)
+r2r/coco/files3.bin: $(subst $(CO)/,$(CO3)/,$(COCO_FILES_OBJS)) $(COCO3_COMMON_OBJS)
 
-$(COCO_SPLIT_BINS):
+$(COCO_SPLIT_BINS) $(COCO3_SPLIT_BINS):
 	@mkdir -p r2r/coco
 	$(LD) -o $@ --org=2600 --limit=7BF8 $^ $(LIBS)
 

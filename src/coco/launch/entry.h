@@ -9,6 +9,13 @@ struct entry_data
 
 #define ENTRY_DATA ((struct entry_data *)0x7BF8)
 
+/* The CoCo 3 builds are WIFI3, MAIN3 and FILES3 on disk. */
+#ifdef COCO3
+#define APP(name) name "3"
+#else
+#define APP(name) name
+#endif
+
 #define ENTRY_NONE  0
 #define ENTRY_INFO  1
 #define ENTRY_FILES 2

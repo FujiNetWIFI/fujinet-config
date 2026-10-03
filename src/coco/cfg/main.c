@@ -35,13 +35,13 @@ int main(void)
       entry_set(ENTRY_FILES, selected_host_slot, selected_device_slot);
       screen_loading("File Browser");
       screen_handoff();
-      runm("FILES");
+      runm(APP("FILES"));
       break;
     case SHOW_INFO:
       entry_set(ENTRY_INFO, selected_host_slot, selected_device_slot);
       screen_loading("Adapter Info");
       screen_handoff();
-      runm("WIFI");
+      runm(APP("WIFI"));
       break;
     case DONE:
       fuji_set_boot_config(0);

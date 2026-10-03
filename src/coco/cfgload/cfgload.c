@@ -10,7 +10,7 @@
 // hardware evidence of what's actually reserved up there.
 #define SCREEN_BUFFER (byte*) 0x6600
 #else
-// The hirestxt screen buffer, so the apps (loaded at 0x2600+) never touch the logo.
+// The hirestxt screen buffer, so loading the apps (at 0x2600+) doesn't overwrite the logo.
 #define SCREEN_BUFFER (byte*) 0x0E00
 #endif
 
@@ -153,7 +153,8 @@ int main(void)
     // a low enough org to leave CONFIG.DWL headroom.
     dwload_clone("STAGE2.DWL",1);
 #else
-    runm("WIFI");
+    initCoCoSupport();
+    runm(isCoCo3 ? "WIFI3" : "WIFI");
 #endif
 
    return 0;

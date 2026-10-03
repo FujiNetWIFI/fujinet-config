@@ -1,7 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * FujiNet Configuration Program: CoCo screen core (hirestxt 42x24).
+ * FujiNet Configuration Program: CoCo screen core, drawn through the text backend (coco_text.h).
  * Per-screen code is in screen_hosts.c, screen_slots.c, screen_files.c and screen_wifi.c.
  */
 
@@ -15,6 +15,7 @@ static byte orig_casflag;
 static byte msg_y = STATUS_Y;
 static bool msg_center;
 static byte msg_hold;
+static byte cur_x, cur_y;
 static char uppercase_tmp[32];
 
 char *screen_upper(char *s)
@@ -26,18 +27,6 @@ char *screen_upper(char *s)
 
 void screen_init(void)
 {
-  struct HiResTextScreenInit init =
-    {
-      SCREEN_COLS,
-      writeCharAt_42cols,
-      SCREEN_BUFFER,
-      TRUE,
-      (word *)0x112,
-      0,
-      NULL,
-      NULL,
-    };
-
   asm {
     lda $011A
     sta orig_casflag
@@ -45,29 +34,26 @@ void screen_init(void)
   }
 
   color_load();
-  width(32);
-  pmode(4, SCREEN_BUFFER);
-  pcls(255);
-  screen(1, COLOR_CSS());
-  initHiResTextScreen(&init);
-  setScreenInverted(COLOR_INVERTED());
-  clear();
+  txt_open();
+#ifdef COCO3
+  if (monitor_unset)
+    monitor_ask();
+#endif
 }
 
+/* Before running another program: nothing of ours may stay hooked into Basic. */
 void screen_handoff(void)
 {
+  txt_release();
   asm {
     lda orig_casflag
     sta $011A
   }
 }
 
-void screen_leave_hires(void)
+void screen_leave_graphics(void)
 {
-  closeHiResTextScreen();
-  width(32);
-  pmode(0, 0);
-  screen(0, 0);
+  txt_close();
 }
 
 void screen_loading(const char *what)
@@ -76,10 +62,8 @@ void screen_loading(const char *what)
   byte x;
   const char *p = s;
 
-  setBoldMode(FALSE);
-  setInverseVideoMode(FALSE);
   for (x = 0; x < SCREEN_COLS; x++)
-    writeCharAt_42cols(x, 0, ' ');
+    txt_put(x, 0, ' ', ROLE_TEXT);
 
   strcpy(s, "Loading ");
   x = (byte)strlen(s);
@@ -89,20 +73,30 @@ void screen_loading(const char *what)
 
   x = (SCREEN_COLS - (byte)strlen(s)) / 2;
   while (*p)
-    writeCharAt_42cols(x++, 0, (byte)*p++);
+    txt_put(x++, 0, (byte)*p++, ROLE_TEXT);
 }
 
-static void put_cell(byte x, byte y, byte c)
+/* c == 0 flips the cell, as the line editor's cursor does. */
+void screen_put_role(byte x, byte y, byte c, byte role)
 {
-  writeCharAt_42cols(x, y, c);
+  if (c)
+    txt_put(x, y, c, role);
+  else
+    txt_invert(x, y);
   if (bar_cell_lit(x, y))
-    writeCharAt_42cols(x, y, 0);
+    txt_invert(x, y);
+}
+
+void screen_puts_role(byte x, byte y, const char *s, byte role)
+{
+  while (*s && x < SCREEN_COLS - 1)
+    screen_put_role(x++, y, (byte)*s++, role);
 }
 
 void screen_clear(void)
 {
   screen_generation++;
-  clear();
+  txt_clear();
   bar_unlit();
 }
 
@@ -111,18 +105,17 @@ void screen_clear_line(unsigned char y)
   byte x;
 
   for (x = 1; x < SCREEN_COLS - 1; x++)
-    put_cell(x, y, ' ');
+    screen_put_role(x, y, ' ', ROLE_TEXT);
 }
 
 void screen_put(int x, int y, uint8_t c)
 {
-  put_cell((byte)x, (byte)y, c);
+  screen_put_role((byte)x, (byte)y, c, ROLE_TEXT);
 }
 
 void screen_puts(unsigned char x, unsigned char y, const char *s)
 {
-  while (*s && x < SCREEN_COLS - 1)
-    put_cell(x++, y, (byte)*s++);
+  screen_puts_role(x, y, s, ROLE_TEXT);
 }
 
 void screen_menu_clear(void)
@@ -145,10 +138,24 @@ void screen_message_target(byte y, bool center, byte hold)
   msg_hold = hold;
 }
 
+#ifdef COCO3
+/* Shared code reports progress and success through screen_error() too. */
+static bool is_status(const char *msg)
+{
+  return strncmp(msg, "CONNECTION SUCCESS", 18) == 0 || strncmp(msg, "PLEASE WAIT", 11) == 0;
+}
+#else
+#define is_status(msg) false
+#endif
+
 void screen_error(const char *msg)
 {
+  /* Shared code names ESC; the CoCo key is BREAK. */
+  if (strncmp(msg, "PLEASE WAIT...(ESC", 18) == 0)
+    msg = "PLEASE WAIT...(BREAK TO ABORT)";
   screen_clear_line(msg_y);
-  screen_puts(msg_center ? (SCREEN_COLS - (byte)strlen(msg)) / 2 : MENU_X, msg_y, msg);
+  screen_puts_role(msg_center ? (SCREEN_COLS - (byte)strlen(msg)) / 2 : MENU_X, msg_y, msg,
+                   is_status(msg) ? ROLE_STATUS : ROLE_ERROR);
   if (msg_hold)
     pause(msg_hold);
 }
@@ -156,7 +163,7 @@ void screen_error(const char *msg)
 static void hline(byte x, byte y, byte n)
 {
   while (n--)
-    writeCharAt_42cols(x++, y, BOX_H);
+    txt_put(x++, y, BOX_H, ROLE_BOX);
 }
 
 void screen_box(byte x, byte y, byte w, byte h, const char *title)
@@ -169,27 +176,27 @@ void screen_box(byte x, byte y, byte w, byte h, const char *title)
   hline(x + 1, y + h - 1, w - 2);
   for (i = 1; i < h - 1; i++)
   {
-    writeCharAt_42cols(x, y + i, BOX_V);
-    writeCharAt_42cols(x + w - 1, y + i, BOX_V);
+    txt_put(x, y + i, BOX_V, ROLE_BOX);
+    txt_put(x + w - 1, y + i, BOX_V, ROLE_BOX);
   }
-  writeCharAt_42cols(x, y, BOX_TL);
-  writeCharAt_42cols(x + w - 1, y, BOX_TR);
-  writeCharAt_42cols(x, y + h - 1, BOX_BL);
-  writeCharAt_42cols(x + w - 1, y + h - 1, BOX_BR);
+  txt_put(x, y, BOX_TL, ROLE_BOX);
+  txt_put(x + w - 1, y, BOX_TR, ROLE_BOX);
+  txt_put(x, y + h - 1, BOX_BL, ROLE_BOX);
+  txt_put(x + w - 1, y + h - 1, BOX_BR, ROLE_BOX);
   if (n)
   {
-    writeCharAt_42cols(tx - 1, y, ' ');
+    txt_put(tx - 1, y, ' ', ROLE_TEXT);
     screen_puts(tx, y, title);
-    writeCharAt_42cols(tx + n, y, ' ');
+    txt_put(tx + n, y, ' ', ROLE_TEXT);
   }
 }
 
 void screen_title(const char *title)
 {
-  setBoldMode(TRUE);
-  moveCursor((SCREEN_COLS - (byte)strlen(title)) / 2, 0);
-  writeString(title);
-  setBoldMode(FALSE);
+  byte x = (SCREEN_COLS - (byte)strlen(title)) / 2;
+
+  while (*title)
+    txt_put(x++, 0, (byte)*title++, ROLE_TITLE);
 }
 
 void screen_frame(const char *title)
@@ -200,18 +207,29 @@ void screen_frame(const char *title)
   screen_box(0, MENU_BOX_Y, SCREEN_COLS, SCREEN_ROWS - MENU_BOX_Y, NULL);
 }
 
+/* Menu text is written left to right from here. */
+void screen_move(byte x, byte y)
+{
+  cur_x = x;
+  cur_y = y;
+}
+
+static void print_role(const char *s, byte role)
+{
+  while (*s)
+    txt_put(cur_x++, cur_y, (byte)*s++, role);
+}
+
 void screen_print_inverse(const char *s)
 {
-  setInverseVideoMode(TRUE);
-  writeString(s);
-  setInverseVideoMode(FALSE);
+  print_role(s, ROLE_KEY);
 }
 
 /* Key cap reversed, then what it does. */
 void screen_print_menu(const char *si, const char *sc)
 {
-  screen_print_inverse(si);
-  writeString(sc);
+  print_role(si, ROLE_KEY);
+  print_role(sc, ROLE_TEXT);
 }
 
 #endif

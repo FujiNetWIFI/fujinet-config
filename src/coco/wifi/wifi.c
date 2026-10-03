@@ -55,7 +55,7 @@ int main(void)
         screen_loading("Hosts and Devices");
         screen_handoff();
       }
-      runm("MAIN");
+      runm(APP("MAIN"));
       break;
     }
   }
