@@ -1,7 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * Selection bar: the current row is shown by inverting it with hirestxt.
+ * Selection bar: the current row is shown by inverting its cells.
  */
 
 #include "coco_screen.h"
@@ -15,7 +15,7 @@ static void invert_row(byte y)
   byte x;
 
   for (x = span_x0; x <= span_x1; x++)
-    writeCharAt_42cols(x, y, 0);
+    txt_invert(x, y);
 }
 
 void bar_unlit(void)

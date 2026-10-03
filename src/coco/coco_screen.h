@@ -3,15 +3,11 @@
 
 #include <cmoc.h>
 #include <coco.h>
-#include <hirestxt.h>
 #include "../screen.h"
-
-#define SCREEN_COLS   42
-#define SCREEN_ROWS   24
-#define SCREEN_BUFFER ((byte *)0x0E00)
+#include "coco_text.h"
 
 #define LIST_X        1
-#define LIST_W        40
+#define LIST_W        (SCREEN_COLS - 2)
 
 #define HOSTS_BOX_Y   2
 #define HOSTS_Y       3
@@ -21,9 +17,9 @@
 #define FILES_BOX_Y   6
 #define FILES_Y       7
 #define FILE_X        1
-#define FILE_W        40
+#define FILE_W        (SCREEN_COLS - 2)
 #define INFO_X        2
-#define INFO_W        38
+#define INFO_W        (SCREEN_COLS - 4)
 #define FILTER_X      (INFO_X + 6)
 #define FILTER_Y      (INFO_BOX_Y + 2)
 #define SLOT_BOX_Y    2
@@ -52,19 +48,24 @@
 
 extern char text_empty[];
 extern unsigned screen_generation;
-extern byte colorset;
 extern byte redraw_row;
-#define COLOR_CSS() (colorset >> 1)
-#define COLOR_INVERTED() (!(colorset & 1))
-void screen_leave_hires(void);
+void screen_leave_graphics(void);
 void color_load(void);
-void color_step(int dir);
+bool color_step(int dir);
+#ifdef COCO3
+extern bool monitor_unset;
+void monitor_set(byte cmp);
+void monitor_ask(void);
+#endif
 
 void screen_handoff(void);
 void screen_loading(const char *what);
 void screen_title(const char *title);
 void screen_frame(const char *title);
 void screen_box(byte x, byte y, byte w, byte h, const char *title);
+void screen_put_role(byte x, byte y, byte c, byte role);
+void screen_puts_role(byte x, byte y, const char *s, byte role);
+void screen_move(byte x, byte y);
 void screen_menu_clear(void);
 void screen_prompt(const char *s);
 void screen_message_target(byte y, bool center, byte hold);

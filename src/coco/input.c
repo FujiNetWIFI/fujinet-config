@@ -15,6 +15,7 @@ unsigned short custom_sectorSize;
 bool mounting = false;
 bool input_abortable = false;
 bool input_aborted = false;
+bool input_digits_only = false;
 
 #define JOY_CENTER   31
 #define JOY_HALF     16
@@ -173,25 +174,34 @@ unsigned char input_handle_joystick(void)
 	return 0;
 }
 
-bool input_color_key(byte k)
+byte input_color_key(byte k)
 {
 	if (k == KEY_SHIFT_RIGHT_ARROW)
-		color_step(1);
-	else if (k == KEY_SHIFT_LEFT_ARROW)
-		color_step(-1);
-	else
-		return false;
-	return true;
+		return color_step(1) ? 2 : 1;
+	if (k == KEY_SHIFT_LEFT_ARROW)
+		return color_step(-1) ? 2 : 1;
+#ifdef COCO3
+	if (k == KEY_SHIFT_CLEAR)
+	{
+		monitor_set(!composite);
+		return 1;
+	}
+#endif
+	return 0;
 }
 
 byte waitkey_joystick(void)
 {
-	byte k;
+	byte k, r;
+
 	for (;;)
 	{
 		k = inkey();
-		if (input_color_key(k))
+		r = input_color_key(k);
+		if (r == 2)
 			return KEY_REDRAW;
+		if (r)
+			continue;
 		if (k)
 			return k;
 		k = input_handle_joystick();
@@ -272,6 +282,8 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
     case KEY_CLEAR:
       break;
     default:
+      if (input_digits_only && (k < '0' || k > '9'))
+        break;
       if ((c - b) < l)
       {
         *c = k;

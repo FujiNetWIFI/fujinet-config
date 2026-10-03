@@ -36,8 +36,12 @@
 #endif
 
 #if defined(BUILD_COCO)
-/* The adapter ellipsizes into maxlen-1 bytes including the NUL: 40 visible characters. */
+/* The adapter ellipsizes into maxlen-1 bytes including the NUL: maxlen-2 visible characters. */
+#ifdef COCO3
+#define DIR_MAX_LEN 40
+#else
 #define DIR_MAX_LEN 42
+#endif
 #elif defined(LEGACY_DIR_ENTRY)
 #define DIR_MAX_LEN 31
 #else

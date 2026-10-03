@@ -62,14 +62,14 @@ void screen_set_wifi_select_network(unsigned char nn)
   screen_menu_clear();
   if (nn)
   {
-    moveCursor(MENU_X, MENU_Y1);
+    screen_move(MENU_X, MENU_Y1);
     screen_print_menu("UP/DOWN", " Move  ");
     screen_print_menu("ENTER", " Select");
-    moveCursor(MENU_X, MENU_Y2);
+    screen_move(MENU_X, MENU_Y2);
   }
   else
   {
-    moveCursor(MENU_X, MENU_Y1);
+    screen_move(MENU_X, MENU_Y1);
   }
   screen_print_menu("S", "kip  ");
   screen_print_menu("H", "idden SSID  ");
@@ -91,7 +91,7 @@ void screen_set_wifi_custom(void)
   screen_frame("FujiNet Config");
   screen_box(0, PROMPT_BOX_Y, SCREEN_COLS, 7, "HIDDEN NETWORK");
   screen_puts(MENU_X, PROMPT_BOX_Y + 2, "Network name:");
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Done");
 }
 
@@ -102,7 +102,7 @@ void screen_set_wifi_password(void)
   screen_puts(MENU_X, PROMPT_BOX_Y + 2, "Network:");
   screen_puts(MENU_X + 10, PROMPT_BOX_Y + 2, nc.ssid);
   screen_puts(MENU_X, PROMPT_FIELD_Y, "Password:");
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Connect");
 }
 
@@ -113,7 +113,7 @@ void screen_connect_wifi(NetConfig *nc)
   center_puts(PROMPT_BOX_Y + 1, "Connecting to network:");
   center_puts(PROMPT_BOX_Y + 3, nc->ssid);
   screen_message_target(PROMPT_BOX_Y + 5, true, 0);
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("BREAK", " Abort");
 }
 
@@ -157,7 +157,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
     screen_puts(x0 + INFO_LABEL_W + 1, 6 + i, vals[i]);
   }
 
-  moveCursor((SCREEN_COLS - 22) / 2, MENU_Y1);
+  screen_move((SCREEN_COLS - 22) / 2, MENU_Y1);
   screen_print_menu("C", "hange SSID  ");
   screen_print_menu("R", "econnect");
   screen_puts((SCREEN_COLS - 38) / 2, MENU_Y2, "Any other key returns to hosts/devices");

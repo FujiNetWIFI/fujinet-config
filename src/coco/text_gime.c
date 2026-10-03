@@ -1,0 +1,245 @@
+#if defined(_CMOC_VERSION_) && defined(COCO3)
+
+/**
+ * CoCo 3 text backend: 40x24 on 320x192x16 with the ROM font and double-line box tiles.
+ * The screen is in physical blocks 0-3, drawn through task 1's $8000 window with interrupts off.
+ */
+
+#include "coco_screen.h"
+
+#define BPR      160
+#define WIN      ((byte *)0x8000)
+#define ROM_FONT ((const byte *)0xF09D)
+#define INVERTED 0x80
+#define MONO_SETS 6
+
+#define INTS_OFF()     do { asm("pshs", "cc"); asm("orcc", "#$50"); } while (0)
+#define INTS_RESTORE() asm("puls", "cc")
+#define GFX_ENTER()    do { INTS_OFF(); asm("ldb", "#$01"); asm("stb", "$FF91"); } while (0)
+#define GFX_LEAVE()    do { asm("clr", "$FF91"); INTS_RESTORE(); } while (0)
+
+enum { P_BG, P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_KEY_BG, P_ERROR, P_STATUS, P_EMPTY, P_READ, P_WRITE, P_BAR_FG, P_BAR_BG };
+
+/* Sets 0-5 are two-color; their slots repeat the text and background colors. */
+static const byte palette_rgb[NUM_COLORSETS][16] = {
+  { 0x00, 0x12, 0x12, 0x12, 0x00, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x00, 0x12, 0x00, 0x00, 0x00 }, /* Green on black */
+  { 0x12, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00 }, /* Black on green */
+  { 0x00, 0x3F, 0x3F, 0x3F, 0x00, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x00, 0x3F, 0x00, 0x00, 0x00 }, /* White on black */
+  { 0x3F, 0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00 }, /* Black on white */
+  { 0x00, 0x34, 0x34, 0x34, 0x00, 0x34, 0x34, 0x34, 0x34, 0x34, 0x34, 0x00, 0x34, 0x00, 0x00, 0x00 }, /* Amber on black */
+  { 0x34, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x00 }, /* Black on amber */
+  { 0x00, 0x1B, 0x3F, 0x1B, 0x00, 0x1B, 0x26, 0x12, 0x38, 0x3F, 0x36, 0x00, 0x1B, 0x00, 0x00, 0x00 }, /* Cyan on black */
+  { 0x08, 0x3F, 0x1B, 0x3F, 0x08, 0x3F, 0x3C, 0x17, 0x38, 0x1B, 0x36, 0x08, 0x3F, 0x00, 0x00, 0x00 }, /* White on blue */
+  { 0x08, 0x36, 0x3F, 0x36, 0x08, 0x36, 0x3C, 0x17, 0x38, 0x1B, 0x3F, 0x08, 0x36, 0x00, 0x00, 0x00 }, /* Yellow on blue */
+  { 0x01, 0x3F, 0x1B, 0x3F, 0x01, 0x3F, 0x3C, 0x17, 0x38, 0x1B, 0x36, 0x01, 0x3F, 0x00, 0x00, 0x00 }, /* White on navy */
+};
+
+static const byte palette_cmp[NUM_COLORSETS][16] = {
+  { 0x00, 0x2F, 0x2F, 0x2F, 0x00, 0x2F, 0x2F, 0x2F, 0x2F, 0x2F, 0x2F, 0x00, 0x2F, 0x00, 0x00, 0x00 }, /* Green on black */
+  { 0x2F, 0x00, 0x00, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 }, /* Black on green */
+  { 0x00, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x30, 0x00, 0x00, 0x00 }, /* White on black */
+  { 0x30, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x00 }, /* Black on white */
+  { 0x00, 0x25, 0x25, 0x25, 0x00, 0x25, 0x25, 0x25, 0x25, 0x25, 0x25, 0x00, 0x25, 0x00, 0x00, 0x00 }, /* Amber on black */
+  { 0x25, 0x00, 0x00, 0x00, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x25, 0x00, 0x00, 0x00, 0x00 }, /* Black on amber */
+  { 0x00, 0x2D, 0x30, 0x2D, 0x00, 0x2D, 0x16, 0x2F, 0x20, 0x30, 0x24, 0x00, 0x2D, 0x00, 0x00, 0x00 }, /* Cyan on black */
+  { 0x1C, 0x30, 0x2D, 0x30, 0x1C, 0x30, 0x27, 0x2F, 0x20, 0x2D, 0x24, 0x1C, 0x30, 0x00, 0x00, 0x00 }, /* White on blue */
+  { 0x1C, 0x24, 0x30, 0x24, 0x1C, 0x24, 0x27, 0x2F, 0x20, 0x2D, 0x30, 0x1C, 0x24, 0x00, 0x00, 0x00 }, /* Yellow on blue */
+  { 0x0C, 0x30, 0x2D, 0x30, 0x0C, 0x30, 0x27, 0x2F, 0x20, 0x2D, 0x24, 0x0C, 0x30, 0x00, 0x00, 0x00 }, /* White on navy */
+};
+
+/* Box codes BOX_TL (0xA0) to 0xAA, in hirestxt's order. */
+static const byte box_tiles[11][8] = {
+  { 0x00, 0x00, 0x00, 0x1F, 0x10, 0x17, 0x14, 0x14 }, /* top left */
+  { 0x00, 0x00, 0x00, 0xFC, 0x04, 0xF4, 0x14, 0x14 }, /* top right */
+  { 0x14, 0x14, 0x14, 0x17, 0x10, 0x1F, 0x00, 0x00 }, /* bottom left */
+  { 0x14, 0x14, 0x14, 0xF4, 0x04, 0xFC, 0x00, 0x00 }, /* bottom right */
+  { 0x14, 0x14, 0x14, 0xF4, 0x14, 0xF4, 0x14, 0x14 }, /* right tee */
+  { 0x14, 0x14, 0x14, 0x17, 0x14, 0x17, 0x14, 0x14 }, /* left tee */
+  { 0x00, 0x00, 0x00, 0xFF, 0x00, 0xF7, 0x14, 0x14 }, /* down tee */
+  { 0x14, 0x14, 0x14, 0xF7, 0x00, 0xFF, 0x00, 0x00 }, /* up tee */
+  { 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14 }, /* vertical */
+  { 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00 }, /* horizontal */
+  { 0x14, 0x14, 0x14, 0xFF, 0x14, 0xFF, 0x14, 0x14 }, /* cross */
+};
+
+static const byte role_fg[] = { P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_ERROR, P_STATUS, P_EMPTY, P_READ, P_WRITE };
+
+/* Slots 0-3 mirror task 0's program blocks; 4-7 are the screen. */
+static const byte task1_map[8] = { 56, 57, 58, 59, 0, 1, 2, 3 };
+
+/* The PMODE 4 splash buffer ($0E00-$25FF) is free once the GIME screen is up. */
+#define FONT      ((byte *)0x0E00)
+#define CELL_CHAR (FONT + 96 * 8)
+#define CELL_ROLE (CELL_CHAR + SCREEN_ROWS * SCREEN_COLS)
+#define CELL(y, x) ((unsigned)(y) * SCREEN_COLS + (x))
+
+byte composite;
+static bool mono;
+
+static void load_palette(void)
+{
+  const byte *p = composite ? palette_cmp[colorset] : palette_rgb[colorset];
+
+  memcpy((void *)0xFFB0, p, 16);
+  *(byte *)0xFF9A = p[P_BG];
+}
+
+static bool bold(byte role)
+{
+  return role == ROLE_TITLE || (mono && (role == ROLE_ERROR || role == ROLE_WRITE));
+}
+
+static const byte blank[8];
+static byte tbl[4];
+static byte tbl_fg = 0xFF, tbl_bg;
+
+static void draw(byte x, byte y)
+{
+  byte c = CELL_CHAR[CELL(y, x)];
+  byte role = CELL_ROLE[CELL(y, x)];
+  byte *dst = WIN + (unsigned)y * (8 * BPR) + (unsigned)x * 4;
+  const byte *g;
+  byte fg, bg, i, b;
+  bool thick = false;
+
+  if (role & INVERTED)
+  {
+    fg = P_BAR_FG;
+    bg = P_BAR_BG;
+    role &= (byte)~INVERTED;
+  }
+  else
+  {
+    fg = role_fg[role];
+    bg = role == ROLE_KEY ? P_KEY_BG : P_BG;
+  }
+
+  if (c >= BOX_TL && c <= BOX_TL + 10)
+    g = box_tiles[c - BOX_TL];
+  else if (c >= 32 && c < 128)
+  {
+    g = FONT + (unsigned)(c - 32) * 8;
+    thick = bold(role);
+  }
+  else
+    g = blank;
+
+  if (fg != tbl_fg || bg != tbl_bg)
+  {
+    tbl[0] = (byte)((bg << 4) | bg);
+    tbl[1] = (byte)((bg << 4) | fg);
+    tbl[2] = (byte)((fg << 4) | bg);
+    tbl[3] = (byte)((fg << 4) | fg);
+    tbl_fg = fg;
+    tbl_bg = bg;
+  }
+  GFX_ENTER();
+  for (i = 0; i < 8; i++)
+  {
+    b = g[i];
+    if (thick)
+      b |= (byte)(b >> 1);
+    dst[0] = tbl[b >> 6];
+    dst[1] = tbl[(b >> 4) & 3];
+    dst[2] = tbl[(b >> 2) & 3];
+    dst[3] = tbl[b & 3];
+    dst += BPR;
+  }
+  GFX_LEAVE();
+}
+
+static void clear_screen(void)
+{
+  byte *dst = WIN;
+  unsigned lines = SCREEN_ROWS * 8;
+
+  while (lines--)
+  {
+    GFX_ENTER();
+    memset(dst, 0, BPR);
+    GFX_LEAVE();
+    dst += BPR;
+  }
+}
+
+/* The splash logo is still showing from $0E00 here: clear the GIME screen and switch to it before
+   the font and cell tables overwrite the logo. Leaves the machine at double speed. */
+void txt_open(void)
+{
+  *(byte *)0xFFD9 = 0;
+  mono = colorset < MONO_SETS;
+  INTS_OFF();
+  memcpy((void *)0xFFA8, task1_map, sizeof(task1_map));
+  INTS_RESTORE();
+  clear_screen();
+  INTS_OFF();
+  load_palette();
+  *(byte *)0xFF9C = 0;
+  *(unsigned *)0xFF9D = 0;
+  *(byte *)0xFF9F = 0;
+  *(byte *)0xFF90 = 0x4C;  /* CoCo 3 mode, MMU on, $FExx constant */
+  *(byte *)0xFF98 = 0x80;  /* graphics */
+  *(byte *)0xFF99 = 0x1E;  /* 192 lines, 160 bytes/row, 16 colors */
+  INTS_RESTORE();
+  memcpy(FONT, ROM_FONT, 96 * 8);
+  memset(CELL_CHAR, ' ', SCREEN_ROWS * SCREEN_COLS);
+  memset(CELL_ROLE, ROLE_TEXT, SCREEN_ROWS * SCREEN_COLS);
+}
+
+void txt_release(void)
+{
+}
+
+/* Back to Basic's 32-column screen with its own palette, so nothing run afterwards inherits our colors. */
+void txt_close(void)
+{
+  txt_release();
+  INTS_OFF();
+  *(byte *)0xFF91 = 0;
+  *(byte *)0xFF98 = 0;
+  *(byte *)0xFF99 = 0;
+  *(byte *)0xFF9A = 0;
+  *(byte *)0xFF9C = 0;
+  *(byte *)0xFF9F = 0;
+  INTS_RESTORE();
+  width(32);
+  pmode(0, 0);
+  screen(0, 0);
+  resetPalette(!composite);
+}
+
+void txt_clear(void)
+{
+  memset(CELL_CHAR, ' ', SCREEN_ROWS * SCREEN_COLS);
+  memset(CELL_ROLE, ROLE_TEXT, SCREEN_ROWS * SCREEN_COLS);
+  clear_screen();
+}
+
+void txt_put(byte x, byte y, byte c, byte role)
+{
+  if (x >= SCREEN_COLS || y >= SCREEN_ROWS)
+    return;
+  CELL_CHAR[CELL(y, x)] = c;
+  CELL_ROLE[CELL(y, x)] = role;
+  draw(x, y);
+}
+
+void txt_invert(byte x, byte y)
+{
+  if (x >= SCREEN_COLS || y >= SCREEN_ROWS)
+    return;
+  CELL_ROLE[CELL(y, x)] ^= INVERTED;
+  draw(x, y);
+}
+
+/* Only a change between two-color and full-color sets needs a redraw (bold differs). */
+bool txt_colors(void)
+{
+  bool was = mono;
+
+  mono = colorset < MONO_SETS;
+  load_palette();
+  return mono != was;
+}
+
+#endif

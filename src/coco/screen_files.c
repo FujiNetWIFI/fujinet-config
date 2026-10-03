@@ -125,11 +125,11 @@ void screen_select_slot(const char *e)
     screen_puts(INFO_X, DETAIL_BOX_Y + 4, s);
   }
 
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Read only  ");
   screen_print_menu("W", "rite  ");
   screen_print_menu("E", "ject");
-  moveCursor(MENU_X, MENU_Y2);
+  screen_move(MENU_X, MENU_Y2);
   screen_print_menu("ARROWS", " Select slot  ");
   screen_print_menu("BREAK", " Abort");
   bar_set(SLOT_Y, 1, NUM_DEVICE_SLOTS, 0);
@@ -248,11 +248,11 @@ void screen_select_file_choose(char visibleEntries)
   byte row;
 
   screen_menu_clear();
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Select  ");
   screen_print_menu("<-", " Up dir  ");
   screen_print_menu("BREAK", copy_mode == true ? " Abort" : " Back");
-  moveCursor(MENU_X, MENU_Y2);
+  screen_move(MENU_X, MENU_Y2);
   if (copy_mode == true)
   {
     screen_print_menu("C", "opy here  ");
@@ -309,7 +309,7 @@ void screen_destination_host_slot(char *h, char *p)
 void screen_destination_host_slot_choose(void)
 {
   screen_menu_clear();
-  moveCursor(MENU_X, MENU_Y1);
+  screen_move(MENU_X, MENU_Y1);
   screen_print_menu("1-8", " Slot  ");
   screen_print_menu("ENTER", " Select  ");
   screen_print_menu("BREAK", " Abort");
