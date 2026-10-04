@@ -7,7 +7,6 @@
 #include "../system.h"
 #include "../constants.h"
 #include <conio.h>
-
 void mount_and_boot_lobby(void)
 {
     screen_mount_and_boot();
@@ -46,6 +45,43 @@ void mount_and_boot_selected(void)
         mount_and_boot();
 }
 
+/* Use individual mounts for compatibility with older firmware and identify
+ * a bad slot instead of relying on the newer aggregate mount command. */
+static bool mount_slots_individually(void)
+{
+    unsigned char i, hs, disk_mode;
+    char message[] = "ERROR MOUNTING D1: - CHECK HOST/FILE";
+    for (i = 0; i < NUM_DEVICE_SLOTS; ++i)
+    {
+        if (deviceSlots[i].hostSlot == 0xff || !deviceSlots[i].file[0])
+            continue;
+        hs = deviceSlots[i].hostSlot;
+        disk_mode = deviceSlots[i].mode & 3;
+        if (!disk_mode) disk_mode = 1;
+        if (hs >= NUM_HOST_SLOTS ||
+            !fuji_mount_host_slot(hs) ||
+            !fuji_mount_disk_image(i, disk_mode))
+        {
+            message[16] = '1' + i;
+            screen_error(message);
+            return false;
+        }
+    }
+    return true;
+}
+
+static void return_to_slots(void)
+{
+    wait_a_moment();
+    state = HOSTS_AND_DEVICES;
+    slots_dirty = true;
+    screen_hosts_and_devices(hostSlots, deviceSlots, deviceEnabled);
+    if (hd_subState == HD_DEVICES)
+        screen_hosts_and_devices_devices();
+    else
+        screen_hosts_and_devices_hosts();
+}
+
 void mount_and_boot(void)
 {
     screen_mount_and_boot();
@@ -68,16 +104,19 @@ void mount_and_boot(void)
 
     screen_puts(0, 3, "Mounting all Host and Device Slots");
 
-    if (!fuji_mount_all())
+    if (!mount_slots_individually())
     {
-        screen_error("ERROR MOUNTING ALL");
-        wait_a_moment();
-        state = HOSTS_AND_DEVICES;
+        return_to_slots();
     }
     else
     {
         screen_puts(9, 22, "SUCCESSFUL! BOOTING");
-        fuji_set_boot_config(0);
+        if (!fuji_set_boot_config(0))
+        {
+            screen_error("ERROR SELECTING DISK BOOT");
+            return_to_slots();
+            return;
+        }
         cold_start();
     }
 

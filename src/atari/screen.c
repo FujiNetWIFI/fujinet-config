@@ -535,8 +535,8 @@ void screen_hosts_and_devices_hosts(void)
   screen_clear_line(23);
   screen_puts(0, 22,
               CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "dit" CH_KEY_RETURN "Browse" CH_KEY_LABEL_L CH_INV_L CH_KEY_LABEL_R "obby");
-  screen_puts(2, 23,
-              CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig" CH_KEY_TAB "Drive Slots" CH_KEY_OPTION "Boot");
+  screen_puts(0, 23,
+              CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig" CH_KEY_TAB "Drives" CH_KEY_OPTION "Boot" CH_KEY_LABEL_L CH_INV_G CH_KEY_LABEL_R "BBS");
 
   // bar_show(2);
   bar_show(selected_host_slot + HOSTS_START_Y);
@@ -554,8 +554,8 @@ void screen_hosts_and_devices_devices(void)
 
   screen_puts(0, 22,
               CH_KEY_1TO8 "Slot" CH_KEY_LABEL_L CH_INV_E CH_KEY_LABEL_R "ject" CH_KEY_LABEL_L CH_INV_C CH_INV_L CH_INV_E CH_INV_A CH_INV_R CH_KEY_LABEL_R "All Slots" CH_KEY_LABEL_L CH_INV_L CH_KEY_LABEL_R "obby");
-  screen_puts(3, 23,
-              CH_KEY_TAB "Hosts" CH_KEY_LABEL_L CH_INV_R CH_KEY_LABEL_R "ead " CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "rite" CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig");
+  screen_puts(0, 23,
+              CH_KEY_TAB "Hosts" CH_KEY_LABEL_L CH_INV_R CH_KEY_LABEL_R "ead " CH_KEY_LABEL_L CH_INV_W CH_KEY_LABEL_R "rite" CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "onfig " CH_KEY_LABEL_L CH_INV_G CH_KEY_LABEL_R "BBS");
   bar_show(selected_device_slot + DEVICES_START_Y);
 }
 
