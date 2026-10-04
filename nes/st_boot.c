@@ -7,8 +7,14 @@
  * the cartridge's M2 watchdog turns into a reload of CONFIG.
  *
  * The whole time is spent on a LOADING screen of its own: the file's name,
- * the host it comes from, and a bar the cartridge's own progress fills.
+ * the host it comes from, a bar the cartridge's own progress fills, and the
+ * bytes received so far against the image's size.
  */
+
+#include <stdlib.h>
+#include <string.h>
+
+#include <fujinet-bus-nes.h>
 
 #include "fujidisp.h"
 #include "fujiraw.h"
@@ -23,6 +29,50 @@
 #define BAR_CELLS  22
 #define PCT_ROW    14
 #define PCT_COL    14
+#define BYTES_ROW  16
+
+/* The FujiNet answers MOUNT_IMAGE only once the whole image is on the cart,
+ * and the cart gives it 60 seconds; wait a little longer than that so its
+ * own timeout is the one that surfaces. */
+#define MOUNT_FRAMES 3900u
+
+/* "got/total BYTES": the total and the layout are fixed once the image
+ * stream opens, so each update rewrites only the right-aligned count. */
+static char tot_txt[9];
+static unsigned char tot_len, got_col;
+static unsigned long shown_tot, shown_got;
+
+static void boot_bytes(unsigned long got, unsigned long tot)
+{
+    char txt[9];
+    unsigned char n;
+
+    if (tot != shown_tot) {
+        shown_tot = tot;
+        shown_got = ~0ul;
+        disp_row_clear(BYTES_ROW);
+        if (tot == 0)
+            return;
+        ultoa(tot, tot_txt, 10);
+        tot_len = (unsigned char)strlen(tot_txt);
+        got_col = (unsigned char)((DISP_COLS - (tot_len * 2 + 7)) / 2);
+        disp_at((unsigned char)(got_col + tot_len), BYTES_ROW, "/");
+        disp_at((unsigned char)(got_col + tot_len + 1), BYTES_ROW, tot_txt);
+        disp_at((unsigned char)(got_col + tot_len * 2 + 1), BYTES_ROW,
+                " BYTES");
+    }
+    if (tot == 0 || got == shown_got)
+        return;
+    shown_got = got;
+    ultoa(got, txt, 10);
+    n = (unsigned char)strlen(txt);
+    if (n > tot_len)
+        n = tot_len;
+    disp_at((unsigned char)(got_col + tot_len - n), BYTES_ROW, txt);
+    while (n < tot_len)
+        disp_char((unsigned char)(got_col + tot_len - 1 - n++), BYTES_ROW,
+                  ' ');
+}
 
 static void boot_pct(unsigned char pct)
 {
@@ -48,32 +98,50 @@ static void boot_screen(volatile unsigned char *name)
              (unsigned char)(BAR_BOX_T + 2), NULL);
     disp_bar_reset();
     boot_pct(0);
+    shown_tot = 0;
+    disp_row_clear(BYTES_ROW);
+}
+
+static void load_error(unsigned char code)
+{
+    disp_row_clear(STATUS_ROW);
+    disp_at(IN_L, STATUS_ROW, "?LOAD ERROR");
+    disp_at_hex8(IN_L + 12, STATUS_ROW, code);
+    sfx_beep();
 }
 
 void boot_mount_swap(void)
 {
-    unsigned char pct = 0;
+    unsigned char pct = 0, want, st;
+    bool acked = false;
+    unsigned int frames = 0;
 
-    status_line("MOUNTING...");
-    if (!fuji_mount_disk_image(DEVICE_SLOT, MODE_READ)) {
-        fail("MOUNT");
-        return;
-    }
-
-    /* The image arrives asynchronously, pushed to the cartridge while the
-     * console keeps running; these three bytes are the cart's progress. */
+    /* Depending on the FujiNet, the image is pushed to the cartridge before
+     * MOUNT_IMAGE is answered (so progress is only visible while that reply
+     * is still outstanding) or after it. Either way: start the mount, then
+     * watch the cart's boot registers -- and the reply -- until the image
+     * is READY. The cart clears those registers when the mount starts. */
     status_line("LOADING...");
+    want = fnraw_mount_start(DEVICE_SLOT, MODE_READ);
     for (;;) {
-        unsigned char st = fuji_nes_boot_state();
         unsigned char now;
 
-        if (st == FUJI_NES_BOOT_READY)
-            break;
+        st = fuji_nes_boot_state();
         if (st == FUJI_NES_BOOT_FAILED) {
-            disp_row_clear(STATUS_ROW);
-            disp_at(IN_L, STATUS_ROW, "?LOAD ERROR");
-            disp_at_hex8(IN_L + 12, STATUS_ROW, fuji_nes_boot_error());
-            sfx_beep();
+            load_error(fuji_nes_boot_error());
+            return;
+        }
+        if (!acked && FN_ACKSEQ == want) {
+            acked = true;
+            if (!fnraw_reply_ok()) {
+                fail("MOUNT");
+                return;
+            }
+        }
+        if (acked && st == FUJI_NES_BOOT_READY)
+            break;
+        if (++frames > MOUNT_FRAMES) {
+            load_error(st);
             return;
         }
         now = fuji_nes_boot_percent();
@@ -83,9 +151,12 @@ void boot_mount_swap(void)
             pct = now;
             boot_pct(pct);
         }
+        boot_bytes(fuji_nes_boot_got(), fuji_nes_boot_total());
+        wait_frames(1);
     }
 
     boot_pct(100);
+    boot_bytes(fuji_nes_boot_total(), fuji_nes_boot_total());
     status_line("BOOTING");
     disp_at(IN_L, LEGEND_ROW, "OK");
     sfx_accept();

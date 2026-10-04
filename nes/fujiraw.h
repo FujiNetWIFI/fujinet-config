@@ -31,4 +31,11 @@ bool fnraw_set_device_path_from_reply(unsigned char dev, unsigned char host_slot
 /* SET_SSID: nparam >= 1 (value ignored) and exactly ssid[33]+password[64]. */
 bool fnraw_set_ssid(const char *ssid, const char *password);
 
+/* MOUNT_IMAGE without waiting for the reply. The FujiNet pushes the whole
+ * image to the cartridge before it answers, so a caller that wants to show
+ * the transfer polls the boot registers until FN_ACKSEQ reads the returned
+ * sequence number, then checks fnraw_reply_ok(). */
+unsigned char fnraw_mount_start(unsigned char dev, unsigned char mode);
+bool fnraw_reply_ok(void);
+
 #endif /* FUJIRAW_H */

@@ -117,3 +117,21 @@ bool fnraw_set_ssid(const char *ssid, const char *password)
     raw_tx_padded(password, 64);
     return raw_finish();
 }
+
+unsigned char fnraw_mount_start(unsigned char dev, unsigned char mode)
+{
+    unsigned char want = (unsigned char)(FN_ACKSEQ + 1);
+
+    if (want == 0)
+        want = 1;               /* 0 means "never used" */
+    raw_begin(FUJICMD_MOUNT_IMAGE);
+    raw_param8(dev, 1);
+    raw_param8(mode, 2);
+    fn_regwr(FNR_SEQ, want);
+    return want;
+}
+
+bool fnraw_reply_ok(void)
+{
+    return FN_ERRCODE == FN_OK && FN_REPLYCMD == FUJICMD_ACK;
+}
