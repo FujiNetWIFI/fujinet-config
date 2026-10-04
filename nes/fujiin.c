@@ -2,6 +2,8 @@
 #include <nes.h>
 #include <time.h>
 
+#include <fujinet-nes.h>
+
 #include "fujiin.h"
 
 #define REPEAT_FIRST 20     /* frames before a held direction repeats */
@@ -10,10 +12,23 @@
 static unsigned char last_dir;
 static unsigned char last_btn;
 static unsigned char hold;
+static bool keyboard;
+static char last_char;
 
 void in_init(void)
 {
     joy_install(joy_static_stddrv);
+    keyboard = (bool)(fuji_nes_kbd_detect() != FUJI_NES_KBD_NONE);
+}
+
+bool in_has_keyboard(void)
+{
+    return keyboard;
+}
+
+char in_char(void)
+{
+    return last_char;
 }
 
 unsigned char in_frames(void)
@@ -21,12 +36,31 @@ unsigned char in_frames(void)
     return (unsigned char)clock();
 }
 
-unsigned char in_read(void)
+static unsigned char read_event(bool text)
 {
     unsigned char j, dir = 0, btn;
+    char c;
 
     waitvsync();
     j = joy_read(JOY_1);
+
+    if (keyboard && (c = fuji_nes_kbd_getc()) != 0) {
+        switch (c) {
+        case FUJI_NES_KEY_UP:    return IN_UP;
+        case FUJI_NES_KEY_DOWN:  return IN_DOWN;
+        case FUJI_NES_KEY_LEFT:  return IN_LEFT;
+        case FUJI_NES_KEY_RIGHT: return IN_RIGHT;
+        case FUJI_NES_KEY_ENTER: return text ? IN_ENTER : IN_FIRE;
+        case FUJI_NES_KEY_ESC:   return text ? IN_ESC : IN_BACK;
+        case FUJI_NES_KEY_BS:    return text ? IN_BS : IN_BACK;
+        default:
+            if (text && c >= 0x20 && c < 0x7F) {
+                last_char = c;
+                return IN_CHAR;
+            }
+            break;
+        }
+    }
 
     if (JOY_UP(j))         dir = IN_UP;
     else if (JOY_DOWN(j))  dir = IN_DOWN;
@@ -59,4 +93,14 @@ unsigned char in_read(void)
         last_btn = 0;
 
     return IN_NONE;
+}
+
+unsigned char in_read(void)
+{
+    return read_event(false);
+}
+
+unsigned char in_read_text(void)
+{
+    return read_event(true);
 }

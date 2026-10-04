@@ -129,17 +129,32 @@ bool fn_edit(const char *title, unsigned char maxlen)
 
     disp_cls();
     disp_at(1, TITLE_ROW, title);
-    disp_at(1, FOOT_ROW, "A PICK  B DEL  SEL CASE  START OK");
+    if (in_has_keyboard())
+        disp_at(1, FOOT_ROW, "TYPE  RETURN OK  ESC CANCEL");
+    else
+        disp_at(1, FOOT_ROW, "A PICK  B DEL  SEL CASE  START OK");
     draw_value();
     draw_grid();
     draw_actions();
 
     for (;;) {
-        unsigned char ev = in_read();
+        unsigned char ev = in_read_text();
 
         switch (ev) {
         case IN_NONE:
             break;
+
+        /* typed on a keyboard */
+        case IN_CHAR:
+            type_char(in_char());
+            break;
+        case IN_BS:
+            backspace();
+            break;
+        case IN_ENTER:
+            return true;
+        case IN_ESC:
+            return false;
 
         case IN_UP:
             if (gy == GRID_ROWS)
