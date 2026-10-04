@@ -13,13 +13,13 @@ static void draw_field(unsigned char row, const char *label,
     volatile unsigned char *r = FN_REPLY + off;
     unsigned char i;
 
-    disp_at(1, row, label);
+    disp_at(IN_L + 1, row, label);
     for (i = 0; i < max; i++) {
         char c = (char)r[i];
 
         if (c == 0)
             break;
-        disp_char((unsigned char)(10 + i), row, c);
+        disp_char((unsigned char)(IN_L + 10 + i), row, c);
     }
 }
 
@@ -29,8 +29,8 @@ void st_info(void)
     status_line("READING...");
 
     if (FUJICALL(FUJICMD_GET_ADAPTERCONFIG_EXTENDED)) {
-        draw_field(5, "SSID", ACX_SSID, 22);
-        draw_field(6, "HOST", ACX_HOSTNAME, 22);
+        draw_field(5, "SSID", ACX_SSID, 18);
+        draw_field(6, "HOST", ACX_HOSTNAME, 18);
         draw_field(8, "IP", ACX_SLOCALIP, 15);
         draw_field(9, "GATEWAY", ACX_SGATEWAY, 15);
         draw_field(10, "NETMASK", ACX_SNETMASK, 15);
@@ -38,9 +38,9 @@ void st_info(void)
         draw_field(13, "MAC", ACX_SMAC, 17);
         draw_field(14, "BSSID", ACX_SBSSID, 17);
         draw_field(16, "VERSION", ACX_VERSION, 14);
-        status_line("A OR B GOES BACK");
+        status_line("A,B KEY IN !!");
     } else {
-        fail("EINFO");
+        fail("INFO");
     }
 
     while (state == ST_INFO) {

@@ -13,6 +13,7 @@
 #include "fujiin.h"
 #include "fujiedit.h"
 #include "fujiraw.h"
+#include "sfx.h"
 #include "state.h"
 
 bool dir_seek(unsigned int pos)
@@ -56,8 +57,16 @@ static bool dir_reopen(void)
 
 void files_legend(void)
 {
-    status_line("A OPEN/BOOT B UP SELECT FILTER");
-    legend_line("< > PAGE  START HOSTS");
+    status_line("A--OPEN B--BACK SEL--FILTER");
+    legend_line("<>--PAGE  START--HOSTS");
+}
+
+/* Blank the list window from row `i` down. A short page must not leave the
+ * tail of the page before it on screen. */
+static void list_clear_from(unsigned char i)
+{
+    for (; i < LIST_ROWS; i++)
+        disp_row_clear((unsigned char)(LIST_TOP + i));
 }
 
 static void files_page(void)
@@ -66,7 +75,8 @@ static void files_page(void)
     unsigned char i;
 
     if (!dir_seek(top)) {
-        fail("ESEEK");
+        list_clear_from(0);
+        fail("SEEK");
         nrows = 0;
         return;
     }
@@ -84,12 +94,13 @@ static void files_page(void)
         }
         name = FN_REPLY;
         for (col = 0; col < NAMELEN && name[col] != 0; col++)
-            disp_char((unsigned char)(2 + col), row, (char)name[col]);
+            disp_char((unsigned char)(3 + col), row, (char)name[col]);
         nrows = (unsigned char)(i + 1);
     }
+    list_clear_from(nrows);
 
     if (nrows == 0) {
-        disp_at(2, LIST_TOP, fn_entry[0] ? "(no matches)" : "(empty)");
+        disp_at(3, LIST_TOP, fn_entry[0] ? "(NO MATCHES)" : "(EMPTY)");
         return;
     }
     if (cur >= nrows)
@@ -100,9 +111,12 @@ static void files_page(void)
 void files_draw(void)
 {
     unsigned char plen = (unsigned char)strlen(path);
+    char title[7];
 
-    draw_frame(NULL);
-    disp_at(1, 3, plen > 30 ? path + (plen - 30) : path);
+    strcpy(title, "HOST 1");
+    title[5] = (char)('1' + host);
+    draw_frame(title);
+    disp_at(IN_L, 3, plen > IN_W ? path + (plen - IN_W) : path);
     files_legend();
     files_page();
 }
@@ -156,7 +170,7 @@ static void devance(void)
     top = 0;
     cur = 0;
     if (!dir_reopen()) {
-        fail("EOPEN");
+        fail("OPEN");
         return;
     }
     files_draw();
@@ -172,7 +186,7 @@ static void open_or_boot(void)
         return;
     status_line("READING...");
     if (!dir_seek(top + cur) || !dir_read_entry(FULLLEN)) {
-        fail("EREAD");
+        fail("READ");
         return;
     }
     name = FN_REPLY;
@@ -180,14 +194,15 @@ static void open_or_boot(void)
     while (n < FULLLEN && name[n] != 0)
         n++;
     if (n == 0) {
-        fail("EEMPTY");
+        fail("NAME");
         return;
     }
 
     if (name[n - 1] == '/') {
         plen = (unsigned char)strlen(path);
         if (plen + n > PATH_MAX_LEN - 1) {
-            status_line("PATH TOO LONG");
+            status_line("?PATH TOO LONG");
+            sfx_beep();
             wait_frames(90);
             files_legend();
             return;
@@ -198,7 +213,7 @@ static void open_or_boot(void)
         top = 0;
         cur = 0;
         if (!dir_reopen()) {
-            fail("EOPEN");
+            fail("OPEN");
             wait_frames(90);
             path[plen] = 0;
             dir_reopen();
@@ -215,11 +230,11 @@ static void open_or_boot(void)
 static void do_filter(void)
 {
     fn_entry[FILTER_MAX] = 0;
-    fn_edit("FILTER (EMPTY SHOWS ALL)", FILTER_MAX);
+    fn_edit("FILTER", FILTER_MAX);
     top = 0;
     cur = 0;
     if (!dir_reopen())
-        fail("EOPEN");
+        fail("OPEN");
     files_draw();
 }
 

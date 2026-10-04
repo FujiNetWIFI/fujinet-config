@@ -5,10 +5,17 @@
  * module per state, each running its own event loop until it hands the state
  * to someone else. Lists are drawn straight out of the cartridge's reply
  * window at $5000 and streamed straight back into the next transaction.
+ *
+ * It looks and sounds like the Famicom's Family BASIC: the GAME BASIC menu's
+ * frame around every list, "A--OPEN" legends, "?xx ERROR" with a BEEP, a
+ * click on every keypress.
  */
+
+#include <string.h>
 
 #include "fujidisp.h"
 #include "fujiin.h"
+#include "sfx.h"
 #include "state.h"
 
 unsigned char state;
@@ -26,28 +33,31 @@ char src_spec[SPEC_MAX_LEN];
 void status_line(const char *s)
 {
     disp_row_clear(STATUS_ROW);
-    disp_at(1, STATUS_ROW, s);
+    disp_at(IN_L, STATUS_ROW, s);
 }
 
 void legend_line(const char *s)
 {
     disp_row_clear(LEGEND_ROW);
-    disp_at(1, LEGEND_ROW, s);
+    disp_at(IN_L, LEGEND_ROW, s);
 }
 
+/* "?MOUNT ERROR 8A", the way Family BASIC says "?SN ERROR", and its BEEP. */
 void fail(const char *what)
 {
+    unsigned char col = (unsigned char)(IN_L + 1 + strlen(what));
+
     disp_row_clear(STATUS_ROW);
-    disp_at(1, STATUS_ROW, what);
-    disp_at_hex8(28, STATUS_ROW, FN_ERRCODE);
+    disp_at(IN_L, STATUS_ROW, "?");
+    disp_at(IN_L + 1, STATUS_ROW, what);
+    disp_at(col, STATUS_ROW, " ERROR ");
+    disp_at_hex8((unsigned char)(col + 7), STATUS_ROW, FN_ERRCODE);
+    sfx_beep();
 }
 
-void draw_frame(const char *subtitle)
+void draw_frame(const char *title)
 {
-    disp_cls();
-    disp_at(1, 1, "FUJINET   C O N F I G");
-    if (subtitle)
-        disp_at(1, 3, subtitle);
+    disp_frame(title);
 }
 
 void wait_frames(unsigned char n)
@@ -76,16 +86,45 @@ void bar_move(signed char d)
     disp_row_invert((unsigned char)(LIST_TOP + cur), true);
 }
 
+/* The power-on screen, after Family BASIC's: no frame, the name typing
+ * itself out a character at a time, then OK and the blinking cursor. Any
+ * key cuts it short. */
+static void splash(void)
+{
+    static const char name[] = "FUJINET CONFIG";
+    unsigned char i;
+
+    for (i = 0; name[i]; i++) {
+        disp_char((unsigned char)(IN_L + i), 3, name[i]);
+        sfx_blip();
+        wait_frames(1);
+    }
+    disp_at(IN_L, 4, "FOR THE NES");
+    disp_at(IN_L, 5, "(C) FUJINET PROJECT");
+    disp_at(IN_L, 6, "OK");
+    disp_cursor_at(IN_L, 7);
+    for (i = 0; i < 30; i++) {
+        if (in_read() != IN_NONE)
+            break;
+        disp_cursor_tick();
+    }
+    disp_cursor_off();
+}
+
 void main(void)
 {
+    sfx_init();
     in_init();
     disp_init();
 
     if (!fuji_nes_present()) {
-        disp_at(4, 8, "NO FUJINET CART");
+        disp_at(IN_L, 3, "?NO FUJINET CART");
+        sfx_beep();
         for (;;)
             ;
     }
+
+    splash();
 
     state = ST_CHECK_WIFI;
     for (;;) {

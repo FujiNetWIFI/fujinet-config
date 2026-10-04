@@ -32,10 +32,10 @@ extern char path[PATH_MAX_LEN];  /* current dir: '/'-prefixed, '/'-terminated */
 extern char src_spec[SPEC_MAX_LEN]; /* custom-SSID scratch */
 
 /* config.c */
-void status_line(const char *s);            /* row 23, cleared first */
-void legend_line(const char *s);            /* row 25, cleared first */
-void fail(const char *what);                /* row 23 + FN_ERRCODE in hex */
-void draw_frame(const char *subtitle);      /* cls + title (+ row-3 subtitle) */
+void status_line(const char *s);            /* STATUS_ROW, cleared first */
+void legend_line(const char *s);            /* LEGEND_ROW, cleared first */
+void fail(const char *what);                /* "?WHAT ERROR xx" + BEEP */
+void draw_frame(const char *title);         /* cls + the frame, titled */
 void wait_frames(unsigned char n);          /* n vblanks, input ignored */
 void bar_move(signed char d);               /* the non-paging selection bar */
 

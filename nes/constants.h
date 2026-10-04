@@ -23,18 +23,18 @@ enum {
 #define HOST_SLOTS   8
 #define HOST_STRIDE  32         /* READ_HOST_SLOTS: 8 x 32 bytes */
 
-/* Screen geometry: cc65's conio gives 32 columns by 28 rows (NTSC); the
- * top and bottom rows sit in the overscan on a CRT, so row 1 is the title,
- * row 3 the subtitle, rows 5-20 the list window, rows 23-25 status and
- * legend. */
+/* Screen geometry: cc65's conio gives 32 columns by 28 rows (NTSC). Menus
+ * sit in a double frame on rows 2-25, cols 1-30 (fujidisp.h), leaving
+ * Family BASIC's 28-column text area inside: row 3 the path, rows 5-20 the
+ * list window, rows 22-23 status and legend. */
 #define DISP_COLS    32
 #define LIST_TOP     5
 #define LIST_ROWS    16
-#define NAMELEN      29         /* display width: col 2..30 */
+#define NAMELEN      27         /* display width: col 3..29 */
 #define FULLLEN      120        /* re-read width when building a full path */
 #define PAYLOAD_LEN  256        /* the fixed buffer the ESP32 expects */
-#define STATUS_ROW   23
-#define LEGEND_ROW   25
+#define STATUS_ROW   22
+#define LEGEND_ROW   23
 
 /* The NES has exactly one thing to mount into: the cartridge. */
 #define DEVICE_SLOT  0

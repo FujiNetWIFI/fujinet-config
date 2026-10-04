@@ -5,6 +5,7 @@
 #include <fujinet-nes.h>
 
 #include "fujiin.h"
+#include "sfx.h"
 
 #define REPEAT_FIRST 20     /* frames before a held direction repeats */
 #define REPEAT_NEXT  6      /* frames between repeats after that */
@@ -95,12 +96,21 @@ static unsigned char read_event(bool text)
     return IN_NONE;
 }
 
+/* Every keypress clicks, the way every key on a Family BASIC keyboard does
+ * -- auto-repeats included. */
+static unsigned char clicked(unsigned char ev)
+{
+    if (ev != IN_NONE)
+        sfx_click();
+    return ev;
+}
+
 unsigned char in_read(void)
 {
-    return read_event(false);
+    return clicked(read_event(false));
 }
 
 unsigned char in_read_text(void)
 {
-    return read_event(true);
+    return clicked(read_event(true));
 }

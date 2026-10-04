@@ -1,21 +1,29 @@
+/* fujiedit.c -- the text editor, drawn as a Family BASIC prompt: the
+ * question on one line ("HOST NAME?"), the answer under it with the blinking
+ * block cursor, and below, framed, the on-screen keyboard for the pad. */
+
 #include <string.h>
 
 #include "fujidisp.h"
 #include "fujiedit.h"
 #include "fujiin.h"
 
-#define TITLE_ROW  1
+#define TITLE_ROW  3
 #define VALUE_ROW  4
-#define VALUE_COL  1
-#define VALUE_W    30
+#define VALUE_COL  IN_L
+#define VALUE_W    IN_W
+#define BOX_L      5
+#define BOX_T      7
+#define BOX_R      26
+#define BOX_B      20
 #define GRID_COL0  8
-#define GRID_ROW0  8
+#define GRID_ROW0  9
 #define GRID_PITCH 2
 #define GRID_COLS  16
 #define GRID_ROWS  4
-#define ACT_ROW    17
+#define ACT_ROW    18
 #define ACT_CELLS  5
-#define FOOT_ROW   23
+#define FOOT_ROW   22
 
 char fn_entry[FN_ENTRY_MAX];
 
@@ -25,7 +33,7 @@ static unsigned char gcase;
 static unsigned char gx, gy;
 
 static const char *act_text[ACT_CELLS] = { "CASE", "SPC", "DEL", "OK", "ESC" };
-static const unsigned char act_col[ACT_CELLS] = { 1, 8, 13, 19, 24 };
+static const unsigned char act_col[ACT_CELLS] = { 7, 12, 16, 20, 23 };
 
 static char cell_char(unsigned char cx, unsigned char cy)
 {
@@ -74,13 +82,9 @@ static void draw_value(void)
         start = (unsigned char)(glen - (VALUE_W - 1));
 
     disp_row_clear(VALUE_ROW);
-    for (i = 0; i < VALUE_W; i++) {
-        unsigned char idx = (unsigned char)(start + i);
-        bool cursor = (bool)(idx == glen);
-
-        disp_char_hi((unsigned char)(VALUE_COL + i), VALUE_ROW,
-                     idx < glen ? fn_entry[idx] : ' ', cursor);
-    }
+    for (i = 0; (unsigned char)(start + i) < glen; i++)
+        disp_char((unsigned char)(VALUE_COL + i), VALUE_ROW, fn_entry[start + i]);
+    disp_cursor_at((unsigned char)(VALUE_COL + i), VALUE_ROW);
 }
 
 static void move_to(unsigned char nx, unsigned char ny)
@@ -116,30 +120,13 @@ static void backspace(void)
     draw_value();
 }
 
-bool fn_edit(const char *title, unsigned char maxlen)
+/* The keys, until OK or cancel. */
+static bool edit_loop(void)
 {
-    if (maxlen > FN_ENTRY_MAX - 1)
-        maxlen = FN_ENTRY_MAX - 1;
-    gmax = maxlen;
-    fn_entry[maxlen] = '\0';
-    glen = (unsigned char)strlen(fn_entry);
-    gcase = 0;
-    gx = 0;
-    gy = 2;
-
-    disp_cls();
-    disp_at(1, TITLE_ROW, title);
-    if (in_has_keyboard())
-        disp_at(1, FOOT_ROW, "TYPE  RETURN OK  ESC CANCEL");
-    else
-        disp_at(1, FOOT_ROW, "A PICK  B DEL  SEL CASE  START OK");
-    draw_value();
-    draw_grid();
-    draw_actions();
-
     for (;;) {
         unsigned char ev = in_read_text();
 
+        disp_cursor_tick();
         switch (ev) {
         case IN_NONE:
             break;
@@ -220,4 +207,36 @@ bool fn_edit(const char *title, unsigned char maxlen)
             return true;
         }
     }
+}
+
+bool fn_edit(const char *title, unsigned char maxlen)
+{
+    bool ok;
+
+    if (maxlen > FN_ENTRY_MAX - 1)
+        maxlen = FN_ENTRY_MAX - 1;
+    gmax = maxlen;
+    fn_entry[maxlen] = '\0';
+    glen = (unsigned char)strlen(fn_entry);
+    gcase = 0;
+    gx = 0;
+    gy = 2;
+
+    disp_cls();
+    disp_at(IN_L, TITLE_ROW, title);
+    disp_at((unsigned char)(IN_L + strlen(title)), TITLE_ROW, "?");
+    disp_box(BOX_L, BOX_T, BOX_R, BOX_B, "KEYBOARD");
+    if (in_has_keyboard()) {
+        disp_at(IN_L, FOOT_ROW, "RETURN--OK  ESC--CANCEL");
+    } else {
+        disp_at(IN_L, FOOT_ROW, "A--PICK  B--DEL  SEL--CASE");
+        disp_at(IN_L, FOOT_ROW + 1, "START--OK");
+    }
+    draw_grid();
+    draw_actions();
+    draw_value();
+
+    ok = edit_loop();
+    disp_cursor_off();
+    return ok;
 }

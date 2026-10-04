@@ -25,7 +25,10 @@ built from a RAM prefix plus a filename that only exists in the reply window.
 | `st_info.c` | adapter info (GET_ADAPTERCONFIG_EXTENDED) |
 | `st_boot.c` | mount into device slot 0, progress, jump to the loader ROM |
 | `fujiraw.c` | the four streamed transactions |
-| `fujidisp.c` `fujiin.c` `fujiedit.c` | the platform layer: conio text with a WRAM shadow for the reverse-video bar, joystick with auto-repeat, the on-screen keyboard |
+| `fujidisp.c` `fujiin.c` `fujiedit.c` | the platform layer: conio text with a WRAM shadow for the reverse-video bar, frames, the progress bar and the blinking cursor; joystick with auto-repeat; the on-screen keyboard |
+| `disp_pal.s` | one palette entry through cc65's vblank write buffer |
+| `sfx.c` | the sounds: key click, BEEP, the accept arpeggio, the typing blip |
+| `font.txt` `tools/mkfont.py` | the character set and frame/bar tiles, and the script that makes them the CHR-ROM (`build/font.s`, replacing cc65's `neschar.s`) |
 | `constants.h` | states, geometry, command payload shapes |
 
 ## Scope
@@ -33,6 +36,26 @@ built from a RAM prefix plus a filename that only exists in the reply window.
 Parity with the ColecoVision CONFIG minus host-to-host copy and the lobby:
 WiFi setup, eight host slots with rename, file browser with paging and
 filter, mount & boot, adapter info. `DEVICE_SLOT` is hardwired to 0.
+
+## Look and sound
+
+CONFIG looks and sounds like the Famicom's Family BASIC cartridge:
+
+- **Screen.** White text on black, using Family BASIC's palette (`0F 30 21 02`).
+  - Every menu sits in the GAME BASIC menu's light-blue double frame, with the title set into its top edge.
+  - Inside the frame is the same 28-column text area BASIC uses.
+- **Words.** Legends read `A--OPEN  B--BACK`. Errors read `?MOUNT ERROR 8A`, the way BASIC prints `?SN ERROR`.
+- **Power-on.** A screen in the style of BASIC's boot screen: the name types itself out, then `OK` and a blinking block cursor.
+- **Text editor.** A BASIC prompt: `HOST NAME?` with a blinking cursor. The pad's keyboard grid sits in a frame below it.
+- **Booting.** A `LOADING` screen with the file's name and a progress bar the cartridge's transfer fills.
+- **Sound.**
+  - Every keypress clicks with the same short pulse-1 tick as Family BASIC.
+  - Errors BEEP with that tone held for ten frames.
+  - Successful joins, mounts and boots play a short triangle arpeggio.
+
+The font, tiles and sounds are this project's own work. They are drawn and
+written to match the style of the original, not copied from its ROM.
+`font.txt` is plain ASCII art, so you can edit it directly.
 
 ## Controls
 
@@ -42,6 +65,7 @@ filter, mount & boot, adapter info. `DEVICE_SLOT` is hardwired to 0.
 | FILES | up/down move (page-crossing), left/right page | open dir / boot file | up a directory (at `/`: hosts) | filter | hosts |
 | WIFI | move | pick network (password follows) | back to hosts | | rescan |
 | INFO | | back | back | | |
+| LOADING | | | | | |
 | keyboard | grid | pick | backspace | case | OK (cancel is the ESC cell) |
 
 ## The one rule

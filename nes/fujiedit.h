@@ -1,8 +1,9 @@
 /* fujiedit.h -- the on-screen keyboard.
  *
- * An NES controller has a d-pad and four buttons, so any text a user has to
- * type -- a host name, a WiFi password -- gets typed on screen: the same 16
- * by 4 grid the Intellivision, Astrocade and ColecoVision clients use, where
+ * The editor is a Family BASIC prompt ("HOST NAME?" over the value and its
+ * blinking cursor). An NES controller has a d-pad and four buttons, so any
+ * text a user has to type -- a host name, a WiFi password -- gets typed on
+ * screen: the same 16 by 4 grid the Intellivision, Astrocade and ColecoVision clients use, where
  * the cursor position IS the character. A: pick the cell. B: backspace.
  * SELECT: toggle case. START: accept. Cancel is the ESC cell and nothing
  * else, so a reflexive extra press while correcting a typo never throws

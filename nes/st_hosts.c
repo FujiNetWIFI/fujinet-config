@@ -10,18 +10,19 @@
 #include "fujiin.h"
 #include "fujiedit.h"
 #include "fujiraw.h"
+#include "sfx.h"
 #include "state.h"
 
 static void hosts_draw(void)
 {
     unsigned char i;
 
-    draw_frame("SELECT A HOST");
-    status_line("A OPEN  SELECT RENAME");
-    legend_line("START INFO  B WIFI SETUP");
+    draw_frame("HOST SLOTS");
+    status_line("A--OPEN  SEL--RENAME");
+    legend_line("B--WIFI  START--INFO");
 
     if (!FUJICALL(FUJICMD_READ_HOST_SLOTS)) {
-        fail("EHOSTS");
+        fail("HOSTS");
         nrows = 0;
         return;
     }
@@ -33,13 +34,13 @@ static void hosts_draw(void)
         unsigned char col;
 
         disp_row_clear(row);
-        disp_at_u16(1, row, (unsigned int)(i + 1));
+        disp_at_u16(3, row, (unsigned int)(i + 1));
         if (*name == 0) {
-            disp_at(3, row, "(empty)");
+            disp_at(5, row, "(EMPTY)");
             continue;
         }
-        for (col = 0; col < HOST_STRIDE - 3 && name[col] != 0; col++)
-            disp_char((unsigned char)(3 + col), row, (char)name[col]);
+        for (col = 0; col <= IN_R - 5 && name[col] != 0; col++)
+            disp_char((unsigned char)(5 + col), row, (char)name[col]);
         hosts_mask |= (unsigned char)(1 << i);
     }
     nrows = HOST_SLOTS;
@@ -52,13 +53,14 @@ static void hosts_draw(void)
 static void enter_host(void)
 {
     if (!(hosts_mask & (unsigned char)(1 << cur))) {
-        status_line("EMPTY SLOT: SELECT SETS A NAME");
+        status_line("?EMPTY SLOT  SEL--RENAME");
+        sfx_beep();
         return;
     }
 
     status_line("MOUNTING HOST...");
     if (!fuji_mount_host_slot(cur)) {
-        fail("EHOST");
+        fail("HOST");
         return;
     }
 
@@ -68,10 +70,11 @@ static void enter_host(void)
     fn_entry[0] = 0;            /* the filter starts clear */
     top = 0;
     if (!dir_open()) {
-        fail("EOPEN");
+        fail("OPEN");
         return;
     }
     cur = 0;
+    sfx_accept();
     state = ST_FILES;
 }
 
@@ -81,7 +84,7 @@ static void rename_host(void)
     unsigned char i;
 
     if (!FUJICALL(FUJICMD_READ_HOST_SLOTS)) {
-        fail("EHOSTS");
+        fail("HOSTS");
         return;
     }
     name = FN_REPLY + (unsigned int)cur * HOST_STRIDE;
@@ -89,9 +92,9 @@ static void rename_host(void)
         fn_entry[i] = (char)name[i];
     fn_entry[i] = 0;
 
-    if (fn_edit("EDIT HOST NAME", HOST_STRIDE - 1)) {
+    if (fn_edit("HOST NAME", HOST_STRIDE - 1)) {
         if (!fnraw_write_host_slot(cur, fn_entry)) {
-            fail("EWRITE");
+            fail("WRITE");
             wait_frames(90);
         }
     }

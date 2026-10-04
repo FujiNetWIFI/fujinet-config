@@ -1,7 +1,7 @@
 # FujiNet CONFIG for the NES.
 #
 # Standalone, like ../coleco and ../intv: a 32K NROM client with 8K CHR-ROM
-# (cc65's own conio font) and the cartridge's 8K WRAM at $6000, built with
+# (our own Family BASIC-style font, font.txt via tools/mkfont.py) and the cartridge's 8K WRAM at $6000, built with
 # cc65's `nes` target and fujinet-lib-experimental's `nes` target (the
 # mailbox transport, the FujiNet linker config and the claim stamp).
 #
@@ -20,8 +20,10 @@ FNLIB    ?= $(HOME)/Workspace/fujinet-lib-experimental
 PICO_NES ?= $(HOME)/Workspace/fujinet-firmware/pico/nes
 
 SRCS = config.c st_wifi.c st_hosts.c st_files.c st_info.c st_boot.c \
-       fujiraw.c fujidisp.c fujiin.c fujiedit.c
-OBJS = $(patsubst %.c,build/%.o,$(SRCS))
+       fujiraw.c fujidisp.c fujiin.c fujiedit.c sfx.c
+ASRCS = disp_pal.s
+OBJS = $(patsubst %.c,build/%.o,$(SRCS)) $(patsubst %.s,build/%.o,$(ASRCS)) \
+       build/font.o
 
 FNLIB_LIB = $(FNLIB)/r2r/nes/fujinet.nes.lib
 NES_CFG   = $(FNLIB)/makefiles/nes-fujinet.cfg
@@ -39,6 +41,16 @@ $(FNLIB_LIB):
 
 build/%.o: %.c $(wildcard *.h) | build
 	cl65 $(CFLAGS) -c -o $@ $<
+
+build/%.o: %.s | build
+	cl65 -t nes -c -o $@ $<
+
+# The background pattern table: replaces cc65's neschar.s (see mkfont.py).
+build/font.s: font.txt tools/mkfont.py | build
+	python3 tools/mkfont.py font.txt $@
+
+build/font.o: build/font.s
+	cl65 -t nes -c -o $@ $<
 
 build:
 	mkdir -p build
