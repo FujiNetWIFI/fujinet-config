@@ -40,6 +40,10 @@ enum {
 #define DEVICE_SLOT  0
 #define MODE_READ    1
 
+/* The FujiNet Game Lobby: HOST SLOTS' ninth row boots it straight from here. */
+#define LOBBY_HOST   "ec.tnfs.io"
+#define LOBBY_PATH   "/nes/lobby.nes"
+
 #define PATH_MAX_LEN 128        /* current directory, '/'-terminated */
 #define SPEC_MAX_LEN 96         /* custom-SSID scratch */
 

@@ -1,8 +1,9 @@
 /* st_boot.c -- mount into device slot 0 and hand the console to the loader.
  *
- * Not a dispatcher state: booting is called from the browser and only ever
- * RETURNS on failure -- success ends in fuji_nes_boot(), which jumps into the
- * cartridge's loader ROM. The loader copies the image into the SRAMs and
+ * Not a dispatcher state: booting is called from the browser (and, for the
+ * Game Lobby, from the host slots) and only ever RETURNS on failure --
+ * success ends in fuji_nes_boot(), which jumps into the cartridge's loader
+ * ROM. The loader copies the image into the SRAMs and
  * cold-starts it; getting back to CONFIG afterwards is a power cycle, which
  * the cartridge's M2 watchdog turns into a reload of CONFIG.
  *
@@ -173,6 +174,21 @@ void boot_reply_entry(void)
     status_line("SETTING PATH...");
     if (!fnraw_set_device_path_from_reply(DEVICE_SLOT, host, MODE_READ,
                                           path, FN_REPLY)) {
+        fail("PATH");
+        return;
+    }
+    boot_mount_swap();
+}
+
+/* Boot the Game Lobby off `host`, which the caller has already pointed at
+ * LOBBY_HOST and mounted. The whole path is the RAM prefix; no name follows. */
+void boot_lobby(void)
+{
+    boot_screen((volatile unsigned char *)"LOBBY.NES");
+    status_line("SETTING PATH...");
+    if (!fnraw_set_device_path_from_reply(DEVICE_SLOT, host, MODE_READ,
+                                          LOBBY_PATH,
+                                          (volatile unsigned char *)"")) {
         fail("PATH");
         return;
     }

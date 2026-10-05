@@ -61,5 +61,7 @@ void boot_reply_entry(void);                /* boot path + name-in-window;
                                                returns only on failure */
 void boot_mount_swap(void);                 /* MOUNT_IMAGE + progress + boot;
                                                returns only on failure */
+void boot_lobby(void);                      /* LOBBY_PATH on `host`;
+                                               returns only on failure */
 
 #endif /* STATE_H */

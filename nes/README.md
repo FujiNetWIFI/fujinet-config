@@ -20,10 +20,10 @@ built from a RAM prefix plus a filename that only exists in the reply window.
 |---|---|
 | `config.c` | entry point, state dispatcher, shared drawing helpers |
 | `st_wifi.c` | CHECK_WIFI / CONNECT_WIFI / SET_WIFI (scan, pick, password, custom SSID) |
-| `st_hosts.c` | host slots: open, rename |
+| `st_hosts.c` | host slots: open, rename, game lobby |
 | `st_files.c` | file browser: paging, descend/devance, filter |
 | `st_info.c` | adapter info (GET_ADAPTERCONFIG_EXTENDED) |
-| `st_boot.c` | mount into device slot 0, progress, jump to the loader ROM |
+| `st_boot.c` | mount into device slot 0 (a browsed file or the lobby), progress, jump to the loader ROM |
 | `fujiraw.c` | the four streamed transactions |
 | `fujidisp.c` `fujiin.c` `fujiedit.c` | the platform layer: conio text with a WRAM shadow for the reverse-video bar, frames, the progress bar and the blinking cursor; joystick with auto-repeat; the on-screen keyboard |
 | `disp_pal.s` | one palette entry through cc65's vblank write buffer |
@@ -33,9 +33,16 @@ built from a RAM prefix plus a filename that only exists in the reply window.
 
 ## Scope
 
-Parity with the ColecoVision CONFIG minus host-to-host copy and the lobby:
-WiFi setup, eight host slots with rename, file browser with paging and
-filter, mount & boot, adapter info. `DEVICE_SLOT` is hardwired to 0.
+Parity with the ColecoVision CONFIG minus host-to-host copy: WiFi setup,
+eight host slots with rename, file browser with paging and filter, mount &
+boot, adapter info, and the FujiNet Game Lobby. `DEVICE_SLOT` is hardwired
+to 0.
+
+The lobby is the ninth row on HOST SLOTS, `PLAY GAME LOBBY`. It boots
+`TNFS://ec.tnfs.io/nes/lobby.nes` through the same LOADING screen as a
+browsed file. It uses the host slot that already holds `ec.tnfs.io` (any
+case). If no slot does, it writes `ec.tnfs.io` into the first empty slot, or
+into slot 8 when all eight are taken.
 
 ## Look and sound
 
@@ -61,7 +68,7 @@ written to match the style of the original, not copied from its ROM.
 
 | screen | d-pad | A | B | SELECT | START |
 |---|---|---|---|---|---|
-| HOSTS | move | open host | WiFi setup | rename slot | adapter info |
+| HOSTS | move | open host / boot lobby | WiFi setup | rename slot | adapter info |
 | FILES | up/down move (page-crossing), left/right page | open dir / boot file | up a directory (at `/`: hosts) | filter | hosts |
 | WIFI | move | pick network (password follows) | back to hosts | | rescan |
 | INFO | | back | back | | |
