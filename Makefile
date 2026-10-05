@@ -67,7 +67,9 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
-CFLAGS_EXTRA_COCO = -Wno-assign-in-condition
+# RUNM keeps the caller's stack, so every app resets S or each hop sinks it toward $7BF8.
+# --initial-s only takes effect when compiling main().
+CFLAGS_EXTRA_COCO = -Wno-assign-in-condition --initial-s=7F00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
 # logo_zx0.asm is shared with Dragon; LOGO.BIN is loaded via BASIC's LOADM
 # (see coco/disk-post), not over DriveWire.
