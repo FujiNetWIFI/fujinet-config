@@ -14,7 +14,6 @@
 #include "atari_screen.h"
 #include "../globals.h"
 #include "mount_and_boot.h"
-#include "bbs_terminal.h"
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../set_wifi.h"
@@ -334,13 +333,13 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_DONE;
   case 'G':
     memset(temp, 0, sizeof(temp));
-    screen_puts(0,24,"Connect to BBS Y/N?");
-    edit_line(19,24,temp,2, false);
+    screen_puts(0,24,"Boot BBS Y/N? ");
+    edit_line(14,24,temp,2, false);
     screen_clear_line(24);
     if (temp[0] == 'Y' || temp[0] == 'y')
     {
-      bbs_terminal();
-      return HD_HOSTS;
+      mount_and_boot_bbs();
+      return HD_DONE;
     }
     return HD_HOSTS;
   case 'L':
@@ -464,13 +463,13 @@ HDSubState input_hosts_and_devices_devices(void)
     return HD_DONE;
   case 'G':
     memset(temp, 0, sizeof(temp));
-    screen_puts(0,24,"Connect to BBS Y/N?");
-    edit_line(19,24,temp,2, false);
+    screen_puts(0,24,"Boot BBS Y/N? ");
+    edit_line(14,24,temp,2, false);
     screen_clear_line(24);
     if (temp[0] == 'Y' || temp[0] == 'y')
     {
-      bbs_terminal();
-      return HD_DEVICES;
+      mount_and_boot_bbs();
+      return HD_DONE;
     }
     return HD_DEVICES;
   case 'L':
