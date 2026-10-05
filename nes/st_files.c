@@ -17,6 +17,12 @@
 #include "sfx.h"
 #include "state.h"
 
+/* Entries in the open directory, for the scroll bar. The cartridge can only
+ * say one entry at a time, so they are counted once per open (a filter is
+ * an open too) and kept. */
+static unsigned int dir_count;
+static bool dir_counted;
+
 /* The marquee on the selected row. `saved` keeps the row as the page drew
  * it. `scroll_len` is the full name's length once fetched, 0 until then. */
 static char saved[IN_W];
@@ -54,7 +60,26 @@ bool dir_read_entry(unsigned char maxlen)
 
 bool dir_open(void)
 {
+    dir_counted = false;
     return fnraw_open_directory(host, path, fn_entry);
+}
+
+/* Short reads, stopping where dir_read_entry() does. 8 bytes, not fewer:
+ * the firmware cuts a name longer than that with an ellipsis in the middle,
+ * but a shorter limit cuts it to its first two characters, which would make
+ * "..anything" look like the end. A big directory counts up on the status
+ * line as it goes. */
+static void dir_count_entries(void)
+{
+    dir_count = 0;
+    dir_counted = true;
+    status_line("COUNTING...");
+    if (!dir_seek(0))
+        return;
+    while (dir_count != 0xFFFF && dir_read_entry(8)) {
+        if ((++dir_count & 0x3F) == 0)
+            disp_at_u16(IN_L + 12, STATUS_ROW, dir_count);
+    }
 }
 
 static bool dir_reopen(void)
@@ -185,6 +210,7 @@ static void files_page(void)
         nrows = (unsigned char)(i + 1);
     }
     list_clear_from(nrows);
+    disp_scroll(FRAME_R, LIST_TOP, LIST_ROWS, top, dir_count);
 
     if (nrows == 0) {
         disp_at(3, LIST_TOP, fn_entry[0] ? "(NO MATCHES)" : "(EMPTY)");
@@ -203,7 +229,10 @@ void files_draw(void)
     strcpy(title, "HOST 1");
     title[5] = (char)('1' + host);
     draw_frame(title);
+    disp_logo(LOGO_MARK);
     disp_at(IN_L, 3, plen > IN_W ? path + (plen - IN_W) : path);
+    if (!dir_counted)
+        dir_count_entries();
     files_legend();
     files_page();
 }

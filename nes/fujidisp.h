@@ -41,6 +41,13 @@
 #define T_CURSOR  0x07
 #define T_BAR0    0x10          /* T_BAR0 + n: n/8 of the cell filled */
 
+/* Tiles in $80-$9F, where the never-shown reverse copies of the tiles
+ * above would be (font.txt). */
+#define T_SB_FULL  0x80         /* the scroll-bar thumb fills the cell */
+#define T_SB_START 0x81         /* + n-1: the thumb starts at pixel row n */
+#define T_SB_END   0x88         /* + n-1: the thumb fills the first n rows */
+#define T_WORD0    0x8F         /* FUJI NET: a top and a bottom tile each */
+
 void disp_init(void);
 void disp_cls(void);
 /* Write `s` at (col,row), clipped at IN_R. Not NUL-padded: whatever was
@@ -78,6 +85,21 @@ void disp_row_restore(unsigned char row, const char *buf, bool hi);
 void disp_bar_reset(void);
 void disp_bar(unsigned char col, unsigned char row, unsigned char cells,
               unsigned char num, unsigned char den);
+
+/* A scroll bar on the frame's rail: `cells` rows down from (col,row), for a
+ * list of `count` entries showing `cells` of them from `first`. The thumb is
+ * placed to the pixel and at least a cell long; with nothing to scroll, the
+ * rail is left plain. Only the cells that changed are rewritten. */
+void disp_scroll(unsigned char col, unsigned char row, unsigned char cells,
+                 unsigned int first, unsigned int count);
+
+/* The FujiNet logo, in sprites (fujilogo.c): LOGO_HOSTS beside its FUJI NET
+ * wordmark on HOST SLOTS, LOGO_MARK faded behind the file browser's list.
+ * Every disp_cls() takes it away again. */
+enum { LOGO_OFF = 0, LOGO_HOSTS, LOGO_MARK };
+void disp_logo(unsigned char mode);
+/* Copy the sprite shadow into the PPU at the next quiet vblank (oam.s). */
+void oam_sync(void);
 
 /* The blinking block cursor: 12 frames on, 12 off. disp_cursor_at() puts
  * it (lit) at a new place, restoring whatever it covered; disp_cursor_tick()

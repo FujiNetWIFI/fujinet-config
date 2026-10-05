@@ -1,7 +1,8 @@
 # FujiNet CONFIG for the NES.
 #
 # Standalone, like ../coleco and ../intv: a 32K NROM client with 8K CHR-ROM
-# (our own Family BASIC-style font, font.txt via tools/mkfont.py) and the cartridge's 8K WRAM at $6000, built with
+# (our own Family BASIC-style font, font.txt, and the FujiNet logo's sprites,
+# logo.txt, via tools/mkfont.py) and the cartridge's 8K WRAM at $6000, built with
 # cc65's `nes` target and fujinet-lib-experimental's `nes` target (the
 # mailbox transport, the FujiNet linker config and the claim stamp).
 #
@@ -20,8 +21,8 @@ FNLIB    ?= $(HOME)/Workspace/fujinet-lib-experimental
 PICO_NES ?= $(HOME)/Workspace/fujinet-firmware/pico/nes
 
 SRCS = config.c st_wifi.c st_hosts.c st_files.c st_info.c st_boot.c \
-       fujiraw.c fujidisp.c fujiin.c fujiedit.c sfx.c
-ASRCS = disp_pal.s
+       fujiraw.c fujidisp.c fujilogo.c fujiin.c fujiedit.c sfx.c
+ASRCS = disp_pal.s oam.s
 OBJS = $(patsubst %.c,build/%.o,$(SRCS)) $(patsubst %.s,build/%.o,$(ASRCS)) \
        build/font.o
 
@@ -45,9 +46,10 @@ build/%.o: %.c $(wildcard *.h) | build
 build/%.o: %.s | build
 	cl65 -t nes -c -o $@ $<
 
-# The background pattern table: replaces cc65's neschar.s (see mkfont.py).
-build/font.s: font.txt tools/mkfont.py | build
-	python3 tools/mkfont.py font.txt $@
+# The CHR-ROM: replaces cc65's neschar.s (see mkfont.py). Background tiles
+# from font.txt, the logo's sprites from logo.txt, and where they go.
+build/font.s: font.txt logo.txt tools/mkfont.py | build
+	python3 tools/mkfont.py font.txt $@ --sprites logo.txt
 
 build/font.o: build/font.s
 	cl65 -t nes -c -o $@ $<
