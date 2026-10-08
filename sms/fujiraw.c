@@ -81,6 +81,41 @@ static bool raw_finish_long(void)
     return false;
 }
 
+unsigned char fnraw_mount_start(unsigned char dev, unsigned char mode)
+{
+    unsigned char want = (unsigned char)(FN_ACKSEQ + 1);
+
+    if (want == 0)
+        want = 1;               /* 0 means "never used" */
+    raw_begin(FUJICMD_MOUNT_IMAGE);
+    raw_param8(dev, 1);
+    raw_param8(mode, 2);
+    fn_regwr(FNR_SEQ, want);
+    return want;
+}
+
+bool fnraw_reply_ok(void)
+{
+    return FN_ERRCODE == FN_OK && FN_REPLYCMD == FUJICMD_ACK;
+}
+
+static unsigned long boot_bytes_once(volatile unsigned char *p)
+{
+    return (unsigned long)p[0] | ((unsigned long)p[1] << 8) |
+           ((unsigned long)p[2] << 16);
+}
+
+unsigned long fnraw_boot_bytes(volatile unsigned char *p)
+{
+    unsigned long a, b;
+
+    do {
+        a = boot_bytes_once(p);
+        b = boot_bytes_once(p);
+    } while (a != b);
+    return a;
+}
+
 bool fnraw_open_directory(unsigned char host_slot,
                           const char *dirpath, const char *pattern)
 {

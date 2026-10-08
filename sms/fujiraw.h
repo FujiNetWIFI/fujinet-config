@@ -49,4 +49,19 @@ bool fnraw_set_ssid(const char *ssid, const char *password);
 bool fnraw_copy_file(unsigned char src_slot1, unsigned char dst_slot1,
                      const char *source_spec, const char *dest_dir);
 
+/* MOUNT_IMAGE, committed without waiting. Every server pushes the whole
+ * image to the cartridge before it ACKs the mount, so a caller that wants to
+ * watch the push polls the boot registers until FN_ACKSEQ reaches the
+ * sequence number returned here -- and writes NOTHING to the mailbox until
+ * it does (a register write would only queue up behind the transaction). */
+unsigned char fnraw_mount_start(unsigned char dev, unsigned char mode);
+
+/* After the ACK: did the transaction succeed? */
+bool fnraw_reply_ok(void);
+
+/* One of the cart's 24-bit little-endian boot counters (FN_BOOTGOT,
+ * FN_BOOTTOT). The cart writes them low byte first while the push runs, so
+ * it is read until two reads agree. */
+unsigned long fnraw_boot_bytes(volatile unsigned char *p);
+
 #endif /* FUJIRAW_H */

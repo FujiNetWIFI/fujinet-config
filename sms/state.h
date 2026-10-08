@@ -78,9 +78,15 @@ void copy_here(void);                       /* COPY HERE, copy in flight */
 void copy_cancel(void);                     /* back to the source browse */
 
 /* st_boot.c */
+void boot_begin(const volatile unsigned char *name);
+                                            /* the progress window, titled with
+                                               `name`; open it BEFORE SET PATH,
+                                               which repaints the reply window */
+void boot_cancel(void);                     /* close it again, on a failure */
 void boot_reply_entry(void);                /* boot path + name-in-window;
                                                returns only on failure */
-void boot_mount_swap(void);                 /* MOUNT_IMAGE + progress + swap;
-                                               returns only on failure */
+void boot_mount_swap(void);                 /* MOUNT_IMAGE + progress + swap,
+                                               window open; returns only on
+                                               failure, window closed */
 
 #endif /* STATE_H */

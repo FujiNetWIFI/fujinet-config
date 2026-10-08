@@ -44,6 +44,11 @@ CONFIG looks and sounds like *Phantasy Star*'s menus:
 - **Keyboard.** Laid out like the game's name-entry screen: characters on every other column and
   row, a cyan underline under the cursor and a white one where the next character goes. CASE
   shows the grid in lowercase.
+- **Loading.** Booting a game opens a window with the file's name, a progress bar the
+  cartridge's transfer fills, and the bytes received so far. The image streams to the cartridge
+  before the mount is acknowledged, so CONFIG commits the mount itself and watches the cart's
+  boot registers while it waits. If the load fails, the window closes and the error appears
+  below it.
 - **Splash.** The FujiNet wordmark fades up out of black under a short fanfare, with a yellow
   pointer blinking beside PRESS BUTTON 1, then fades away the way the game leaves a scene: red
   first, then green, then blue. Booting a game fades out the same way.

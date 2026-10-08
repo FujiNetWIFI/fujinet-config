@@ -35,6 +35,8 @@
 #define T_TRI     5             /* splash pointer, yellow */
 #define T_ULINE   6             /* keyboard cursor sprite, cyan */
 #define T_ULINE2  7             /* keyboard edit-point sprite, white */
+#define T_BARCAP  8             /* progress bar end; A_HFLIP for the right */
+#define T_BAR0    9             /* progress bar cell, 0-8 px filled: +n */
 
 /* Name-table high-byte bits, as the shadow keeps them. */
 #define A_HFLIP   0x02

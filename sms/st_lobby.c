@@ -59,8 +59,9 @@ static void lobby_go(void)
     }
     host = slot;
 
-    status_now("SET PATH...");
+    boot_begin((const volatile unsigned char *)LOBBY_PATH);
     if (!fnraw_set_device_path(DEVICE_SLOT, slot, MODE_READ, LOBBY_PATH)) {
+        boot_cancel();
         fail("EPATH");
         return;
     }
