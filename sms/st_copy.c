@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "fujidisp.h"
+#include "fujisnd.h"
 #include "fujiedit.h"
 #include "fujiraw.h"
 #include "state.h"
@@ -26,7 +27,7 @@ void copy_mark(void)
 
     if (nrows == 0)
         return;
-    status_line("READING...");
+    status_now("READING...");
     if (!dir_seek(top + cur) || !dir_read_entry(FULLLEN)) {
         fail("EREAD");
         return;
@@ -40,7 +41,8 @@ void copy_mark(void)
         return;
     }
     if (name[n - 1] == '/') {
-        status_line("CANNOT COPY A FOLDER");
+        snd_play(SND_ERROR);
+        status_line("A FOLDER CANNOT BE COPIED.");
         wait_frames(90);
         files_legend();
         return;
@@ -48,7 +50,8 @@ void copy_mark(void)
 
     plen = (unsigned char)strlen(path);
     if (plen + n > SPEC_MAX_LEN - 1) {
-        status_line("PATH TOO LONG");
+        snd_play(SND_ERROR);
+        status_line("THE PATH IS TOO LONG.");
         wait_frames(90);
         files_legend();
         return;
@@ -105,11 +108,12 @@ static void copy_return(void)
 
 void copy_here(void)
 {
-    status_line("COPYING...");
+    status_now("COPYING...");
     if (fnraw_copy_file((unsigned char)(src_host + 1), (unsigned char)(host + 1),
-                        src_spec, path))
-        status_line("COPIED");
-    else
+                        src_spec, path)) {
+        snd_play(SND_READY);
+        status_line("COPIED.");
+    } else
         fail("ECOPY");
     wait_frames(120);
     copy_return();

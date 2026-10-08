@@ -1,7 +1,8 @@
-/* fujisplash.h -- the boot splash: the FujiNet wordmark over the Master
- * System BIOS's black, its glyphs coloured top to bottom from white to the
- * BIOS's SEGA blue. The artwork and its data are ../coleco's; see
- * fujisplash_data.c.
+/* fujisplash.h -- the boot splash, staged like Phantasy Star's title: the
+ * FujiNet wordmark (its glyphs coloured top to bottom from white to the
+ * BIOS's SEGA blue) fades up out of black under the fanfare, a yellow
+ * pointer blinks beside PRESS BUTTON 1, and it all fades away again. The
+ * artwork and its data are ../coleco's; see fujisplash_data.c.
  */
 
 #ifndef FUJISPLASH_H
@@ -13,8 +14,10 @@
 extern const unsigned char splash_patterns[768];
 extern const unsigned char splash_nametable[320];
 
-/* Take over the screen. The logo's tiles overlap the magenta font, so run
- * disp_init() again before drawing anything else. */
+/* Take over the screen until button 1 or the fanfare's end; returns with
+ * the screen faded to black and the sound off. The logo's name-table cells
+ * are not in fujidisp's shadow, so run disp_init() before drawing anything
+ * else. */
 void splash_show(void);
 
 #endif /* FUJISPLASH_H */

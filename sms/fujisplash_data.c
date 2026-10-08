@@ -10,9 +10,7 @@
  * are kept.
  *
  * The pattern INDICES 0x80-0xDF are baked into the name table, so the glyphs
- * have to load at 0x80 -- which is also where fujidisp.c builds its inverse
- * charset. The two never coexist: the splash owns the screen, then disp_init()
- * rebuilds the charset for the browser. Do not "optimise" that reload away.
+ * have to load at 0x80 -- just above the font, which ends at 0x7F.
  */
 
 #include "fujisplash.h"

@@ -25,7 +25,7 @@ extern unsigned char host;       /* the mounted/browsed host slot */
 extern unsigned char src_host;   /* copy: the source's host slot */
 extern unsigned char copy_mode;  /* nonzero while a copy source is marked */
 
-extern unsigned char cur;        /* selection bar row within the window */
+extern unsigned char cur;        /* selected row within the window */
 extern unsigned char nrows;      /* rows the current list actually has */
 extern unsigned char at_end;     /* the visible page ends the directory */
 extern unsigned int  top;        /* first visible entry (16-bit: big dirs) */
@@ -36,14 +36,19 @@ extern char src_spec[SPEC_MAX_LEN]; /* copy source full path; also the
                                        custom-SSID scratch (never both) */
 
 /* config.c */
-void status_line(const char *s);            /* row 22, cleared first */
-void legend_line(const char *s);            /* row 23, cleared first */
-void fail(const char *what);                /* row 22 + FN_ERRCODE in hex */
-void draw_frame(const char *subtitle);      /* cls + title (+ row-3 subtitle) */
-void wait_frames(unsigned char n);          /* n vblanks, input ignored */
-void bar_move(signed char d);               /* the non-paging selection bar */
-/* Pause: pick one of a screen's actions on the status line; returns the
- * event that action stands for, or IN_NONE. */
+void status_line(const char *s);            /* message line 1, typed out */
+void status_now(const char *s);             /* line 1 at once, sound settled:
+                                               say it before anything long */
+void legend_line(const char *s);            /* message line 2 */
+void fail(const char *what);                /* error buzz, line 1 + FN_ERRCODE */
+void fail_code(const char *what, unsigned char code);
+void draw_frame(const char *title);         /* main window cleared + retitled,
+                                               message lines blank */
+void wait_frames(unsigned char n);          /* n frames, input left alone */
+void list_select(unsigned char i, bool on); /* the cursor onto/off list row i */
+void bar_move(signed char d);               /* one-page lists: moves, wraps */
+/* Pause: pick one of a screen's actions from a Phantasy Star COMMAND pop-up;
+ * returns the event that action stands for, or IN_NONE. */
 unsigned char menu_pick(const char *const *names, const unsigned char *events,
                         unsigned char n);
 
@@ -64,7 +69,7 @@ bool dir_read_entry(unsigned char maxlen);  /* false at end/error; guards the
 bool dir_open(void);                        /* OPEN_DIRECTORY: host, path,
                                                filter (= fn_entry) */
 void files_draw(void);                      /* full redraw */
-void files_legend(void);                    /* just rows 22-23 */
+void files_legend(void);                    /* just the message lines */
 void leave_host(void);                      /* close dir, back to ST_HOSTS */
 
 /* st_copy.c */

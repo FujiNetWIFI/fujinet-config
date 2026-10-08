@@ -19,14 +19,8 @@ static void hosts_draw(void)
 {
     unsigned char i;
 
-    draw_frame(copy_mode ? "COPY TO WHICH HOST?" : "SELECT A HOST");
-    if (copy_mode) {
-        status_line("1 PICK DESTINATION");
-        legend_line("2 CANCEL COPY");
-    } else {
-        status_line("1 OPEN  2 WIFI  PAUSE MENU");
-        legend_line("MENU: INFO LOBBY RENAME");
-    }
+    draw_frame(copy_mode ? "COPY" : "HOSTS");
+    legend_line(copy_mode ? "1 PICK  2 CANCEL COPY" : "1 OPEN  2 WIFI  PAUSE MENU");
 
     if (!FUJICALL(FUJICMD_READ_HOST_SLOTS)) {
         fail("EHOSTS");
@@ -37,18 +31,17 @@ static void hosts_draw(void)
     hosts_mask = 0;
     for (i = 0; i < HOST_SLOTS; i++) {
         volatile unsigned char *name = FN_REPLY + (unsigned int)i * HOST_STRIDE;
-        unsigned char row = (unsigned char)(LIST_TOP + i);
+        unsigned char row = LIST_Y(i);
         unsigned char col;
 
-        disp_row_clear(row);
         disp_at_u16(1, row, (unsigned int)(i + 1));
         if (*name == 0) {
-            disp_at(3, row, "(empty)");
+            disp_at(3, row, "(EMPTY)");
             continue;
         }
         /* Straight out of the reply window, a character at a time -- there is
          * nowhere in RAM to put it and no reason to. */
-        for (col = 0; col < HOST_STRIDE && name[col] != 0; col++)
+        for (col = 0; col < NAMELEN - 2 && name[col] != 0; col++)
             disp_char((unsigned char)(3 + col), row, (char)name[col]);
         hosts_mask |= (unsigned char)(1 << i);
     }
@@ -57,17 +50,20 @@ static void hosts_draw(void)
     at_end = 1;
     if (cur >= nrows)
         cur = 0;
-    disp_row_invert((unsigned char)(LIST_TOP + cur), true);
+    list_select(cur, true);
+    status_line(copy_mode ? "COPY TO WHICH HOST?" : "SELECT A HOST.");
 }
 
 static void enter_host(void)
 {
     if (!(hosts_mask & (unsigned char)(1 << cur))) {
-        status_line(copy_mode ? "EMPTY SLOT" : "EMPTY: PAUSE, RENAME");
+        snd_play(SND_ERROR);
+        status_line(copy_mode ? "THAT SLOT IS EMPTY." : "EMPTY. PAUSE, RENAME SLOT.");
         return;
     }
 
-    status_line("MOUNTING HOST...");
+    snd_play(SND_OK);
+    status_now("MOUNTING HOST...");
     if (!fuji_mount_host_slot(cur)) {
         fail("EHOST");
         return;
@@ -102,7 +98,8 @@ static void rename_host(void)
         fn_entry[i] = (char)name[i];
     fn_entry[i] = 0;
 
-    if (fn_edit("EDIT HOST NAME", HOST_STRIDE - 1)) {
+    if (fn_edit("HOST NAME", "INPUT THE HOST NAME.", HOST_STRIDE - 1)) {
+        status_now("SAVING...");
         if (!fnraw_write_host_slot(cur, fn_entry)) {
             fail("EWRITE");
             wait_frames(90);
@@ -138,6 +135,7 @@ void st_hosts(void)
             enter_host();
             break;
         case IN_KEYSTAR:
+            snd_play(SND_BACK);
             if (copy_mode) {
                 copy_cancel();
                 if (state == ST_HOSTS)

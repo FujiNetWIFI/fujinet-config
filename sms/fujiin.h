@@ -2,7 +2,8 @@
  *
  * Button 1 picks, button 2 goes back, and Pause opens the screen's action
  * menu. There are no frame interrupts: the VDP's frame flag is polled, so
- * nothing ever interrupts a VDP address write or a mailbox transaction.
+ * nothing ever interrupts a VDP address write or a mailbox transaction. Each
+ * new frame the poll ticks the sound and the cursor blink.
  */
 
 #ifndef FUJIIN_H
@@ -28,7 +29,15 @@ void in_init(void);
 /* Frames since in_init(), counted off the VDP frame flag. Wraps at 256. */
 unsigned char in_frames(void);
 
-/* One event, or IN_NONE. A held direction auto-repeats. */
+/* One event, or IN_NONE. A held direction auto-repeats: first after 24
+ * frames, then every 5 (Phantasy Star's name-entry timing). */
 unsigned char in_read(void);
+
+/* Pop-up menus don't repeat, the way Phantasy Star's don't. */
+void in_repeat(bool on);
+
+/* Let n frames go by: the sound and the cursor blink keep running, input is
+ * left for the next in_read(). */
+void in_wait(unsigned char n);
 
 #endif /* FUJIIN_H */

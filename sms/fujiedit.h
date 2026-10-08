@@ -2,16 +2,17 @@
  *
  * A Master System pad has two buttons and a d-pad, so any text a user has
  * to type -- a host name, a WiFi password -- gets typed on screen. This is
- * the same grid the Intellivision client's grid_entry and the Astrocade's
- * edit.inc use, and the reason all three look alike is the same insight: all
- * 64 printable characters from space to underscore fit in 16 columns by 4
- * rows, so the cursor position IS the character and there is no shift key and
- * no paging.
+ * Phantasy Star's name-entry screen: characters spaced out on every other
+ * column and row, an underline sprite for the cursor, the action words
+ * along the bottom. The 63 characters from '!' to '_' fill 13 columns by 5
+ * rows (space is an action), so there is no shift key and no paging.
  *
- * Two rules inherited deliberately from those two:
+ * Two rules inherited deliberately from the Intellivision client's
+ * grid_entry and the Astrocade's edit.inc:
  *
- *   - CASE is a toggle that redraws the letter rows in real lowercase, not a
- *     shift modifier. You can see what you are about to type.
+ *   - CASE is a toggle that redraws the grid in real lowercase (and @[\]^
+ *     as `{|}~), not a shift modifier. You can see what you are about to
+ *     type.
  *   - Cancel is the ESC cell and nothing else. The backspace key must never
  *     discard the edit, because reaching for it repeatedly while correcting a
  *     typo is exactly when a reflexive extra press happens.
@@ -33,8 +34,9 @@
 #define FN_ENTRY_MAX 64
 extern char fn_entry[FN_ENTRY_MAX];
 
-/* Run the editor over fn_entry. `maxlen` is the longest string to allow, not
- * counting the NUL. Returns true on accept, false on cancel. */
-bool fn_edit(const char *title, unsigned char maxlen);
+/* Run the editor over fn_entry: `title` goes in the window's top border,
+ * `prompt` is typed into the message window. `maxlen` is the longest string
+ * to allow, not counting the NUL. Returns true on accept, false on cancel. */
+bool fn_edit(const char *title, const char *prompt, unsigned char maxlen);
 
 #endif /* FUJIEDIT_H */

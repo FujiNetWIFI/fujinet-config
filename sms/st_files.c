@@ -70,61 +70,64 @@ static bool dir_reopen(void)
 void files_legend(void)
 {
     if (copy_mode) {
-        status_line("1 OPEN DIR  2 UP  < > PAGE");
-        legend_line("MENU: COPY HERE  CANCEL");
+        status_line("COPY: PICK A FOLDER.");
+        legend_line("1 OPEN 2 UP <> PAGE PAUSE MENU");
     } else {
-        status_line("1 OPEN/BOOT  2 UP  < > PAGE");
-        legend_line("MENU: FILTER COPY HOSTS");
+        status_line(fn_entry[0] ? "SELECT A FILE. (FILTERED)" : "SELECT A FILE.");
+        legend_line("1 OPEN 2 UP <> PAGE PAUSE MENU");
     }
 }
 
-static void files_page(void)
+/* One page: every row is cleared, even past the end of the directory --
+ * a short last page must not keep the previous page's names. */
+static bool files_page(void)
 {
     volatile unsigned char *name;
     unsigned char i;
 
+    win_clear();
+    nrows = 0;
     if (!dir_seek(top)) {
         fail("ESEEK");
-        nrows = 0;
-        return;
+        return false;
     }
 
-    nrows = 0;
     at_end = 0;
     for (i = 0; i < LIST_ROWS; i++) {
-        unsigned char row = (unsigned char)(LIST_TOP + i);
+        unsigned char row = LIST_Y(i);
         unsigned char col;
 
-        disp_row_clear(row);
         if (!dir_read_entry(NAMELEN)) {
             at_end = 1;
             break;
         }
         name = FN_REPLY;
         for (col = 0; col < NAMELEN && name[col] != 0; col++)
-            disp_char((unsigned char)(2 + col), row, (char)name[col]);
+            disp_char((unsigned char)(1 + col), row, (char)name[col]);
         nrows = (unsigned char)(i + 1);
     }
 
     if (nrows == 0) {
-        disp_at(2, LIST_TOP, fn_entry[0] ? "(no matches)" : "(empty)");
-        return;
+        disp_at(1, LIST_TOP, fn_entry[0] ? "(NO MATCHES)" : "(EMPTY)");
+        return true;
     }
     if (cur >= nrows)
         cur = (unsigned char)(nrows - 1);
-    disp_row_invert((unsigned char)(LIST_TOP + cur), true);
+    list_select(cur, true);
+    return true;
 }
 
 void files_draw(void)
 {
     unsigned char plen = (unsigned char)strlen(path);
 
-    draw_frame(NULL);
-    /* Row 3: the tail of the current path -- the leading part is the least
-     * interesting part when it does not fit. */
-    disp_at(1, 3, plen > 30 ? path + (plen - 30) : path);
-    files_legend();
-    files_page();
+    /* The title is the tail of the current path -- the leading part is the
+     * least interesting part when it does not fit. */
+    draw_frame(plen > TITLE_MAX ? path + (plen - TITLE_MAX) : path);
+    if (files_page())
+        files_legend();
+    else
+        legend_line("2 UP  PAUSE MENU");
 }
 
 /* The browser's bar, with page-crossing. Up from row 0 of a later page goes
@@ -134,29 +137,29 @@ static void fmove(signed char d)
 {
     if (d < 0) {
         if (nrows != 0 && cur > 0) {
-            disp_row_invert((unsigned char)(LIST_TOP + cur), false);
+            list_select(cur, false);
             cur--;
-            disp_row_invert((unsigned char)(LIST_TOP + cur), true);
-            snd_click();
+            list_select(cur, true);
+            snd_play(SND_MOVE);
         } else if (top >= LIST_ROWS) {
             top -= LIST_ROWS;
             cur = LIST_ROWS - 1;
-            snd_click();
             files_page();
+            snd_play(SND_MOVE);
         }
     } else {
         if (nrows == 0)
             return;
         if ((unsigned char)(cur + 1) < nrows) {
-            disp_row_invert((unsigned char)(LIST_TOP + cur), false);
+            list_select(cur, false);
             cur++;
-            disp_row_invert((unsigned char)(LIST_TOP + cur), true);
-            snd_click();
+            list_select(cur, true);
+            snd_play(SND_MOVE);
         } else if (!at_end) {
             top += LIST_ROWS;
             cur = 0;
-            snd_click();
             files_page();
+            snd_play(SND_MOVE);
         }
     }
 }
@@ -184,7 +187,8 @@ static void devance(void)
     path[len] = 0;
     top = 0;
     cur = 0;
-    snd_click();
+    snd_play(SND_BACK);
+    status_now("READING...");
     if (!dir_reopen()) {
         fail("EOPEN");
         return;
@@ -202,7 +206,8 @@ static void open_or_boot(void)
 
     if (nrows == 0)
         return;
-    status_line("READING...");
+    snd_play(SND_OK);
+    status_now("READING...");
     if (!dir_seek(top + cur) || !dir_read_entry(FULLLEN)) {
         fail("EREAD");
         return;
@@ -221,7 +226,8 @@ static void open_or_boot(void)
          * trailing slash and all -- the one reply-to-RAM copy here. */
         plen = (unsigned char)strlen(path);
         if (plen + n > PATH_MAX_LEN - 1) {
-            status_line("PATH TOO LONG");
+            snd_play(SND_ERROR);
+            status_line("THE PATH IS TOO LONG.");
             wait_frames(90);
             files_legend();
             return;
@@ -242,7 +248,7 @@ static void open_or_boot(void)
     }
 
     if (copy_mode) {
-        status_line("PAUSE MENU: COPY HERE");
+        status_line("PAUSE, THEN COPY HERE.");
         return;
     }
 
@@ -258,9 +264,10 @@ static void do_filter(void)
      * so OK and ESC both leave the edited text as the filter; documented in
      * the README rather than fought with a scratch copy there is no RAM for. */
     fn_entry[FILTER_MAX] = 0;
-    fn_edit("FILTER (EMPTY SHOWS ALL)", FILTER_MAX);
+    fn_edit("FILTER", "EMPTY SHOWS EVERYTHING.", FILTER_MAX);
     top = 0;
     cur = 0;
+    status_now("READING...");
     if (!dir_reopen())
         fail("EOPEN");
     files_draw();
@@ -295,16 +302,16 @@ void st_files(void)
             if (top >= LIST_ROWS) {
                 top -= LIST_ROWS;
                 cur = 0;
-                snd_click();
                 files_page();
+                snd_play(SND_MOVE);
             }
             break;
         case IN_RIGHT:
             if (nrows != 0 && !at_end) {
                 top += LIST_ROWS;
                 cur = 0;
-                snd_click();
                 files_page();
+                snd_play(SND_MOVE);
             }
             break;
         case IN_FIRE:

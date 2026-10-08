@@ -32,7 +32,7 @@ static void lobby_go(void)
     unsigned char slot = 0xFF;
     unsigned char i;
 
-    status_line("FINDING LOBBY HOST...");
+    status_now("FINDING LOBBY HOST...");
     if (!FUJICALL(FUJICMD_READ_HOST_SLOTS)) {
         fail("EHOSTS");
         return;
@@ -52,14 +52,14 @@ static void lobby_go(void)
         }
     }
 
-    status_line("MOUNTING LOBBY HOST...");
+    status_now("MOUNTING LOBBY HOST...");
     if (!fuji_mount_host_slot(slot)) {
         fail("EHOST");
         return;
     }
     host = slot;
 
-    status_line("SET PATH...");
+    status_now("SET PATH...");
     if (!fnraw_set_device_path(DEVICE_SLOT, slot, MODE_READ, LOBBY_PATH)) {
         fail("EPATH");
         return;
@@ -70,6 +70,6 @@ static void lobby_go(void)
 void st_lobby(void)
 {
     lobby_go();
-    wait_frames(120);           /* whatever failed is on the status line */
+    wait_frames(120);           /* whatever failed is in the message window */
     state = ST_HOSTS;
 }

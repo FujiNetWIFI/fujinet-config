@@ -36,15 +36,18 @@ enum {
 #define HOST_SLOTS   8
 #define HOST_STRIDE  32         /* READ_HOST_SLOTS: 8 x 32 bytes */
 
-/* Screen geometry: 32x24 Mode 4. Row 1 title, row 3 subtitle, rows 5-20
- * the list window, rows 22-23 the legend (also the status/error line). */
-#define LIST_TOP     5
-#define LIST_ROWS    16
-#define NAMELEN      29         /* display width: col 2..30 */
+/* Screen geometry (the windows themselves are fujidisp.h's): lists sit on
+ * every other row of the main window, Phantasy Star style -- 8 entries on
+ * rows 2, 4, ..., 16, text from column 1, the cursor notched into the left
+ * border at column 0. */
+#define LIST_TOP     2
+#define LIST_PITCH   2
+#define LIST_ROWS    8
+#define LIST_Y(i)    ((unsigned char)(LIST_TOP + (i) * LIST_PITCH))
+#define NAMELEN      30         /* display width: col 1..30 */
 #define FULLLEN      120        /* re-read width when building a full path */
 #define PAYLOAD_LEN  256        /* the fixed buffer the ESP32 expects */
-#define STATUS_ROW   22
-#define LEGEND_ROW   23
+#define TITLE_MAX    26         /* what fits in the main window's top border */
 
 /* The Master System has exactly one thing to mount into: the cartridge. */
 #define DEVICE_SLOT  0
@@ -53,7 +56,7 @@ enum {
 #define PATH_MAX_LEN 96         /* current directory, '/'-terminated */
 #define SPEC_MAX_LEN 96         /* copy source full path / custom-SSID scratch */
 
-#define WIFI_MAX     15         /* networks shown; row 16 is always OTHER */
+#define WIFI_MAX     15         /* networks listed; OTHER always follows */
 #define SSID_LEN     33         /* SSIDInfo/NetConfig: char ssid[33] */
 #define PASS_MAX     63
 #define FILTER_MAX   30

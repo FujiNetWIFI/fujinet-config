@@ -8,6 +8,8 @@
  */
 
 #include "fujidisp.h"
+#include "fujisnd.h"
+#include "fujiin.h"
 #include "fujiraw.h"
 #include "state.h"
 
@@ -15,7 +17,7 @@ void boot_mount_swap(void)
 {
     unsigned char pct = 0xFF;
 
-    status_line("MOUNTING...");
+    status_now("MOUNTING...");
     if (!fuji_mount_disk_image(DEVICE_SLOT, MODE_READ)) {
         fail("EMOUNT");
         return;
@@ -23,25 +25,32 @@ void boot_mount_swap(void)
 
     /* The image arrives asynchronously, pushed to the cartridge while the
      * console keeps running; these three bytes are the cart's progress. */
-    status_line("LOADING");
+    status_now("LOADING");
     for (;;) {
         unsigned char st = fuji_sms_boot_state();
 
+        in_frames();            /* keeps the cursor and sound ticking */
         if (st == FUJI_SMS_BOOT_READY)
             break;
         if (st == FUJI_SMS_BOOT_FAILED) {
-            disp_row_clear(STATUS_ROW);
-            disp_at(1, STATUS_ROW, "ELOAD");
-            disp_at_hex8(28, STATUS_ROW, fuji_sms_boot_error());
+            fail_code("ELOAD", fuji_sms_boot_error());
             return;
         }
         if (fuji_sms_boot_percent() != pct) {
             pct = fuji_sms_boot_percent();
-            disp_at_u16(24, STATUS_ROW, pct);
+            disp_at(24, MSG_LINE1, "   %");
+            disp_at_u16(pct < 10 ? 26 : pct < 100 ? 25 : 24, MSG_LINE1, pct);
         }
     }
 
-    status_line("BOOTING");
+    /* The chime, then the scene fades out the way Phantasy Star leaves one,
+     * and the PSG goes quiet so nothing carries into the game. */
+    msg_put(MSG_LINE1, "BOOTING");
+    snd_play(SND_READY);
+    while (snd_busy())
+        in_frames();
+    fade_out();
+    snd_init();
     fuji_sms_boot();            /* does not return */
 }
 
@@ -50,7 +59,7 @@ void boot_mount_swap(void)
  * streams cartridge-to-cartridge without ever landing in console RAM. */
 void boot_reply_entry(void)
 {
-    status_line("SET PATH...");
+    status_now("SET PATH...");
     if (!fnraw_set_device_path_from_reply(DEVICE_SLOT, host, MODE_READ,
                                           path, FN_REPLY)) {
         fail("EPATH");

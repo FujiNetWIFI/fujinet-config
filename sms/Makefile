@@ -25,7 +25,8 @@ export PATH  := $(Z88DK)/bin:$(PATH)
 
 APP  = config.c st_wifi.c st_hosts.c st_files.c st_copy.c st_info.c st_boot.c \
        st_lobby.c fujiraw.c
-PLAT = fujidisp.c fujiin.c fujisnd.c fujiedit.c fujisplash.c fujisplash_data.c
+PLAT = fujidisp.c fujiin.c fujisnd.c snd_data.c fujiedit.c fujisplash.c \
+       fujisplash_data.c
 SRCS = $(APP) $(PLAT)
 
 FNLIB_LIB = $(FNLIB)/r2r/sms/fujinet.sms.lib
@@ -37,11 +38,16 @@ all: build/config.sms
 $(FNLIB_LIB):
 	$(MAKE) -C $(FNLIB) sms/r2r
 
-build/config.sms: $(SRCS) $(wildcard *.h) $(FNLIB_LIB)
+# The tiles (window frame, cursor, font) are ASCII art in font.txt.
+build/font_data.c: font.txt tools/mkfont.py
+	mkdir -p build
+	python3 tools/mkfont.py font.txt $@
+
+build/config.sms: $(SRCS) build/font_data.c $(wildcard *.h) $(FNLIB_LIB)
 	mkdir -p build
 	cd build && zcc +sms -O2 -I.. -I$(FNLIB)/include -I$(FNLIB)/bus/sms -m \
 	    -pragma-define:CRT_ENABLE_STDIO=0 -pragma-define:CLIB_FOPEN_MAX=0 \
-	    $(addprefix ../,$(SRCS)) -L$(FNLIB)/r2r/sms -lfujinet.sms.lib \
+	    $(addprefix ../,$(SRCS)) font_data.c -L$(FNLIB)/r2r/sms -lfujinet.sms.lib \
 	    -o config -create-app
 	python3 $(FNLIB)/makefiles/sms-romstamp.py --stamp $@
 
