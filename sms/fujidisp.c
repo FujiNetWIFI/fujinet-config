@@ -143,6 +143,15 @@ void disp_row_attr(unsigned char row, unsigned char set, unsigned char clr)
              (unsigned char)((scr_at[row][col] & ~clr) | set));
 }
 
+void disp_row_vram(unsigned char row, const volatile unsigned char *s)
+{
+    unsigned char col;
+
+    cell_addr(TEXT_L, row);
+    for (col = TEXT_L; col <= TEXT_R; col++)
+        put(text_tile((char)*s++), scr_at[row][col]);
+}
+
 /* ---- windows ------------------------------------------------------------ */
 
 static void box_row(unsigned char x0, unsigned char x1, unsigned char y,

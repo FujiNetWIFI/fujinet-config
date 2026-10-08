@@ -5,7 +5,9 @@
  * writes it back must therefore re-read first and stream out of the fresh
  * window (the way rename and the lobby claim do) -- never hold a window
  * across an intervening transaction. fn_edit() runs no transactions, which
- * is what makes "fetch, edit, stream back" safe.
+ * is what makes "fetch, edit, stream back" safe. The browser's name scroll
+ * is the one reader that keeps a window from frame to frame, and only while
+ * no event is running: st_files stops it before handling any.
  */
 
 #ifndef STATE_H

@@ -38,7 +38,9 @@ CONFIG looks and sounds like *Phantasy Star*'s menus:
   border, and below it a message window shaped like the game's dialogue box. Prompts and results
   type themselves into the message window a character a frame; the button legend sits under them.
 - **Lists.** Entries go on every other row, 8 to a page. The selection is a pointer notched into
-  the window's left edge, blinking 8 frames on and 8 off. There is no inverse bar.
+  the window's left edge, blinking 8 frames on and 8 off. There is no inverse bar. A file name
+  too long for the window is shortened with "..." in the middle; rest the pointer on it and after
+  a moment the whole name scrolls back and forth through the row, until the pointer moves.
 - **Pause menu.** Pause opens a COMMAND window at the top right. It wipes open a row a frame, and
   closing it puts back exactly what was underneath.
 - **Keyboard.** Laid out like the game's name-entry screen: characters on every other column and

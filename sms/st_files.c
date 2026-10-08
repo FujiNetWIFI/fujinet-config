@@ -3,9 +3,15 @@
  * Mirrors src/select_file.c's flow with the testrom's proven mechanics: one
  * seek per page then sequential reads (READ_DIR_ENTRY advances the cursor
  * itself), names drawn straight from the reply window at display width and
- * re-read at full width the moment one is acted on -- what is on screen was
- * crunched to 29 columns, and a path built from that would name a file that
- * does not exist.
+ * re-read at full width the moment one is acted on -- the firmware cuts a
+ * name of 30 or more characters to 28 with "..." in the middle, and a path
+ * built from that would name a file that does not exist.
+ *
+ * The same full-width re-read feeds the scroll: let the cursor rest on a cut
+ * name and the whole of it bounces back and forth through the row, drawn out
+ * of the reply window into VRAM only. The display shadow still holds the row
+ * as listed, which is what puts it back. Every event stops the scroll before
+ * it runs, so the window is never held across a transaction.
  *
  * `path` is the one string in RAM: '/'-prefixed, '/'-terminated, appended to
  * on descend (the sole reply-to-RAM copy in the program) and truncated at the
@@ -21,6 +27,26 @@
 #include "fujiedit.h"
 #include "fujiraw.h"
 #include "state.h"
+
+/* The scroll's timing, in frames, as intv/scroll.bas has it: rest this long
+ * before it starts, step a character this often, pause this long at each
+ * end. */
+#define SC_IDLE  45
+#define SC_STEP  6
+#define SC_HOLD  30
+
+/* A listed name this long may have been cut; anything shorter is whole. */
+#define CUT_LEN  (NAMELEN - 2)
+
+enum { SC_WAIT, SC_RUN, SC_OFF };
+
+static unsigned char long_rows; /* bit i: row i's listed name may be cut */
+static unsigned char sc_phase;
+static unsigned char sc_frame;  /* in_frames() when last ticked */
+static unsigned char sc_wait;   /* frames to the next step */
+static unsigned char sc_len;    /* the full name's length in the window */
+static unsigned char sc_off;    /* its first character on screen */
+static signed char sc_dir;
 
 bool dir_seek(unsigned int pos)
 {
@@ -87,6 +113,7 @@ static bool files_page(void)
 
     win_clear();
     nrows = 0;
+    long_rows = 0;
     if (!dir_seek(top)) {
         fail("ESEEK");
         return false;
@@ -104,6 +131,8 @@ static bool files_page(void)
         name = FN_REPLY;
         for (col = 0; col < NAMELEN && name[col] != 0; col++)
             disp_char((unsigned char)(1 + col), row, (char)name[col]);
+        if (col >= CUT_LEN)
+            long_rows |= (unsigned char)(1 << i);
         nrows = (unsigned char)(i + 1);
     }
 
@@ -273,6 +302,64 @@ static void do_filter(void)
     files_draw();
 }
 
+/* Before any event: the selected row back as listed, and the rest starts
+ * counting again from here. */
+static void scroll_stop(void)
+{
+    if (sc_phase == SC_RUN)
+        disp_row_attr(LIST_Y(cur), 0, 0);
+    sc_phase = SC_WAIT;
+    sc_wait = SC_IDLE;
+    sc_frame = in_frames();
+}
+
+/* Between events, at most once a frame. The re-read is the only transaction,
+ * and only for a row whose listing may be cut; if it fails the row simply
+ * stays as listed -- the next real action reports the error. */
+static void scroll_tick(void)
+{
+    volatile unsigned char *name = FN_REPLY;
+    unsigned char now = in_frames();
+
+    if (sc_phase == SC_OFF || now == sc_frame)
+        return;
+    sc_frame = now;
+    if (--sc_wait)
+        return;
+
+    if (sc_phase == SC_WAIT) {
+        sc_phase = SC_OFF;
+        if (!(long_rows & (unsigned char)(1 << cur)))
+            return;
+        if (!dir_seek(top + cur) || !dir_read_entry(FULLLEN))
+            return;
+        sc_len = 0;
+        while (sc_len < FULLLEN && name[sc_len] != 0)
+            sc_len++;
+        if (sc_len < NAMELEN)
+            return;             /* it was whole after all */
+        sc_off = 0;
+        sc_dir = 1;
+        sc_wait = SC_HOLD;
+        sc_phase = SC_RUN;
+        disp_row_vram(LIST_Y(cur), name);
+        return;
+    }
+
+    if (sc_len == NAMELEN) {
+        sc_wait = SC_HOLD;      /* the whole name fits: nothing to move */
+        return;
+    }
+    sc_off = (unsigned char)(sc_off + sc_dir);
+    disp_row_vram(LIST_Y(cur), name + sc_off);
+    if (sc_off == 0 || sc_off == (unsigned char)(sc_len - NAMELEN)) {
+        sc_dir = (signed char)-sc_dir;
+        sc_wait = SC_HOLD;
+    } else {
+        sc_wait = SC_STEP;
+    }
+}
+
 static const char *const menu_names[] = { "FILTER", "COPY FILE", "HOSTS" };
 static const char *const copy_names[] = { "COPY HERE", "CANCEL COPY" };
 static const unsigned char menu_events[] = { IN_KEY0 + 4, IN_KEY0 + 5, IN_KEYHASH };
@@ -281,9 +368,16 @@ static const unsigned char copy_events[] = { IN_KEY0 + 5, IN_KEYHASH };
 void st_files(void)
 {
     files_draw();
+    scroll_stop();
     while (state == ST_FILES) {
         unsigned char ev = in_read();
 
+        if (ev == IN_NONE) {
+            scroll_tick();
+            continue;
+        }
+        /* Before anything draws, opens a pop-up or runs a transaction. */
+        scroll_stop();
         if (ev == IN_MENU)
             ev = copy_mode ? menu_pick(copy_names, copy_events, 2)
                            : menu_pick(menu_names, menu_events, 3);

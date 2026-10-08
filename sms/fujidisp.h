@@ -70,6 +70,11 @@ void disp_tile(unsigned char col, unsigned char row, unsigned char t, unsigned c
  * set and cleared. */
 void disp_row_blank(unsigned char row);
 void disp_row_attr(unsigned char row, unsigned char set, unsigned char clr);
+/* Columns TEXT_L..TEXT_R of a row from `s`, a passing view such as a long
+ * name scrolling under the cursor: VRAM only, with the attribute bits the
+ * shadow has there. The shadow keeps what the row really holds, and
+ * disp_row_attr(row, 0, 0) puts it back. */
+void disp_row_vram(unsigned char row, const volatile unsigned char *s);
 
 /* Windows. A wiped window opens top to bottom, a row a frame. */
 void win_box(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, bool wipe);
