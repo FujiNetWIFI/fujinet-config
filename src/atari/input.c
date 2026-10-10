@@ -331,6 +331,17 @@ HDSubState input_hosts_and_devices_hosts(void)
   case 'C':
     state = SHOW_INFO;
     return HD_DONE;
+  case 'G':
+    memset(temp, 0, sizeof(temp));
+    screen_puts(0,24,"Boot BBS Y/N? ");
+    edit_line(14,24,temp,2, false);
+    screen_clear_line(24);
+    if (temp[0] == 'Y' || temp[0] == 'y')
+    {
+      mount_and_boot_bbs();
+      return HD_DONE;
+    }
+    return HD_HOSTS;
   case 'L':
     // boot lobby.
     memset(temp, 0, sizeof(temp));
@@ -450,6 +461,17 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'C':
     state = SHOW_INFO;
     return HD_DONE;
+  case 'G':
+    memset(temp, 0, sizeof(temp));
+    screen_puts(0,24,"Boot BBS Y/N? ");
+    edit_line(14,24,temp,2, false);
+    screen_clear_line(24);
+    if (temp[0] == 'Y' || temp[0] == 'y')
+    {
+      mount_and_boot_bbs();
+      return HD_DONE;
+    }
+    return HD_DEVICES;
   case 'L':
     // boot lobby.
     // boot lobby.
