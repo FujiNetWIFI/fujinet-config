@@ -236,9 +236,19 @@ void screen_select_file_prev(void)
   screen_puts(SCREEN_COLS - 10, FILES_BOX_Y, " [...] ");
 }
 
+static bool row_is_dir[ENTRIES_PER_PAGE];
+
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
+  byte n = (byte)strlen(e);
+
+  row_is_dir[y] = n && e[n - 1] == '/';
   put_padded(FILE_X, FILES_Y + y, e, FILE_W);
+}
+
+bool screen_select_file_row_is_dir(byte y)
+{
+  return row_is_dir[y];
 }
 
 byte redraw_row = 0xFF;

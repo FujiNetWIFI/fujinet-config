@@ -70,6 +70,7 @@ void screen_menu_clear(void);
 void screen_prompt(const char *s);
 void screen_message_target(byte y, bool center, byte hold);
 char *screen_upper(char *s);
+bool screen_select_file_row_is_dir(byte y);
 
 void bar_unlit(void);
 bool bar_cell_lit(byte x, byte y);
