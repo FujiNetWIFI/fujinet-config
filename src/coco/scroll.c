@@ -34,6 +34,9 @@ void scroll_step(void)
   byte y = (byte)bar_get();
   int len;
 
+  if (screen_select_file_row_is_dir(y))
+    return;
+
   if (!got_scrolltext)
   {
     select_get_filename(255);
