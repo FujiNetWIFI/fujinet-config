@@ -290,7 +290,11 @@ msxrom-exp::
 CFLAGS_EXTRA_H89-CPM = -DBUILD_H89
 CFLAGS_EXTRA_H89-HDOS = -DBUILD_H89
 LDFLAGS_EXTRA_H89-CPM = -m
-LDFLAGS_EXTRA_H89-HDOS = -m
+# HDOS loads programs from 2280H (USERFWA). z88dk's HDOS startup links them
+# at 4480H instead (a misreading of Heath's split octal 042.200), which wastes
+# 8.7K and leaves too little room once a driver like FN: has loaded. Link at
+# 2A80H, with the stack in the 2K under the program.
+LDFLAGS_EXTRA_H89-HDOS = -m -pragma-define:CRT_ORG_CODE=0x2A80 -pragma-define:REGISTER_SP=0x2A80
 H89_APPMAKE ?= z88dk-appmake
 
 # CONFIG.ABS alone on a 100K H17 disk: MOUNT SY1: then RUN SY1:CONFIG.ABS.
