@@ -22,6 +22,10 @@ jobs:
           - dragon
           #- msxrom
           #- msdos
+          # The H89 builds need a fujinet-lib with H89 support (see
+          # FUJINET_LIB_H89 in the Makefile) and a z88dk with +hdos.
+          #- h89-cpm
+          #- h89-hdos
 
     container:
       image: fozztexx/defoogi:1.4.7

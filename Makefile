@@ -21,6 +21,11 @@ PLATFORMS += dragon
 #PLATFORMS += apple2cda
 #PLATFORMS += apple2gs
 
+# Heathkit H89 needs a fujinet-lib with H89 support, which no release has yet.
+# Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
+#PLATFORMS += h89-cpm
+#PLATFORMS += h89-hdos
+
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
 # Example shortcuts:
@@ -45,6 +50,14 @@ endif
 #FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 FUJINET_LIB =
 
+# The H89 lib also needs 9e6d4dd, which stops each program start from
+# rebooting the ESP32 (and dropping what CONFIG just mounted).
+# FUJINET_LIB=<dir> on the command line overrides this.
+FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-keep-esp32-running
+ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
+  FUJINET_LIB = $(FUJINET_LIB_H89)
+endif
+
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
 PLATFORM_COMBOS = \
@@ -52,7 +65,9 @@ PLATFORM_COMBOS = \
   atarixe+=atari \
   msxrom+=msx \
   msxdos+=msx \
-  dragon+=coco
+  dragon+=coco \
+  h89-cpm+=h89 \
+  h89-hdos+=h89
 
 include makefiles/toplevel-rules.mk
 include atari-fastloader.mk
@@ -60,7 +75,8 @@ include atari-fastloader.mk
 ########################################
 # Common things
 
-CFLAGS = -DBUILD_$(PLATFORM_UC)
+# h89-cpm is BUILD_H89_CPM: a hyphen can't be part of a macro name.
+CFLAGS = -DBUILD_$(subst -,_,$(PLATFORM_UC))
 CFLAGS_EXTRA_CC65 = -Os
 CFLAGS_EXTRA_Z88DK = -Os
 
@@ -266,3 +282,37 @@ msxrom-exp::
 	fi
 	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
 	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom
+
+########################################
+# Heathkit H89 (HDOS and CP/M) customization
+
+# Both builds share src/h89 (PLATFORM_COMBOS above).
+CFLAGS_EXTRA_H89-CPM = -DBUILD_H89
+CFLAGS_EXTRA_H89-HDOS = -DBUILD_H89
+LDFLAGS_EXTRA_H89-CPM = -m
+LDFLAGS_EXTRA_H89-HDOS = -m
+H89_APPMAKE ?= z88dk-appmake
+
+# CONFIG.ABS alone on a 100K H17 disk: MOUNT SY1: then RUN SY1:CONFIG.ABS.
+# appmake wants the bare program, so the 8-byte ABS header comes off and its
+# load address (which HDOS also uses as the entry) goes to --org.
+h89-hdos/r2r-post::
+	@mkdir -p $(CACHE_PLATFORM)
+	tail -c +9 $(R2R_PD)/config.abs > $(CACHE_PLATFORM)/config.bin
+	cd $(CACHE_PLATFORM) && rm -f config.h8d && $(H89_APPMAKE) +hdos -b config.bin \
+	  --org $$(od -An -tu2 -j2 -N2 $(CURDIR)/$(R2R_PD)/config.abs | tr -d ' ') -o CONFIG
+	mv $(CACHE_PLATFORM)/config.h8d $(R2R_PD)/config-hdos.h8d
+
+# CONFIG.COM alone on a 100K H17 CP/M disk (hz89 format): B:CONFIG.
+h89-cpm/r2r-post::
+	@mkdir -p $(CACHE_PLATFORM)/disk
+	cp $(R2R_PD)/config.com $(CACHE_PLATFORM)/disk/CONFIG.COM
+	cd $(CACHE_PLATFORM)/disk && rm -f disk && $(H89_APPMAKE) +cpmdisk -f hz89 \
+	  --container raw --no-com-file -b CONFIG.COM -o disk
+	python3 -I dist.h89/cpm-dir-fixup.py $(CACHE_PLATFORM)/disk/disk
+	mv $(CACHE_PLATFORM)/disk/disk $(R2R_PD)/config-cpm.h8d
+
+h89:
+	$(MAKE) h89-cpm/r2r
+	$(MAKE) h89-hdos/r2r
+.PHONY: h89

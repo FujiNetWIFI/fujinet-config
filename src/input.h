@@ -57,6 +57,10 @@ void input_select_slot_build_eos_directory_label(char *c);
 #include "adam/key_codes.h"
 #endif /* BUILD_ADAM */
 
+#ifdef BUILD_H89
+#include "h89/key_codes.h"
+#endif /* BUILD_H89 */
+
 #if defined(BUILD_APPLE2) || defined(BUILD_ATARI)
 #include <conio.h>
 #define KEY_ABORT CH_ESC

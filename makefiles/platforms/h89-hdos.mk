@@ -6,7 +6,7 @@ include $(MWD)/common.mk
 include $(MWD)/toolchains/z88dk.mk
 
 MSX_FLAGS = +hdos -create-app -startup=3 -Cz--abs -pragma-define:CLIB_DISABLE_FGETS_CURSOR=1
-CFLAGS += $(MSX_FLAGS)
+CFLAGS += $(MSX_FLAGS) -D__H89__
 LDFLAGS += $(MSX_FLAGS)
 
 r2r:: $(BUILD_EXEC) $(BUILD_LIB) $(R2R_EXTRA_DEPS)

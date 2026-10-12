@@ -6,7 +6,7 @@ include $(MWD)/common.mk
 include $(MWD)/toolchains/z88dk.mk
 
 MSX_FLAGS = +cpm -create-app
-CFLAGS += $(MSX_FLAGS)
+CFLAGS += $(MSX_FLAGS) -D__H89__
 LDFLAGS += $(MSX_FLAGS)
 ifneq ($(IS_LIBRARY),1)
   LDFLAGS += -create-app
