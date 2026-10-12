@@ -64,7 +64,7 @@ void select_slot_display()
 {
   if (create==true)
     {
-#ifdef BUILD_COCO
+#if defined(BUILD_COCO) || defined(BUILD_H89)
       char dispPath[11 + DIR_MAX_LEN + 1];
 #else
       char dispPath[42];
@@ -166,7 +166,7 @@ void select_slot_done()
 #endif
       goto not_created;
     }
-#ifdef BUILD_COCO
+#if defined(BUILD_COCO) || defined(BUILD_H89)
     memcpy(deviceSlots[selected_device_slot].file,path,FILE_MAXLEN);
 #else
     memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
