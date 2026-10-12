@@ -21,6 +21,11 @@ PLATFORMS += dragon
 #PLATFORMS += apple2cda
 #PLATFORMS += apple2gs
 
+# Need a fujinet-lib with the S-100 bus, not in a release yet:
+#   make FUJINET_LIB=<fujinet-lib checkout> s100-cpm/r2r s100-rom/r2r
+#PLATFORMS += s100-cpm
+#PLATFORMS += s100-rom
+
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
 # Example shortcuts:
@@ -52,7 +57,9 @@ PLATFORM_COMBOS = \
   atarixe+=atari \
   msxrom+=msx \
   msxdos+=msx \
-  dragon+=coco
+  dragon+=coco \
+  s100-cpm+=s100 \
+  s100-rom+=s100,s100-cpm
 
 include makefiles/toplevel-rules.mk
 include atari-fastloader.mk
@@ -266,3 +273,26 @@ msxrom-exp::
 	fi
 	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
 	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom
+
+########################################
+# S-100 customization
+
+# s100-cpm is CONFIG.COM; s100-rom is CONFIG.BIN, the card's image 0, which
+# its boot page runs before any OS. One BUILD_ macro covers both.
+ifneq ($(filter s100-cpm s100-rom,$(PLATFORM)),)
+CFLAGS = -DBUILD_S100
+endif
+CFLAGS_EXTRA_S100-ROM = -DS100_ROM
+LDFLAGS_EXTRA_S100-CPM = -pragma-define:CRT_COMMANDLINE_REDIRECTION=0 -pragma-define:CRT_TRIM_BSS=1
+# src/s100/rom/crt_preamble.asm sets the stack before the CRT runs
+LDFLAGS_EXTRA_S100-ROM = -pragma-define:CRT_INCLUDE_PREAMBLE=1 -Ca-I$(CURDIR)/src/s100/rom \
+  -pragma-define:CRT_TRIM_BSS=1
+
+# CRT_TRIM_BSS leaves BSS out of the image, which the CRT clears anyway,
+# and writes it to a file of zeros nothing needs
+s100-cpm/executable-post::
+	rm -f $(R2R_PD)/$(PRODUCT_BASE)_BSS.bin
+
+s100-rom/executable-post::
+	rm -f $(R2R_PD)/$(PRODUCT_BASE)_BSS.bin
+	cp $(R2R_PD)/$(PRODUCT_BASE).bin $(R2R_PD)/CONFIG.BIN
