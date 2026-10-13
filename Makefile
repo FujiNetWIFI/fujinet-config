@@ -55,10 +55,11 @@ endif
 # whose rate limit CI runs hit.
 FUJINET_LIB = 5.0.0
 
-# The H89 lib also needs 9e6d4dd, which stops each program start from
-# rebooting the ESP32 (and dropping what CONFIG just mounted).
+# The H89 lib also needs d08f584. It sets up the card's 8255 after a reset
+# even when EN reads high (HDOS CONFIG hung at "Contacting FujiNet..."),
+# and doesn't reboot the ESP32 when an earlier program has set it up.
 # FUJINET_LIB=<dir> on the command line overrides this.
-FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-keep-esp32-running
+FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
 ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
   FUJINET_LIB = $(FUJINET_LIB_H89)
 endif
