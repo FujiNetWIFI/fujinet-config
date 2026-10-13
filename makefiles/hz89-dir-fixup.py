@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Fixes up the hz89 disk image appmake +cpmdisk makes for h89-cpm.mk.
+#
 # appmake gives a file of exactly 16 1K blocks a second, all-zero directory
 # entry, which DIR lists as a nameless file. Mark such entries erased the way
 # ERA does, E5 in the first byte only: Heath's CP/M 2.2.04 ends a directory
