@@ -18,8 +18,8 @@ H17 disk with it on in `r2r/`:
 
 | | |
 |---|---|
-| `r2r/h89-hdos/config.abs`, `config-hdos.h8d` | `MOUNT SY1:` then `RUN SY1:CONFIG.ABS` |
-| `r2r/h89-cpm/config.com`, `config-cpm.h8d` | `B:CONFIG` |
+| `r2r/h89-hdos/config.abs`, `config.h8d` | `MOUNT SY1:` then `RUN SY1:CONFIG.ABS` |
+| `r2r/h89-cpm/config.com`, `config.h8d` | `B:CONFIG` |
 
 ## Keys
 

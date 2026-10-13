@@ -298,26 +298,6 @@ LDFLAGS_EXTRA_H89-CPM = -m
 # 8.7K and leaves too little room once a driver like FN: has loaded. Link at
 # 2A80H, with the stack in the 2K under the program.
 LDFLAGS_EXTRA_H89-HDOS = -m -pragma-define:CRT_ORG_CODE=0x2A80 -pragma-define:REGISTER_SP=0x2A80
-H89_APPMAKE ?= z88dk-appmake
-
-# CONFIG.ABS alone on a 100K H17 disk: MOUNT SY1: then RUN SY1:CONFIG.ABS.
-# appmake wants the bare program, so the 8-byte ABS header comes off and its
-# load address (which HDOS also uses as the entry) goes to --org.
-h89-hdos/r2r-post::
-	@mkdir -p $(CACHE_PLATFORM)
-	tail -c +9 $(R2R_PD)/config.abs > $(CACHE_PLATFORM)/config.bin
-	cd $(CACHE_PLATFORM) && rm -f config.h8d && $(H89_APPMAKE) +hdos -b config.bin \
-	  --org $$(od -An -tu2 -j2 -N2 $(CURDIR)/$(R2R_PD)/config.abs | tr -d ' ') -o CONFIG
-	mv $(CACHE_PLATFORM)/config.h8d $(R2R_PD)/config-hdos.h8d
-
-# CONFIG.COM alone on a 100K H17 CP/M disk (hz89 format): B:CONFIG.
-h89-cpm/r2r-post::
-	@mkdir -p $(CACHE_PLATFORM)/disk
-	cp $(R2R_PD)/config.com $(CACHE_PLATFORM)/disk/CONFIG.COM
-	cd $(CACHE_PLATFORM)/disk && rm -f disk && $(H89_APPMAKE) +cpmdisk -f hz89 \
-	  --container raw --no-com-file -b CONFIG.COM -o disk
-	python3 -I dist.h89/cpm-dir-fixup.py $(CACHE_PLATFORM)/disk/disk
-	mv $(CACHE_PLATFORM)/disk/disk $(R2R_PD)/config-cpm.h8d
 
 h89:
 	$(MAKE) h89-cpm/r2r
