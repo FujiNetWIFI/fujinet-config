@@ -21,6 +21,11 @@ PLATFORMS += dragon
 #PLATFORMS += apple2cda
 #PLATFORMS += apple2gs
 
+# Heathkit H89 needs a fujinet-lib with H89 support, which no release has yet.
+# Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
+#PLATFORMS += h89-cpm
+#PLATFORMS += h89-hdos
+
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
 # Example shortcuts:
@@ -45,6 +50,15 @@ endif
 #FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 FUJINET_LIB =
 
+# The H89 lib also needs d08f584. It sets up the card's 8255 after a reset
+# even when EN reads high (HDOS CONFIG hung at "Contacting FujiNet..."),
+# and doesn't reboot the ESP32 when an earlier program has set it up.
+# FUJINET_LIB=<dir> on the command line overrides this.
+FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
+ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
+  FUJINET_LIB = $(FUJINET_LIB_H89)
+endif
+
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
 PLATFORM_COMBOS = \
@@ -52,7 +66,9 @@ PLATFORM_COMBOS = \
   atarixe+=atari \
   msxrom+=msx \
   msxdos+=msx \
-  dragon+=coco
+  dragon+=coco \
+  h89-cpm+=h89 \
+  h89-hdos+=h89
 
 include makefiles/toplevel-rules.mk
 include atari-fastloader.mk
@@ -60,7 +76,8 @@ include atari-fastloader.mk
 ########################################
 # Common things
 
-CFLAGS = -DBUILD_$(PLATFORM_UC)
+# h89-cpm is BUILD_H89_CPM: a hyphen can't be part of a macro name.
+CFLAGS = -DBUILD_$(subst -,_,$(PLATFORM_UC))
 CFLAGS_EXTRA_CC65 = -Os
 CFLAGS_EXTRA_Z88DK = -Os
 
@@ -266,3 +283,21 @@ msxrom-exp::
 	fi
 	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
 	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom
+
+########################################
+# Heathkit H89 (HDOS and CP/M) customization
+
+# Both builds share src/h89 (PLATFORM_COMBOS above).
+CFLAGS_EXTRA_H89-CPM = -DBUILD_H89
+CFLAGS_EXTRA_H89-HDOS = -DBUILD_H89
+LDFLAGS_EXTRA_H89-CPM = -m
+# HDOS loads programs from 2280H (USERFWA). z88dk's HDOS startup links them
+# at 4480H instead (a misreading of Heath's split octal 042.200), which wastes
+# 8.7K and leaves too little room once a driver like FN: has loaded. Link at
+# 2A80H, with the stack in the 2K under the program.
+LDFLAGS_EXTRA_H89-HDOS = -m -pragma-define:CRT_ORG_CODE=0x2A80 -pragma-define:REGISTER_SP=0x2A80
+
+h89:
+	$(MAKE) h89-cpm/r2r
+	$(MAKE) h89-hdos/r2r
+.PHONY: h89

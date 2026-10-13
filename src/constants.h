@@ -1,7 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#if defined(BUILD_ATARI) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM)
+#if defined(BUILD_ATARI) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM) \
+  || defined(BUILD_H89)
 #define NUM_DEVICE_SLOTS 8
 #elif defined(BUILD_APPLE2)
 #define MAX_SMARTPORT 8
@@ -17,6 +18,8 @@
 #define ENTRIES_PER_PAGE 12
 #elif defined(BUILD_MSDOS)
 #define ENTRIES_PER_PAGE 13
+#elif defined(BUILD_H89)
+#define ENTRIES_PER_PAGE 17
 #elif defined(BUILD_ATARI)
 /* 14, not 15. The file list occupies rows FILES_START_Y(6)..6+EPP-1 and
    the "Next Page" line sits at FILES_START_Y+EPP, which the directory
@@ -42,6 +45,9 @@
 #else
 #define DIR_MAX_LEN 42
 #endif
+#elif defined(BUILD_H89)
+/* 80 columns: the frame leaves 74 for a name, plus the NUL and the byte the adapter keeps back. */
+#define DIR_MAX_LEN 76
 #elif defined(LEGACY_DIR_ENTRY)
 #define DIR_MAX_LEN 31
 #else
