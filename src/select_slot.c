@@ -303,11 +303,6 @@ void select_slot_done()
 #endif // OBSOLETE
 
     fuji_close_directory();
-
-#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
-    if (selected_rom_image && system_confirm_and_boot_user_rom(filename))
-      return; // Firmware is resetting into the cart -- nothing left to do here.
-#endif
   }
 
  not_created:

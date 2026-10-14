@@ -16,7 +16,6 @@ extern bool system_build_directory(unsigned char ds, unsigned long numBlocks, ch
 #if defined(BUILD_COCO) || defined(BUILD_DRAGON)
 extern void system_enable_user_rom(void);
 extern bool system_slot0_is_rom(void);
-extern bool system_confirm_and_boot_user_rom(const char *filename);
 #endif /* BUILD_COCO || BUILD_DRAGON */
 
 #ifdef BUILD_APPLE2
