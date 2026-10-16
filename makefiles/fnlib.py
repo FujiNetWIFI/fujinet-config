@@ -121,8 +121,10 @@ class LibLocator:
     if not self.MV.FUJINET_LIB_FILE:
       if not self.MV.FUJINET_LIB_ZIP or not os.path.exists(self.MV.FUJINET_LIB_ZIP):
         self.downloadZip()
-      with zipfile.ZipFile(self.MV.FUJINET_LIB_ZIP, "r") as zf:
-        zf.extractall(self.MV.FUJINET_LIB_DIR)
+      # downloadZip() leaves no zip when the library is already in the cache
+      if self.MV.FUJINET_LIB_ZIP and os.path.exists(self.MV.FUJINET_LIB_ZIP):
+        with zipfile.ZipFile(self.MV.FUJINET_LIB_ZIP, "r") as zf:
+          zf.extractall(self.MV.FUJINET_LIB_DIR)
 
     if not self.MV.FUJINET_LIB_INCLUDE:
       self.getInclude()
