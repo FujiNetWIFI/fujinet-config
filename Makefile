@@ -41,7 +41,9 @@ endif
 # - a zip file with an archived fujinet-lib
 # - a URL to a git repo
 # - empty which will use whatever is the latest
-FUJINET_LIB =
+# Pinned, because finding the latest release goes through the GitHub API,
+# whose rate limit CI runs hit.
+FUJINET_LIB = 5.0.0
 
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
