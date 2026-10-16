@@ -25,7 +25,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
   {
     screen_frame("FujiNet Config");
     screen_box(0, HOSTS_BOX_Y, SCREEN_COLS, 10, "HOST SLOTS");
-    screen_box(0, DEVICES_BOX_Y, SCREEN_COLS, 6, "DRIVE SLOTS");
+    screen_box_joined(DEVICES_BOX_Y, 6, "DRIVE SLOTS");
     drawn = true;
     drawn_generation = screen_generation;
   }
@@ -59,6 +59,7 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("C", "onfig  ");
   screen_print_menu("SHIFT-DN", " Drives  ");
   screen_print_menu("BREAK", " Quit");
+  screen_color_hint(true);
   bar_set(HOSTS_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
 }
 
@@ -77,6 +78,7 @@ void screen_hosts_and_devices_devices(void)
     screen_move(MENU_X, MENU_Y2);
     screen_print_menu("CLEAR", " All Slots  ");
     screen_print_menu("SHIFT-UP", " Hosts");
+    screen_color_hint(true);
     devices_menu = true;
     devices_menu_generation = screen_generation;
   }
@@ -96,7 +98,8 @@ void screen_hosts_and_devices_edit_host_slot(int i)
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-  screen_hosts_and_devices_device_slots(DEVICES_Y, &deviceSlots[0], &deviceEnabled[0]);
+  screen_device_slot(DEVICES_Y, ds);
+  memcpy(&shown_devices[ds], &deviceSlots[ds], sizeof(DeviceSlot));
 }
 
 void screen_hosts_and_devices_long_filename(const char *f)

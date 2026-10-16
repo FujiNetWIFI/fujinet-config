@@ -74,6 +74,7 @@ void screen_set_wifi_select_network(unsigned char nn)
   screen_print_menu("S", "kip  ");
   screen_print_menu("H", "idden SSID  ");
   screen_print_menu("R", "escan");
+  screen_color_hint(true);
   if (nn)
   {
     bar_set(NETWORKS_Y, 1, nn, 0);
@@ -163,6 +164,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
   screen_print_menu("C", "hange SSID  ");
   screen_print_menu("R", "econnect");
   screen_puts((SCREEN_COLS - 38) / 2, MENU_Y2, "Any other key returns to hosts/devices");
+  screen_color_hint(true);
 }
 
 #endif
