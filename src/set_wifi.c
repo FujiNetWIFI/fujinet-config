@@ -35,15 +35,15 @@ void set_wifi_select(void)
 void set_wifi_custom(void)
 {
   screen_set_wifi_custom();
-  input_line_set_wifi_custom(nc.ssid);
   ws_subState=WS_PASSWORD;
+  input_line_set_wifi_custom(nc.ssid);
 }
 
 void set_wifi_password(void)
 {
   screen_set_wifi_password();
-  input_line_set_wifi_password(nc.password);
   ws_subState=WS_DONE;
+  input_line_set_wifi_password(nc.password);
 }
 
 void set_wifi_scan(void)

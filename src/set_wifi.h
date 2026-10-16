@@ -7,6 +7,9 @@
 
 #include "typedefs.h"
 
+/* Set before each WiFi line input, so the input can back out to WS_SELECT */
+extern WSSubState ws_subState;
+
 void set_wifi_set_ssid(uint_fast8_t i);
 void set_wifi(void);
 
