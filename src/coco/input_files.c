@@ -20,7 +20,11 @@ extern unsigned short entry_timer;
 
 void input_line_filter(char *c)
 {
-  input_line(FILTER_X, FILTER_Y, 0, c, 31, false);
+  char orig[32];
+
+  memcpy(orig, c, sizeof(orig));
+  if (input_line_cancel(FILTER_X, FILTER_Y, c, 31, false))
+    memcpy(c, orig, sizeof(orig));
 }
 
 unsigned char input_select_file_new_type(void)
@@ -34,7 +38,8 @@ unsigned long input_select_file_new_size(unsigned char t)
 
   memset(c, 0, sizeof(c));
   input_digits_only = true;
-  input_line(MENU_X, STATUS_Y, 0, c, 16, false);
+  if (input_line_cancel(MENU_X, STATUS_Y, c, 16, false))
+    c[0] = 0;
   input_digits_only = false;
 
   return (long)atol(c);
@@ -47,7 +52,11 @@ unsigned long input_select_file_new_custom(void)
 
 void input_select_file_new_name(char *c)
 {
-  input_line(MENU_X, STATUS_Y, 0, c, 255, false);
+  if (input_line_cancel(MENU_X, STATUS_Y, c, 255, false))
+  {
+    c[0] = 0;
+    return;
+  }
 
   if (!strendswith(c, ".dsk") && !strendswith(c, ".DSK"))
     strcat(c, ".DSK");

@@ -12,6 +12,9 @@ extern bool input_abortable;
 extern bool input_aborted;
 extern bool input_digits_only;
 
+/* input_line() with BREAK cancelling; true if cancelled */
+bool input_line_cancel(uint8_t x, uint8_t y, char *c, uint8_t l, bool password);
+
 byte waitkey_joystick(void);
 /* 0: not a color key; 1: handled; 2: handled, redraw the screen. */
 byte input_color_key(byte k);

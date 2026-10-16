@@ -282,6 +282,8 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
     case KEY_CLEAR:
       break;
     default:
+      if (k < ' ' || k > '~')
+        break;
       if (input_digits_only && (k < '0' || k > '9'))
         break;
       if ((c - b) < l)
@@ -292,6 +294,15 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
     }
   }
   draw_field(x, y, b, (byte)(c - b), password, false);
+}
+
+bool input_line_cancel(uint8_t x, uint8_t y, char *c, uint8_t l, bool password)
+{
+  input_aborted = false;
+  input_abortable = true;
+  input_line(x, y, 0, c, l, password);
+  input_abortable = false;
+  return input_aborted;
 }
 
 #endif
