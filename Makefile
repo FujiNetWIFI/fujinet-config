@@ -7,7 +7,7 @@ PLATFORMS += coco
 PLATFORMS += dragon
 PLATFORMS += msdos
 
-# Won't build until a fujinet-lib release includes FujiNetWIFI/fujinet-lib#125
+# Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
 #PLATFORMS += msxrom
 
 # Not currently in buildable state
