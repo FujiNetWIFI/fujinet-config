@@ -7,6 +7,11 @@
 
 #include "typedefs.h"
 
+/* MekkoGX leaves GIT_VERSION undefined outside a git checkout */
+#ifndef GIT_VERSION
+#define GIT_VERSION ""
+#endif
+
 extern State state;
 extern char response[];
 extern char selected_host_slot;

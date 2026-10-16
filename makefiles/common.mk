@@ -29,7 +29,10 @@ include $(CURDIR)/$(MEKKO_CONFIG)
 # Define GIT_VERSION to be used in macro define to CFLAGS, includes
 # tag if available, short commit hash, appends '*' if changes haven't
 # been commited
-GIT_VERSION := $(shell git rev-parse --short HEAD)$(shell git status --porcelain | grep -q '^[ MADRCU]' && echo '*')
+_git_version := $(shell git rev-parse --short HEAD 2>/dev/null)
+ifneq ($(_git_version),)
+GIT_VERSION := $(_git_version)$(shell git status --porcelain 2>/dev/null | grep -q '^[ MADRCU]' && echo '*')
+endif
 
 # A pass with MEKKO_PRODUCT set builds that one product, without it the
 # pass builds the disk from all of PRODUCTS
@@ -189,7 +192,7 @@ vpath %.pas $(SRC_DIRS_EXPANDED)
 .PHONY: clean debug r2r $(PLATFORM)/r2r disk $(PLATFORM)/disk $(PLATFORM)/release
 
 clean::
-	rm -rf $(OBJ_DIR) $(CACHE_PLATFORM) $(R2R_PD)
+	rm -rf $(OBJ_DIR) $(CACHE_PLATFORM) $(R2R_PD) $(RELEASE_DIR)
 
 debug::
 	echo 'What should debug target do?'
@@ -249,12 +252,17 @@ $(PLATFORM)/library-post::
 RELEASE_INCLUDES ?= $(foreach dir,$(INCLUDE_DIRS),$(wildcard $(dir)/*.h $(dir)/*.inc))
 RELEASE_INCLUDES += $(wildcard Changelog.md)
 RELEASE_VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo dev)
-RELEASE_ZIP = $(RELEASE_DIR)/$(PRODUCT)-$(RELEASE_VERSION)-$(PLATFORM).zip
+PRODUCT_DASH = $(subst .,-,$(PRODUCT))
+VERSION_CLEAN = $(patsubst v%,%,$(RELEASE_VERSION))
+RELEASE_ZIP = $(RELEASE_DIR)/$(PRODUCT_DASH)-$(PLATFORM)-$(VERSION_CLEAN).zip
+RELEASE_LIB = $(RELEASE_DIR)/$(PRODUCT_BASE)-$(PLATFORM)-$(VERSION_CLEAN).lib
 
 $(PLATFORM)/release: $(RELEASE_ZIP)
 $(RELEASE_ZIP):: $(LIBRARY)
 	$(MKDIR_P) $(RELEASE_DIR)
-	zip -j $@ $(RELEASE_INCLUDES) $(BUILD_LIB)
+	cp $(BUILD_LIB) $(RELEASE_LIB)
+	zip -j $@ $(RELEASE_INCLUDES) $(RELEASE_LIB)
+	rm $(RELEASE_LIB)
 
 # include autodeps
 DEPS := $(OBJS:.o=.d)
