@@ -92,7 +92,8 @@ void screen_set_wifi_custom(void)
   screen_box(0, PROMPT_BOX_Y, SCREEN_COLS, 7, "HIDDEN NETWORK");
   screen_puts(MENU_X, PROMPT_BOX_Y + 2, "Network name:");
   screen_move(MENU_X, MENU_Y1);
-  screen_print_menu("ENTER", " Done");
+  screen_print_menu("ENTER", " Done  ");
+  screen_print_menu("BREAK", " Back");
 }
 
 void screen_set_wifi_password(void)
@@ -103,7 +104,8 @@ void screen_set_wifi_password(void)
   screen_puts(MENU_X + 10, PROMPT_BOX_Y + 2, nc.ssid);
   screen_puts(MENU_X, PROMPT_FIELD_Y, "Password:");
   screen_move(MENU_X, MENU_Y1);
-  screen_print_menu("ENTER", " Connect");
+  screen_print_menu("ENTER", " Connect  ");
+  screen_print_menu("BREAK", " Back");
 }
 
 void screen_connect_wifi(NetConfig *nc)

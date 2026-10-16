@@ -10,16 +10,6 @@
 #include "../key_codes.h"
 #include "../set_wifi.h"
 
-void input_line_set_wifi_custom(char *c)
-{
-  input_line(MENU_X, PROMPT_FIELD_Y, 0, c, 32, false);
-}
-
-void input_line_set_wifi_password(char *c)
-{
-  input_line(MENU_X + 10, PROMPT_FIELD_Y, 0, c, 64, true);
-}
-
 static void redraw_networks(void)
 {
   SSIDInfo s;
@@ -36,6 +26,26 @@ static void redraw_networks(void)
   screen_set_wifi_select_network(numNetworks);
   if (numNetworks)
     bar_jump(row);
+}
+
+/* BREAK goes back to the network list */
+static void wifi_line(byte x, char *c, byte l, bool password)
+{
+  if (input_line_cancel(x, PROMPT_FIELD_Y, c, l, password))
+  {
+    redraw_networks();
+    ws_subState = WS_SELECT;
+  }
+}
+
+void input_line_set_wifi_custom(char *c)
+{
+  wifi_line(MENU_X, c, 32, false);
+}
+
+void input_line_set_wifi_password(char *c)
+{
+  wifi_line(MENU_X + 10, c, 64, true);
 }
 
 WSSubState input_set_wifi_select(void)
