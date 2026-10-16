@@ -27,6 +27,10 @@ extern bool copy_mode;
 char text_empty[] = "Empty";
 char fn[256];
 char d[256];
+
+#define ELLIPSIS "..."
+#define ELLIPSIS_LEN (sizeof(ELLIPSIS) - 1)
+
 unsigned char byte0;
 unsigned char byte1;
 unsigned char byte2;
@@ -284,15 +288,15 @@ void screen_select_slot(const char *e)
 
      e += sizeof(unsigned long) + 3; // Skip isdir, trunc, type
      
-    // Filename: past 31 columns it wraps onto the MTIME row
+    // Filename: a longer one would wrap onto the MTIME row
     screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
-    if (strlen(e) > 31)
+    if (strlen(e) > FILENAME_COLS)
     {
-      memcpy(d, e, 28);
-      strcpy(d + 28, "...");
+      memcpy(d, e, FILENAME_COLS - ELLIPSIS_LEN);
+      strcpy(d + FILENAME_COLS - ELLIPSIS_LEN, ELLIPSIS);
       e = d;
     }
-    screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
+    screen_puts(FILENAME_X, DEVICES_END_MOUNT_Y + 2, e);
   }
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, deviceSlots, deviceEnabled);
@@ -364,17 +368,17 @@ void screen_select_file_display(char *p, char *f)
   screen_puts(0, 2, "Fltr:");
   screen_puts(5, 2, f);
 
-  // Path: rows 3-4 hold 75 columns; a longer path keeps its tail behind "..."
-  screen_clear_line(3);
-  screen_clear_line(4);
-  screen_puts(0, 3, "Path:");
-  if (strlen(p) > 75)
+  // Path: a longer one keeps its tail, the current directory, behind the ellipsis
+  screen_clear_line(PATH_Y);
+  screen_clear_line(PATH_Y + 1);
+  screen_puts(0, PATH_Y, "Path:");
+  if (strlen(p) > PATH_COLS)
   {
-    strcpy(d, "...");
-    strcpy(d + 3, p + strlen(p) - 72);
+    strcpy(d, ELLIPSIS);
+    strcpy(d + ELLIPSIS_LEN, p + strlen(p) - (PATH_COLS - ELLIPSIS_LEN));
     p = d;
   }
-  screen_puts(5, 3, p);
+  screen_puts(PATH_X, PATH_Y, p);
 
   // Clear out the file area
   for (i = FILES_START_Y; i < FILES_START_Y + ENTRIES_PER_PAGE; i++)
