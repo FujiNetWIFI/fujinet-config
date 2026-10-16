@@ -284,8 +284,14 @@ void screen_select_slot(const char *e)
 
      e += sizeof(unsigned long) + 3; // Skip isdir, trunc, type
      
-    // Filename
+    // Filename: past 31 columns it wraps onto the MTIME row
     screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
+    if (strlen(e) > 31)
+    {
+      memcpy(d, e, 28);
+      strcpy(d + 28, "...");
+      e = d;
+    }
     screen_puts(9, DEVICES_END_MOUNT_Y + 2, e);
   }
 
@@ -358,10 +364,16 @@ void screen_select_file_display(char *p, char *f)
   screen_puts(0, 2, "Fltr:");
   screen_puts(5, 2, f);
 
-  // Path - the path can wrap to line 4 (maybe 5?) so clear both to be safe.
+  // Path: rows 3-4 hold 75 columns; a longer path keeps its tail behind "..."
   screen_clear_line(3);
   screen_clear_line(4);
   screen_puts(0, 3, "Path:");
+  if (strlen(p) > 75)
+  {
+    strcpy(d, "...");
+    strcpy(d + 3, p + strlen(p) - 72);
+    p = d;
+  }
   screen_puts(5, 3, p);
 
   // Clear out the file area
