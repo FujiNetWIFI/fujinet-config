@@ -132,6 +132,7 @@ void screen_select_slot(const char *e)
   screen_move(MENU_X, MENU_Y2);
   screen_print_menu("ARROWS", " Select slot  ");
   screen_print_menu("BREAK", " Abort");
+  screen_color_hint(true);
   bar_set(SLOT_Y, 1, NUM_DEVICE_SLOTS, 0);
 }
 
@@ -145,7 +146,7 @@ void screen_select_slot_choose(void)
 
 void screen_select_slot_eject(unsigned char ds)
 {
-  screen_hosts_and_devices_device_slots(SLOT_Y, &deviceSlots[0], &deviceEnabled[0]);
+  screen_device_slot(SLOT_Y, ds);
 }
 
 void screen_select_slot_build_eos_directory(void)
@@ -160,6 +161,9 @@ void screen_select_slot_build_eos_directory_creating(void)
 {
 }
 
+/* Paging keeps the menu; a redrawn frame or a prompt in the menu box clears this */
+static bool menu_drawn;
+
 static void file_boxes(void)
 {
   static bool drawn;
@@ -169,7 +173,8 @@ static void file_boxes(void)
     return;
   screen_frame("FujiNet Config");
   screen_box(0, INFO_BOX_Y, SCREEN_COLS, 5, NULL);
-  screen_box(0, FILES_BOX_Y, SCREEN_COLS, ENTRIES_PER_PAGE + 2, NULL);
+  screen_box_joined(FILES_BOX_Y, ENTRIES_PER_PAGE + 2, NULL);
+  menu_drawn = false;
   drawn = true;
   drawn_generation = screen_generation;
 }
@@ -223,6 +228,8 @@ void screen_select_file_clear_long_filename(void)
 
 void screen_select_file_filter(void)
 {
+  menu_drawn = false;
+  screen_color_hint(false);
   put_padded(FILTER_X, FILTER_Y, "", INFO_W - 6);
 }
 
@@ -257,6 +264,9 @@ void screen_select_file_choose(char visibleEntries)
 {
   byte row;
 
+  if (menu_drawn)
+    goto bar;
+  menu_drawn = true;
   screen_menu_clear();
   screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Select  ");
@@ -274,7 +284,9 @@ void screen_select_file_choose(char visibleEntries)
     screen_print_menu("C", "opy  ");
   }
   screen_print_menu("SHIFT-UP/DN", " Page");
+  screen_color_hint(true);
 
+bar:
   row = prev_page ? visibleEntries - 1 : 0;
   if (redraw_row < visibleEntries)
     row = redraw_row;
@@ -288,6 +300,7 @@ void screen_select_file_new_type(void)
 
 void screen_select_file_new_size(unsigned char k)
 {
+  menu_drawn = false;
   screen_prompt("Number of drives to create:");
 }
 
@@ -309,7 +322,7 @@ void screen_destination_host_slot(char *h, char *p)
 {
   screen_frame("FujiNet Config");
   screen_box(0, HOSTS_BOX_Y, SCREEN_COLS, NUM_HOST_SLOTS + 2, "COPY TO HOST SLOT");
-  screen_box(0, DEVICES_BOX_Y, SCREEN_COLS, 6, "DISK IMAGE DETAILS");
+  screen_box_joined(DEVICES_BOX_Y, 6, "DISK IMAGE DETAILS");
   screen_puts(INFO_X, DEVICES_BOX_Y + 1, "Host: ");
   screen_puts(INFO_X + 6, DEVICES_BOX_Y + 1, h);
   screen_puts(INFO_X, DEVICES_BOX_Y + 2, "Path: ");
@@ -323,6 +336,7 @@ void screen_destination_host_slot_choose(void)
   screen_print_menu("1-8", " Slot  ");
   screen_print_menu("ENTER", " Select  ");
   screen_print_menu("BREAK", " Abort");
+  screen_color_hint(true);
   bar_set(HOSTS_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
 }
 

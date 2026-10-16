@@ -11,11 +11,13 @@
 
 #define HOSTS_BOX_Y   2
 #define HOSTS_Y       3
-#define DEVICES_BOX_Y 13
-#define DEVICES_Y     14
+/* Shares the hosts box's bottom border */
+#define DEVICES_BOX_Y 11
+#define DEVICES_Y     12
 #define INFO_BOX_Y    1
-#define FILES_BOX_Y   6
-#define FILES_Y       7
+/* Shares the info box's bottom border */
+#define FILES_BOX_Y   5
+#define FILES_Y       6
 #define FILE_X        1
 #define FILE_W        (SCREEN_COLS - 2)
 #define INFO_X        2
@@ -30,8 +32,9 @@
 #define PROMPT_BOX_Y  7
 #define PROMPT_FIELD_Y 11
 
-#define ASK_Y         19
-#define MENU_BOX_Y    20
+#define ASK_Y         18
+#define MENU_BOX_Y    19
+#define HINT_Y        20
 #define MENU_X        2
 #define MENU_Y1       21
 #define MENU_Y2       22
@@ -68,6 +71,11 @@ void screen_puts_role(byte x, byte y, const char *s, byte role);
 void screen_move(byte x, byte y);
 void screen_menu_clear(void);
 void screen_prompt(const char *s);
+/* Only on screens whose input goes through input_color_key() */
+void screen_color_hint(bool show);
+void screen_box_joined(byte y, byte h, const char *title);
+/* Redraw device slot i of a list whose first slot is on row y */
+void screen_device_slot(byte y, byte i);
 void screen_message_target(byte y, bool center, byte hold);
 char *screen_upper(char *s);
 bool screen_select_file_row_is_dir(byte y);
