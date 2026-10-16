@@ -513,9 +513,11 @@ SFSubState input_select_file_choose(void)
   switch (k)
   {
   case 0x83: // TK-II HOME
+     entry_timer=ENTRY_TIMER_DUR;
      bar_show(FILES_START_Y);
      return SF_CHOOSE;
   case 0x84: // TK-II END
+     entry_timer=ENTRY_TIMER_DUR;
      bar_show(FILES_START_Y + (_visibleEntries - 1));
      return SF_CHOOSE;
   case 0x8E: // TK-II UP
@@ -566,6 +568,7 @@ SFSubState input_select_file_choose(void)
   case 0x86: // TK-II LEFT
   case '<':
   case '+':
+    entry_timer=ENTRY_TIMER_DUR;
     if ( strlen(path) == 1 && pos <= 0 ) // We're at the root of the filesystem, and we're on the first page - go back to hosts/devices screen.
     {
       copy_mode = false; // Leaving file selection abandons any in-progress copy.
@@ -577,6 +580,7 @@ SFSubState input_select_file_choose(void)
     return SF_DEVANCE_FOLDER;
   case 0x87:
   case '>':
+    entry_timer=ENTRY_TIMER_DUR;
     if ((ENTRIES_PER_PAGE == _visibleEntries ) && (dir_eof == false))
       return SF_NEXT_PAGE;
     return SF_CHOOSE;
