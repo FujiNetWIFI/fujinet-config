@@ -60,23 +60,30 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   }
 }
 
+static void device_row(byte y, byte i, const DeviceSlot *dslot)
+{
+  char host = dslot->hostSlot == 0xFF ? ' ' : dslot->hostSlot + '1';
+  char mode = dslot->file[0] ? device_slot_mode(dslot->mode) : ' ';
+
+  put_row(y + i, '0' + i, host, mode, mode == 'W' ? ROLE_WRITE : ROLE_READ,
+          dslot->file[0] ? (char *)dslot->file : text_empty, dslot->file[0] ? ROLE_TEXT : ROLE_EMPTY, 7);
+}
+
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, const bool *e)
 {
   byte i;
-  char host;
-  char mode;
 
   /* Shared code redraws after R/W with y = 1, meaning the hosts/devices screen's list. */
   if (y == 1)
     y = DEVICES_Y;
 
   for (i = 0; i < NUM_DEVICE_SLOTS; i++, dslot++)
-  {
-    host = dslot->hostSlot == 0xFF ? ' ' : dslot->hostSlot + '1';
-    mode = dslot->file[0] ? device_slot_mode(dslot->mode) : ' ';
-    put_row(y + i, '0' + i, host, mode, mode == 'W' ? ROLE_WRITE : ROLE_READ,
-            dslot->file[0] ? (char *)dslot->file : text_empty, dslot->file[0] ? ROLE_TEXT : ROLE_EMPTY, 7);
-  }
+    device_row(y, i, dslot);
+}
+
+void screen_device_slot(byte y, byte i)
+{
+  device_row(y, i, &deviceSlots[i]);
 }
 
 void screen_hosts_and_devices_clear_host_slot(int i)

@@ -126,6 +126,7 @@ void screen_menu_clear(void)
 
 void screen_prompt(const char *s)
 {
+  screen_color_hint(false);
   screen_menu_clear();
   screen_puts(MENU_X, MENU_Y1, s);
 }
@@ -230,6 +231,38 @@ void screen_print_menu(const char *si, const char *sc)
 {
   print_role(si, ROLE_KEY);
   print_role(sc, ROLE_TEXT);
+}
+
+/* Key, text pairs, centered on the first row inside the menu box; HINT_W is their total length */
+static const char *const color_hint[] = {
+#ifdef COCO3
+  "SHIFT-LT/RT", " Colors ",
+  "SHIFT-CLR", " RGB/CMP",
+#define HINT_W (sizeof("SHIFT-LT/RT Colors SHIFT-CLR RGB/CMP") - 1)
+#else
+  "SHIFT-LT/RT", " Colors",
+#define HINT_W (sizeof("SHIFT-LT/RT Colors") - 1)
+#endif
+};
+
+void screen_color_hint(bool show)
+{
+  byte i;
+
+  screen_clear_line(HINT_Y);
+  if (!show)
+    return;
+  screen_move((SCREEN_COLS - HINT_W) / 2, HINT_Y);
+  for (i = 0; i < sizeof(color_hint) / sizeof(color_hint[0]); i += 2)
+    screen_print_menu(color_hint[i], color_hint[i + 1]);
+}
+
+/* A full-width box whose top border is the bottom border of the box above */
+void screen_box_joined(byte y, byte h, const char *title)
+{
+  screen_box(0, y, SCREEN_COLS, h, title);
+  txt_put(0, y, BOX_LT, ROLE_BOX);
+  txt_put(SCREEN_COLS - 1, y, BOX_RT, ROLE_BOX);
 }
 
 #endif

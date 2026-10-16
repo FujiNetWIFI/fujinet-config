@@ -134,6 +134,7 @@ void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char
   char orig[32];
 
   bar_clear(false);
+  screen_color_hint(false);
   memcpy(orig, c, sizeof(orig));
   input_aborted = false;
   input_abortable = true;
@@ -141,6 +142,7 @@ void input_line_hosts_and_devices_host_slot(uint_fast8_t i, uint_fast8_t o, char
   input_abortable = false;
   if (input_aborted)
     memcpy(c, orig, sizeof(orig));
+  screen_color_hint(true);
 }
 
 #endif
