@@ -5,10 +5,9 @@ PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
+PLATFORMS += msdos
 
-# Only in fujinet-lib-experimental currently
-# Build them with make msdos-exp or make msxrom-exp.
-#PLATFORMS += msdos
+# Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
 #PLATFORMS += msxrom
 
 # Not currently in buildable state
@@ -42,7 +41,6 @@ endif
 # - a zip file with an archived fujinet-lib
 # - a URL to a git repo
 # - empty which will use whatever is the latest
-#FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 FUJINET_LIB =
 
 # Define extra dirs ("combos") that expand with a platform.
@@ -239,30 +237,3 @@ msdos/disk-post::
 	mcopy -i $(DISK) $(CACHE_DIR)/msdos-files/* '::/'
 	mcopy -i $(DISK) dist.msdos/AUTOEXEC.BAT '::/AUTOEXEC.BAT'
 
-FUJINET_LIB_EXP_REPO = https://github.com/FozzTexx/fujinet-lib-experimental.git
-
-msdos-exp::
-	$(MAKE) FUJINET_LIB=$(FUJINET_LIB_EXP_REPO) PLATFORMS=$(@:-exp=) $(@:-exp=)
-
-########################################
-# MSX customization
-
-# fujinet-lib-experimental main regressed the MSX transport in 902032d
-# ("Changed fuji_bus_call to use varargs"): sccz80 mis-passes the arguments, so the
-# header leaves the MSX corrupted - device 0x70 arrives as 0x10 and command
-# 0xEA as 0xC4 - and the firmware never answers, so CONFIG sits on the splash
-# spinning on IO_STATUS. Pin to the last commit known to talk to the firmware.
-# When that is fixed upstream, drop this and fold msxrom back into msdos-exp.
-# The pin has to live here because $(CACHE_DIR) is gitignored, so a checkout
-# made by hand in the cache would silently revert to main the next time the
-# cache is cleared.
-MSXROM_FNLIB_REV = b0a7959
-MSXROM_FNLIB_CACHE = $(CACHE_DIR)/fujinet-lib-msx-$(MSXROM_FNLIB_REV)
-
-msxrom-exp::
-	@if [ ! -d $(MSXROM_FNLIB_CACHE) ]; then \
-	  git clone $(FUJINET_LIB_EXP_REPO) $(MSXROM_FNLIB_CACHE) && \
-	  git -C $(MSXROM_FNLIB_CACHE) checkout --detach $(MSXROM_FNLIB_REV); \
-	fi
-	$(MAKE) -C $(MSXROM_FNLIB_CACHE) msx/r2r
-	$(MAKE) FUJINET_LIB=$(abspath $(MSXROM_FNLIB_CACHE)) PLATFORMS=msxrom msxrom

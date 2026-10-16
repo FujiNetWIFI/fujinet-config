@@ -118,9 +118,11 @@ class LibLocator:
     if not self.MV.FUJINET_LIB_DIR:
       self.getDirectory()
 
-    if not self.MV.FUJINET_LIB_FILE \
-       and (not self.MV.FUJINET_LIB_ZIP or not os.path.exists(self.MV.FUJINET_LIB_ZIP)):
-      self.downloadZip()
+    if not self.MV.FUJINET_LIB_FILE:
+      if not self.MV.FUJINET_LIB_ZIP or not os.path.exists(self.MV.FUJINET_LIB_ZIP):
+        self.downloadZip()
+      with zipfile.ZipFile(self.MV.FUJINET_LIB_ZIP, "r") as zf:
+        zf.extractall(self.MV.FUJINET_LIB_DIR)
 
     if not self.MV.FUJINET_LIB_INCLUDE:
       self.getInclude()
@@ -208,7 +210,7 @@ class LibLocator:
         exit(0)
       #error_exit(f"No library found for \"{self.PLATFORM}\"")
       if not self.MV.FUJINET_LIB_FILE:
-        raise ValueError
+        raise ValueError("No library found for", self.PLATFORM)
       return
 
     # No version was specified, so any version is fine
@@ -266,9 +268,6 @@ class LibLocator:
             urllib.request.urlretrieve(release_url, self.MV.FUJINET_LIB_ZIP)
           except:
             continue
-
-        with zipfile.ZipFile(self.MV.FUJINET_LIB_ZIP, "r") as zf:
-          zf.extractall(self.MV.FUJINET_LIB_DIR)
 
         return
 
@@ -374,7 +373,7 @@ def error_exit(*args):
   exit(1)
 
 def main():
-  global CACHE_DIR, FUJINET_CACHE_DIR
+  global CACHE_DIR, FUJINET_CACHE_DIR, FUJINET_REPO
 
   args = build_argparser().parse_args()
 
@@ -391,12 +390,18 @@ def main():
   if not FUJINET_LIB:
     FUJINET_LIB = os.getenv("FUJINET_LIB")
 
+  repo = os.getenv("FUJINET_REPO")
+  if repo:
+    FUJINET_REPO = repo
+
   env_cache_dir = os.getenv("CACHE_DIR")
   if env_cache_dir:
     CACHE_DIR = env_cache_dir
     FUJINET_CACHE_DIR = os.path.join(CACHE_DIR, os.path.basename(FUJINET_CACHE_DIR))
 
   fujinetLib = LibLocator(FUJINET_LIB, PLATFORM, PLATFORM_COMBOS, args.skip_if_missing)
+  if fujinetLib.MV.FUJINET_LIB_VERSION:
+    fujinetLib.MV.FUJINET_LIB_VERSION = "v" + fujinetLib.MV.FUJINET_LIB_VERSION
   fujinetLib.printMakeVariables()
 
   return
