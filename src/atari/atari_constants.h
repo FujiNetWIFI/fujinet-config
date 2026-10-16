@@ -19,6 +19,18 @@
 #define DEVICES_START_MOUNT_Y   3
 #define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + NUM_DEVICE_SLOTS-1)
 
+// Text columns per row.
+#define SCREEN_COLS 40
+
+// Mount screen file name: from FILENAME_X to the end of its row.
+#define FILENAME_X 9
+#define FILENAME_COLS (SCREEN_COLS - FILENAME_X)
+
+// File browser path: from PATH_X on row PATH_Y through the end of the next row.
+#define PATH_X 5
+#define PATH_Y 3
+#define PATH_COLS (SCREEN_COLS - PATH_X + SCREEN_COLS)
+
 #define COLOR_SETTING_FAILED 0x33
 #define COLOR_SETTING_SUCCESSFUL 0xB4
 
