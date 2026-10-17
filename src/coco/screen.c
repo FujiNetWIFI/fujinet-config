@@ -16,14 +16,6 @@ static byte msg_y = STATUS_Y;
 static bool msg_center;
 static byte msg_hold;
 static byte cur_x, cur_y;
-static char uppercase_tmp[32];
-
-char *screen_upper(char *s)
-{
-  memset(uppercase_tmp, 0, sizeof(uppercase_tmp));
-  strncpy(uppercase_tmp, s, sizeof(uppercase_tmp) - 1);
-  return strupr(uppercase_tmp);
-}
 
 void screen_init(void)
 {
