@@ -3,8 +3,6 @@
 #include "../globals.h"
 #include "strendswith.h"
 
-extern char *screen_upper(char *s);
-
 #define FUJI_IO_REG ((unsigned char *)0xFF41)
 
 static NewDisk newDisk;
@@ -22,7 +20,7 @@ bool system_slot0_is_rom(void)
 
   if (!fuji_get_device_filename(0, fn))
     return false;
-  name = screen_upper(fn);
+  name = strupr(fn);
   return strendswith(name, ".CCC") || strendswith(name, ".ROM");
 }
 
@@ -38,8 +36,6 @@ void system_boot(void)
     pause(120);
   }
 
-  // If the ROM detection code runs on a Rev0000 FujiNet, 
-  // The ROM boot won't happen, so just do a cold start to boot the system normally.
 #ifndef DRAGON
   coldStart();
 #endif
