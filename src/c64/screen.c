@@ -316,6 +316,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
 	cprintf("%10s%s\r\n", "MAC: ", ac->sMacAddress);
 	cprintf("%10s%s\r\n", "BSSID: ", ac->sBssid);
 	cprintf("%10s%s\r\n", "FNVER: ", ac->fn_version);
+	cprintf("%10s%s\r\n", "CONFIG: ", GIT_VERSION);
 
 	gotoxy(6, STATUS_BAR);
 	screen_print_menu("C", "HANGE SSID  ");

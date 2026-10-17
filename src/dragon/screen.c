@@ -161,7 +161,8 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* ac)
   printf("%10s%02X:%02X:%02X:%02X:%02X:%02X\n","MAC: ",ac->macAddress[0],ac->macAddress[1],ac->macAddress[2],ac->macAddress[3],ac->macAddress[4],ac->macAddress[5]);
   printf("%10s%02X:%02X:%02X:%02X:%02X:%02X\n","BSSID: ",ac->bssid[0],ac->bssid[1],ac->bssid[2],ac->bssid[3],ac->bssid[4],ac->bssid[5]);
   printf("%10s%s","FNVER: ",screen_upper(ac->fn_version));
-  printf("\n\n\n");
+  printf("\n%10s%s","CONFIG: ",screen_upper((char *)GIT_VERSION));
+  printf("\n\n");
   printf(" cHANGE SSID          rECONNECT ");
   printf("OR  ANY KEY  TO RETURN TO HOSTS");
 
