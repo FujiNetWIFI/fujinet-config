@@ -49,6 +49,7 @@ int main(void)
       entry_set(ENTRY_HOSTS, selected_host_slot, selected_device_slot);
       screen_loading("Hosts and Devices");
       screen_handoff();
+      remount_config_disk();
       runm(APP("MAIN"));
       break;
     }
