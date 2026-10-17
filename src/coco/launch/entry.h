@@ -21,6 +21,10 @@ struct entry_data
 #define ENTRY_FILES 2
 #define ENTRY_HOSTS 3
 
+/* An eject or mode change in slot 0 unmounts or replaces CONFIG's disk, which the next app loads from.
+   TODO: FUJI_BOOT_MODE_CONFIG once the pinned fujinet-lib has it (#265). */
+#define remount_config_disk() fuji_set_boot_mode(0)
+
 void entry_set(unsigned char entry, unsigned char host_slot, unsigned char device_slot);
 
 /* Returns the pending entry code (ENTRY_NONE if none) and clears it. */
