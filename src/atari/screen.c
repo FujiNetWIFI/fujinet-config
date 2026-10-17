@@ -233,9 +233,9 @@ void screen_show_info_extended(bool, AdapterConfigExtended *ac)
   bar_clear(false);
 
   screen_puts(3, 5, "FUJINET CONFIG");
-  screen_puts(7, 17,
+  screen_puts(7, 18,
               CH_KEY_LABEL_L CH_INV_C CH_KEY_LABEL_R "RECONNECT " CH_KEY_LABEL_L CH_INV_S CH_KEY_LABEL_R "CHANGE SSID");
-  screen_puts(9, 19, "Any other key to return");
+  screen_puts(9, 20, "Any other key to return");
   screen_puts(5, 7, "      SSID:");
   screen_puts(5, 8, "  Hostname:");
   screen_puts(5, 9, "IP Address:");
@@ -245,6 +245,7 @@ void screen_show_info_extended(bool, AdapterConfigExtended *ac)
   screen_puts(5, 13, "       MAC:");
   screen_puts(5, 14, "     BSSID:");
   screen_puts(5, 15, "   Version:");
+  screen_puts(5, 16, "    CONFIG:");
 
   screen_puts(17, 7, ac->ssid);
   screen_puts(17, 8, ac->hostname);
@@ -255,6 +256,7 @@ void screen_show_info_extended(bool, AdapterConfigExtended *ac)
   screen_puts(17, 13, ac->sMacAddress);
   screen_puts(17, 14, ac->sBssid);
   screen_puts(17, 15, ac->fn_version);
+  screen_puts(17, 16, GIT_VERSION);
 }
 
 void screen_select_slot(const char *e)
