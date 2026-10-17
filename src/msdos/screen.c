@@ -224,7 +224,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 }
 
 /**
- * @brief Render the "Enter a specific SSID" entry at the bottom of the network list and initialise the bar.
+ * @brief Render the "Enter a specific SSID" entry at the bottom of the network list and initialize the bar.
  * @param nn Total number of scanned networks; the extra entry is placed at row NETWORKS_START_Y + nn.
  */
 void screen_set_wifi_sel_net(unsigned char nn)
@@ -271,7 +271,7 @@ void screen_set_wifi_password(void)
 }
 
 /**
- * @brief Display the network information screen with IP, MAC, and firmware details.
+ * @brief Display the network information screen with IP, MAC, firmware version and CONFIG commit.
  * @param printerEnabled Unused on MS-DOS; present for cross-platform API compatibility.
  * @param acx            Pointer to extended adapter configuration with network details.
  */
@@ -344,6 +344,8 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 	    acx->bssid[5]);
     screen_puts(x+17, 14, ATTRIBUTE_BOLD,(const char *)tmp);
     screen_puts(x+17, 15, ATTRIBUTE_BOLD,acx->fn_version);
+    screen_puts(x+5, 16, ATTRIBUTE_NORMAL,"    CONFIG:");
+    screen_puts(x+17, 16, ATTRIBUTE_BOLD,GIT_VERSION);
 }
 
 /* Matches rs232Fuji::set_additional_direntry_details() packed layout:
@@ -691,7 +693,7 @@ void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryTy
 }
 
 /**
- * @brief Initialise the highlight bar over the file list.
+ * @brief Initialize the highlight bar over the file list.
  * @param visibleEntries Number of entries currently visible in the list.
  */
 void screen_select_file_choose(char visibleEntries)
@@ -719,7 +721,7 @@ void screen_select_file_new_size(uint8_t k)
 }
 
 /**
- * @brief Draw a centred bracket pair of width w on row y for text input display.
+ * @brief Draw a centered bracket pair of width w on row y for text input display.
  * @param y Row on which to draw the brackets.
  * @param w Interior width in characters (bracket characters not included).
  */
@@ -897,7 +899,7 @@ void screen_clear(void)
 }
 
 /**
- * @brief Display an error message centred on the status bar (row 24).
+ * @brief Display an error message centered on the status bar (row 24).
  * @param msg Null-terminated error message string.
  */
 void screen_error(const char *msg)
@@ -1104,7 +1106,7 @@ void screen_destination_host_slot(char *h, char *p)
 }
 
 /**
- * @brief Initialise the highlight bar on the destination host slot list.
+ * @brief Initialize the highlight bar on the destination host slot list.
  */
 void screen_destination_host_slot_choose(void)
 {
