@@ -46,11 +46,6 @@ ifeq ($(PLATFORM),dragon)
 SRC_DIRS = src src/dragon
 endif
 
-# The Model II has only its display test so far.
-ifeq ($(PLATFORM),model2)
-SRC_DIRS = src/model2
-endif
-
 # FUJINET_LIB can be
 # - a version number such as 4.7.6
 # - a directory which contains the libs for each platform
@@ -247,6 +242,12 @@ $(STAGE2_DWL_DRAGON):: $(STAGE2_DRAGON) | $(R2R_PD)
 # Adam customization
 
 LDFLAGS_EXTRA_ADAM = -lndos
+
+########################################
+# TRS-80 Model II customization
+
+# CCP refuses a .COM that reaches past the TPA; the startup zeroes BSS anyway.
+LDFLAGS_EXTRA_MODEL2 = -pragma-define:CRT_TRIM_BSS=1
 
 ########################################
 # MSX customization

@@ -1,6 +1,11 @@
 /**
  * @file vid.h
- * @brief The Model II's 80x24 screen through the P&T video driver.
+ * @brief The Model II's 80x24 screen, drawn by cells and sent by difference.
+ *
+ * A cell is one byte: bit 7 is reverse video and the low seven bits are a
+ * graphics character (00h-1Fh) or ASCII. Screens draw into a buffer
+ * (vid_put and friends); vid_flush() sends only the cells that differ from
+ * what is on the screen, through the P&T video driver.
  */
 
 #ifndef MODEL2_VID_H
@@ -11,6 +16,9 @@
 
 #define VID_COLS 80
 #define VID_ROWS 24
+
+#define REV 0x80
+#define VID_NONE 0xFF
 
 /* Model II graphics characters, from the Operation Manual's chart */
 #define G_CORNER_UL      0x00 /* ┏ */
@@ -49,22 +57,36 @@
 /** Clear the screen, hide the cursor, and leave graphics and reverse off */
 void vid_init(void);
 
-/** Clear the screen, show the cursor, and leave graphics and reverse off */
+/** Clear the screen and show the cursor again; safe to call twice */
 void vid_exit(void);
 
-void vid_goto(uint8_t x, uint8_t y);
+/** Blank the screen and drop the bar and the cursor */
+void vid_begin(void);
 
-void vid_reverse(bool on);
+/** Set one cell */
+void vid_put(uint8_t x, uint8_t y, uint8_t c);
 
-/** A graphics character at the cursor */
-void vid_glyph(uint8_t g);
+/** Set w cells from x to one code */
+void vid_fill(uint8_t x, uint8_t y, uint8_t w, uint8_t c);
 
-/** n graphics characters at the cursor */
-void vid_glyphs(uint8_t g, uint8_t n);
+/** Write s from x with attr (0 or REV) OR'd in, at most w cells, padding
+    with spaces to w when pad is set. Returns the column after the text. */
+uint8_t vid_text(uint8_t x, uint8_t y, const char *s, uint8_t w, uint8_t attr, bool pad);
 
-/** Text at the cursor */
-void vid_text(const char *s);
+/** Show line y from x0 to x1 in reverse video, with a > at x0;
+    y = VID_NONE takes the bar away */
+void vid_bar(uint8_t y, uint8_t x0, uint8_t x1);
 
-void vid_clear_eol(void);
+/** Show the cursor at x,y after each flush; x = VID_NONE hides it */
+void vid_cursor(uint8_t x, uint8_t y);
+
+/** Send what changed in lines y0-y1 */
+void vid_flush_rows(uint8_t y0, uint8_t y1);
+
+/** Send everything that changed */
+void vid_flush(void);
+
+/** Ring the bell (a P&T CCB board or a Model 12 has one) */
+void vid_bell(void);
 
 #endif /* MODEL2_VID_H */

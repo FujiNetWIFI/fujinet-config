@@ -13,9 +13,9 @@
 #ifdef BUILD_MSXROM
 #include "msx/device_slots.h"
 #endif /* BUILD_MSXROM */
-#ifdef BUILD_H89
+#if defined(BUILD_H89) || defined(BUILD_MODEL2)
 #include "mount_and_boot.h"
-#endif /* BUILD_H89 */
+#endif /* BUILD_H89 || BUILD_MODEL2 */
 
 HDSubState hd_subState;
 #ifdef BUILD_ATARI
@@ -300,13 +300,13 @@ void hosts_and_devices_done(void)
 {
   char i;
   // char *msg[40];
-#ifdef BUILD_H89
-  /* Nothing can boot from a FujiNet drive on the H89 yet, so this mounts
-     every slot (with progress) and done() then returns to HDOS or CP/M. */
+#if defined(BUILD_H89) || defined(BUILD_MODEL2)
+  /* Nothing can boot from a FujiNet drive on the H89 or Model II, so this
+     mounts every slot (with progress) and done() then returns to the OS. */
   mount_and_boot();
   state = DONE;
   return;
-#endif /* BUILD_H89 */
+#endif /* BUILD_H89 || BUILD_MODEL2 */
 #ifdef BUILD_MSDOS
   /* If the user armed the TSR option, install CFGTSR.EXE BEFORE the
      mount-all loop below swaps the config disk image away from us. */

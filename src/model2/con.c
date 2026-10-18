@@ -57,4 +57,22 @@ uint32_t con_ticks(void) __naked
 #endasm
 }
 
+/* Special function n, with nothing passed or returned */
+static void special(uint8_t n) __z88dk_fastcall __naked
+{
+#asm
+    ld      b,l
+    jp      40h
+#endasm
+}
+
+/* Video memory appears at F800h between special functions 21 and 22, with
+   no system calls in between */
+void con_vram_put(uint16_t off, uint8_t c)
+{
+  special(21);
+  ((volatile uint8_t *)0xF800)[off] = c;
+  special(22);
+}
+
 #endif /* BUILD_MODEL2 */
