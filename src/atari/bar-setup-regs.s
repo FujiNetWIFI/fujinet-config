@@ -10,7 +10,7 @@ _bar_setup_regs:
 	sta 623
 	
 	;; set color
-	lda #$44
+	lda #$48
 	sta $02C0
 	sta $02C1
 	sta $02C2
