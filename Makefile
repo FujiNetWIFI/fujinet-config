@@ -6,6 +6,7 @@ PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
 PLATFORMS += msdos
+PLATFORMS += model2
 
 # Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
 #PLATFORMS += msxrom
@@ -43,6 +44,11 @@ SRC_DIRS = src src/%PLATFORM%
 # Dragon keeps the original 32-column code; the combo below still selects its fujinet-lib.
 ifeq ($(PLATFORM),dragon)
 SRC_DIRS = src src/dragon
+endif
+
+# The Model II has only its display test so far.
+ifeq ($(PLATFORM),model2)
+SRC_DIRS = src/model2
 endif
 
 # FUJINET_LIB can be
