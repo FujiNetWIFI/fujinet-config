@@ -1,13 +1,9 @@
 #ifdef BUILD_ATARI
 
 /**
- * FujiNet Configuration Program: screen functions
- * The screen functions are a common set of graphics and text string functions to display information to the video output device.
- * These screen functions is comprised of two files; screen.c and screen.h.  Screen.c sets up the display dimensions, memory and
- * initializes the display as well as provide various text manipulations functions for proper display.  The screen.h file include
- * defines for various items such as keyboard codes, functions and screen memory addresses.
- *
- **/
+ * FujiNet Configuration Program: Atari screen functions. Display list and screen memory
+ * addresses are in atari_screen.h.
+ */
 
 #include "atari_screen.h"
 #include <stdio.h>
@@ -38,7 +34,7 @@ unsigned char byte3;
 uint32_t s;
 
 // The currently active screen (basically each time a different displaylist is used that will be considered a screen)
-// Used by 'set_cursor' so it knows the layout of the screen and can properly figure out the memory offset needed whengiven an (x, y) coordinate pair.
+// Used by 'set_cursor' so it knows the layout of the screen and can properly figure out the memory offset needed when given an (x, y) coordinate pair.
 //
 _screen active_screen = SCREEN_HOSTS_AND_DEVICES;
 
@@ -50,7 +46,7 @@ void config_dlist =
         DL_BLK8,              // 0x01 (8 Blank Scanlines)
         DL_BLK8,              // 0x02 (8 Blank Scanlines)
         DL_LMS(DL_CHR20x8x2), // 0x03 Line 0 (first line of displayable text, will start at coordinates 0,0)
-        DISPLAY_MEMORY,       // 0x04 and 0x05 This is the high order bit location of the display list.  Defined in screen.h
+        DISPLAY_MEMORY,       // 0x04 and 0x05: address of display memory for the LMS above. Defined in atari_screen.h
         DL_CHR20x8x2,         // 0x06  Line 1
         DL_CHR40x8x1,         // 0x07  Line 2
         DL_CHR40x8x1,         // 0x08  Line 3
@@ -76,7 +72,7 @@ void config_dlist =
         DL_CHR20x8x2,         // 0x1c  Line 23
         DL_CHR40x8x1,         // 0x1d  Line 24
         DL_CHR40x8x1,         // 0x1e  Line 25
-        DL_JVB,               // Signal to ANTIC end of DISPLAY_LIST has been reached and loop back to the beginning.  The jump to the begining is located at the next two bits defined below.
+        DL_JVB,               // Signal to ANTIC end of DISPLAY_LIST has been reached and loop back to the beginning.  The jump address is in the next two bytes.
         DISPLAY_LIST          // 0x1f, 0x20  Memory address containing the entire display list.
 };
 
@@ -98,7 +94,7 @@ void set_active_screen(unsigned char screen)
 }
 
 /**********************
- * Print ATASCII string to display memory.  Note: ATASCII is not a 1:1 mapping for ASCII.  It is a ven diagram with significant overlap.
+ * Print one ATASCII character to display memory.  Note: ATASCII is not a 1:1 mapping for ASCII.  It is a Venn diagram with significant overlap.
  */
 void put_char(char c)
 {
@@ -115,7 +111,7 @@ void put_char(char c)
   {
     offset = 0;
   }
-  POKE(cursor_ptr++, c + offset); // Insert into the locaiton in memory for next bit in cursor_ptr the ATASCI character.  c+offset is the ATASCI character desired to be displayed.
+  POKE(cursor_ptr++, c + offset); // c + offset is the screen code for the ATASCII character
 }
 
 void screen_append(const char *s)
@@ -591,8 +587,6 @@ void screen_hosts_and_devices_host_slots(HostSlot *)
   }
 }
 
-// Since 'deviceSlots' is a global, do we need to access the input parameter at all?
-// Maybe globals.h wasn't supposed in be part of screen? I needed it for something..
 void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *, const bool *)
 {
   unsigned char slotNum;
