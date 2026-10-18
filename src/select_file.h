@@ -9,6 +9,9 @@
 
 #define ENTRY_TIMER_DUR 128
 
+/* New disk name buffer, including the terminator */
+#define NEW_NAME_SIZE 128
+
 void select_file(void);
 void select_display_long_filename(void);
 void select_get_filename(uint8_t len);

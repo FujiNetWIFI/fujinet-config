@@ -292,6 +292,8 @@ void input_line(uint8_t x, uint8_t y, uint8_t unknown, char *c, uint8_t l, bool 
 		case KEY_CLEAR:
 			break;
 		default:
+			if (c - b >= l)
+				break;
 			if (password)
 			{
 				putchar('*');
@@ -349,7 +351,7 @@ unsigned long input_select_file_new_size(unsigned char t)
 
 	memset(c, 0, sizeof(c));
 
-	input_line(0, 15, 0, c, 16, false);
+	input_line(0, 15, 0, c, sizeof(c) - 1, false);
 
 	return (long)atol(c);
 }
@@ -361,7 +363,7 @@ unsigned long input_select_file_new_custom(void)
 
 void input_select_file_new_name(char *c)
 {
-  input_line(0, 15, 0, c, 255, false);
+  input_line(0, 15, 0, c, NEW_NAME_SIZE - 5, false);
 
 	if (!strendswith(c, ".dsk") && !strendswith(c, ".DSK"))
 	{

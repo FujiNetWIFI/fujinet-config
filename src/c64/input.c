@@ -225,13 +225,14 @@ unsigned long input_select_file_new_size(unsigned char t)
 unsigned long input_select_file_new_custom(void)
 {
 	char c[12];
-	input_line(0, 22, 0, c, 32, false);
+	memset(c, 0, sizeof(c));
+	input_line(0, 22, 0, c, sizeof(c) - 1, false);
 	return atol(c);
 }
 
 void input_select_file_new_name(char *c)
 {
-	input_line(0, 22, 0, c, 255, false);
+	input_line(0, 22, 0, c, NEW_NAME_SIZE - 1, false);
 }
 
 SSSubState input_select_slot_choose(void)
