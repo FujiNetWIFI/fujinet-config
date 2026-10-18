@@ -189,10 +189,6 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
       textbackground(15);
       cprintf("%-31s",screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
   }
-  
-  // Clear the next line since last print isn't truncated to 31 chars :shrug:
-  // gotoxy(0,MAX_DISK_SLOTS+y+1); cprintf("%s","                                ");
-
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)

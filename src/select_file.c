@@ -339,7 +339,7 @@ void select_file_new(void)
     screen_select_file_new_custom();
     selected_size = input_select_file_new_custom();
   }
-#endif /* CMOC_VERSION */
+#endif /* _CMOC_VERSION_ */
 
   if (selected_size == 0) // Aborted from size
   {
