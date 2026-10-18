@@ -21,8 +21,21 @@ static uint8_t g_cart_cksum_lo, g_cart_cksum_hi;
 
 // LDA $FF02 (clears PIA0's latched CB1 flag, the real 60Hz tick ack);
 // RTI. See system_enable_user_rom()'s jump sequence - this is what $010C
-// gets repointed at for a cart big enough to have overwritten $D8AF.
+// gets repointed at before every jump.
 static const uint8_t g_irq_tick_stub[4] = { 0xB6, 0xFF, 0x02, 0x3B };
+
+// Hand-assembled (not a CMOC function - entered via an indirect call
+// through $A002, so prologue/epilogue must be exactly what an external
+// caller expects: character in A, A/X/Y preserved, plain RTS). Cursor
+// counter lives in its own last 2 bytes, PC-relative addressed so the
+// routine works wherever this array ends up linked. lwasm source kept
+// in the scratchpad this was assembled from, not duplicated here.
+static const uint8_t g_putchr_stub[42] = {
+    0x34, 0x32, 0xae, 0x8d, 0x00, 0x22, 0x81, 0x0d, 0x27, 0x0c, 0x1f, 0x12,
+    0x31, 0xa9, 0x04, 0x00, 0xa7, 0xa4, 0x30, 0x01, 0x20, 0x03, 0x30, 0x88,
+    0x20, 0x8c, 0x02, 0x00, 0x25, 0x03, 0x8e, 0x00, 0x00, 0xaf, 0x8d, 0x00,
+    0x03, 0x35, 0x32, 0x39, 0x00, 0x00
+};
 
 // printf()/putchar() on this target (see cmoc-0.1.100/src/stdlib/
 // putchar_a.asm) jump through CHROUT, a pointer this build's own crt.asm
@@ -63,28 +76,13 @@ cout_store@
     }
 }
 
-// Sends the "!LDCART!" knock exactly once and polls for the plugin's status
-// report - deliberately NOT the bounded resend-on-timeout
-// dwonewrite.asm's DWWrite uses for its own knock (DWWACKTIMEOUT/
-// DWWACKRETRIES). That pattern is safe for an ordinary write knock because
-// the companion is never anywhere else it could be in the meantime, but
-// "!LDCART!" is different: on success, the plugin switches the active slot
-// and permanently stops its own knock-matching loop (see
-// drivewire_do_load_cart() in drivewire_main.c) - so if this side's poll
-// window happens to miss the status write and resends the knock, every one
-// of those resend reads lands on the cart's own live memory instead of
-// anything listening for a knock. That is exactly the access pattern the
-// big comment in system_enable_user_rom() already documents as wedging the
-// bus outright on real hardware (confirmed there for the CPU's own
-// instruction fetches after a successful load; a resent knock's reads are
-// the same kind of unpaced, full-speed access against the same just-
-// activated memory). So: one knock, one generous wait, and if nothing
-// comes back, give up rather than ever touching $C1xx/$C2xx again.
-// g_cart_status on return: 0 (DW_CART_STATUS_SUCCESS) or 255
-// (DW_CART_STATUS_FAILURE) came from the plugin; $FE means this function
-// gave up without ever seeing either (no response at all - most likely no
-// One ROM present). g_cart_len_*/g_cart_cksum_* are only meaningful when
-// g_cart_status is 0. Returns non-zero only in that case.
+// Sends the "!LDCART!" knock once and polls for the plugin's status report -
+// not the bounded resend dwonewrite.asm's DWWrite uses, because a resent
+// knock here would read the cart's own live memory once the plugin
+// switches slots, the same bus-wedging access pattern the jump sequence
+// below avoids. One knock, one generous wait, then give up.
+// g_cart_status: 0 (success) or 255 (failure) from the plugin; $FE means no
+// response at all. g_cart_len_*/g_cart_cksum_* only valid when status is 0.
 static uint8_t onerom_load_cart(void)
 {
     // No blank lines from here through onerom_done@ - lwasm starts a new
@@ -139,22 +137,12 @@ onerom_success@
         sta     g_cart_cksum_hi
         clra
         sta     g_cart_status
-        ; The plugin has just switched the active slot, which means HDBDOS
-        ; - including its own IRQ handler at $D8AF, which the real 6809 IRQ
-        ; vector ($010C) points straight at - is already gone, replaced by
-        ; the cart image. PIA hardware keeps latching the 60Hz edge that
-        ; drives it regardless of the CC mask above, so the instant this
-        ; function's own puls below re-enables interrupts, a pending edge
-        ; fires immediately, straight into whatever garbage the cart now
-        ; has at $D8AF - before this function can even reach its own RTS.
-        ; Disabling (not just clearing) both PIAs' CA1/CB1 sources here -
-        ; same technique as the jump sequence below already uses, just
-        ; needed here too now that execution can return to ordinary CMOC
-        ; code instead of always jumping away immediately - means neither
-        ; of them can ever latch another edge, so nothing after this point
-        ; can try to call through $D8AF again. pause()/getTimer() stop
-        ; working from here on, same trade the jump sequence always made;
-        ; the caller must not rely on them once this returns successfully.
+        ; The plugin just switched slots, so HDBDOS's IRQ handler at $D8AF
+        ; (what $010C points at) is now cart data. PIA hardware latches the
+        ; 60Hz edge regardless of the CC mask, so this puls's own
+        ; re-enable would fire straight into it. Disable (not just clear)
+        ; both PIAs' CA1/CB1 sources instead - pause()/getTimer() stop
+        ; working from here on; the caller must not rely on them.
         lda     $FF00
         lda     $FF01
         anda    #$FE
@@ -171,12 +159,12 @@ onerom_success@
         lda     $FF23
         anda    #$FE
         sta     $FF23
-        ; Safety margin against the (already tiny, ~100x clock ratio) gap
-        ; between the plugin's status write and its active-slot switch
-        ; actually completing - needed here because the checksum walk in
-        ; system_enable_user_rom() reads $C000 as the activated cart, not
-        ; slot 0, and must not start before the switch is genuinely done.
-        ldd     #$1000
+        ; Margin against the gap between the plugin's status write and its
+        ; active-slot switch completing - the checksum walk below reads
+        ; $C000 as the activated cart and must not start first. Not a
+        ; measured bound, just generous; cheap regardless given this path
+        ; already tolerates multi-second pause()s elsewhere.
+        ldd     #$A000
 onerom_margin@
         subd    #1
         bne     onerom_margin@
@@ -236,13 +224,15 @@ void system_enable_user_rom(void)
 
     if (calc_cksum != reported_cksum)
     {
-      printf("\nCKSUM MISMATCH - NOT JUMPING\n");
+      printf("\nCKSUM MISMATCH - NOT JUMPING\nLEN=%u\nOURS=%04x PLUGIN=%04x\n",
+             reported_len, calc_cksum, reported_cksum);
       // Plain busy-wait, not pause(): onerom_load_cart()'s own success
       // path already disabled both PIAs' interrupt sources (see its own
       // comment), so the jiffy clock pause() needs is gone regardless of
-      // which branch this is. Just long enough to read the message before
-      // returning to system_boot(), which cold-starts and wipes the screen.
-      for (outer = 0; outer < 200; outer++)
+      // which branch this is. Long enough to read/note the values above
+      // before returning to system_boot(), which cold-starts and wipes
+      // the screen.
+      for (outer = 0; outer < 600; outer++)
         for (inner = 0; inner < 2000; inner++) { }
       return;
     }
@@ -251,57 +241,41 @@ void system_enable_user_rom(void)
     // straight into it, mirroring how the real FUJI_IO_REG write below never
     // returns either.
     //
-    // Nothing in $0100-$01FF needs touching before this jump except the IRQ
-    // vector handling below. HDBDOS's own init fills this page with
-    // RAM-resident vectors (IRQVEC, NMIVEC at $0109, the RVEC0-RVEC5
-    // GET/PUT and disk-command dispatch table at $015E-$016F, among
-    // others), all pointing into HDBDOS/Color BASIC ROM outside the
-    // $C000-$CFFF range a small cart image replaces. Cart games do commonly
-    // treat this page as theirs to repurpose regardless - Pinball's own
-    // startup sets the Direct Page register to $01 and copies its own data
-    // over part of the RVEC table within its first few instructions - but
-    // nothing calls back into that table once the cart has taken over, so
-    // this is harmless (confirmed by tracing the actual machine state under
-    // XRoar's GDB stub).
+    // $0100-$01FF needs no touching: carts commonly repurpose this RAM
+    // page themselves (Pinball sets DP=$01 and overwrites part of it),
+    // and nothing calls back into HDBDOS's own vectors there once a cart
+    // has taken over. Stack is restored to INISTK (this program's own
+    // entry-time value) rather than left wherever C's own usage has it -
+    // a true jump, not a call, same as dwload_cmoc.c's dwload_clone().
     //
-    // The stack pointer is restored to INISTK (this program's own
-    // entry-time value, high in RAM) rather than left wherever this call
-    // chain's own C-compiled stack usage happens to have it - same
-    // "true jump, not a call" pattern dwload_cmoc.c's dwload_clone() already
-    // uses.
+    // CC is unmasked to match how EXEC &HC000 hands off to the same cart
+    // (BASIC runs with interrupts enabled). Only PIA0's CB1 - the 60Hz
+    // tick most carts need - is enabled below; PIA0's CA1 (HSync,
+    // ~15.7kHz) and PIA1's CA1/CB1 are left as inherited, since enabling
+    // a source this code doesn't also ack causes an interrupt storm.
     //
-    // CC is unmasked (not left masked) right before the jump, matching how
-    // EXEC &HC000 hands off to the same cart - BASIC runs with interrupts
-    // enabled, so a cart that assumes it's entered that way, rather than
-    // issuing its own CLI, otherwise never sees its 60Hz tick. Only PIA0's
-    // CB1 - the actual tick source Atom needs - is enabled below; PIA0's
-    // CA1 (HSync, ~15.7kHz) and PIA1's CA1/CB1 are left exactly as
-    // inherited, since enabling a source this code doesn't also ack in
-    // g_irq_tick_stub below causes an interrupt storm bad enough that the
-    // cart never even reaches its own splash screen. Every side still gets
-    // its data register read once first, to clear whatever latched edge
-    // this plugin's own presence on the ROM bus may have left pending,
-    // without forcing an enable bit this code doesn't also own.
-    //
-    // $010C is the real 6809 hardware IRQ vector target (the CPU vector
-    // table at $FFF8/$FFF9 points straight at it, no ROM dispatcher above
-    // it), and its as-booted value is JMP $D8AF, deep in HDBDOS's own ROM.
-    // For a cart small enough to leave $D8AF unwritten (Pinball), that's
-    // still the real HDBDOS handler and works correctly as-is - it reads
-    // PIA0's $FF02 to ack CB1 before handing off to Extended BASIC's jiffy
-    // update at $8955; skipping that ack and jumping straight to $8955 is
-    // its own interrupt-storm trap. A cart big enough to reach $010C's
-    // target offset ($18AF bytes in - Atom's 16K image included) overwrites
-    // $D8AF with cart data instead, so $010C needs repointing at
-    // g_irq_tick_stub, which does the same CB1 ack $D8AF would, then RTIs
-    // without forwarding to BASIC's jiffy code, which a cart doesn't need.
-    // Repointing the JMP's target rather than overwriting its opcode keeps
-    // the 3-byte vector slot itself untouched either way.
-    if (reported_len > 0x18AFu)
+    // $010C, the real IRQ vector, is always repointed at g_irq_tick_stub
+    // (acks CB1 the way $D8AF - HDBDOS's own handler, now cart data -
+    // would, then RTIs without BASIC's jiffy code). The plugin's cart
+    // push mirrors a smaller image across the whole slot, so $D8AF is
+    // always cart data regardless of image size.
     {
       unsigned int stub_addr = (unsigned int)g_irq_tick_stub;
       *(unsigned char *)0x010Du = (unsigned char)(stub_addr >> 8);
       *(unsigned char *)0x010Eu = (unsigned char)(stub_addr & 0xFF);
+    }
+
+    // $A002 - the classic "current PUTCHR" vector - is the same problem
+    // as $010C above: HDBDOS points it at charout code that's now cart
+    // data. Our own C code is covered by setConsoleOutHook() instead,
+    // but a cart built to run alongside BASIC (EdTASM+) can call through
+    // $A002 directly for its own output. Needs to keep working for as
+    // long as the cart calls it, so repointed at g_putchr_stub rather
+    // than a no-op. Holds a plain 2-byte address (not a JMP opcode).
+    {
+      unsigned int putchr_addr = (unsigned int)g_putchr_stub;
+      *(unsigned char *)0xA002u = (unsigned char)(putchr_addr >> 8);
+      *(unsigned char *)0xA003u = (unsigned char)(putchr_addr & 0xFF);
     }
 
     asm
@@ -325,12 +299,33 @@ void system_enable_user_rom(void)
         ; visible at $8000-$FEFF), same power-on default a reset leaves it
         ; in.
         clr     $FFDE
+        ; Margin against the jump landing before the companion's serving
+        ; path has settled for sustained, full-speed instruction fetches -
+        ; a different access pattern than the checksum walk's own slow,
+        ; one-byte reads. Cheap insurance.
+        ldd     #$0400
+onerom_jump_margin@
+        subd    #1
+        bne     onerom_jump_margin@
 INISTK  IMPORT
         lds     INISTK
+        ; A real 6809 reset clears DP to $00 (confirmed against XRoar's
+        ; mc6809.c; A/B/X/Y/U/S are not reset, so not zeroed here either).
+        ; Every CoCo program relies on that convention without setting it
+        ; itself; this jump never touched DP before, leaving it at
+        ; whatever HDBDOS/this program's own C runtime left it.
+        clra
+        tfr     a,dp
         andcc   #$AF            ; unmask F and I - see comment above
         jmp     $C000
     }
   }
+  // Known limitation: some carts (Demon Attack) still fail intermittently
+  // past a clean checksum match - real autostart ties the cart's FIRQ
+  // line to the clock, so BASIC jumps to $C000 much earlier in its own
+  // boot than this path (jumping from an already-running HDBDOS session)
+  // can reproduce. XRoar's own autostart approximation hits the same
+  // cart intermittently for the same reason, per its cart.c comment.
 
   printf("\nFALLBACK IOREG\n");
   pause(60);
