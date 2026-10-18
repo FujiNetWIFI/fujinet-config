@@ -1,13 +1,9 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * FujiNet Configuration Program: screen functions
- * The screen functions are a common set of graphics and text string functions to display information to the video output device.
- * These screen functions is comprised of two files; screen.c and screen.h.  Screen.c sets up the display dimensions, memory and
- * initializes the display as well as provide various text manipulations functions for proper display.  The screen.h file include
- * defines for various items such as keyboard codes, functions and screen memory addresses.
- *
- **/
+ * FujiNet Configuration Program: Dragon screen functions. Shared declarations are in
+ * coco_screen.h.
+ */
 
 #include <cmoc.h>
 #include <coco.h>
@@ -580,7 +576,7 @@ void screen_connect_wifi(NetConfig *nc)
   locate(0,7);
   printf("     CONNECTING TO NETWORK:     %32s",screen_upper(nc->ssid));
 
-  screen_add_shadow(9,BLUE); // change to CYAN
+  screen_add_shadow(9,BLUE);
 }
 
 bool screen_mount_and_boot_lobby(void)

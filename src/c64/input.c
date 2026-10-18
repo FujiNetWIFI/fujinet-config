@@ -56,7 +56,7 @@ unsigned char input_ucase(void)
  * @param y Y position
  * @param o start at character offset
  * @param c target buffer
- * @param l Length
+ * @param len Length
  * @param password echoes characters.
  */
 void input_line(unsigned char x, unsigned char y, unsigned char, char *c, unsigned char len, bool password)

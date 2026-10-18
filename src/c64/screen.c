@@ -75,7 +75,6 @@ void screen_error(const char *c)
 
 void screen_putlcc(char)
 {
-	// REMOVE
 }
 
 void screen_set_wifi_extended(AdapterConfigExtended *ac)
@@ -354,9 +353,6 @@ void screen_select_file_prev(void)
 
 void screen_select_file_display_long_filename(const char *)
 {
-	// it wasn't this.
-	/* gotoxy(0,19); */
-	/* cprintf("%-40s",e); */
 }
 
 void screen_select_file_next(void)
@@ -373,8 +369,6 @@ void screen_select_file_display_entry(unsigned char y, const char *e, unsigned)
 
 void screen_select_file_clear_long_filename(void)
 {
-	// Is it this?
-	// cclearxy(0,13,80);
 }
 
 void screen_select_file_new_type(void)
