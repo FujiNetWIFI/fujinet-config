@@ -34,15 +34,23 @@ unsigned char input_select_file_new_type(void)
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
-  char c[16];
+  char c[4];
+  unsigned long n;
 
   memset(c, 0, sizeof(c));
   input_digits_only = true;
-  if (input_line_cancel(MENU_X, STATUS_Y, c, 16, false))
+  if (input_line_cancel(MENU_X, STATUS_Y, c, sizeof(c) - 1, false))
     c[0] = 0;
   input_digits_only = false;
 
-  return (long)atol(c);
+  /* The firmware takes the drive count as one byte */
+  n = atol(c);
+  if (n > 255)
+  {
+    screen_error("MAX 255 DRIVES.");
+    return 0;
+  }
+  return n;
 }
 
 unsigned long input_select_file_new_custom(void)
