@@ -317,10 +317,10 @@ unsigned select_file_entry_type(void)
 
 void select_file_new(void)
 {
-  char f[128];
+  char f[NEW_NAME_SIZE];
   char k;
 
-  memset(f, 0, 128);
+  memset(f, 0, sizeof(f));
 
   screen_select_file_new_type();
   k = input_select_file_new_type();
@@ -352,6 +352,12 @@ void select_file_new(void)
 
   if (f[0] == 0x00)
   {
+    sf_subState = SF_CHOOSE;
+    return;
+  }
+  else if (strlen(path) + strlen(f) >= sizeof(path))
+  {
+    screen_error("  NAME TOO LONG.");
     sf_subState = SF_CHOOSE;
     return;
   }
