@@ -9,9 +9,9 @@
 #include <6502.h>
 #endif
 
-static NewDisk newDisk;
 uint8_t system_create_type;
-char response[256];
+/* Big enough to double as system_create_new()'s NewDisk; nothing else is using it then */
+char response[sizeof(NewDisk)];
 
 #ifndef __ORCAC__
 // From FujiNet Lib
@@ -101,12 +101,15 @@ void system_boot(void)
 void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                        unsigned long selected_size, const char *path)
 {
-  newDisk.createType = system_create_type;
-  newDisk.deviceSlot = selected_device_slot;
-  newDisk.hostSlot = selected_host_slot;
-  newDisk.numBlocks = selected_size;
-  strcpy(&newDisk.filename[0], path);
-  fuji_create_new(&newDisk);
+  NewDisk *nd = (NewDisk *)response;
+
+  memset(nd, 0, sizeof(NewDisk));
+  nd->createType = system_create_type;
+  nd->deviceSlot = selected_device_slot;
+  nd->hostSlot = selected_host_slot;
+  nd->numBlocks = selected_size;
+  strcpy(nd->filename, path);
+  fuji_create_new(nd);
   return;
 }
 
