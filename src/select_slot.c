@@ -126,6 +126,10 @@ void select_slot_choose()
 
   while (ss_subState==SS_CHOOSE)
     ss_subState=input_select_slot_choose();
+
+  // An abort leaves SELECT_SLOT; the next pick must mount, not create
+  if (state != SELECT_SLOT)
+    create = false;
 }
 
 void select_slot_done()
