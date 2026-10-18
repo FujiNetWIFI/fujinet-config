@@ -364,6 +364,9 @@ void select_file_new(void)
   else
   {
     create = true;
+    // Some platforms leave the slot picker through source_path; come back to this folder
+    if (!copy_mode)
+      strcpy(source_path, path);
     strcat(path, f);
     state = SELECT_SLOT;
   }
