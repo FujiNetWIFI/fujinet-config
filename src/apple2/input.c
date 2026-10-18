@@ -184,20 +184,21 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
   char a;
   char uc;
   char ostype;
+  unsigned char col; // wraps back to x before column 39: printing there would move the cursor down a row
 
   uc = 0;
   ostype = get_ostype() & 0xF0;
 
-  i = o; // index into array and y-coordinate
-  // x += o;
+  i = o; // index into array
+  col = x + o;
 
   gotoy(y);
 
   while(1)
   {
-    gotox(x + i);
+    gotox(col);
     cputc('_');
-    gotox(x + i);
+    gotox(col);
     a = cgetc();
     if (ostype == APPLE_IIIEM)   // check for Apple3 lowercase
       if (!(PEEK(0xc008)&0x02) && (PEEK(0xc008)&0x08)) // test for shift or alpha lock key not pressed
@@ -220,9 +221,12 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       {
         c[--i] = 0;
         cputc(' ');
-        gotox(x + i);
+        if (col == x)
+          col = 39;
+        --col;
+        gotox(col);
         cputc(' ');
-        gotox(x + i);
+        gotox(col);
       }
       break;
     case KEY_RIGHT_ARROW:
@@ -236,12 +240,14 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
       {
         if (a>64 && a<91)
           a += uc;
-        gotox(x + i);
+        gotox(col);
 	if (password)
 	  screen_putlcc('*');
 	else
 	  screen_putlcc(a);
         c[i++] = a;
+        if (++col == 39)
+          col = x;
       }
     break;
     }
