@@ -141,9 +141,9 @@ void select_slot_done()
   // int i;
 #endif
 
-  // Every path below changes the device slot table on the FujiNet - through
-  // fuji_set_device_filename() at least - and the firmware also owns the
-  // MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
+  // Every path below can change the device slot table on the FujiNet - even a
+  // refused NEW DISK leaves its name in the slot - and the firmware also owns
+  // the MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
   slots_dirty = true;
 
   memset(filename,0,sizeof(filename));
@@ -152,7 +152,16 @@ void select_slot_done()
   {
     create=false; // we're done with this until next time.
     screen_select_file_new_creating();
-    system_create_new(selected_host_slot,selected_device_slot,selected_size,path);
+    if (!system_create_new(selected_host_slot,selected_device_slot,selected_size,path))
+    {
+      screen_error("  COULD NOT CREATE DISK.");
+#ifdef BUILD_APPLE2
+      pause(255); // the Apple II's pause() runs about 4x short
+#else
+      pause(150);
+#endif
+      goto not_created;
+    }
 #ifdef BUILD_COCO
     memcpy(deviceSlots[selected_device_slot].file,path,FILE_MAXLEN);
 #else
@@ -161,23 +170,29 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
-#if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
-    // why hardcoded to 2 here?
-    fuji_set_device_filename(2, selected_host_slot, selected_device_slot, path);
-#else
+#if !defined(BUILD_ATARI) && !defined(BUILD_APPLE2) && !defined(__CBM__)
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
-    fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, path);
 #endif
+    // A new disk is for writing on, whichever key picked the slot
+    fuji_set_device_filename(MODE_WRITE, selected_host_slot, selected_device_slot, path);
 
 #ifdef BUILD_ADAM
-    screen_select_slot_build_eos_directory();
-    if (input_select_slot_build_eos_directory())
+    // An EOS directory holds the disk's size in 16 bits
+    if (selected_size <= 0xFFFF)
     {
-      fuji_mount_disk_image(selected_device_slot,2); // R/W
-      screen_select_slot_build_eos_directory_label();
-      input_select_slot_build_eos_directory_label(filename);
-      screen_select_slot_build_eos_directory_creating();
-      system_build_directory(selected_device_slot,selected_size,filename);
+      screen_select_slot_build_eos_directory();
+      if (input_select_slot_build_eos_directory())
+      {
+        fuji_mount_disk_image(selected_device_slot,2); // R/W
+        screen_select_slot_build_eos_directory_label();
+        input_select_slot_build_eos_directory_label(filename);
+        screen_select_slot_build_eos_directory_creating();
+        if (!system_build_directory(selected_device_slot,selected_size,filename))
+        {
+          screen_select_slot_build_eos_directory_failed();
+          input_select_slot_build_eos_directory_failed();
+        }
+      }
     }
 
     state=HOSTS_AND_DEVICES;
@@ -250,6 +265,7 @@ void select_slot_done()
     fuji_close_directory();
   }
 
+ not_created:
   if (!quick_boot)
     {
 #ifdef BUILD_PMD85

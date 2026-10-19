@@ -11,7 +11,7 @@ void system_boot(void)
   return;
 }
 
-void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
+bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                        uint32_t selected_size, const char *path)
 {
   switch (selected_size)
@@ -45,7 +45,7 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
     newDisk.sectorSize = custom_sectorSize;
     break;
   default:
-    return;
+    return false;
   }
 
   newDisk.hostSlot = selected_host_slot;
@@ -54,6 +54,5 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
   strcpy(newDisk.filename, path);
 
   deviceSlots[selected_device_slot].mode = mode;
-  fuji_create_new(&newDisk);
-
+  return fuji_create_new(&newDisk);
 }

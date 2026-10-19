@@ -557,6 +557,13 @@ void screen_select_slot_build_eos_directory_creating(void)
   smartkeys_sound_play(SOUND_CONFIRM);
 }
 
+void screen_select_slot_build_eos_directory_failed(void)
+{
+  smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
+  smartkeys_status("  COULD NOT WRITE\n  THE DIRECTORY.\n  PRESS ANY KEY.");
+  smartkeys_sound_play(SOUND_NEGATIVE_BUZZ);
+}
+
 void screen_destination_host_slot(char *h, char *p)
 {
     vdp_noblank();

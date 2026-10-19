@@ -97,16 +97,17 @@ void system_boot(void)
 /**
  * @brief Create a new floppy disk image on the FujiNet host.
  *
- * Maps the disk-type code in selected_size to the appropriate MS-DOS floppy
- * geometry (numSectors + sectorSize = 512) and sends a NEW_DISK command.
+ * Maps the disk-type code in selected_size to a count of 512-byte sectors
+ * and sends a NEW_DISK command.
  *
  * @param selected_host_slot    Host slot index (0-based).
  * @param selected_device_slot  Device slot index (0-based).
  * @param selected_size         Disk type code: 360=360K, 720=720K,
  *                              1200=1.2MB, 1440=1.44MB, 999=custom.
  * @param path                  Full path/filename for the new image.
+ * @return true if the FujiNet created the image.
  */
-void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
+bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                        uint32_t selected_size, const char *path)
 {
     static NewDisk newDisk;
@@ -134,7 +135,7 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
         newDisk.sectorSize = custom_sectorSize;
         break;
     default:
-        return;
+        return false;
     }
 
     newDisk.hostSlot   = selected_host_slot;
@@ -142,7 +143,7 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
     strncpy(newDisk.filename, path, sizeof(newDisk.filename) - 1);
     newDisk.filename[sizeof(newDisk.filename) - 1] = '\0';
 
-    fuji_create_new(&newDisk);
+    return fuji_create_new(&newDisk);
 }
 
 /**
