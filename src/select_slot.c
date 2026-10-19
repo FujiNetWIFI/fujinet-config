@@ -170,13 +170,11 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=2;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
-#if defined(BUILD_ATARI) || defined(BUILD_APPLE2) || defined(__CBM__)
-    // why hardcoded to 2 here?
-    fuji_set_device_filename(2, selected_host_slot, selected_device_slot, path);
-#else
+#if !defined(BUILD_ATARI) && !defined(BUILD_APPLE2) && !defined(__CBM__)
     fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
-    fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, path);
 #endif
+    // A new disk is for writing on, whichever key picked the slot
+    fuji_set_device_filename(MODE_WRITE, selected_host_slot, selected_device_slot, path);
 
 #ifdef BUILD_ADAM
     screen_select_slot_build_eos_directory();
