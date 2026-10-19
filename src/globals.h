@@ -61,4 +61,8 @@ extern bool prev_page;
 extern bool hisio_boot_enabled;
 #endif /* BUILD_ATARI */
 
+#ifdef BUILD_COCO
+extern bool config_disk_gone;
+#endif /* BUILD_COCO */
+
 #endif /* GLOBALS_H */

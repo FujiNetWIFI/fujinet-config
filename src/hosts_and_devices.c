@@ -118,6 +118,10 @@ void hosts_and_devices_eject(unsigned char ds)
 #endif /* BUILD_MSXROM */
 
   fuji_unmount_disk_image(ds);
+#ifdef BUILD_COCO
+  if (ds == 0)
+    config_disk_gone = true;
+#endif /* BUILD_COCO */
 
 #ifdef BUILD_MSXROM
   // A ROM row only exists while that ROM is mounted, so ejecting one
@@ -200,6 +204,10 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
 
   // unmount disk image
   fuji_unmount_disk_image(selected_device_slot);
+#ifdef BUILD_COCO
+  if (selected_device_slot == 0)
+    config_disk_gone = true;
+#endif /* BUILD_COCO */
 
   // copy device slot back in.
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));

@@ -114,6 +114,10 @@ void select_slot_eject(unsigned char ds)
 {
   slots_dirty = true;
   fuji_unmount_disk_image(ds);
+#ifdef BUILD_COCO
+  if (ds == 0)
+    config_disk_gone = true;
+#endif /* BUILD_COCO */
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
   fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
