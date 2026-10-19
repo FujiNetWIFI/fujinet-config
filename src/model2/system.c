@@ -57,18 +57,11 @@ bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
 {
   static NewDisk nd;
 
+  (void)selected_size;
   memset(&nd, 0, sizeof(nd));
-  if (selected_size == 999)
-  {
-    nd.numSectors = custom_numSectors;
-    nd.sectorSize = custom_sectorSize;
-  }
-  else
-  {
-    /* The size in K, as 512-byte sectors */
-    nd.numSectors = (uint16_t)(selected_size * 2);
-    nd.sectorSize = 512;
-  }
+  /* IBM-3740, as MekkoGX builds: 77 tracks of 26 128-byte sectors */
+  nd.numSectors = 77 * 26;
+  nd.sectorSize = 128;
   nd.hostSlot = selected_host_slot;
   nd.deviceSlot = selected_device_slot;
   strncpy(nd.filename, path, sizeof(nd.filename) - 1);

@@ -27,8 +27,6 @@
 
 extern unsigned char copy_host_slot;
 
-unsigned short custom_numSectors;
-unsigned short custom_sectorSize;
 bool mounting = false;
 
 uint8_t input(void)
@@ -359,8 +357,6 @@ SFSubState input_select_file_choose(void)
   case 'N':
     if (copy_mode)
       return SF_CHOOSE;
-    /* Back here when the new disk is in a drive */
-    strncpy(source_path, path, 224);
     return SF_NEW;
   case 'c':
   case 'C':
@@ -397,40 +393,32 @@ uint8_t input_select_file_new_type(void)
   return 1;
 }
 
+/* One size, IBM-3740 (system_create_new), so nothing to ask */
 uint32_t input_select_file_new_size(uint8_t t)
 {
   (void)t;
-  for (;;)
-  {
-    switch (kbd_wait())
-    {
-    case '1': return 100;
-    case '2': return 400;
-    case '3': return 720;
-    case '4': return 1440;
-    case 'c':
-    case 'C': return 1;
-    case KEY_ESCAPE: return 0;
-    case KEY_CTRL_C: quit(); break;
-    default: break;
-    }
-  }
+  return 250;
 }
 
 uint32_t input_select_file_new_custom(void)
 {
-  static char num[6];
+  return 0;
+}
 
-  memset(num, 0, sizeof(num));
-  input_line(ui_field_x, INFO_Y, 0, num, sizeof(num), false);
-  custom_numSectors = (unsigned short)atoi(num);
-  custom_sectorSize = 512;
-  return custom_numSectors ? 999 : 0;
+static bool ends_imd(const char *c)
+{
+  static uint8_t n;
+
+  n = (uint8_t)strlen(c);
+  return n >= 4 && c[n - 4] == '.' && (c[n - 3] | 0x20) == 'i'
+    && (c[n - 2] | 0x20) == 'm' && (c[n - 1] | 0x20) == 'd';
 }
 
 void input_select_file_new_name(char *c)
 {
-  input_line(ui_field_x, INFO_Y, 0, c, 64, false);
+  input_line(ui_field_x, INFO_Y, 0, c, NEW_NAME_SIZE - 4, false);
+  if (c[0] && !ends_imd(c))
+    strcat(c, ".imd");
 }
 
 /*
@@ -479,7 +467,6 @@ SSSubState input_select_slot_choose(void)
     mode = MODE_WRITE;
     return SS_DONE;
   case KEY_ESCAPE:
-    create = false;
     state = SELECT_FILE;
     backToFiles = true;
     return SS_ABORT;

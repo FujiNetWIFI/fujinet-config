@@ -376,19 +376,15 @@ void screen_select_file_new_size(uint8_t k)
 {
   (void)k;
   bar_clear(false);
-  ui_info("New disk image: how big?");
-  ui_hints("[1] 100K  [2] 400K  [3] 720K  [4] 1.44M  [C] Custom", "[ESC] Cancel");
 }
 
 void screen_select_file_new_custom(void)
 {
-  ui_prompt("Number of 512-byte sectors:");
-  screen_edit_hints();
 }
 
 void screen_select_file_new_name(void)
 {
-  ui_prompt("Name of the new disk image:");
+  ui_prompt("New 8\" IBM-3740 disk (.imd), name:");
   screen_edit_hints();
 }
 
