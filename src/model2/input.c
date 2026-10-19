@@ -28,6 +28,7 @@
 extern unsigned char copy_host_slot;
 
 bool mounting = false;
+static bool line_cancelled;
 
 uint8_t input(void)
 {
@@ -55,6 +56,7 @@ void input_line(uint8_t x, uint8_t y, uint8_t o, char *c, uint8_t l, bool passwo
   static bool done;
 
   (void)o;
+  line_cancelled = false;
   if (!l)
     return;
 
@@ -94,6 +96,7 @@ void input_line(uint8_t x, uint8_t y, uint8_t o, char *c, uint8_t l, bool passwo
       strncpy(c, orig, l - 1);
       c[l - 1] = 0;
       n = (uint8_t)strlen(c);
+      line_cancelled = true;
       done = true;
       break;
     case KEY_CTRL_C:
@@ -458,8 +461,7 @@ SSSubState input_select_slot_choose(void)
   case 'r':
   case 'R':
     selected_device_slot = bar_get();
-    /* A new disk is for writing on */
-    mode = create ? MODE_WRITE : MODE_READ;
+    mode = MODE_READ;
     return SS_DONE;
   case 'w':
   case 'W':
@@ -557,16 +559,21 @@ WSSubState input_set_wifi_select(void)
   }
 }
 
+/* ESC goes back to the network list */
 void input_line_set_wifi_custom(char *c)
 {
   memset(c, 0, SSID_MAXLEN);
   input_line(ui_field_x, INFO_Y, 0, c, SSID_MAXLEN, false);
+  if (line_cancelled)
+    ws_subState = WS_SELECT;
 }
 
 void input_line_set_wifi_password(char *c)
 {
   memset(c, 0, MAX_PASSWORD_LEN);
   input_line(ui_field_x, INFO_Y, 0, c, MAX_PASSWORD_LEN, true);
+  if (line_cancelled)
+    ws_subState = WS_SELECT;
 }
 
 SISubState input_show_info(void)
