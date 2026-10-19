@@ -179,17 +179,21 @@ void select_slot_done()
 #endif
 
 #ifdef BUILD_ADAM
-    screen_select_slot_build_eos_directory();
-    if (input_select_slot_build_eos_directory())
+    // An EOS directory holds the disk's size in 16 bits
+    if (selected_size <= 0xFFFF)
     {
-      fuji_mount_disk_image(selected_device_slot,2); // R/W
-      screen_select_slot_build_eos_directory_label();
-      input_select_slot_build_eos_directory_label(filename);
-      screen_select_slot_build_eos_directory_creating();
-      if (!system_build_directory(selected_device_slot,selected_size,filename))
+      screen_select_slot_build_eos_directory();
+      if (input_select_slot_build_eos_directory())
       {
-        screen_select_slot_build_eos_directory_failed();
-        input_select_slot_build_eos_directory_failed();
+        fuji_mount_disk_image(selected_device_slot,2); // R/W
+        screen_select_slot_build_eos_directory_label();
+        input_select_slot_build_eos_directory_label(filename);
+        screen_select_slot_build_eos_directory_creating();
+        if (!system_build_directory(selected_device_slot,selected_size,filename))
+        {
+          screen_select_slot_build_eos_directory_failed();
+          input_select_slot_build_eos_directory_failed();
+        }
       }
     }
 
