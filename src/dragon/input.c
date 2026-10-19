@@ -664,7 +664,9 @@ SSSubState input_select_slot_choose(void)
 	case 'r':
 		mode = MODE_READ;
 		selected_device_slot = (char)bar_get();
-		strncpy(source_path, path, 224);
+		// After New, path ends in the new name; select_file_new() saved the folder
+		if (!create)
+			strncpy(source_path, path, 224);
 		old_pos = pos;
 		return SS_DONE;
 	case 'W':
@@ -690,10 +692,10 @@ unsigned char input_select_slot_mode(char *mode)
 }
 
 /*
- *  Handle inupt for the "show info" screen.
+ *  Handle input for the "show info" screen.
  *
- *  'C' - Reconnect Wifi
- *  'S' - Change SSID
+ *  'C' - Change SSID
+ *  'R' - Reconnect WiFi
  *  Any other key - return to main hosts and devices screen
  *
  */

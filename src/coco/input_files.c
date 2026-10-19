@@ -200,7 +200,9 @@ SSSubState input_select_slot_choose(void)
   case 'r':
     mode = MODE_READ;
     selected_device_slot = (char)bar_get();
-    strncpy(source_path, path, 224);
+    // After New, path ends in the new name; select_file_new() saved the folder
+    if (!create)
+      strncpy(source_path, path, 224);
     old_pos = pos;
     return SS_DONE;
   case 'W':
