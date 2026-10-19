@@ -12,7 +12,7 @@ void system_boot(void)
   eos_init();
 }
 
-void system_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
+bool system_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
 {
   char nd[263]={0xE7,0x00,0x00,0x00,0x00,0x00,0x00};
   char *c = &nd[3];
@@ -23,7 +23,7 @@ void system_create_new(unsigned char selected_host_slot,unsigned char selected_d
   *l=selected_size;
   strcpy(&nd[7],path);
 
-  eos_write_character_device(FUJI_DEV,&nd,sizeof(nd));
+  return eos_write_character_device(FUJI_DEV,&nd,sizeof(nd)) == ADAMNET_OK;
 }
 
 void system_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
