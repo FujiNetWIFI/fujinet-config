@@ -1,4 +1,7 @@
+#include "../../typedefs.h"
 #include "entry.h"
+
+bool config_disk_gone = false;
 
 void entry_set(unsigned char entry, unsigned char host_slot, unsigned char device_slot)
 {
