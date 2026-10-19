@@ -509,7 +509,9 @@ SSSubState input_select_slot_choose(void)
     case KEY_SMART_V:
       selected_device_slot=bar_get();
       mode=0;
-      strncpy(source_path, path, 224);
+      // After New, path ends in the new name; select_file_new() saved the folder
+      if (!create)
+        strncpy(source_path, path, 224);
       old_pos = pos;
       return SS_DONE;
     case KEY_SMART_VI:
