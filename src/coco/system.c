@@ -45,7 +45,7 @@ void system_boot(void)
   exit(0);
 }
 
-void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
+bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                        uint32_t selected_size, const char *path)
 {
   NewDisk *nd = (NewDisk *)response;
@@ -56,7 +56,6 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
   nd->deviceSlot = selected_device_slot;
   strcpy(nd->filename, path);
 
-  fuji_create_new(nd);
-  return;
+  return fuji_create_new(nd);
 }
 

@@ -141,9 +141,9 @@ void select_slot_done()
   // int i;
 #endif
 
-  // Every path below changes the device slot table on the FujiNet - through
-  // fuji_set_device_filename() at least - and the firmware also owns the
-  // MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
+  // Every path below can change the device slot table on the FujiNet - even a
+  // refused NEW DISK leaves its name in the slot - and the firmware also owns
+  // the MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
   slots_dirty = true;
 
   memset(filename,0,sizeof(filename));
@@ -152,7 +152,16 @@ void select_slot_done()
   {
     create=false; // we're done with this until next time.
     screen_select_file_new_creating();
-    system_create_new(selected_host_slot,selected_device_slot,selected_size,path);
+    if (!system_create_new(selected_host_slot,selected_device_slot,selected_size,path))
+    {
+      screen_error("  COULD NOT CREATE DISK.");
+#ifdef BUILD_APPLE2
+      pause(255); // the Apple II's pause() runs about 4x short
+#else
+      pause(150);
+#endif
+      goto not_created;
+    }
 #ifdef BUILD_COCO
     memcpy(deviceSlots[selected_device_slot].file,path,FILE_MAXLEN);
 #else
@@ -250,6 +259,7 @@ void select_slot_done()
     fuji_close_directory();
   }
 
+ not_created:
   if (!quick_boot)
     {
 #ifdef BUILD_PMD85

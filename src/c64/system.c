@@ -8,8 +8,9 @@ void system_boot(void)
   return;
 }
 
-void system_create_new(uint8_t, uint8_t, uint32_t, const char *)
+bool system_create_new(uint8_t, uint8_t, uint32_t, const char *)
 {
 	// TODO implement
+	return false;
 }
 

@@ -42,7 +42,7 @@ void system_boot(void)
   exit(0);
 }
 
-void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
+bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
                        uint32_t selected_size, const char *path)
 {
   memset(&newDisk, 0, sizeof(newDisk));
@@ -51,7 +51,6 @@ void system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
   newDisk.deviceSlot = selected_device_slot;
   strcpy(newDisk.filename, path);
 
-  fuji_create_new(&newDisk);
-  return;
+  return fuji_create_new(&newDisk);
 }
 
