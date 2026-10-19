@@ -1,0 +1,5 @@
+build/
+cfg/
+snap/
+nvram/
+fujiconfigrom.h
