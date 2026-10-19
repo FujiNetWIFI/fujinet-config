@@ -52,6 +52,7 @@ void input_line_filter(char *c);
 
 bool input_select_slot_build_eos_directory(void);
 void input_select_slot_build_eos_directory_label(char *c);
+void input_select_slot_build_eos_directory_failed(void);
 
 #ifdef BUILD_ADAM
 #include "adam/key_codes.h"
@@ -72,7 +73,7 @@ void input_joystick_init(void);
 
 #ifdef BUILD_ATARI
 #define KCODE_ESCAPE CH_ESC
-#define KCODE_RETURN 0x9B // is the ATASCI equivlant of 155 End Of Line (return)
+#define KCODE_RETURN 0x9B // is the ATASCII equivalent of 155 End Of Line (return)
 #define KCODE_BACKSP 0x7E
 
 #define CH_KEY_LABEL_L "\xD9" // Left arrow on the keyboard

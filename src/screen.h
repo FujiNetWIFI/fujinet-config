@@ -11,7 +11,7 @@
 #include <conio.h>
 #endif /* BUILD_APPLE2 || BUILD_PMD85 */
 
-// Used to identify what screen we're currently displaying. The set_cursor() method uses this so it know what screen we're on so it
+// Used to identify what screen we're currently displaying. The set_cursor() method uses this so it knows what screen we're on so it
 // can correctly calculate the memory offset in video memory when given an x,y coordinate pair.
 //
 typedef enum
@@ -108,6 +108,7 @@ bool screen_mount_and_boot_lobby(void);
 void screen_select_slot_build_eos_directory(void);
 void screen_select_slot_build_eos_directory_label(void);
 void screen_select_slot_build_eos_directory_creating(void);
+void screen_select_slot_build_eos_directory_failed(void);
 
 /**
  * Clear the currently displayed bar from screen
@@ -116,7 +117,7 @@ void bar_clear(bool oldRow);
 
 /**
  * Set up bar and start display on row
- * @param y Y column for bar display
+ * @param y row for bar display
  * @param c # of columns for left
  * @param m number of items
  * @param i item index to start display
@@ -155,23 +156,13 @@ uint_fast8_t bar_get(void);
 #ifdef BUILD_APPLE2
 /**
  * Get current bar position for devices
- * used for apple2 devce view toggle
+ * used for apple2 device view toggle
  * @return bar index
  */
 unsigned char bar_get_device(void);
 #endif
 
 #ifndef BUILD_MSDOS
-/**
- * Set up bar and start display on row
- * @param y Y column for bar display
- * @param c # of columns for left
- * @param m number of items
- * @param i item index to start display
- * @param s s split s lines (used to allow for diskII separater)
- */
-void bar_set_split(uint8_t y, uint8_t c, uint8_t m, uint8_t i, uint8_t s);
-
 void set_cursor(unsigned char x, unsigned char y);
 void bar_set_color(unsigned char c);
 

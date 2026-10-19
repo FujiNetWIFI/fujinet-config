@@ -605,4 +605,9 @@ void input_select_slot_build_eos_directory_label(char *c)
   input_line(0,19,0,c,12,false);
 }
 
+void input_select_slot_build_eos_directory_failed(void)
+{
+  cgetc();
+}
+
 #endif /* BUILD_ADAM */
