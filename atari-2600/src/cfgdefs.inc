@@ -18,6 +18,83 @@
 ; drift away from this equate.
 CFGOTO  EQU     FNTAIL
 
+; The rest of the tail's entry points, for the same reason. config.asm ORGs
+; each one at its equate and fails the build if the routine before it runs
+; into it.
+SNDPOL  EQU     $1F27           ; FNGO's spin: a sound tick once a frame's time
+SNDERR  EQU     $1F50           ; play the error beep
+SNDMNU  EQU     $1F54           ; play the menu's two-tone
+SNDCUE  EQU     $1F56           ; play cue A
+SNDKEY  EQU     $1F6A           ; a click for input mask A; A is preserved
+VBTAIL  EQU     $1F7C           ; the frame's blanking work, then VBLANK off
+
+; Cue offsets into the tail's SNDTAB, checked there.
+CUETIK  EQU     1               ; a stick step
+CUEBLP  EQU     4               ; FIRE
+CUEMNU  EQU     7               ; SELECT opens a menu
+CUEERR  EQU     11              ; an error line
+CUEUP   EQU     15              ; a boot begins
+CUEOK   EQU     21              ; the image is in
+
+; ---------------- the display ----------------
+; FN_T_PLANE(0..5) from firmware/include/fuji_mailbox.h. Here rather than in
+; fujidisp.inc because the tail reads them too, and the tail cannot include
+; code.
+TP0     EQU     $1800
+TP1     EQU     $1880
+TP2     EQU     $1900
+TP3     EQU     $1980
+TP4     EQU     $1A00
+TP5     EQU     $1A80
+
+TROWS   EQU     21              ; FN_T_ROWS
+TCELLH  EQU     6               ; FN_T_CELL_H; the sixth line is always blank
+TLINES  EQU     TROWS*TCELLH    ; 126 scanlines of text
+
+; NTSC colours. The frame and the bar share COLUPF, so a bar row's stretch of
+; the frame sides takes the bar colour.
+        IFDEF   MONO
+COLFRM  EQU     $01             ; black on screen, nonzero for the kernel
+COLBAR  EQU     $01
+COLTTL  EQU     $0E
+COLPTH  EQU     $0E
+COLTXT  EQU     $0E
+COLERR  EQU     $0E
+COLHNT  EQU     $0E
+COLHI   EQU     $0E
+        ELSE
+COLFRM  EQU     $9A             ; light blue
+COLBAR  EQU     $84             ; blue: the selection bar and the title strip
+COLTTL  EQU     $1E             ; gold
+COLPTH  EQU     $9C             ; light blue
+COLTXT  EQU     $0E             ; white
+COLERR  EQU     $46             ; red
+COLHNT  EQU     $08             ; grey
+COLHI   EQU     $C8             ; green: the progress bar, the keyboard caret
+        ENDIF
+
+; RCOLS -- a bank's row colour table, RCOLTB: the title, the path row, the
+; list, and the bank's own error and hint rows. A bank with any other shape
+; writes its 21 bytes out instead.
+RCOLS   MACRO   ERR,HINT,{GLOBALSYMBOLS}
+RCOLTB:
+RCI     SET     0
+        REPT    TROWS
+        IF      RCI=0
+        DB      COLTTL
+        ELSEIF  RCI=1
+        DB      COLPTH
+        ELSEIF  RCI=ERR
+        DB      COLERR
+        ELSEIF  RCI=HINT
+        DB      COLHNT
+        ELSE
+        DB      COLTXT
+        ENDIF
+RCI     SET     RCI+1
+        ENDM
+        ENDM
+
 BANKHST EQU     0               ; host slots
 BANKDIR EQU     1               ; the directory browser
 BANKINF EQU     2               ; adapter info
@@ -40,6 +117,7 @@ CP_DONE EQU     2
 ; FP_POP drops the filename and puts the browser back where it was.
 BT_GO   EQU     0
 BT_FAIL EQU     1
+BT_JING EQU     2               ; the image is in; its cue is playing
 
 ; The wifi bank's sub-states, in CFSUB. Cold start lands on WS_CHECK because
 ; CFCOLD zeroes the zero page and WS_CHECK is zero -- which is deliberate:
@@ -115,6 +193,16 @@ CFTMPB  EQU     $8D
 ; Nothing else is live while the keyboard is, so the landing ground will do.
 EDCOL   EQU     $8F
 EDROW   EQU     $90
+
+; The display kernel's and the sound engine's, in the same landing ground and
+; safe for the same reason: the boot bank lets a cue finish before FNSWAP.
+ROWN    EQU     $91             ; the text row the kernel is on
+ROWEND  EQU     $92             ; the scanline that row's ink ends at
+BARY    EQU     $93             ; 6 * the row with a '>' in column 0, or $FF
+SNDPTR  EQU     $94             ; the next note in SNDTAB; 0 is idle
+SNDDUR  EQU     $95             ; frames left on this note, minus one
+SNDVOL  EQU     $96             ; AUDV0 for this cue; 0 when nothing plays
+SAVSP   EQU     $97             ; the stack pointer, while the kernel uses S
 
 HOSTSLN EQU     32              ; MAX_HOSTNAME_LEN: the stride in the reply
 NHOSTS  EQU     8               ; MAX_HOST_SLOTS

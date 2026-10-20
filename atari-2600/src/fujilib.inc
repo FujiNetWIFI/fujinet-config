@@ -33,22 +33,20 @@ FNRW:   sta     FNRSEL,x
         sta     FNCMT
         rts
 
-; FNARM -- open the decode gate.
-; Two stores, in order, carrying two specific values. A 7800's BIOS probes
-; cartridge space on startup and cannot produce that, which is the point.
-FNARM:  lda     #FNAM1
-        sta     FNRSEL+FH_ARM1
-        lda     #FNAM2
-        sta     FNRSEL+FH_ARM2
-        rts
-
 ; FNCHK -- Z set if a FujiNet cartridge is answering.
+;
+; Like FNLSWAP below, this and the other routines only some banks call are
+; assembled only into a bank that asks for them, because the browser has no
+; bytes to spare for code it never runs. A bank that forgets its flag fails to
+; assemble rather than failing at run time.
+        IFDEF   FNLCHK
 FNCHK:  lda     FNMAG0
         cmp     #'F'
         bne     FNCHK1
         lda     FNMAG1
         cmp     #'N'
 FNCHK1: rts
+        ENDIF
 
 ; FNBEG -- begin a transaction described by FNDEV / FNCMD / FNNPR.
 ; Rewinds the TX stream last, so parameters may be appended immediately.
@@ -66,10 +64,6 @@ FNBEG:  lda     #16             ; ~9s; longer than the cart's own 5s budget so
         lda     #0
         ldx     #FR_DRST
         jsr     FNRW
-        rts
-
-; FNTXB -- append A to the TX stream.
-FNTXB:  sta     FNTX
         rts
 
 ; FNPB -- append a one-byte parameter with value A.
@@ -116,7 +110,8 @@ FNGO1:  sta     FNSEQ
         lda     FNTMO
         sta     FNCNT
 FNGO2:  ldy     #0
-FNGO3:  ldx     #0
+FNGO3:  jsr     SNDPOL          ; no frames while this spins: keep the sound's
+        ldx     #0              ;   time, so a cue never holds a note
         ; ACKSEQ is published LAST, after the whole reply is in place, so a
         ; match means everything behind it is already readable.
 FNGO4:  lda     FNACKS
@@ -185,6 +180,7 @@ FNCLS1: txa
 ;
 ; X is a single byte, so this reaches the first 256 bytes of the reply. Every
 ; field of GET_ADAPTERCONFIG_EXTENDED that a client wants lives below that.
+        IFDEF   FNLRRPL
 FNRRPL: sta     FNRSEL+FH_TROW
 FNRR1:  lda     FNRPLY,x
         beq     FNRR2
@@ -195,6 +191,7 @@ FNRR1:  lda     FNRPLY,x
 FNRR2:  lda     #0
         sta     FNRSEL+FH_TEND
         rts
+        ENDIF
 
 ; FNRSTR -- render the NUL-terminated string at FNPTRL/FNPTRH into text row A.
 FNRSTR: sta     FNRSEL+FH_TROW
@@ -328,6 +325,7 @@ FNPE2:  rts
 ; want from a browser -- but it means a client must not assume the buffer is
 ; empty at startup. Call FNWRST.
 
+        IFDEF   FNLPATH
 ; FNWRST -- empty it.
 FNWRST: lda     #FP_RST
         sta     FNRSEL+FH_PATHO
@@ -336,6 +334,7 @@ FNWRST: lda     #FP_RST
 ; FNWCH -- append A. Preserves X and Y.
 FNWCH:  sta     FNRSEL+FH_PATHC
         rts
+        ENDIF
 
 ; FNWPOP -- drop the last component. "/a/b/c/" becomes "/a/b/", and "/"
 ; stays "/", so walking up from the root is harmless.
@@ -345,9 +344,11 @@ FNWPOP: lda     #FP_POP
 
 ; FNWTX -- emit the path into the TX stream as EXACTLY 256 bytes, padded.
 ; One store; the cartridge does the other 255.
+        IFDEF   FNLWTX
 FNWTX:  lda     #FP_TX
         sta     FNRSEL+FH_PATHO
         rts
+        ENDIF
 
 ; FNPWD -- append the SELECTED path buffer to the payload being built, WITHOUT
 ; padding, and advance the payload counter past it.
@@ -456,7 +457,7 @@ INREPT: jsr     INSCAN
         lda     #INDLAY
         sta     INRPT
         pla
-        rts
+        jmp     SNDKEY          ; its click; A comes back as it went in
 
 INRP1:  lda     INCUR
         and     #INDIRS
@@ -469,7 +470,7 @@ INRPF:  lda     #INRATE
         sta     INRPT
         lda     INCUR
         and     #INDIRS
-        rts
+        jmp     SNDKEY
 
 INRP2:  lda     #INDLAY
         sta     INRPT

@@ -31,8 +31,7 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81             ; the display kernel's 3-cycle pad target
-SAVSP   EQU     $82
+FNLCHK  EQU     1
 
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
@@ -530,7 +529,8 @@ PADN1:  sta     FNTX
 PADN9:  rts
 
 ; ---------------------------------------------------------------------------
-SHOWERR: lda    #WSROWE
+SHOWERR: jsr    SNDERR
+        lda     #WSROWE
         jsr     FNROWA
         lda     #'E'
         sta     FNRSEL+FH_TCHR
@@ -554,6 +554,9 @@ TSCANN: DB      "SCANNING...",0
 TOTHER: DB      "OTHER...",0
 TWAIT:  DB      "PLEASE WAIT",0
 THINT:  DB      "SEL=SKIP",0
+
+; Row colours for the kernel.
+        RCOLS   WSROWE,WSROWH
 
         INCLUDE "ui.inc"
         INCLUDE "fujilib.inc"

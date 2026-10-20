@@ -10,8 +10,7 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81
-SAVSP   EQU     $82
+FNLRRPL EQU     1
 
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
@@ -43,6 +42,7 @@ START:  lda     #2
 
 ; ---------------------------------------------------------------------------
 APPVBL: jsr     INSCAN
+        jsr     SNDKEY
         and     #IN_FIRE|IN_SEL
         beq     AVDONE
         lda     #BANKHST
@@ -120,7 +120,8 @@ DRDONE: lda     #(THINT)&$FF
         jsr     FNRSTR
         rts
 
-DRBAD:  lda     #1
+DRBAD:  jsr     SNDERR
+        lda     #1
         sta     CFSTEP
         lda     #ROWERR
         jsr     FNROWA
@@ -152,6 +153,16 @@ LMAC:   DB      "MAC",0
 LVER:   DB      "VERSION",0
 TTITLE: DB      "FN INFO",0
 THINT:  DB      "FIRE=BACK",0
+
+; Row colours for the kernel: each label above its value.
+RCOLTB: DB      COLTTL,COLTXT
+        REPT    6
+        DB      COLPTH,COLTXT
+        ENDM
+        DB      COLTXT,COLTXT,COLTXT,COLTXT,COLERR,COLHNT,COLTXT
+        IF      *-RCOLTB<>TROWS
+        FATAL   "RCOLTB is not one byte per row"
+        ENDIF
 
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"

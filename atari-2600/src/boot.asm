@@ -18,19 +18,19 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81             ; the display kernel's 3-cycle pad target
-SAVSP   EQU     $82
-
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
 
 FNLSWAP EQU     1               ; this is the bank that hands the console over
+FNLWTX  EQU     1
 
 BTROWP  EQU     2               ; the path being booted
 BTROWB  EQU     5               ; the progress bar
 BTROWE  EQU     18              ; the error line
 BTROWH  EQU     20              ; "DO NOT POWER OFF"
 BTFAILW EQU     180             ; frames to hold a failure before going back
+CFCELL  EQU     CFMENU          ; bar cells drawn: one tick per new one. This
+                                ;   bank has no menu.
 
         ORG     $1000
 
@@ -41,6 +41,9 @@ START:  lda     #2
         sta     CFSTEP
         sta     CFMOPN
         sta     CFN             ; last percentage drawn
+        sta     CFCELL
+        lda     #CUEUP          ; it plays on through the two round trips
+        jsr     SNDCUE
 
         jsr     DRAW
 
@@ -76,6 +79,8 @@ BTBAD:  lda     #BT_FAIL
 APPVBL: lda     CFSUB
         cmp     #BT_FAIL
         beq     AVFAIL
+        cmp     #BT_JING
+        beq     AVJING
 
         lda     FNBST
         cmp     #FNBRDY
@@ -89,7 +94,18 @@ APPVBL: lda     CFSUB
         sta     CFN
         jmp     BAR
 
-AVGO:   jsr     FNBLK
+AVGO:   ldy     #FNTCOL         ; the whole bar, while the cue plays
+        jsr     BAR2
+        lda     #BT_JING
+        sta     CFSUB
+        lda     #CUEOK
+        jmp     SNDCUE
+
+; The cue is let finish before the swap, which silences the TIA and leaves
+; the sound to the game.
+AVJING: lda     SNDVOL
+        bne     AVDONE
+        jsr     FNBLK
         jmp     FNSWAP          ; does not return
 
 AVDIED: lda     FNBER
@@ -128,7 +144,12 @@ BARL:   cmp     #9
         cpy     #FNTCOL
         bcc     BARL
 BAR2:   sty     CFTMPB
-
+        cpy     CFCELL
+        beq     BAR3
+        sty     CFCELL
+        lda     #CUETIK
+        jsr     SNDCUE
+BAR3:
         ldy     #0
 BARD:   tya
         cmp     CFTMPB
@@ -240,7 +261,8 @@ TFAILR: lda     #(TFAILT)&$FF
         lda     #0
         jmp     FNRSTR
 
-SHOWERR: lda    #BTROWE
+SHOWERR: jsr    SNDERR
+        lda     #BTROWE
         jsr     FNROWA
         lda     #'E'
         sta     FNRSEL+FH_TCHR
@@ -255,6 +277,16 @@ SHOWERR: lda    #BTROWE
 TTITLE: DB      "BOOTING",0
 TFAILT: DB      "BOOT FAILED",0
 THINT:  DB      "DO NOT POWER",0
+
+; Row colours for the kernel: the path, and the bar in green.
+RCOLTB: DB      COLTTL,COLTXT,COLPTH,COLTXT,COLTXT,COLHI
+        REPT    BTROWE-BTROWB-1
+        DB      COLTXT
+        ENDM
+        DB      COLERR,COLTXT,COLHNT
+        IF      *-RCOLTB<>TROWS
+        FATAL   "RCOLTB is not one byte per row"
+        ENDIF
 
         INCLUDE "ui.inc"
         INCLUDE "fujilib.inc"

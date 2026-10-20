@@ -80,6 +80,7 @@ SWACNT  EQU     $0281
 SWCHB   EQU     $0282           ; bit 0 RESET, bit 1 SELECT (low = pressed)
 SWBCNT  EQU     $0283
 INTIM   EQU     $0284
+TIMINT  EQU     $0285           ; bit 7: the timer has run out (sticky)
 TIM1T   EQU     $0294
 TIM8T   EQU     $0295
 TIM64T  EQU     $0296

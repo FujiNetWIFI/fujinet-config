@@ -25,9 +25,6 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81
-SAVSP   EQU     $82
-
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
 
@@ -656,6 +653,7 @@ MNTBL:  DB      "UP DIR",0
 
 ; ---------------------------------------------------------------------------
 SHOWERR:
+        jsr     SNDERR
         lda     #ROWERR
         jsr     FNROWA
         lda     #'E'
@@ -671,6 +669,9 @@ SHOWERR:
 
 TTITLE: DB      "FN BROWSE",0
 THINT:  DB      "SEL=UP",0
+
+; Row colours for the kernel: the hint sits under the list.
+        RCOLS   ROWERR,ROW0+NROWS+1
 
         INCLUDE "menu.inc"
         INCLUDE "ui.inc"

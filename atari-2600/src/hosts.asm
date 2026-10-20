@@ -14,8 +14,8 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81             ; the display kernel's 3-cycle pad target
-SAVSP   EQU     $82
+FNLCHK  EQU     1
+FNLPATH EQU     1
 
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
@@ -327,6 +327,7 @@ PUTRPL: lda     FNRPLY,x
 PUTR2:  rts
 
 SHOWERR:
+        jsr     SNDERR
         lda     #ROWERR
         jsr     FNROWA
         lda     #'E'
@@ -599,6 +600,9 @@ TTITLE: DB      "FN HOSTS",0
 TCOPYT: DB      "COPY TO",0
 TEMPTY: DB      "(EMPTY)",0
 THINT:  DB      "SEL=MENU",0
+
+; Row colours for the kernel: the hint sits under the eight slots.
+        RCOLS   ROWERR,ROW0+NHOSTS+1
 
         INCLUDE "menu.inc"
         INCLUDE "fujilib.inc"
