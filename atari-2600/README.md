@@ -36,12 +36,23 @@ header this port's equates mirror, and the MAME cartridge device.
 **The cartridge composes the glyphs.** There is no framebuffer and no character
 generator; the RP2040 renders ASCII into the exact shape a 48-pixel player
 kernel wants and publishes six 128-byte planes, and the 6507 does nothing but
-stream them into `GRP0`/`GRP1` on a cycle-exact schedule (`src/fujidisp.inc`,
-which is transcribed and must not be touched).
+stream them into `GRP0`/`GRP1` on a cycle-exact schedule (`src/fujidisp.inc`).
 
-**There is no inverse video.** `vcs_render_row()` takes no attribute, so a
-selected row cannot be highlighted. Every list marks its selection with a `>`
-in column 0 — which is also why content gets eleven columns, not twelve.
+**Colour is per row, set on the blank line.** The sixth line of every cell is
+blank in the font, so the kernel never streams it: it blanks the players there
+and sets the next row's text colour (`RCOLTB`, one byte per row, each bank its
+own) and the playfield. The playfield draws a light-blue frame, a title strip,
+and a **selection bar** behind whichever row has a `>` in column 0 — `VBTAIL`
+finds it in the planes each frame, so no screen has to say where its cursor is,
+and an open menu's wins because it is lower. The `>` stays: it is still the
+selection on a monochrome TV, and it is why content gets eleven columns.
+
+**Sound is TIA channel 0, from the fixed tail.** A tick for each stick step, a
+blip for FIRE, a two-tone when SELECT opens a menu, a low beep with every error
+line, and for a boot a rising tone, a tick per bar cell and C-E-G-C, played out
+before the swap. CONFIG draws no frames while a transaction is out, so FNGO's
+spin keeps the sound's time from the RIOT timer instead, and AUDV0 is written
+every tick: no cue can be left holding a note.
 
 **Almost nothing lives in console RAM.** The working directory, the filter, a
 pending copy's source path and the text being typed are all 256-byte strings
@@ -75,8 +86,8 @@ last cell as backspace. No shift key, no paging. The Intellivision uses six
 rows of sixteen for the same trick; sixteen columns do not exist here, and the
 transpose is what makes it fit.
 
-The cursor is a `^` on the blank line under its row, because there is no
-highlight to use. The double spacing that makes room for it also makes 4×6
+The cursor is a `^` on the blank line under its row, because colour is per row
+and a cell cannot be picked out; that row is green. The double spacing that makes room for it also makes 4×6
 cells far easier to read.
 
 ## What the cartridge had to learn
@@ -128,7 +139,7 @@ not a served image, so the flag would only unmount device slot 0 — which
   30-character `READ_DIR_ENTRY`. The Intellivision bounce-scrolls the
   highlighted name; this is the one parity item outstanding.
 
-  It needs about 180 bytes and the browser bank has 96. More banks would not
+  It needs about 180 bytes and the browser bank has 82. More banks would not
   help — a bank is 2K whatever the image size. The way in is to move the action
   menu into a bank of its own: it is modal already, it costs the hosts, browser
   and keyboard banks about 250 bytes each in `menu.inc` plus their tables, and
@@ -154,8 +165,15 @@ lossy and would fail on real filenames.
     ./run.sh copytest     # mark, pick a host, copy, verify by re-listing
     BOOT_IMAGE=... CFG_DIR=VCS/ CFG_NAME=DEEP.BIN ./run.sh cfgtest
 
-`accepttest`, `copytest` and `lobbytest` write to a real FujiNet and put back
-what they touched. `emu/setslot.lua`, `emu/listhost.lua` and `emu/probe.lua`
+Most need longer than `run.sh`'s default ten emulated seconds (`SECS=300`).
+`pagetest` and `copytest` need a `SOAK/` folder of `.bin`/`.cfg` pairs on host
+slot 0. They write to a real FujiNet: `lobbytest` puts back the slot it
+claims, `copytest` leaves `soak2k.bin` in the root for the shell to delete, and
+`accepttest` assumes slot 3 is empty and leaves it empty.
+
+The raster check is `$FN2600/emu/dispcheck.py`, which treats anything brighter
+than the background as ink, so run it on `MONO=1 ./build.sh`: every row white,
+the frame and bar black, and not one instruction different. `emu/setslot.lua`, `emu/listhost.lua` and `emu/probe.lua`
 are tools rather than tests: they set a host slot, list one, and report where
 the keyboard's caret actually is. The last found a cursor that tracked
 perfectly and still typed the wrong character -- the action menu and the grid
@@ -188,3 +206,14 @@ the cartridge running.
 
 **The path buffers survive a console reset too.** `CFCOLD` empties all four and
 selects buffer 0.
+
+**The sixth line of every cell belongs to the kernel.** A glyph that inked it
+would not be drawn.
+
+**The fixed tail has fixed entry points**, in `src/cfgdefs.inc`: `CFGOTO`, the
+`SND*` routines and `VBTAIL`. `config.asm` fails the build if one runs into the
+next; there are eight bytes spare.
+
+**Library routines only some banks call are opt-in**: a bank defines `FNLCHK`,
+`FNLRRPL`, `FNLPATH`, `FNLWTX` or `FNLSWAP` to get them. Forgetting one fails
+the assembly, not the program.

@@ -29,9 +29,6 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81             ; the display kernel's 3-cycle pad target
-SAVSP   EQU     $82
-
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
 
@@ -217,7 +214,8 @@ PATHRW: sta     FNRSEL+FH_BLTDL
         sta     FNRSEL+FH_BLTGO
         rts
 
-SHOWERR: lda    #CPROWE
+SHOWERR: jsr    SNDERR
+        lda     #CPROWE
         jsr     FNROWA
         lda     #'E'
         sta     FNRSEL+FH_TCHR
@@ -233,6 +231,9 @@ TTITLE: DB      "COPYING",0
 TCOPY:  DB      "COPIED",0
 TFAIL:  DB      "COPY FAILED",0
 THINT:  DB      "FIRE=BACK",0
+
+; Row colours for the kernel.
+        RCOLS   CPROWE,CPROWH
 
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"

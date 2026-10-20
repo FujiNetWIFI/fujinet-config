@@ -59,8 +59,13 @@ emitted() {
         | sed -n 's/.*(\([0-9][0-9]*\) Bytes).*/\1/p' | head -1
 }
 
+# MONO=1 builds the image emu/dispcheck.py can read: every row white, the frame
+# and the bar black, and not one instruction different.
+DEFS=()
+[ -n "${MONO:-}" ] && DEFS=(-D MONO)
+
 asm() {
-    ( cd src && "$ASL" -q -L "$1.asm" )
+    ( cd src && "$ASL" -q -L ${DEFS[@]+"${DEFS[@]}"} "$1.asm" )
     mv "src/$1.p" "build/$1.p"
     mv -f "src/$1.lst" "build/$1.lst" 2>/dev/null || true
 }

@@ -35,9 +35,6 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
-PAD3    EQU     $81             ; the display kernel's 3-cycle pad target
-SAVSP   EQU     $82
-
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
 
@@ -409,6 +406,17 @@ THOST:  DB      "HOST NAME",0
 TFILT:  DB      "FILTER",0
 TLEN:   DB      "LEN ",0
 THINT:  DB      "FIRE SEL=OK",0
+
+; Row colours for the kernel. The caret rows -- the blank row under each grid
+; row, where the '^' sits -- are picked out, so the caret is easy to find.
+RCOLTB: DB      COLTTL,COLPTH,COLHNT,COLTXT
+        REPT    EDGROWS
+        DB      COLTXT,COLHI
+        ENDM
+        DB      COLHNT
+        IF      *-RCOLTB<>TROWS
+        FATAL   "RCOLTB is not one byte per row"
+        ENDIF
 
         INCLUDE "menu.inc"
         INCLUDE "fujilib.inc"

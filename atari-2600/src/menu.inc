@@ -29,7 +29,8 @@ MNNONE  EQU     $FF             ; "nothing chosen yet"
 
 ; ---------------------------------------------------------------------------
 ; MNOPEN -- start showing the menu at item 0.
-MNOPEN: lda     #0
+MNOPEN: jsr     SNDMNU
+        lda     #0
         sta     CFMENU
         lda     #1
         sta     CFMOPN
