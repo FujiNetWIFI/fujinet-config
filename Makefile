@@ -129,12 +129,15 @@ endif
 CO = build/config/coco/src
 COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/fuji_compat.o $(CO)/coco/launch/runm.o \
   $(CO)/coco/launch/entry.o $(CO)/coco/bar.o $(CO)/coco/color.o $(CO)/coco/die.o $(CO)/coco/input.o \
-  $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o \
+  $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system_create_new.o \
   $(CO)/coco/text_hires.o
 COCO_WIFI_OBJS = $(CO)/coco/wifi/wifi.o $(CO)/check_wifi.o $(CO)/connect_wifi.o \
   $(CO)/set_wifi.o $(CO)/show_info.o $(CO)/coco/screen_wifi.o $(CO)/coco/input_wifi.o
+# system.c (system_boot()'s cart-boot path) is MAIN-only: neither FILES nor
+# WIFI calls into it, and it's too big to carry in COCO_COMMON_OBJS without
+# files.bin blowing its --limit=7BF8.
 COCO_MAIN_OBJS = $(CO)/coco/cfg/main.o $(CO)/hosts_and_devices.o $(CO)/coco/mount_and_boot.o \
-  $(CO)/coco/screen_slots.o $(CO)/coco/screen_hosts.o $(CO)/coco/input_hosts.o
+  $(CO)/coco/screen_slots.o $(CO)/coco/screen_hosts.o $(CO)/coco/input_hosts.o $(CO)/coco/system.o
 COCO_FILES_OBJS = $(CO)/coco/files/main.o $(CO)/coco/files/globals.o $(CO)/select_file.o \
   $(CO)/select_slot.o $(CO)/destination_host_slot.o $(CO)/perform_copy.o \
   $(CO)/coco/scroll.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_files.o \

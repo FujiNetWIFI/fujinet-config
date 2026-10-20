@@ -6,9 +6,6 @@
 
 #define FUJI_IO_REG ((unsigned char *)0xFF41)
 
-/* Big enough to double as system_create_new()'s NewDisk; nothing else is using it then */
-char response[sizeof(NewDisk)];
-
 // "!LDCART!" reports a 5-byte status/length/checksum block at
 // DW_CART_STATUS_ADDR and the four addresses right after it (see
 // drivewire_main.c), instead of a bare ack byte - this lets
@@ -368,19 +365,5 @@ void system_boot(void)
   coldStart();
 #endif
   exit(0);
-}
-
-bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
-                       uint32_t selected_size, const char *path)
-{
-  NewDisk *nd = (NewDisk *)response;
-
-  memset(nd, 0, sizeof(NewDisk));
-  nd->numDisks = (byte)selected_size;
-  nd->hostSlot = selected_host_slot;
-  nd->deviceSlot = selected_device_slot;
-  strcpy(nd->filename, path);
-
-  return fuji_create_new(nd);
 }
 
