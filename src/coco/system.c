@@ -108,13 +108,16 @@ static uint8_t onerom_load_cart(void)
         ldu     #$C210           ; DW_CART_STATUS_ADDR, mapped into cart space
         ldx     #8               ; outer budget - extends the total wait only, never resends
 onerom_poll_outer@
-        ldd     #$4000           ; matches DWWACKTIMEOUT
+        ldy     #$4000           ; matches DWWACKTIMEOUT - Y, not D: LDA ,U below
+                                  ; loads into D's own high byte (A), so counting
+                                  ; down D here would overwrite it with whatever
+                                  ; was just read and never reliably reach zero.
 onerom_poll@
         lda     ,u
         beq     onerom_success@  ; 0 = DW_CART_STATUS_SUCCESS
         cmpa    #$FF
         beq     onerom_failed@   ; 255 = DW_CART_STATUS_FAILURE
-        subd    #1
+        leay    -1,y             ; LEAY affects Z on the 6809, so this BNE is valid
         bne     onerom_poll@
         leax    -1,x
         bne     onerom_poll_outer@
@@ -331,24 +334,19 @@ INISTK  IMPORT
 
 bool system_slot0_is_rom(void)
 {
-  char *name;
-
   if (!fuji_get_device_filename(0, response))
     return false;
-  name = strupr(response);
-  return strendswith(name, ".CCC") || strendswith(name, ".ROM");
+  return filename_has_rom_suffix(response) != 0;
 }
 
 void system_boot(void)
 {
   static const char msg[] = "\rBOOTING USER ROM...\r";
 
-  // Mount every configured slot now, synchronously - this is also what
-  // pushes a cartridge image to a One ROM companion if slot 0 holds one
-  // (see fujicmd_mount_all_success() in centi-fuji), so it has to happen
-  // before the slot0-is-rom check below can have anything to jump into.
-  fuji_mount_all();
-
+  // hosts_and_devices_done() already mounted every configured slot - slot 0
+  // included, which is also what pushes a cartridge image to a One ROM
+  // companion if it holds one (see fujicmd_mount_disk_image_success() in
+  // centi-fuji) - before state became DONE and got us here.
   if (system_slot0_is_rom()) {
     // putstr, not printf: keeps the printf library out of apps that never print.
     putstr(msg, sizeof(msg) - 1);

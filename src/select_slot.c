@@ -28,17 +28,12 @@ SSSubState ss_subState;
 // no disk device for a cart ROM to occupy.
 static bool selected_rom_image = false;
 
-// Read the name of the currently selected directory entry and report
-// whether it is a ROM cartridge image.
+// select_file_entry_type() (select_file.c) already read the selected entry's
+// name into response, right before SELECT_SLOT is entered - no need to
+// reopen the directory and read the same entry again.
 static bool selected_file_is_rom_image(void)
 {
-  fuji_open_directory_filter(selected_host_slot,path,filter);
-  fuji_set_directory_position(pos);
-  fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
-  fuji_close_directory();
-
-  return strendswith(response, ".ccc") || strendswith(response, ".CCC") ||
-         strendswith(response, ".rom") || strendswith(response, ".ROM");
+  return filename_has_rom_suffix(response) != 0;
 }
 #endif /* BUILD_COCO || BUILD_DRAGON */
 

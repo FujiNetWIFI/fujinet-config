@@ -17,4 +17,9 @@
  */
 int strendswith(const char *str, const char *suffix);
 
+// Case-insensitive .CCC/.ROM suffix check, shared by system_slot0_is_rom()
+// and the file browser's own ROM-cartridge detection so the suffix rules
+// live in one place.
+int filename_has_rom_suffix(const char *name);
+
 #endif /* STRRCHR_H */
