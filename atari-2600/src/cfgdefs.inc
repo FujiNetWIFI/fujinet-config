@@ -115,9 +115,10 @@ CP_DONE EQU     2
 ; to boot. The browser appends the filename before it leaves; the lobby builds
 ; the path from a literal. Boot then needs no argument at all, and on failure
 ; FP_POP drops the filename and puts the browser back where it was.
-BT_GO   EQU     0
+BT_GO   EQU     0               ; MOUNT_IMAGE answered: judge the boot state
 BT_FAIL EQU     1
 BT_JING EQU     2               ; the image is in; its cue is playing
+BT_WAIT EQU     3               ; MOUNT_IMAGE out: the image is arriving
 
 ; The wifi bank's sub-states, in CFSUB. Cold start lands on WS_CHECK because
 ; CFCOLD zeroes the zero page and WS_CHECK is zero -- which is deliberate:
@@ -203,12 +204,17 @@ SNDPTR  EQU     $94             ; the next note in SNDTAB; 0 is idle
 SNDDUR  EQU     $95             ; frames left on this note, minus one
 SNDVOL  EQU     $96             ; AUDV0 for this cue; 0 when nothing plays
 SAVSP   EQU     $97             ; the stack pointer, while the kernel uses S
+BTPF    EQU     $98             ; the boot bar's PF2; only the boot bank's
+                                ;   kernel reads it
+RDMAX   EQU     $99             ; the browser's READ_DIR_ENTRY maxlen
 
 HOSTSLN EQU     32              ; MAX_HOSTNAME_LEN: the stride in the reply
 NHOSTS  EQU     8               ; MAX_HOST_SLOTS
 DEVSLOT EQU     0               ; this console has one thing to mount into
 NAMELN  EQU     30              ; READ_DIR_ENTRY maxlen. NOT 31: at exactly 31
                                 ;   the firmware prepends icon bytes.
+NAMEMX  EQU     128             ; the same, to boot or descend: a name of
+                                ;   NAMELN or more comes back cut with "..."
 NROWS   EQU     14              ; list rows
 ROW0    EQU     2               ; the first of them
 ROWERR  EQU     18              ; where a failure is reported

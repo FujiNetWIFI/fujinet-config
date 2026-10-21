@@ -145,7 +145,7 @@ FNCNT   EQU     $83             ; timeout quanta remaining
 FNDEV   EQU     $86             ; transaction setup, read by FNBEG
 FNCMD   EQU     $87
 FNNPR   EQU     $88
-FNTMO   EQU     $89             ; timeout in ~0.6s quanta
+FNTMO   EQU     $89             ; timeout in ~0.8s quanta
 FNPTRL  EQU     $8A
 FNPTRH  EQU     $8B
 FNPCNT  EQU     $8E             ; bytes written into the current path payload

@@ -50,7 +50,7 @@ FNCHK1: rts
 
 ; FNBEG -- begin a transaction described by FNDEV / FNCMD / FNNPR.
 ; Rewinds the TX stream last, so parameters may be appended immediately.
-FNBEG:  lda     #16             ; ~9s; longer than the cart's own 5s budget so
+FNBEG:  lda     #16             ; ~12s; longer than the cart's own 5s budget so
         sta     FNTMO           ;   a real timeout is reported as ITS error
         lda     FNDEV
         ldx     #FR_DEV
@@ -99,14 +99,21 @@ FNPW:   pha
 ; connector and the RESET switch is a bit in a RIOT register the cart never
 ; sees. A program-local counter would restart at 1, collide with a sequence
 ; already answered, and the transaction would be dropped in silence.
-FNGO:   lda     FNACKS
+;
+; The launch is a macro so FNSEND shares it without adding a byte to the banks
+; that never use FNSEND.
+FNLNCH  MACRO
+        lda     FNACKS
         clc
         adc     #1
-        bne     FNGO1
+        bne     FNLN1
         lda     #1              ; 0 is reserved as "never used"
-FNGO1:  sta     FNSEQ
+FNLN1:  sta     FNSEQ
         ldx     #FR_SEQ
         jsr     FNRW            ; launching it is this single commit
+        ENDM
+
+FNGO:   FNLNCH
         lda     FNTMO
         sta     FNCNT
 FNGO2:  ldy     #0
@@ -127,6 +134,14 @@ FNGO4:  lda     FNACKS
         rts
 FNGO5:  lda     FNERR
         rts
+
+; FNSEND -- commit and return at once, for a caller that has frames to draw
+; while the reply is out. It polls FNACKS == FNSEQ itself, and must make no
+; register write until they match: the cart drops them while it is busy.
+        IFDEF   FNLSEND
+FNSEND: FNLNCH
+        rts
+        ENDIF
 
 ; FNACK -- 0 on success, FNE* on transport failure, FNENAK if the server said
 ; no. Call after FNGO returned 0.
