@@ -10,6 +10,11 @@
 #define BPR      160
 #define WIN      ((byte *)0x8000)
 #define ROM_FONT ((const byte *)0xF09D)
+#define NUM_GLYPHS  96
+#define GLYPH_ROWS  8
+#define CELL_BYTES  4
+#define NUM_BOX_TILES 11
+#define GLYPH(font, c) ((font) + (unsigned)((c) - ' ') * GLYPH_ROWS)
 #define INVERTED 0x80
 #define MONO_SETS 6
 
@@ -17,6 +22,8 @@
 #define INTS_RESTORE() asm("puls", "cc")
 #define GFX_ENTER()    do { INTS_OFF(); asm("ldb", "#$01"); asm("stb", "$FF91"); } while (0)
 #define GFX_LEAVE()    do { asm("clr", "$FF91"); INTS_RESTORE(); } while (0)
+
+enum { ROM_CARET = 0x60, ROM_UNDERSCORE = 0x7F };
 
 enum { P_BG, P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_KEY_BG, P_ERROR, P_STATUS, P_EMPTY, P_READ, P_WRITE, P_BAR_FG, P_BAR_BG };
 
@@ -48,7 +55,7 @@ static const byte palette_cmp[NUM_COLORSETS][16] = {
 };
 
 /* Box codes BOX_TL (0xA0) to 0xAA, in hirestxt's order. */
-static const byte box_tiles[11][8] = {
+static const byte box_tiles[NUM_BOX_TILES][GLYPH_ROWS] = {
   { 0x00, 0x00, 0x00, 0x1F, 0x10, 0x17, 0x14, 0x14 }, /* top left */
   { 0x00, 0x00, 0x00, 0xFC, 0x04, 0xF4, 0x14, 0x14 }, /* top right */
   { 0x14, 0x14, 0x14, 0x17, 0x10, 0x1F, 0x00, 0x00 }, /* bottom left */
@@ -62,7 +69,7 @@ static const byte box_tiles[11][8] = {
   { 0x14, 0x14, 0x14, 0xFF, 0x14, 0xFF, 0x14, 0x14 }, /* cross */
 };
 
-static const byte backtick[8] = { 0x10, 0x10, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static const byte backtick[GLYPH_ROWS] = { 0x10, 0x10, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 static const byte role_fg[] = { P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_ERROR, P_STATUS, P_EMPTY, P_READ, P_WRITE };
 
@@ -71,7 +78,7 @@ static const byte task1_map[8] = { 56, 57, 58, 59, 0, 1, 2, 3 };
 
 /* The PMODE 4 splash buffer ($0E00-$25FF) is free once the GIME screen is up. */
 #define FONT      ((byte *)0x0E00)
-#define CELL_CHAR (FONT + 96 * 8)
+#define CELL_CHAR (FONT + NUM_GLYPHS * GLYPH_ROWS)
 #define CELL_ROLE (CELL_CHAR + SCREEN_ROWS * SCREEN_COLS)
 #define CELL(y, x) ((unsigned)(y) * SCREEN_COLS + (x))
 
@@ -91,7 +98,7 @@ static bool bold(byte role)
   return role == ROLE_TITLE || (mono && (role == ROLE_ERROR || role == ROLE_WRITE));
 }
 
-static const byte blank[8];
+static const byte blank[GLYPH_ROWS];
 static byte tbl[4];
 static byte tbl_fg = 0xFF, tbl_bg;
 
@@ -99,7 +106,7 @@ static void draw(byte x, byte y)
 {
   byte c = CELL_CHAR[CELL(y, x)];
   byte role = CELL_ROLE[CELL(y, x)];
-  byte *dst = WIN + (unsigned)y * (8 * BPR) + (unsigned)x * 4;
+  byte *dst = WIN + (unsigned)y * (GLYPH_ROWS * BPR) + (unsigned)x * CELL_BYTES;
   const byte *g;
   byte fg, bg, i, b;
   bool thick = false;
@@ -116,11 +123,11 @@ static void draw(byte x, byte y)
     bg = role == ROLE_KEY ? P_KEY_BG : P_BG;
   }
 
-  if (c >= BOX_TL && c <= BOX_TL + 10)
+  if (c >= BOX_TL && c < BOX_TL + NUM_BOX_TILES)
     g = box_tiles[c - BOX_TL];
-  else if (c >= 32 && c < 128)
+  else if (c >= ' ' && c < ' ' + NUM_GLYPHS)
   {
-    g = FONT + (unsigned)(c - 32) * 8;
+    g = GLYPH(FONT, c);
     thick = bold(role);
   }
   else
@@ -136,7 +143,7 @@ static void draw(byte x, byte y)
     tbl_bg = bg;
   }
   GFX_ENTER();
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < GLYPH_ROWS; i++)
   {
     b = g[i];
     if (thick)
@@ -153,7 +160,7 @@ static void draw(byte x, byte y)
 static void clear_screen(void)
 {
   byte *dst = WIN;
-  unsigned lines = SCREEN_ROWS * 8;
+  unsigned lines = SCREEN_ROWS * GLYPH_ROWS;
 
   while (lines--)
   {
@@ -183,11 +190,11 @@ void txt_open(void)
   *(byte *)0xFF98 = 0x80;  /* graphics */
   *(byte *)0xFF99 = 0x1E;  /* 192 lines, 160 bytes/row, 16 colors */
   INTS_RESTORE();
-  memcpy(FONT, ROM_FONT, 96 * 8);
-  /* The ROM font has arrows at ^ and _, its caret at ` and its underscore at 0x7F. */
-  memcpy(FONT + ('^' - 32) * 8, ROM_FONT + (0x60 - 32) * 8, 8);
-  memcpy(FONT + ('_' - 32) * 8, ROM_FONT + (0x7F - 32) * 8, 8);
-  memcpy(FONT + ('`' - 32) * 8, backtick, 8);
+  memcpy(FONT, ROM_FONT, NUM_GLYPHS * GLYPH_ROWS);
+  /* The ROM font has arrows at ^ and _. */
+  memcpy(GLYPH(FONT, '^'), GLYPH(ROM_FONT, ROM_CARET), GLYPH_ROWS);
+  memcpy(GLYPH(FONT, '_'), GLYPH(ROM_FONT, ROM_UNDERSCORE), GLYPH_ROWS);
+  memcpy(GLYPH(FONT, '`'), backtick, GLYPH_ROWS);
   memset(CELL_CHAR, ' ', SCREEN_ROWS * SCREEN_COLS);
   memset(CELL_ROLE, ROLE_TEXT, SCREEN_ROWS * SCREEN_COLS);
 }
