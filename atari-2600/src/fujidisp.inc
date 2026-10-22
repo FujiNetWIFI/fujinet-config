@@ -102,6 +102,10 @@ DLOOP:
 ; takes, up to the end of the blanking.
         jsr     APPVBL
         jsr     VBTAIL          ; the bar's row, a sound tick, VBLANK off
+        IFDEF   FNLBAR
+        lda     #BTBARY         ; the boot bar has no '>' for VBTAIL to find
+        sta     BARY
+        ENDIF
 
 ; ---------------- the frame's top edge ----------------
         lda     #COLFRM
@@ -167,19 +171,33 @@ KERN:   sta     WSYNC
 ; frame's sides otherwise -- and the next row's text colour. The playfield
 ; stores land before x48, where PF2's first pixel is; COLUP0/1 change while
 ; the players are blank. Worst case, KERN's WSYNC ends by cycle 71.
+;
+; In the boot bank the bar is the progress bar, as wide as BTPF: mirrored PF2
+; fills from both sides in towards the middle.
 HKW:    sta     WSYNC
         lda     #0              ;  2
         sta     GRP0            ;  5
         sta     GRP1            ;  8   with VDELP set, clearing both displayed
         sta     GRP0            ; 11   registers takes three writes
         iny                     ; 13   the next row's first scanline
+        IFDEF   FNLBAR
+        beq     HKT             ; 15   row 0: the title strip
+        ELSE
         beq     HKB             ; 15   row 0: the title strip
+        ENDIF
         cpy     BARY            ; 18
         beq     HKB             ; 20
         ldx     #PFSIDE         ; 22
         lda     #COLFRM         ; 24
         bne     HKC             ; 27   always
+        IFDEF   FNLBAR
+HKT:    ldx     #$FF            ; 18
+        lda     #COLBAR         ; 20
+        bne     HKC             ; 23   always
+HKB:    ldx     BTPF            ; 24
+        ELSE
 HKB:    ldx     #$FF
+        ENDIF
         lda     #COLBAR
 HKC:    sta     COLUPF          ; <=31
         stx     PF2             ; <=34, x <=34

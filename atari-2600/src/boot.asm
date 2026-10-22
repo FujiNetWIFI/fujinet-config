@@ -12,8 +12,12 @@
 ; that triggered the swap is not there afterwards. Nothing returns.
 ;
 ; The progress bar is the reason this is a screen rather than a spin loop. The
-; browser's old inline boot waited on FN_R_BOOT_STATE with the display frozen,
-; and a large image over TNFS is many seconds of a console that looks hung.
+; firmware pushes the whole image BEFORE it answers MOUNT_IMAGE, so the mount
+; is launched and watched a frame at a time, never waited for.
+;
+; The bar is drawn twice. The playfield band behind it (BTPF, fujidisp.inc's
+; FNLBAR) is the 6507's own, so it moves on any cartridge. The '#' cells are
+; cell blits, which the RP2040 defers until the transaction ends.
 
         CPU     6502
         INCLUDE "vcs.inc"
@@ -23,12 +27,18 @@
 
 FNLSWAP EQU     1               ; this is the bank that hands the console over
 FNLWTX  EQU     1
+FNLSEND EQU     1               ; MOUNT_IMAGE is launched, not waited for
+FNLBAR  EQU     1               ; the kernel draws the progress band
 
 BTROWP  EQU     2               ; the path being booted
 BTROWB  EQU     5               ; the progress bar
 BTROWE  EQU     18              ; the error line
 BTROWH  EQU     20              ; "DO NOT POWER OFF"
 BTFAILW EQU     180             ; frames to hold a failure before going back
+BTWAITS EQU     75              ; seconds without progress before giving up:
+                                ;   past the cart's own 60s, so it is the
+                                ;   cart's timeout that normally shows
+BTBARY  EQU     TCELLH*BTROWB   ; the bar's row, as the kernel's BARY counts
 CFCELL  EQU     CFMENU          ; bar cells drawn: one tick per new one. This
                                 ;   bank has no menu.
 
@@ -42,33 +52,26 @@ START:  lda     #2
         sta     CFMOPN
         sta     CFN             ; last percentage drawn
         sta     CFCELL
-        lda     #CUEUP          ; it plays on through the two round trips
+        lda     #CUEUP          ; it plays on through the round trip
         jsr     SNDCUE
 
-        jsr     DRAW
+        jsr     DRAW            ; the empty bar, which sets BTPF
 
-        ; Both transactions happen with the screen still blanked: each is a
-        ; round trip and neither will finish inside a frame.
+        ; SET_DEVICE_FULLPATH is one short round trip, taken with the screen
+        ; still blanked. MOUNT_IMAGE is the whole push, so it is launched and
+        ; APPVBL watches it.
         jsr     SDFP
         lda     CFERR
         bne     BTBAD
         jsr     MIMG
-        lda     CFERR
-        bne     BTBAD
-
-        lda     #BT_GO
+        lda     #BT_WAIT
         sta     CFSUB
-        lda     #0
-        sta     VBLANK
-        jsr     DINIT
-        jmp     DLOOP
+        jsr     WDRST
+        jmp     BTRUN
 
-BTBAD:  lda     #BT_FAIL
-        sta     CFSUB
-        lda     #BTFAILW
-        sta     CFTMR
+BTBAD:  jsr     BTDIE
         jsr     SHOWERR
-        lda     #0
+BTRUN:  lda     #0
         sta     VBLANK
         jsr     DINIT
         jmp     DLOOP
@@ -77,25 +80,34 @@ BTBAD:  lda     #BT_FAIL
 ; APPVBL -- watch the push. FN_R_BOOT_PCT is painted by the cartridge as the
 ; image arrives, so the bar costs no transaction at all.
 APPVBL: lda     CFSUB
+        cmp     #BT_WAIT
+        beq     AVWAIT
         cmp     #BT_FAIL
         beq     AVFAIL
         cmp     #BT_JING
         beq     AVJING
 
-        lda     FNBST
+; BT_GO: the answer came after the whole push, so the boot state is final.
+AVJUDG: lda     FNBST
         cmp     #FNBRDY
         beq     AVGO
         cmp     #FNBFAIL
         beq     AVDIED
 
-        lda     FNBPC           ; only redraw when it actually moved
-        cmp     CFN
-        beq     AVDONE
-        sta     CFN
-        jmp     BAR
+; Answered with nothing pushed: the server mounted the file as a disk image.
+        jsr     BTDIE
+        jsr     SNDERR
+        lda     #(TNOROM)&$FF
+        sta     FNPTRL
+        lda     #(TNOROM)>>8
+        sta     FNPTRH
+        lda     #BTROWE
+        jmp     FNRSTR
 
 AVGO:   ldy     #FNTCOL         ; the whole bar, while the cue plays
         jsr     BAR2
+        jsr     FNBLK           ; a cue ahead of the swap: the cart arms it
+                                ;   asynchronously, after this store
         lda     #BT_JING
         sta     CFSUB
         lda     #CUEOK
@@ -105,20 +117,22 @@ AVGO:   ldy     #FNTCOL         ; the whole bar, while the cue plays
 ; the sound to the game.
 AVJING: lda     SNDVOL
         bne     AVDONE
-        jsr     FNBLK
         jmp     FNSWAP          ; does not return
 
 AVDIED: lda     FNBER
         sta     CFERR
         lda     #6
         sta     CFSTEP
-        lda     #BT_FAIL
+        jsr     BTDIE
+        jsr     SHOWERR
+AVDONE: rts
+
+; BTDIE -- the failure screen's state and title; the caller says why.
+BTDIE:  lda     #BT_FAIL
         sta     CFSUB
         lda     #BTFAILW
         sta     CFTMR
-        jsr     TFAILR
-        jsr     SHOWERR
-AVDONE: rts
+        jmp     TFAILR
 
 ; A failure is held on screen long enough to read, then the browser gets its
 ; directory back -- FP_POP drops the filename this bank was given.
@@ -127,6 +141,53 @@ AVFAIL: dec     CFTMR
         jsr     FNWPOP
         lda     #BANKDIR
         jmp     CFGOTO          ; does not return
+
+; BT_WAIT: until FNACKS matches, no register write. A READY or FAILED seen
+; now may be left from an earlier boot; only a transfer's percent is ours.
+AVWAIT: lda     FNACKS
+        cmp     FNSEQ
+        beq     AVREP
+        lda     FNBST
+        cmp     #FNBXFR
+        bne     AVDOG
+        lda     FNBPC           ; only redraw when it actually moved
+        cmp     CFN
+        beq     AVDOG
+        sta     CFN
+        jsr     WDRST
+        jmp     BAR
+
+; No answer and no progress for BTWAITS seconds.
+AVDOG:  dec     CFTMR
+        bne     AVDONE
+        lda     #60
+        sta     CFTMR
+        dec     CFMLEN
+        bne     AVDONE
+        lda     #FNEWAIT
+        bne     AVMERR          ; always
+
+; The answer, judged as FINISH judges one.
+AVREP:  lda     FNERR
+        bne     AVMERR
+        jsr     FNACK
+        bne     AVMERR
+        lda     #BT_GO
+        sta     CFSUB
+        jmp     AVJUDG
+
+AVMERR: sta     CFERR
+        lda     #5
+        sta     CFSTEP
+        jsr     BTDIE
+        jmp     SHOWERR
+
+; WDRST -- restart the no-progress watchdog.
+WDRST:  lda     #60
+        sta     CFTMR
+        lda     #BTWAITS
+        sta     CFMLEN          ; this bank has no menu
+        rts
 
 ; ---------------------------------------------------------------------------
 ; BAR -- a twelve-cell bar, one cell per whole 1/12th, poked a cell at a time
@@ -144,6 +205,8 @@ BARL:   cmp     #9
         cpy     #FNTCOL
         bcc     BARL
 BAR2:   sty     CFTMPB
+        lda     BANDTB,y
+        sta     BTPF
         cpy     CFCELL
         beq     BAR3
         sty     CFCELL
@@ -185,7 +248,7 @@ SDFP:   lda     #FNDEVF
         sta     CFTMPA
         jmp     FINISH
 
-; MIMG -- MOUNT_IMAGE. This is what starts the push.
+; MIMG -- launch MOUNT_IMAGE. This is what starts the push.
 MIMG:   lda     #FNDEVF
         sta     FNDEV
         lda     #FNCMIMG
@@ -197,9 +260,7 @@ MIMG:   lda     #FNDEVF
         jsr     FNPB
         lda     #FMREAD
         jsr     FNPB
-        lda     #5
-        sta     CFTMPA
-        ; fall through
+        jmp     FNSEND
 
 FINISH: jsr     FNGO
         sta     CFERR
@@ -277,6 +338,14 @@ SHOWERR: jsr    SNDERR
 TTITLE: DB      "BOOTING",0
 TFAILT: DB      "BOOT FAILED",0
 THINT:  DB      "DO NOT POWER",0
+TNOROM: DB      "NOT A ROM",0
+
+; PF2 for each count of '#' cells: the band closes in from both sides. Bit 0
+; is the frame's own side, so an empty bar is the frame.
+BANDTB: DB      $01,$01,$03,$03,$07,$07,$0F,$1F,$1F,$3F,$3F,$7F,$FF
+        IF      *-BANDTB<>FNTCOL+1
+        FATAL   "BANDTB is not one byte per cell count"
+        ENDIF
 
 ; Row colours for the kernel: the path, and the bar in green.
 RCOLTB: DB      COLTTL,COLTXT,COLPTH,COLTXT,COLTXT,COLHI

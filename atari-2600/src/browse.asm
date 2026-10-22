@@ -284,7 +284,7 @@ POSL2:  ldx     CFWANT
         rts
 
 ; ---------------------------------------------------------------------------
-; RDENT -- READ_DIR_ENTRY(NAMELN, 0). Z set on success; the entry stays in the
+; RDENT -- READ_DIR_ENTRY(RDMAX, 0). Z set on success; the entry stays in the
 ; reply window and is not copied anywhere.
 RDENT:  lda     #FNDEVF
         sta     FNDEV
@@ -293,7 +293,7 @@ RDENT:  lda     #FNDEVF
         lda     #2
         sta     FNNPR
         jsr     FNBEG
-        lda     #NAMELN
+        lda     RDMAX
         jsr     FNPB
         lda     #0
         jsr     FNPB
@@ -323,7 +323,7 @@ ISCFG:  ldx     #0
 ICF1:   lda     FNRPLY,x
         beq     ICF2
         inx
-        cpx     #NAMELN
+        cpx     RDMAX
         bcc     ICF1
 ICF2:   cpx     #4
         bcc     ICFNO
@@ -363,12 +363,15 @@ LOW9:   rts
 ;
 ; Both the listing and the pick go through this, and they must: the row index
 ; only maps back onto a directory position if both count the same entries.
-RDVIS:  jsr     RDENT
+; RDVISN reads A bytes of name: the listing shows NAMELN, the pick needs all.
+RDVIS:  lda     #NAMELN
+RDVISN: sta     RDMAX
+RDVIS1: jsr     RDENT
         bne     RDV9            ; a transport failure, already recorded
         jsr     FNEOF
         beq     RDVOK           ; the end marker: the caller has to see it
         jsr     ISCFG
-        beq     RDVIS           ; a .cfg: silently take the next one
+        beq     RDVIS1          ; a .cfg: silently take the next one
 RDVOK:  lda     #FNEOK
 RDV9:   rts
 
@@ -500,7 +503,8 @@ PK1:    jsr     SEEK
         jmp     PKBAD
 PK2:    lda     #0
         sta     CFWANT
-PKSKIP: jsr     RDVIS
+PKSKIP: lda     #NAMEMX         ; the whole name, not the listing's cut one
+        jsr     RDVISN
         beq     PKS1
         jmp     PKBAD
 PKS1:   jsr     FNEOF
@@ -517,7 +521,7 @@ PKGOT:  ldx     #0
 PKL1:   lda     FNRPLY,x
         beq     PKL2
         inx
-        cpx     #NAMELN
+        cpx     #NAMEMX
         bcc     PKL1
 PKL2:   cpx     #0
         bne     PKL3
@@ -533,7 +537,7 @@ PKL3:   dex
 ; cartridge's path buffer. It is already held with its trailing "/", which is
 ; exactly the form the buffer wants, so appending it is the whole operation.
 PKDIR:  ldx     #0
-        ldy     #NAMELN
+        ldy     #NAMEMX
         jsr     FNWRPL
         inc     CFDEPTH
         lda     #0
@@ -551,7 +555,7 @@ PKDIR:  ldx     #0
 ; Either way the filename is appended to the working directory first, so
 ; buffer 0 holds the FULL PATH of the highlighted file.
 PKFILE: ldx     #0
-        ldy     #NAMELN
+        ldy     #NAMEMX
         jsr     FNWRPL
 
         lda     CFCOPY

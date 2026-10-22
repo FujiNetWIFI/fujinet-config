@@ -46,13 +46,17 @@ and a **selection bar** behind whichever row has a `>` in column 0 — `VBTAIL`
 finds it in the planes each frame, so no screen has to say where its cursor is,
 and an open menu's wins because it is lower. The `>` stays: it is still the
 selection on a monochrome TV, and it is why content gets eleven columns.
+On the boot screen the bar is the progress bar: it closes in from both sides
+as the image arrives, drawn by the 6507 because the RP2040 defers cell blits
+while a transaction is out.
 
 **Sound is TIA channel 0, from the fixed tail.** A tick for each stick step, a
 blip for FIRE, a two-tone when SELECT opens a menu, a low beep with every error
 line, and for a boot a rising tone, a tick per bar cell and C-E-G-C, played out
-before the swap. CONFIG draws no frames while a transaction is out, so FNGO's
-spin keeps the sound's time from the RIOT timer instead, and AUDV0 is written
-every tick: no cue can be left holding a note.
+before the swap. Apart from the boot's MOUNT_IMAGE, which is watched a frame
+at a time, CONFIG draws no frames while a transaction is out, so FNGO's spin
+keeps the sound's time from the RIOT timer instead, and AUDV0 is written every
+tick: no cue can be left holding a note.
 
 **Almost nothing lives in console RAM.** The working directory, the filter, a
 pending copy's source path and the text being typed are all 256-byte strings
@@ -136,10 +140,11 @@ not a served image, so the flag would only unmount device slot 0 — which
   boot as soon as that directory exists. The path is one literal in
   `src/hosts.asm`.
 - **Long names are truncated, not scrolled.** Eleven visible columns against a
-  30-character `READ_DIR_ENTRY`. The Intellivision bounce-scrolls the
-  highlighted name; this is the one parity item outstanding.
+  30-character `READ_DIR_ENTRY`. Only the listing: picking a file or folder
+  re-reads its entry at 128. The Intellivision bounce-scrolls the highlighted
+  name; this is the one parity item outstanding.
 
-  It needs about 180 bytes and the browser bank has 82. More banks would not
+  It needs about 180 bytes and the browser bank has 76. More banks would not
   help — a bank is 2K whatever the image size. The way in is to move the action
   menu into a bank of its own: it is modal already, it costs the hosts, browser
   and keyboard banks about 250 bytes each in `menu.inc` plus their tables, and
