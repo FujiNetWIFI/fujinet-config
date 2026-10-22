@@ -62,6 +62,8 @@ static const byte box_tiles[11][8] = {
   { 0x14, 0x14, 0x14, 0xFF, 0x14, 0xFF, 0x14, 0x14 }, /* cross */
 };
 
+static const byte backtick[8] = { 0x10, 0x10, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
 static const byte role_fg[] = { P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_ERROR, P_STATUS, P_EMPTY, P_READ, P_WRITE };
 
 /* Slots 0-3 mirror task 0's program blocks; 4-7 are the screen. */
@@ -182,6 +184,10 @@ void txt_open(void)
   *(byte *)0xFF99 = 0x1E;  /* 192 lines, 160 bytes/row, 16 colors */
   INTS_RESTORE();
   memcpy(FONT, ROM_FONT, 96 * 8);
+  /* The ROM font has arrows at ^ and _, its caret at ` and its underscore at 0x7F. */
+  memcpy(FONT + ('^' - 32) * 8, ROM_FONT + (0x60 - 32) * 8, 8);
+  memcpy(FONT + ('_' - 32) * 8, ROM_FONT + (0x7F - 32) * 8, 8);
+  memcpy(FONT + ('`' - 32) * 8, backtick, 8);
   memset(CELL_CHAR, ' ', SCREEN_ROWS * SCREEN_COLS);
   memset(CELL_ROLE, ROLE_TEXT, SCREEN_ROWS * SCREEN_COLS);
 }
