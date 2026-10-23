@@ -54,7 +54,7 @@ jobs:
 
     concurrency:
       group: firmware-pr
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     env:
       REPO: FujiNetWIFI/fujinet-firmware
