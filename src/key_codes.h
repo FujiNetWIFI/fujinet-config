@@ -43,6 +43,8 @@
 
 // back arrow <-
 #define KEY_ESCAPE         0x5F
+// RUN/STOP, also taken as ESC
+#define KEY_STOP           0x03
 #define KEY_RETURN         CH_ENTER
 #define KEY_BACKSPACE      CH_DEL
 // Up arrow

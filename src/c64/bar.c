@@ -113,13 +113,6 @@ void bar_down()
  */
 void bar_jump(unsigned char i)
 {
-	uint8_t old_x; 
-	uint8_t old_y;
-	old_x = wherex();
-	old_y = wherey();
-	gotoxy(14, 23);
-	cprintf("j:%d bi:%d bo:%d    ", i, bar_i, bar_oldi);
-	gotoxy(old_x, old_y);
 	bar_oldi = bar_i;
 	bar_i = i;
 	bar_update();

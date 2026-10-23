@@ -8,6 +8,14 @@
 
 #include "display_string_in_viewport.h"
 
+#ifdef BUILD_C64
+// The buffer holds ASCII for FujiNet
+#include "c64/petscii.h"
+#define SCREEN_CHAR(c) ascii_to_petscii(c)
+#else
+#define SCREEN_CHAR(c) (c)
+#endif
+
 void display_string_in_viewport(uint8_t x, uint8_t y, char* str, int current_length, int viewport_width, int cursor_pos, bool is_password) {
     int i, char_index, start_pos, half_viewport;
     start_pos = 0;
@@ -31,7 +39,7 @@ void display_string_in_viewport(uint8_t x, uint8_t y, char* str, int current_len
 
         if (char_index < current_length) {
             if (!is_password)
-                cputc(str[char_index]);
+                cputc(SCREEN_CHAR(str[char_index]));
             else
                 cputc('*');
         } else {

@@ -20,18 +20,29 @@
 #include "../select_slot.h"
 #include "../key_codes.h"
 #include "../edit_string.h"
+#include "petscii.h"
 
 #define STATUS_BAR 21 // defined in screen.c
 
 #define UNUSED(x) (void)(x);
 
 /**
+ * Wait for a key, with RUN/STOP standing in for ESC
+ */
+static unsigned char input_key(void)
+{
+	unsigned char k = cgetc();
+
+	return k == KEY_STOP ? KEY_ESCAPE : k;
+}
+
+/**
  * Get input from keyboard/joystick
- * @return keycode (or synthesized keycode if joystick)
+ * @return keycode (or synthesized keycode if joystick), 0 if none is waiting
  */
 unsigned char input()
 {
-	return cgetc();
+	return kbhit() ? input_key() : 0;
 }
 
 char kb_get_c() {
@@ -39,7 +50,8 @@ char kb_get_c() {
     c = kbhit();
     if (c == 0) return 0;
 
-    return cgetc();
+    // edit_string() fills buffers that go to FujiNet, which wants ASCII
+    return petscii_to_ascii(input_key());
 }
 
 unsigned char input_ucase(void)
@@ -74,9 +86,10 @@ DHSubState input_destination_host_slot_choose(void)
 	case KEY_RETURN:
 		if (hostSlots[bar_get()][0] != 0x00)
 		{
-			copy_host_slot = bar_get();
+			// copy_host_slot is the source; browse the destination
+			selected_host_slot = bar_get();
+			strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
 			copy_mode = true;
-			state = SELECT_FILE;
 			return DH_DONE;
 		}
 		else
@@ -108,7 +121,7 @@ DHSubState input_destination_host_slot_choose(void)
 SFSubState input_select_file_choose(void)
 {
 	unsigned entryType;
-	unsigned char k = cgetc();
+	unsigned char k = input_key();
 
 	switch (k)
 	{
@@ -121,6 +134,9 @@ SFSubState input_select_file_choose(void)
 			return SF_LINK;
 		else
 		{
+			// Come back to this folder after mounting
+			strncpy(source_path, path, 224);
+			old_pos = pos;
 			return SF_DONE;
 		}
 	case KEY_ESCAPE:
@@ -136,9 +152,7 @@ SFSubState input_select_file_choose(void)
 	case 'F':
 	case 'f':
 		return SF_FILTER;
-	case 'N':
-	case 'n':
-		return SF_NEW;
+	// No SF_NEW: IEC FujiNet can't create disks
 	// case KEY_RETURN: // KEY_SMART_VI:
 	//   if (copy_mode == false)
 	//   {
@@ -151,8 +165,11 @@ SFSubState input_select_file_choose(void)
 	//   return SF_NEW;
 	case 'C':
 	case 'c':
+		if (copy_mode)
+			return SF_DONE; // copy into this folder
 		pos += bar_get();
 		select_file_set_source_filename();
+		copy_host_slot = selected_host_slot;
 		return SF_COPY;
 	case KEY_UP_ARROW:
 	case KEY_LEFT_ARROW:
@@ -178,10 +195,12 @@ SFSubState input_select_file_choose(void)
 	case '<':
 		if (pos > 0)
 			return SF_PREV_PAGE;
+		return SF_CHOOSE;
 	case '.':
 	case '>':
 		if (dir_eof == false)
 			return SF_NEXT_PAGE;
+		return SF_CHOOSE;
 	default:
 		return SF_CHOOSE;
 	}
@@ -240,7 +259,7 @@ SSSubState input_select_slot_choose(void)
 	// cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
 	unsigned char k;
 
-	k = cgetc();
+	k = input_key();
 
 	switch (k)
 	{
@@ -262,12 +281,12 @@ SSSubState input_select_slot_choose(void)
 	case 'r':
 	case KEY_RETURN:
 		selected_device_slot = bar_get();
-		mode = 0; // ?? read/write mode?
+		mode = MODE_READ;
 		return SS_DONE;
 	case 'W':
 	case 'w':
 		selected_device_slot = bar_get();
-		mode = 2;
+		mode = MODE_WRITE;
 		return SS_DONE;
 	case KEY_UP_ARROW:
 	case KEY_LEFT_ARROW:
@@ -304,7 +323,7 @@ SISubState input_show_info(void)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-	unsigned char k = cgetc();
+	unsigned char k = input_key();
 
 	switch (k)
 	{
@@ -317,8 +336,11 @@ HDSubState input_hosts_and_devices_hosts(void)
 	case KEY_7:
 	case KEY_8:
 		bar_jump(k - KEY_1);
+		selected_host_slot = bar_get();
 		return HD_HOSTS;
 	case KEY_TAB:
+	case 'D':
+	case 'd':
 		bar_clear(false);
 		return HD_DEVICES;
 	case KEY_RETURN:
@@ -360,6 +382,20 @@ HDSubState input_hosts_and_devices_hosts(void)
 	}
 }
 
+/**
+ * Remount the selected drive slot in mode m and show the new mode
+ */
+static void input_devices_set_mode(unsigned char m)
+{
+	selected_device_slot = bar_get();
+	if (deviceSlots[selected_device_slot].file[0] == 0x00)
+		return;
+
+	hosts_and_devices_devices_set_mode(m);
+	screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled);
+	bar_jump(selected_device_slot);
+}
+
 HDSubState input_hosts_and_devices_devices(void)
 {
 	unsigned char k = input();
@@ -374,21 +410,23 @@ HDSubState input_hosts_and_devices_devices(void)
 		hosts_and_devices_long_filename();
 		return HD_DEVICES;
 	case KEY_TAB:
+	case 'H':
+	case 'h':
 		bar_clear(false);
 		return HD_HOSTS;
+	case KEY_ESCAPE:
+		return HD_DONE;
 	case 'E':
 	case 'e':
 		hosts_and_devices_eject(bar_get());
 		return HD_DEVICES;
 	case 'R':
 	case 'r':
-		selected_device_slot = bar_get();
-		hosts_and_devices_devices_set_mode(0);
+		input_devices_set_mode(MODE_READ);
 		return HD_DEVICES;
 	case 'W':
 	case 'w':
-		selected_device_slot = bar_get();
-		hosts_and_devices_devices_set_mode(2);
+		input_devices_set_mode(MODE_WRITE);
 		return HD_DEVICES;
 	// case KEY_CLEAR:
 	//   return HD_CLEAR_ALL_DEVICES;
@@ -428,7 +466,8 @@ WSSubState input_set_wifi_select(void)
 	case KEY_RETURN:
 		set_wifi_set_ssid(bar_get());
 		return WS_PASSWORD;
-	case 0x84:
+	case 'H':
+	case 'h':
 		return WS_CUSTOM;
 	case 'R':
 	case 'r':
@@ -453,11 +492,11 @@ WSSubState input_set_wifi_select(void)
 void input_line_hosts_and_devices_host_slot(unsigned char i, unsigned char o, char *c)
 {
 	bar_clear(false);
-	input_line(2, i + 1, o, c, 32, false);
+	input_line(2, i + 1, o, c, sizeof(HostSlot) - 1, false);
 }
 
 void input_line_filter(char *c)
 {
-	input_line(0, 23, 0, c, 32, false);
+	input_line(0, 23, 0, c, 31, false); // filter[32]
 }
 #endif /* BUILD_C64 */
