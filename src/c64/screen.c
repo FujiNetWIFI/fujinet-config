@@ -7,6 +7,7 @@
 
 #include "../screen.h"
 #include "../globals.h"
+#include "petscii.h"
 #include <conio.h>
 #include <string.h>
 #include <c64.h>
@@ -16,9 +17,64 @@
 #define UNUSED(x) (void)(x);
 
 static const char *empty = "EMPTY";
-static const char *off = "OFF";
 
 unsigned char *mousetext = (unsigned char *)0xC00E;
+
+/**
+ * Print text from FujiNet, which is ASCII, padded or cut to w columns
+ */
+static void screen_puts_ascii(const char *s, unsigned char w)
+{
+	for (; w > 0; w--)
+		cputc(*s ? ascii_to_petscii(*s++) : ' ');
+}
+
+/**
+ * As screen_puts_ascii(), keeping the end of a long path
+ */
+static void screen_puts_ascii_tail(const char *s, unsigned char w)
+{
+	size_t l = strlen(s);
+
+	screen_puts_ascii(l > w ? s + l - w : s, w);
+}
+
+static void screen_host_slot(unsigned char i, const char *h)
+{
+	gotoxy(0, i + 1);
+	cprintf("%d ", i + 1);
+	if (h[0] == 0x00)
+		cprintf("%-38s", empty);
+	else
+		screen_puts_ascii(h, 38);
+}
+
+static void screen_device_slot(unsigned char y, unsigned char i, const DeviceSlot *d)
+{
+	char m;
+
+	gotoxy(0, y);
+	if (d->file[0] == 0x00)
+	{
+		cprintf("%d %-38s", i + 1, empty);
+		return;
+	}
+
+	switch (d->mode & 0x0f) // without MODE_MOUNTED
+	{
+	case MODE_READ:
+		m = 'R';
+		break;
+	case MODE_WRITE:
+		m = 'W';
+		break;
+	default:
+		m = '?';
+		break;
+	}
+	cprintf("%d %c %d:", i + 1, m, d->hostSlot + 1);
+	screen_puts_ascii((const char *)d->file, 34);
+}
 
 extern bool copy_mode;
 extern unsigned char copy_host_slot;
@@ -83,7 +139,8 @@ void screen_set_wifi_extended(AdapterConfigExtended *ac)
 	gotoxy(9, 0);
 	cprintf("WELCOME TO FUJINET!");
 	gotoxy(0, 2);
-	cprintf("MAC Address: %s", ac->sMacAddress);
+	cprintf("MAC Address: ");
+	screen_puts_ascii(ac->sMacAddress, 27);
 	gotoxy(7, STATUS_BAR);
 	cprintf("SCANNING FOR NETWORKS...");
 }
@@ -91,10 +148,6 @@ void screen_set_wifi_extended(AdapterConfigExtended *ac)
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 {
 	char meter[4] = {0x20, 0x20, 0x20, 0x00};
-	char ds[32];
-
-	memset(ds, 0x20, 32);
-	strncpy(ds, s->ssid, 32);
 
 	if (s->rssi > -50)
 	{
@@ -113,7 +166,7 @@ void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
 	}
 
 	gotoxy(2, n + 4);
-	cprintf("%s", ds);
+	screen_puts_ascii(s->ssid, 32);
 	gotoxy(36, n + 4);
 	cprintf("%s", meter);
 }
@@ -155,7 +208,8 @@ void screen_connect_wifi(NetConfig *nc)
 {
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
-	cprintf("CONNECTING TO NETWORK: %s", nc->ssid);
+	cprintf("CONNECTING TO NETWORK: ");
+	screen_puts_ascii(nc->ssid, 32);
 }
 
 void screen_destination_host_slot(char *h, char *p)
@@ -165,51 +219,36 @@ void screen_destination_host_slot(char *h, char *p)
 	cprintf("COPY FROM HOST SLOT");
 	chlinexy(0, 13, 40);
 	gotoxy(0, 14);
-	cprintf("%-32s", h);
+	screen_puts_ascii(h, 40);
 	gotoxy(0, 15);
-	cprintf("%-128s", p);
+	screen_puts_ascii_tail(p, 120);
 }
 
 void screen_destination_host_slot_choose(void)
 {
+	const char t[] = "COPY TO HOST SLOT";
+
+	// Title on row 0, as on the hosts screen: the slots fill rows 1-8
 	gotoxy(0, 0);
-	cprintf("COPY TO HOST SLOT");
-	chlinexy(0, 1, 40);
+	cprintf("%40s", t);
+	chlinexy(0, 0, 40 - sizeof(t));
 
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
 	screen_print_menu("1-8", ":CHOOSE SLOT\r\n");
 	screen_print_menu("RETURN", ":SELECT SLOT\r\n");
-	screen_print_menu("ESC", " TO ABORT");
+	screen_print_menu("\x5F", " TO ABORT");
 
-	bar_set(2, 1, 8, selected_host_slot);
-}
-
-const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, const char *fn)
-{
-	UNUSED(hs);
-	if (fn[0] != 0x00)
-		return fn;
-	else if (e == false)
-		return &off[0];
-	else
-		return &empty[0];
-}
-
-char *screen_hosts_and_devices_slot(char *c)
-{
-	return c[0] == 0x00 ? "EMPTY" : c;
+	bar_set(1, 1, 8, selected_host_slot);
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const bool *e)
 {
 	char i;
 
+	UNUSED(e); // no platform queries the enabled state yet
 	for (i = 0; i < 4; i++)
-	{
-		gotoxy(0, i + y);
-		cprintf("%d %s", i + 1, screen_hosts_and_devices_device_slot(d[i].hostSlot, e[i], (char *)d[i].file));
-	}
+		screen_device_slot(y + i, i, &d[i]);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
@@ -228,25 +267,22 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 	chlinexy(0, 10, 40 - sizeof(ds));
 
 	for (i = 0; i < 8; i++)
-	{
-		gotoxy(0, i + 1);
-		cprintf("%d %s", i + 1, screen_hosts_and_devices_slot((char *)h[i]));
-	}
+		screen_host_slot(i, (char *)h[i]);
 
 	screen_hosts_and_devices_device_slots(11, d, e);
 }
 
 void screen_hosts_and_devices_hosts(void)
 {
-	bar_set(1, 1, 8, 0);
+	bar_set(1, 1, 8, selected_host_slot);
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
 	screen_print_menu("1-8", ":SLOT  ");
 	screen_print_menu("E", "DIT  ");
 	screen_print_menu("RETURN", ":SELECT FILES\r\n ");
 	screen_print_menu("C", "ONFIG  ");
-	screen_print_menu("TAB", ":DRIVE SLOTS  ");
-	screen_print_menu("ESC", ":BOOT");
+	screen_print_menu("D", "RIVE SLOTS  ");
+	screen_print_menu("\x5F", ":BOOT");
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -254,10 +290,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 	char i;
 
 	for (i = 0; i < 8; i++)
-	{
-		gotoxy(0, i + 1);
-		cprintf("%d %-32s", i + 1, screen_hosts_and_devices_slot((char *)h[i]));
-	}
+		screen_host_slot(i, (char *)h[i]);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -268,7 +301,8 @@ void screen_hosts_and_devices_devices(void)
 	screen_print_menu("E", "JECT  ");
 	screen_print_menu("R", "EAD ONLY  ");
 	screen_print_menu("W", "RITE\r\n");
-	screen_print_menu("TAB", ":HOST SLOTS");
+	screen_print_menu("H", "OST SLOTS  ");
+	screen_print_menu("\x5F", ":BOOT");
 }
 
 void screen_hosts_and_devices_clear_host_slot(unsigned char i)
@@ -280,22 +314,30 @@ void screen_hosts_and_devices_edit_host_slot(unsigned char i)
 {
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
-	cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.", i);
+	cprintf("EDIT THE HOST NAME FOR SLOT %d\r\nPRESS [RETURN] WHEN DONE.", i + 1);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
 	clrscr();
 	gotoxy(0, 0);
-	cprintf("%32s", "COPYING FILE FROM:");
+	cprintf("COPYING FILE FROM:");
 	gotoxy(0, 1);
-	cprintf("%32s", sh);
+	screen_puts_ascii(sh, 40);
 	gotoxy(0, 2);
-	cprintf("%-128s", p);
+	screen_puts_ascii_tail(p, 120);
 	gotoxy(0, 6);
-	cprintf("%32s", dh);
+	cprintf("TO:");
 	gotoxy(0, 7);
-	cprintf("%-128s", dp);
+	screen_puts_ascii(dh, 40);
+	gotoxy(0, 8);
+	screen_puts_ascii_tail(dp, 120);
+}
+
+static void screen_info_line(const char *l, const char *v)
+{
+	cprintf("%10s", l);
+	screen_puts_ascii(v, 30);
 }
 
 void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
@@ -307,14 +349,15 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *ac)
 	cprintf("F U J I N E T      C O N F I G");
 	revers(0);
 	gotoxy(0, 8);
-	cprintf("%10s%s\r\n", "SSID: ", ac->ssid);
-	cprintf("%10s%s\r\n", "HOSTNAME: ", ac->hostname);
-	cprintf("%10s%s\r\n", "IP: ", ac->sLocalIP);
-	cprintf("%10s%s\r\n", "NETMASK: ", ac->sNetmask);
-	cprintf("%10s%s\r\n", "DNS: ", ac->sDnsIP);
-	cprintf("%10s%s\r\n", "MAC: ", ac->sMacAddress);
-	cprintf("%10s%s\r\n", "BSSID: ", ac->sBssid);
-	cprintf("%10s%s\r\n", "FNVER: ", ac->fn_version);
+	// Each line fills the row, so the next starts below it
+	screen_info_line("SSID: ", ac->ssid);
+	screen_info_line("HOSTNAME: ", ac->hostname);
+	screen_info_line("IP: ", ac->sLocalIP);
+	screen_info_line("NETMASK: ", ac->sNetmask);
+	screen_info_line("DNS: ", ac->sDnsIP);
+	screen_info_line("MAC: ", ac->sMacAddress);
+	screen_info_line("BSSID: ", ac->sBssid);
+	screen_info_line("FNVER: ", ac->fn_version);
 	cprintf("%10s%s\r\n", "CONFIG: ", GIT_VERSION);
 
 	gotoxy(6, STATUS_BAR);
@@ -337,12 +380,15 @@ void screen_select_file_display(char *p, char *f)
 
 	// Update content area
 	gotoxy(0, 0);
-	cprintf("%-40s", selected_host_name);
+	screen_puts_ascii(selected_host_name, 40);
 	gotoxy(0, 1);
 	if (f[0] == 0x00)
-		cprintf("%-40s", p);
+		screen_puts_ascii_tail(p, 40);
 	else
-		cprintf("%-32s%8s", p, f);
+	{
+		screen_puts_ascii_tail(p, 32);
+		screen_puts_ascii(f, 8);
+	}
 }
 
 void screen_select_file_prev(void)
@@ -364,7 +410,7 @@ void screen_select_file_next(void)
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned)
 {
 	gotoxy(0, y + 3);
-	cprintf("%-40s", &e[0]);
+	screen_puts_ascii(e, 40);
 }
 
 void screen_select_file_clear_long_filename(void)
@@ -404,11 +450,22 @@ void screen_select_file_choose(char visibleEntries)
 	bar_set(3, 2, visibleEntries, prev_page ? visibleEntries-1 : 0);
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
-	screen_print_menu("RETURN", ":SELECT FILE TO MOUNT\r\n");
-	screen_print_menu("ESC", ":PARENT  ");
-	screen_print_menu("F", "ILTER  ");
-	screen_print_menu("N", "EW  ");
-	screen_print_menu("ESC", ":BOOT");
+	if (copy_mode)
+	{
+		screen_print_menu("RETURN", ":OPEN FOLDER\r\n");
+		screen_print_menu("^", ":UPDIR  ");
+		screen_print_menu("\x5F", ":ABORT  ");
+		screen_print_menu("C", "OPY HERE");
+	}
+	else
+	{
+		// No NEW: IEC FujiNet can't create disks
+		screen_print_menu("RETURN", ":SELECT FILE TO MOUNT\r\n");
+		screen_print_menu("^", ":UPDIR  ");
+		screen_print_menu("\x5F", ":ABORT  ");
+		screen_print_menu("F", "ILTER  ");
+		screen_print_menu("C", "OPY");
+	}
 }
 
 void screen_select_file_filter(void)
@@ -437,7 +494,7 @@ void screen_select_slot(const char *e)
 
 	e += 2; // skip is_dir, media_type
 	// Filename is next
-	cprintf("%-40s", e);
+	screen_puts_ascii(e, 40);
 
 	screen_hosts_and_devices_device_slots(1, &deviceSlots[0], &deviceEnabled[0]);
 
@@ -451,7 +508,7 @@ void screen_select_slot_choose(void)
 	screen_print_menu("1-4", " SELECT SLOT OR USE ARROW KEYS\r\n ");
 	screen_print_menu("RETURN/R", ":INSERT READ ONLY\r\n ");
 	screen_print_menu("W", ":INSERT READ/WRITE\r\n ");
-	screen_print_menu("ESC", " TO ABORT.");
+	screen_print_menu("\x5F", " TO ABORT.");
 }
 
 void screen_select_file_new_name(void)
@@ -467,7 +524,7 @@ void screen_hosts_and_devices_long_filename(const char *f)
 	if (strlen(f) > 31)
 	{
 		gotoxy(0, STATUS_BAR - 3);
-		cprintf("%s", f);
+		screen_puts_ascii_tail(f, 120);
 	}
 	else
 		cclearxy(0, STATUS_BAR - 3, 120);
@@ -497,24 +554,21 @@ void screen_select_slot_mode(void)
 
 void screen_select_slot_eject(unsigned char ds)
 {
-	cclearxy(1, 1 + ds, 39);
-	gotoxy(2, 1 + ds);
-	cprintf("Empty");
+	gotoxy(0, 1 + ds);
+	cprintf("%d %-38s", ds + 1, empty);
 	bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_eject(unsigned char ds)
 {
-	cclearxy(1, 11 + ds, 39);
-	gotoxy(2, 11 + ds);
-	cprintf("Empty");
+	gotoxy(0, 11 + ds);
+	cprintf("%d %-38s", ds + 1, empty);
 	bar_jump(bar_get());
 }
 
 void screen_hosts_and_devices_host_slot_empty(unsigned char hs)
 {
-	gotoxy(2, 2 + hs);
-	cprintf("Empty");
+	screen_host_slot(hs, "");
 }
 
 void screen_end(void)
