@@ -45,3 +45,88 @@ jobs:
         with:
           name: ${{ matrix.platform }}
           path: r2r/${{ matrix.platform }}/**
+
+  firmware-pr:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: firmware-pr
+      cancel-in-progress: true
+
+    env:
+      REPO: FujiNetWIFI/fujinet-firmware
+      BRANCH: config-autorun
+      DEST: data/webui/device_specific
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: r2r
+
+      - name: Copy the images into fujinet-firmware
+        env:
+          GH_TOKEN: ${{ secrets.FIRMWARE_TOKEN }}
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse --branch master \
+            "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" fw
+          git -C fw sparse-checkout set "$DEST"
+          git -C fw checkout -b "$BRANCH"
+          while read -r src dst; do
+            cp "r2r/$src" "fw/$DEST/$dst"
+          done <<'EOF'
+          adam/config.ddp      BUILD_ADAM/autorun.ddp
+          apple2/config.po     BUILD_APPLE/autorun.po
+          atari/config.atr     BUILD_ATARI/autorun.atr
+          coco/config.dsk      BUILD_COCO/autorun.dsk
+          dragon/config.vdk    BUILD_COCO/autorund.vdk
+          dragon/AUTOLOAD.DWL  BUILD_COCO/AUTOLOAD.DWL
+          dragon/LOGO.DWL      BUILD_COCO/LOGO.DWL
+          dragon/STAGE2.DWL    BUILD_COCO/STAGE2.DWL
+          dragon/CONFIG.DWL    BUILD_COCO/CONFIG.DWL
+          msdos/config.img     BUILD_RS232/autorun.img
+          EOF
+
+      - name: Open or update the firmware PR
+        env:
+          GH_TOKEN: ${{ secrets.FIRMWARE_TOKEN }}
+          BEFORE: ${{ github.event.before }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="[config] Update autorun images to CONFIG $(git rev-parse --short HEAD)"
+          git -C fw add "$DEST"
+          git -C fw -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit --allow-empty -q -m "$title"
+          git -C fw push -q --force origin "$BRANCH"
+
+          # The commit list starts where the last merged PR's images came from.
+          prs=$(gh api "repos/$REPO/pulls?head=${REPO%%/*}:$BRANCH&state=all&per_page=100")
+          open=$(jq -r '[.[] | select(.state == "open")][0].number // empty' <<<"$prs")
+          marker() {
+            jq -r "$2" <<<"$prs" | sed -n "s/.*<!-- $1: \([0-9a-f]\{40\}\) -->.*/\1/p" | head -1
+          }
+          base=$(marker config '[.[] | select(.merged_at)] | sort_by(.merged_at) | last | .body // ""')
+          [ -n "$base" ] || base=$(marker base 'sort_by(.created_at) | last | .body // ""')
+          [ -n "$base" ] || base=$BEFORE
+          range=("$base..HEAD")
+          git cat-file -e "$base^{commit}" 2>/dev/null || range=(-1 HEAD)
+
+          body=$(printf '%s\n\n%s\n\n%s\n\n<!-- base: %s -->\n<!-- config: %s -->\n' \
+            "Images built by [CONFIG CI]($RUN_URL) from ${GITHUB_REPOSITORY}@$(git rev-parse HEAD)." \
+            "CONFIG commits:" \
+            "$(git log --format="- ${GITHUB_REPOSITORY}@%h %s" "${range[@]}" |
+               sed "s|(#\([0-9]*\))|(${GITHUB_REPOSITORY}#\1)|g")" \
+            "$base" "$(git rev-parse HEAD)")
+
+          if [ -n "$open" ]; then
+            gh api -X PATCH "repos/$REPO/pulls/$open" -f title="$title" -f body="$body" --jq .html_url
+          else
+            gh api "repos/$REPO/pulls" -f head="$BRANCH" -f base=master \
+              -f title="$title" -f body="$body" --jq .html_url
+          fi
