@@ -66,6 +66,10 @@ void input_select_slot_build_eos_directory_failed(void);
 #include "h89/key_codes.h"
 #endif /* BUILD_H89 */
 
+#ifdef BUILD_MODEL2
+#include "model2/key_codes.h"
+#endif /* BUILD_MODEL2 */
+
 #if defined(BUILD_APPLE2) || defined(BUILD_ATARI)
 #include <conio.h>
 #define KEY_ABORT CH_ESC

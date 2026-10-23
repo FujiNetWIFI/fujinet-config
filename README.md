@@ -209,6 +209,17 @@ To compiled, currently requires:
 
 Make using `make -f Makefile.rc2014`
 
+## Compiling on the TRS-80 Model II
+CONFIG for the Model II runs under Pickles & Trout CP/M 2.2 and talks to the FujiNet over serial port A. Mounted images appear as drives through the [FujiNet CP/M driver](https://github.com/FozzTexx/fujinet-trs80-model2-driver).
+
+Requires Z88DK, cpmtools and libdsk (`raw2imd`); the `defoogi` Docker image has them all.
+
+```
+$ make model2/r2r
+```
+
+This produces `r2r/model2/config.imd`, an 8" IBM-3740 disk image. Boot CP/M with that disk in a drive and run `CONFIG`. "Mount drives & exit" (ESC) returns to CP/M.
+
 ## Screen Shots
 
 ### CONFIG on the ADAM

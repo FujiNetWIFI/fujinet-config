@@ -6,6 +6,7 @@ PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
 PLATFORMS += msdos
+PLATFORMS += model2
 
 # Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
 #PLATFORMS += msxrom
@@ -241,6 +242,12 @@ $(STAGE2_DWL_DRAGON):: $(STAGE2_DRAGON) | $(R2R_PD)
 # Adam customization
 
 LDFLAGS_EXTRA_ADAM = -lndos
+
+########################################
+# TRS-80 Model II customization
+
+# CCP refuses a .COM that reaches past the TPA; the startup zeroes BSS anyway.
+LDFLAGS_EXTRA_MODEL2 = -pragma-define:CRT_TRIM_BSS=1
 
 ########################################
 # MSX customization

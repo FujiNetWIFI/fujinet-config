@@ -20,6 +20,7 @@ jobs:
           - c64
           - coco
           - dragon
+          - model2
           - msdos
           # Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
           #- msxrom
