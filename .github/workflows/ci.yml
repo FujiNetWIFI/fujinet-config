@@ -91,6 +91,7 @@ jobs:
           dragon/STAGE2.DWL    BUILD_COCO/STAGE2.DWL
           dragon/CONFIG.DWL    BUILD_COCO/CONFIG.DWL
           msdos/config.img     BUILD_RS232/autorun.img
+          model2/config.imd    BUILD_RS232/autorun.imd
           EOF
 
       - name: Open or update the firmware PR
