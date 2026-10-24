@@ -47,9 +47,22 @@ jobs:
           name: ${{ matrix.platform }}
           path: r2r/${{ matrix.platform }}/**
 
-  firmware-pr:
+  # Runs can finish out of order; only the one for main's newest commit updates the firmware PR.
+  newest:
     needs: build
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.repository == 'FujiNetWIFI/fujinet-config'
+    runs-on: ubuntu-latest
+    outputs:
+      newest: ${{ steps.tip.outputs.newest }}
+    steps:
+      - id: tip
+        run: |
+          tip=$(git ls-remote "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" refs/heads/main | cut -f1)
+          echo "newest=$([ "$tip" = "$GITHUB_SHA" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  firmware-pr:
+    needs: newest
+    if: needs.newest.outputs.newest == 'true'
     runs-on: ubuntu-latest
 
     concurrency:
