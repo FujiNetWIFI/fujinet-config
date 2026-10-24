@@ -5,6 +5,7 @@ struct entry_data
   unsigned char entry;
   unsigned char host_slot;
   unsigned char device_slot;
+  unsigned char joystick;    /* JoySide; survives entry_take(), cleared by cfgload */
 };
 
 #define ENTRY_DATA ((struct entry_data *)0x7BF8)
@@ -15,6 +16,13 @@ struct entry_data
 #else
 #define APP(name) name
 #endif
+
+typedef enum
+{
+  JOY_NONE,
+  JOY_LEFT,
+  JOY_RIGHT
+} JoySide;
 
 #define ENTRY_NONE  0
 #define ENTRY_INFO  1

@@ -8,6 +8,7 @@
 #include "../input.h"
 #include "../globals.h"
 #include "../key_codes.h"
+#include "launch/entry.h"
 
 unsigned char selected_network;
 unsigned short custom_numSectors;
@@ -26,10 +27,11 @@ bool input_digits_only = false;
 #define JOY_REPEAT_INTERVAL  6
 
 /* Positions are ignored until a button is pressed at least once, so a
-   floating (disconnected) analog stick can't produce phantom movement. */
-static bool joy_right_selected = false;
-static bool joy_left_selected = false;
-static bool joy_btn_released = true;
+   floating (disconnected) analog stick can't produce phantom movement.
+   The choice lives in the handoff data so it carries over between programs. */
+#define joy_selected (ENTRY_DATA->joystick)
+/* Starts false so a press held across a program switch isn't taken. */
+static bool joy_btn_released = false;
 static byte joy_last_dir = 0;
 static word joy_next_repeat = 0;
 
@@ -82,23 +84,17 @@ static byte readJoystick(void)
 	rbtn2 = (buttons & 0x04) == 0;
 
 	if (lbtn1 || lbtn2)
-	{
-		joy_left_selected = true;
-		joy_right_selected = false;
-	}
+		joy_selected = JOY_LEFT;
 	else if (rbtn1 || rbtn2)
-	{
-		joy_right_selected = true;
-		joy_left_selected = false;
-	}
+		joy_selected = JOY_RIGHT;
 
-	if (!joy_left_selected && !joy_right_selected)
+	if (joy_selected == JOY_NONE)
 		return 0;
 
 	{
 		const byte *joy = readJoystickPositions();
 
-		if (joy_left_selected)
+		if (joy_selected == JOY_LEFT)
 		{
 			h = joy[JOYSTK_LEFT_HORIZ];
 			v = joy[JOYSTK_LEFT_VERT];
@@ -124,7 +120,7 @@ static byte readJoystick(void)
 
 unsigned char input_handle_joystick(void)
 {
-	bool was_active = joy_left_selected || joy_right_selected;
+	bool was_active = joy_selected != JOY_NONE;
 	byte value = readJoystick();
 	byte dir = value & 0x0F;
 	byte btn = value & 0x30;

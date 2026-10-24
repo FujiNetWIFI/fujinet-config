@@ -139,6 +139,7 @@ int main(void)
 {
 #ifndef DRAGON
     ENTRY_DATA->magic[0] = 0;  // drop any stale handoff from before a reset
+    ENTRY_DATA->joystick = JOY_NONE;
 #endif
     width(32);
     pmode(4, SCREEN_BUFFER);
