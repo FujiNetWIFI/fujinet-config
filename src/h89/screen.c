@@ -74,13 +74,16 @@ static const char *host_path(const char *host, const char *p, uint8_t w)
 }
 
 /* Joe Travis's FujiNet logo, in the letters that show the H19's graphics
-   characters (ESC F): ROM index = letter - 0x60 */
+   characters (ESC F): ROM index = letter - 0x60. The paste lost its single
+   backticks (vertical lines) to markdown, so these rows were rebuilt to match
+   a photo of the real thing: don't re-derive them from the paste. */
+#define LOGO_X 15
 #define LOGO_Y 8
-static const uint8_t logo_x[] = { 15, 17, 16, 15 };
+#define LOGO_SPIKE_X 40
 static const char *logo_rows[] = {
   "faaaacfacfac   facfac ababab  faasacfaaaacfaaaaac",
-  "aat `` fac `` vabababa          ``  asdeac fad",
-  "faad ed  ed           bababa      ``  auc   `",
+  "`  aat` `` `fac` `` `vabababa `  ` ``  asdeac fad",
+  "` faad` ed `` ed `` `  bababa ` `  ``  auc  ` `",
   "ead   eaaaadeaaaadead    bababeauaadeaaaad  ead",
 };
 
@@ -92,8 +95,9 @@ static void logo(void)
   static uint8_t i, x;
   static const char *s;
 
-  for (i = 0; i < sizeof(logo_x); i++)
-    for (x = logo_x[i], s = logo_rows[i]; *s; x++, s++)
+  h19_put(LOGO_SPIKE_X, LOGO_Y - 1, G_VLINE);
+  for (i = 0; i < sizeof(logo_rows) / sizeof(logo_rows[0]); i++)
+    for (x = LOGO_X, s = logo_rows[i]; *s; x++, s++)
       if (*s != ' ')
         h19_put(x, LOGO_Y + i, *s - 0x60);
 
