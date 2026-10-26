@@ -55,9 +55,9 @@ endif
 # whose rate limit CI runs hit.
 FUJINET_LIB = 5.0.0
 
-# The H89 lib also needs d08f584. It sets up the card's 8255 after a reset
-# even when EN reads high (HDOS CONFIG hung at "Contacting FujiNet..."),
-# and doesn't reboot the ESP32 when an earlier program has set it up.
+# The H89 lib also needs the fork's h89 fixes that aren't upstream yet: the
+# drain and SLIP-sync bound (fujinet-lib #155) and the C2H mode word, which
+# makes the card's port B an input.
 # FUJINET_LIB=<dir> on the command line overrides this.
 FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
 ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)

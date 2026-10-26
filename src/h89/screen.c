@@ -19,6 +19,7 @@
 #include "../globals.h"
 #include "../constants.h"
 #include "../hosts_and_devices.h"
+#include "../pause.h"
 #include "h19.h"
 #include "h89.h"
 #include "layout.h"
@@ -72,6 +73,40 @@ static const char *host_path(const char *host, const char *p, uint8_t w)
   return &buf[n - w];
 }
 
+/* Joe Travis's FujiNet logo, in the letters that show the H19's graphics
+   characters (ESC F): ROM index = letter - 0x60 */
+#define LOGO_Y 8
+static const uint8_t logo_x[] = { 15, 17, 16, 15 };
+static const char *logo_rows[] = {
+  "faaaacfacfac   facfac ababab  faasacfaaaacfaaaaac",
+  "aat `` fac `` vabababa          ``  asdeac fad",
+  "faad ed  ed           bababa      ``  auc   `",
+  "ead   eaaaadeaaaadead    bababeauaadeaaaad  ead",
+};
+
+/* Where the o hops, x then y, leaving a bullet each time */
+static const uint8_t logo_hops[] = { 42, 10, 42, 9, 40, 8, 38, 9, 40, 9 };
+
+static void logo(void)
+{
+  static uint8_t i, x;
+  static const char *s;
+
+  for (i = 0; i < sizeof(logo_x); i++)
+    for (x = logo_x[i], s = logo_rows[i]; *s; x++, s++)
+      if (*s != ' ')
+        h19_put(x, LOGO_Y + i, *s - 0x60);
+
+  for (i = 0; i < sizeof(logo_hops); i += 2)
+  {
+    pause(12); /* 200 ms */
+    if (i)
+      h19_put(logo_hops[i - 2], logo_hops[i - 1], G_BULLET);
+    h19_put(logo_hops[i], logo_hops[i + 1], 'o');
+  }
+  h19_flush();
+}
+
 void screen_init(void)
 {
   h19_init();
@@ -79,8 +114,8 @@ void screen_init(void)
 
   ui_frame();
   ui_divider(PANE_Y, NULL, NULL);
-  ui_center(9, "Contacting FujiNet...");
-  h19_flush();
+  ui_center(14, "Contacting FujiNet...");
+  logo();
 }
 
 void screen_end(void)
