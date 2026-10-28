@@ -105,6 +105,7 @@ jobs:
           adam/config.ddp      BUILD_ADAM/autorun.ddp
           apple2/config.po     BUILD_APPLE/autorun.po
           atari/config.atr     BUILD_ATARI/autorun.atr
+          c64/config.prg       BUILD_IEC/config.prg
           coco/config.dsk      BUILD_COCO/autorun.dsk
           dragon/config.vdk    BUILD_COCO/autorund.vdk
           dragon/AUTOLOAD.DWL  BUILD_COCO/AUTOLOAD.DWL
