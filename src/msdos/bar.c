@@ -7,12 +7,11 @@
  * @license gpl v. 3, see LICENSE for details.
  */
 
-#include <stdlib.h> // for NULL.
 #include <dos.h>
 #include "screen.h"
 
 /**
- * static local variables for bar y, max, and index.
+ * Bar row, margin, last index, and current and previous index.
  */
 static int bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0;
 
@@ -33,6 +32,15 @@ static void save_row_attrs(int y, unsigned char *buf)
     for (i = 0; i < w; i++) { buf[i] = (unsigned char)video[o]; o += 2; }
 }
 
+static bool row_is_lit(int y)
+{
+    int o = (y * screen_cols + bar_c) * 2 + 1;
+    int w = screen_cols - 2 * bar_c;
+    int i;
+    for (i = 0; i < w; i++) { if (video[o] == ATTRIBUTE_SELECTED) return true; o += 2; }
+    return false;
+}
+
 static void restore_row_attrs(int y, unsigned char *buf)
 {
     int o = (y * screen_cols + bar_c) * 2 + 1;
@@ -45,7 +53,7 @@ static void restore_row_attrs(int y, unsigned char *buf)
 /**
  * @brief Set up bar and start display on row.
  * @param y Starting row for bar display.
- * @param c Column size in characters (left/right margin).
+ * @param c Left/right margin in columns.
  * @param m Total number of items.
  * @param i Item index to start display at.
  */
@@ -167,9 +175,16 @@ void bar_update(void)
   int old_row = bar_y + bar_oldi;
 
   /* Save new row's attributes BEFORE anything modifies them.
-   * This must happen first so that when old_row == new_row (initialisation),
-   * we capture the real mixed attrs before bar_draw(clear) overwrites them. */
-  save_row_attrs(new_row, saved_next);
+   * This must happen first so that when old_row == new_row (initialization),
+   * we capture the real mixed attrs before bar_draw(clear) overwrites them.
+   * A row that is still lit has its real attrs in saved_current already. */
+  if (saved_current_row == new_row && row_is_lit(new_row))
+  {
+    int i;
+    for (i = 0; i < (int)sizeof(saved_next); i++) saved_next[i] = saved_current[i];
+  }
+  else
+    save_row_attrs(new_row, saved_next);
 
   /* Restore old row: use saved attrs if available, else fall back to NORMAL. */
   if (saved_current_row == old_row)

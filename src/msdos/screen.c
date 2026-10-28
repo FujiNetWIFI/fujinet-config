@@ -36,6 +36,12 @@ char text_empty[] = "Empty";
 char fn[256];
 char _visibleEntries;
 
+#define INFO_BOX_WIDTH 44
+
+static bool status_two_rows;
+static bool new_disk_prompted;
+static const char *pending_error;
+
 extern bool copy_mode;
 
 /**
@@ -80,7 +86,7 @@ static unsigned char far *screen_get_video_segment_address(void)
  *        far pointer.
  *
  *        Unlike the old BIOS path this does not move the hardware cursor. That
- *        is fine: the cursor is hidden everywhere except inside input_line(),
+ *        is fine: the cursor is hidden except during keyboard input in input.c,
  *        which positions it explicitly with gotoxy().
  *
  * @param x Column (00-screen_cols-1)
@@ -108,7 +114,8 @@ void screen_putc(unsigned char x, unsigned char y, unsigned char a, const char c
  */
 void screen_puts_center(unsigned char y, unsigned char a, const char *s)
 {
-    unsigned char x = (screen_cols >> 1) - (strlen(s) >> 1);
+    size_t len = strlen(s);
+    unsigned char x = len >= screen_cols ? 0 : (screen_cols >> 1) - (len >> 1);
     screen_puts(x,y,a,s);
 }
 
@@ -116,7 +123,8 @@ void screen_puts_center(unsigned char y, unsigned char a, const char *s)
  * @brief place a NULL terminated string on screen, with selected attribute
  * @param x Column (00-screen_cols-1)
  * @param y Line (00-24)
- * @param
+ * @param a The color attribute
+ * @param s NULL terminated string to display
  */
 void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *s)
 {
@@ -143,6 +151,66 @@ void screen_puts(unsigned char x, unsigned char y, unsigned char a, const char *
         video[vo++] = a;
         x++;
     }
+}
+
+/**
+ * @brief Center s on row y. If it is wider than the screen, break it at its
+ *        double spaces, rejoin with single spaces, and continue on row y+1.
+ */
+static void screen_puts_center_wrap(unsigned char y, unsigned char a, const char *s)
+{
+    static char line[SCREEN_MAX_COLS + 1];
+    unsigned char n = 0;
+    unsigned char tl;
+    const char *t;
+    const char *e;
+
+    if (strlen(s) <= screen_cols)
+    {
+        screen_puts_center(y, a, s);
+        return;
+    }
+
+    for (t = s; *t; t = e)
+    {
+        while (*t == ' ')
+            t++;
+        if (*t == 0)
+            break;
+
+        e = strstr(t, "  ");
+        if (e == NULL)
+            e = t + strlen(t);
+        tl = (unsigned char)(e - t);
+        if (tl > screen_cols)
+            tl = screen_cols;
+
+        if (n && n + 1 + tl > screen_cols)
+        {
+            line[n] = 0;
+            screen_puts_center(y++, a, line);
+            n = 0;
+        }
+        if (n)
+            line[n++] = ' ';
+        memcpy(line + n, t, tl);
+        n += tl;
+    }
+
+    line[n] = 0;
+    screen_puts_center(y, a, line);
+}
+
+/**
+ * @brief Put at most w characters of s at x, y.
+ */
+static void screen_puts_clip(unsigned char x, unsigned char y, unsigned char a, const char *s, unsigned char w)
+{
+    static char clip[SCREEN_MAX_COLS + 1];
+
+    strncpy(clip, s, w);
+    clip[w] = 0;
+    screen_puts(x, y, a, clip);
 }
 
 /**
@@ -261,12 +329,11 @@ void screen_set_wifi_custom(void)
  */
 void screen_set_wifi_password(void)
 {
-    static const char blank[65] = "                                                                ";
-    unsigned char bx = (screen_cols - (64 + 2)) / 2;
+    unsigned char w  = WIFI_PASSWORD_FIELD;
+    unsigned char bx = (screen_cols - (w + 2)) / 2;
     screen_clear_line(23);
-    screen_putc(bx,      23, ATTRIBUTE_NORMAL, '[');
-    screen_puts(bx + 1,  23, ATTRIBUTE_NORMAL, (const char *)blank);
-    screen_putc(bx + 65, 23, ATTRIBUTE_NORMAL, ']');
+    screen_putc(bx,         23, ATTRIBUTE_NORMAL, '[');
+    screen_putc(bx + w + 1, 23, ATTRIBUTE_NORMAL, ']');
     screen_status("Enter password and press [ENTER]");
 }
 
@@ -277,54 +344,58 @@ void screen_set_wifi_password(void)
  */
 void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 {
-    unsigned char x = (screen_cols - 44) / 2;
+    unsigned char bw = screen_cols < INFO_BOX_WIDTH ? screen_cols : INFO_BOX_WIDTH;
+    unsigned char x  = (screen_cols - bw) / 2;
+    unsigned char lx = x + (bw < INFO_BOX_WIDTH ? 2 : 5);
+    unsigned char vx = lx + 12;
+    unsigned char vw = x + bw - 1 - vx;
     char tmp[80];
 
     screen_clear();
 
     screen_header("FujiNet Config");
-    screen_draw_box_titled(x, 5, 44, 13, ATTRIBUTE_BORDER, true, "Network Info");
+    screen_draw_box_titled(x, 5, bw, 13, ATTRIBUTE_BORDER, bw < screen_cols, "Network Info");
     screen_status("[R]econnect  Change [S]SID  [Any key] Return");
-    screen_puts(x+5, 7, ATTRIBUTE_NORMAL,"      SSID:");
-    screen_puts(x+5, 8, ATTRIBUTE_NORMAL,"  Hostname:");
-    screen_puts(x+5, 9, ATTRIBUTE_NORMAL,"IP Address:");
-    screen_puts(x+5, 10, ATTRIBUTE_NORMAL,"   Gateway:");
-    screen_puts(x+5, 11, ATTRIBUTE_NORMAL,"       DNS:");
-    screen_puts(x+5, 12, ATTRIBUTE_NORMAL,"   Netmask:");
-    screen_puts(x+5, 13, ATTRIBUTE_NORMAL,"       MAC:");
-    screen_puts(x+5, 14, ATTRIBUTE_NORMAL,"     BSSID:");
-    screen_puts(x+5, 15, ATTRIBUTE_NORMAL,"   Version:");
+    screen_puts(lx, 7, ATTRIBUTE_NORMAL,"      SSID:");
+    screen_puts(lx, 8, ATTRIBUTE_NORMAL,"  Hostname:");
+    screen_puts(lx, 9, ATTRIBUTE_NORMAL,"IP Address:");
+    screen_puts(lx, 10, ATTRIBUTE_NORMAL,"   Gateway:");
+    screen_puts(lx, 11, ATTRIBUTE_NORMAL,"       DNS:");
+    screen_puts(lx, 12, ATTRIBUTE_NORMAL,"   Netmask:");
+    screen_puts(lx, 13, ATTRIBUTE_NORMAL,"       MAC:");
+    screen_puts(lx, 14, ATTRIBUTE_NORMAL,"     BSSID:");
+    screen_puts(lx, 15, ATTRIBUTE_NORMAL,"   Version:");
 
-    screen_puts(x+17, 7, ATTRIBUTE_BOLD,acx->ssid);
-    screen_puts(x+17, 8, ATTRIBUTE_BOLD,acx->hostname);
+    screen_puts_clip(vx, 7, ATTRIBUTE_BOLD, acx->ssid, vw);
+    screen_puts_clip(vx, 8, ATTRIBUTE_BOLD, acx->hostname, vw);
 
     sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
 	    acx->localIP[0],
 	    acx->localIP[1],
 	    acx->localIP[2],
 	    acx->localIP[3]);
-    screen_puts(x+17, 9, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts_clip(vx, 9, ATTRIBUTE_BOLD, (const char *)tmp, vw);
 
     sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
 	    acx->gateway[0],
 	    acx->gateway[1],
 	    acx->gateway[2],
 	    acx->gateway[3]);
-    screen_puts(x+17, 10, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts_clip(vx, 10, ATTRIBUTE_BOLD, (const char *)tmp, vw);
 
     sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
 	    acx->dnsIP[0],
 	    acx->dnsIP[1],
 	    acx->dnsIP[2],
 	    acx->dnsIP[3]);
-    screen_puts(x+17, 11, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts_clip(vx, 11, ATTRIBUTE_BOLD, (const char *)tmp, vw);
 
     sprintf((char *)tmp,"%03u.%03u.%03u.%03u",
 	    acx->netmask[0],
 	    acx->netmask[1],
 	    acx->netmask[2],
 	    acx->netmask[3]);
-    screen_puts(x+17, 12, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts_clip(vx, 12, ATTRIBUTE_BOLD, (const char *)tmp, vw);
 
     sprintf((char *)tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
 	    acx->macAddress[0],
@@ -333,7 +404,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 	    acx->macAddress[3],
 	    acx->macAddress[4],
 	    acx->macAddress[5]);
-    screen_puts(x+17, 13, ATTRIBUTE_BOLD,(const char *)tmp);
+    screen_puts_clip(vx, 13, ATTRIBUTE_BOLD, (const char *)tmp, vw);
 
     sprintf((char *)tmp,"%02X:%02X:%02X:%02X:%02X:%02X",
 	    acx->bssid[0],
@@ -342,10 +413,10 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
 	    acx->bssid[3],
 	    acx->bssid[4],
 	    acx->bssid[5]);
-    screen_puts(x+17, 14, ATTRIBUTE_BOLD,(const char *)tmp);
-    screen_puts(x+17, 15, ATTRIBUTE_BOLD,acx->fn_version);
-    screen_puts(x+5, 16, ATTRIBUTE_NORMAL,"    CONFIG:");
-    screen_puts(x+17, 16, ATTRIBUTE_BOLD,GIT_VERSION);
+    screen_puts_clip(vx, 14, ATTRIBUTE_BOLD, (const char *)tmp, vw);
+    screen_puts_clip(vx, 15, ATTRIBUTE_BOLD, acx->fn_version, vw);
+    screen_puts(lx, 16, ATTRIBUTE_NORMAL,"    CONFIG:");
+    screen_puts_clip(vx, 16, ATTRIBUTE_BOLD, GIT_VERSION, vw);
 }
 
 /* Matches rs232Fuji::set_additional_direntry_details() packed layout:
@@ -384,7 +455,7 @@ void screen_select_slot(const char *e)
 
   if (create == false)
   {
-    /* Filename follows struct at offset 13 (= sizeof struct _file_info) */
+    /* Filename follows struct at offset 12 (= sizeof struct _file_info) */
     sprintf((char *)fullpath, "%s%s", path, (char *)(i + 1));
     fullpath[screen_cols - 2] = '\0';
 
@@ -416,8 +487,11 @@ void screen_select_slot(const char *e)
  */
 void screen_select_slot_mode(void)
 {
+    static const char prompt[] = "[ENTER] Read Only  [W] Read/Write  [ESC] Abort";
+
     screen_clear_line(21);
-    screen_puts_center(22,ATTRIBUTE_NORMAL,"[ENTER] Read Only [W] Read/Write [ESC] Abort");
+    screen_clear_line(22);
+    screen_puts_center_wrap(strlen(prompt) > screen_cols ? 21 : 22, ATTRIBUTE_NORMAL, prompt);
 }
 
 /**
@@ -502,14 +576,6 @@ void screen_select_slot_build_eos_directory_creating(void)
 {
 }
 
-/* CP437 single-line box drawing characters */
-#define BOX_TL   '\xDA'   /* top-left corner    ┌ */
-#define BOX_TR   '\xBF'   /* top-right corner   ┐ */
-#define BOX_BL   '\xC0'   /* bottom-left corner └ */
-#define BOX_BR   '\xD9'   /* bottom-right corner┘ */
-#define BOX_H    '\xC4'   /* horizontal bar     ─ */
-#define BOX_V    '\xB3'   /* vertical bar       │ */
-
 /**
  * @brief Draw/redraw the top border of the file list box, optionally with a
  *        "[PgUp]" label at the left end of the horizontal rule.
@@ -558,6 +624,14 @@ static void sf_draw_file_bot_border(bool pgdn)
     screen_putc(screen_cols - 1, row, a, BOX_BR);
 }
 
+static void screen_select_file_status(void)
+{
+    if (copy_mode == false)
+        screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C]opy  [ENTER] Choose  [ESC] Abort");
+    else
+        screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C] Do Copy!  [ENTER] Choose  [ESC] Abort");
+}
+
 /**
  * @brief Draw the full file-browser screen including header, info box, and file list box.
  */
@@ -570,13 +644,10 @@ void screen_select_file(void)
 
     screen_draw_box(0, 1, screen_cols, 5, ATTRIBUTE_BORDER, false);
 
-    /* File list box: top border row 7 (FILES_START_Y-1), bottom border row 23. No shadow (row 24 = status bar). */
+    /* File list box: top border row 7 (FILES_START_Y-1), bottom border row 21. */
     screen_draw_box(0, FILES_START_Y - 1, screen_cols, ENTRIES_PER_PAGE + 2, ATTRIBUTE_BORDER, false);
 
-    if (copy_mode == false)
-        screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C]opy  [ENTER] Choose  [ESC] Abort");
-    else
-        screen_status("[BKSP] Up Dir  [N]ew  [F]ilter  [C] Do Copy!  [ENTER] Choose  [ESC] Abort");
+    screen_select_file_status();
 }
 
 /**
@@ -670,15 +741,6 @@ void screen_select_file_prev(void)
  */
 void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryType)
 {
-
-    /*
-      if (e[strlen(e)-1]=='/')
-      screen_puts(0,FILES_START_Y+y,CH_FOLDER);
-      else if (e[0]=='=')
-      screen_puts(0,FILES_START_Y+y,CH_SERVER);
-      else
-    */
-
     if (e[strlen(e)-1]=='/')
     {
         screen_puts(1,FILES_START_Y+y,ATTRIBUTE_BOLD, "/");
@@ -698,6 +760,19 @@ void screen_select_file_display_entry(uint8_t y, const char *e, uint16_t entryTy
  */
 void screen_select_file_choose(char visibleEntries)
 {
+    /* NEW's prompts on rows 22-23 cover the first status row in 40-column mode. */
+    if (new_disk_prompted)
+    {
+        const char *err = pending_error;
+
+        new_disk_prompted = false;
+        screen_clear_line(NEW_PROMPT_Y);
+        screen_clear_line(NEW_INPUT_Y);
+        screen_select_file_status();
+        if (err)
+            screen_error(err);
+    }
+
     bar_set(FILES_START_Y,1,visibleEntries,prev_page ? visibleEntries-1 : 0);
     _visibleEntries = visibleEntries;
 }
@@ -715,9 +790,10 @@ void screen_select_file_new_type(void)
  */
 void screen_select_file_new_size(uint8_t k)
 {
+    new_disk_prompted = true;
     screen_clear_line(NEW_PROMPT_Y);
     screen_clear_line(NEW_INPUT_Y);
-    screen_puts_center(NEW_PROMPT_Y, ATTRIBUTE_BOLD, "[1] 360K  [2] 720K  [3] 1.2MB  [4] 1.44MB  [C]ustom");
+    screen_puts_center_wrap(NEW_PROMPT_Y, ATTRIBUTE_BOLD, "[1] 360K  [2] 720K  [3] 1.2MB  [4] 1.44MB  [C]ustom");
 }
 
 /**
@@ -792,10 +868,26 @@ void screen_header(const char *title)
 }
 
 /**
- * @brief Draw a full-width status bar on line 24 (EDIT.EXE status bar style).
+ * @brief Draw a full-width status bar on line 24 (EDIT.EXE status bar style),
+ *        taking lines 23-24 when the text is wider than the screen.
  */
 void screen_status(const char *text)
 {
+    pending_error = NULL;
+
+    if (strlen(text) > screen_cols)
+    {
+        screen_fill_line(23, ATTRIBUTE_STATUS);
+        screen_fill_line(24, ATTRIBUTE_STATUS);
+        screen_puts_center_wrap(23, ATTRIBUTE_STATUS, text);
+        status_two_rows = true;
+        return;
+    }
+
+    if (status_two_rows)
+        screen_clear_line(23);
+    status_two_rows = false;
+
     screen_fill_line(24, ATTRIBUTE_STATUS);
     screen_puts_center(24, ATTRIBUTE_STATUS, text);
 }
@@ -807,19 +899,20 @@ void screen_status(const char *text)
  */
 void screen_status_tsr_indicator(const char *status_text)
 {
-    const char *p;
-    unsigned char offset, start_col;
+    unsigned int vo  = (unsigned int)23 * screen_cols << 1;
+    unsigned int end = (unsigned int)25 * screen_cols << 1;
 
-    if (!install_tsr)
+    if (!install_tsr || strstr(status_text, "[T]") == NULL)
         return;
 
-    p = strstr(status_text, "[T]");
-    if (!p)
-        return;
-
-    offset    = (unsigned char)(p - status_text) + 1; /* 'T' sits right after '[' */
-    start_col = (screen_cols >> 1) - ((unsigned char)strlen(status_text) >> 1);
-    screen_putc(start_col + offset, 24, ATTRIBUTE_BOLD, 'T');
+    for (; vo + 4 < end; vo += 2)
+    {
+        if (video[vo] == '[' && video[vo + 2] == 'T' && video[vo + 4] == ']')
+        {
+            video[vo + 3] = ATTRIBUTE_BOLD;
+            return;
+        }
+    }
 }
 
 /**
@@ -891,6 +984,8 @@ void screen_clear(void)
     unsigned short i;
     unsigned short cells = (unsigned short)screen_cols * 25 * 2;
 
+    status_two_rows = false;
+
     for (i = 0; i < cells; i += 2)
     {
         video[i]   = 0x20;             /* space character */
@@ -904,6 +999,7 @@ void screen_clear(void)
  */
 void screen_error(const char *msg)
 {
+    pending_error = msg;
     screen_clear_line(24);
     screen_puts_center(24, ATTRIBUTE_BOLD, msg);
 }
@@ -933,11 +1029,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
  */
 void screen_hosts_and_devices_hosts(void)
 {
-    const char *status_text;
-    if (screen_cols <= 40)
-        status_text = "[1-8] [E]dit [RET] Browse [TAB] Drives";
-    else
-        status_text = "[1-8] [E]dit  [RET] Browse  [L]obby  [T]SR  [C]onfig  [TAB] Drives  [ESC] Exit";
+    static const char status_text[] = "[1-8] [E]dit  [RET] Browse  [L]obby  [T]SR  [C]onfig  [TAB] Drives  [ESC] Exit";
     screen_status(status_text);
     screen_status_tsr_indicator(status_text);
 
@@ -949,11 +1041,7 @@ void screen_hosts_and_devices_hosts(void)
  */
 void screen_hosts_and_devices_devices(void)
 {
-    const char *status_text;
-    if (screen_cols <= 40)
-        status_text = "[1-8] [E]ject [Del] Clear [TAB] Hosts";
-    else
-        status_text = "[1-8] [E]ject  [Del] Clr  [L]obby  [T]SR  [TAB] Hosts  [R]ead  [W]rite  [C]onfig";
+    static const char status_text[] = "[1-8] [E]ject  [Del] Clr  [L]obby  [T]SR  [TAB] Hosts  [R]ead  [W]rite  [C]onfig";
     screen_status(status_text);
     screen_status_tsr_indicator(status_text);
 
@@ -1071,8 +1159,6 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
  */
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 {
-    // When this gets called it seems like the cursor is right where we want it to be.
-    // so no need to move to a position first.
     screen_puts(5, HOSTS_START_Y+hs, ATTRIBUTE_NORMAL, text_empty);
 }
 

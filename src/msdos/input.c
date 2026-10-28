@@ -66,7 +66,7 @@ int kbhit(void)
  * For printable keys the ASCII value is returned directly.  For extended
  * (special) keys the scan code is translated to a KEY_* constant.
  *
- * @return ASCII character value, a KEY_* constant, or 0 for unrecognised extended keys.
+ * @return ASCII character value, a KEY_* constant, or 0 for unrecognized extended keys.
  */
 unsigned char cgetc(void)
 {
@@ -143,18 +143,18 @@ void gotoxy(unsigned char x, unsigned char y)
  * @param o        Initial offset into the buffer (pre-existing text length).
  * @param c        Pointer to the character buffer to receive input.
  * @param l        Maximum number of characters to accept (buffer capacity).
+ * @param w        Columns available for echo; characters past it are accepted but not shown.
  * @param password If true, echo '*' instead of the actual character.
  */
-void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
+static void input_line_field(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, unsigned char w, bool password)
 {
     unsigned char pos=o;
     unsigned char key=0;
-    
+
     c += o;
-    x += o;
 
     cursor(true);
-    gotoxy(x,y);
+    gotoxy(x + (pos < w ? pos : w), y);
 
     while (key = cgetc())
     {
@@ -173,13 +173,14 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
             if (pos > 0)
             {
                 pos--;
-                x--;
                 c--;
                 *c = 0x00;
-                vo = (unsigned int)(y * screen_cols + x) * 2;
-                video[vo]     = ' ';
-                video[vo + 1] = ATTRIBUTE_NORMAL;
-                gotoxy(x, y);
+                if (pos < w)
+                {
+                    vo = (unsigned int)(y * screen_cols + x + pos) * 2;
+                    video[vo]     = ' ';
+                    video[vo + 1] = ATTRIBUTE_NORMAL;
+                }
             }
         }
         else if (key > 0x1F && key < 0x7F) // Printable characters
@@ -187,22 +188,33 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
             if (pos < l)
             {
                 *c = key;
-                vo = (unsigned int)(y * screen_cols + x) * 2;
-                video[vo]     = password ? '*' : key;
-                video[vo + 1] = ATTRIBUTE_NORMAL;
+                if (pos < w)
+                {
+                    vo = (unsigned int)(y * screen_cols + x + pos) * 2;
+                    video[vo]     = password ? '*' : key;
+                    video[vo + 1] = ATTRIBUTE_NORMAL;
+                }
                 c++;
                 pos++;
-                x++;
-                gotoxy(x, y);
             }
         }
+
+        gotoxy(x + (pos < w ? pos : w), y);
     }
 
     cursor(false);
 }
 
 /**
- * @brief Prompt for a custom SSID network name on row 22.
+ * @brief input_line_field() with every accepted character echoed.
+ */
+void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsigned char l, bool password)
+{
+    input_line_field(x, y, o, c, l, l, password);
+}
+
+/**
+ * @brief Prompt for a custom SSID network name on row 23.
  * @param c Buffer to receive the entered network name (up to 32 characters).
  */
 void input_line_set_wifi_custom(char *c)
@@ -213,20 +225,40 @@ void input_line_set_wifi_custom(char *c)
 }
 
 /**
+ * @brief Show a Y/N prompt on row 23 and take a single key, without ENTER.
+ * @param p Prompt text.
+ * @return true for Y or y; any other key means no.
+ */
+static bool input_yes_no(const char *p)
+{
+    unsigned char k;
+
+    screen_clear_line(23);
+    screen_puts(0, 23, ATTRIBUTE_BOLD, p);
+    gotoxy((unsigned char)strlen(p), 23);
+    cursor(true);
+    k = cgetc();
+    cursor(false);
+    screen_clear_line(23);
+    return k == 'Y' || k == 'y';
+}
+
+/**
  * @brief Prompt for a WiFi password on row 23, echoing asterisks.
  * @param c Buffer containing any pre-existing password; receives the updated password (up to 64 characters).
  */
 void input_line_set_wifi_password(char *c)
 {
-    unsigned char ix = (screen_cols - (64 + 2)) / 2 + 1;  /* inside brackets */
-    char stars[65];
+    unsigned char w  = WIFI_PASSWORD_FIELD;
+    unsigned char ix = (screen_cols - (w + 2)) / 2 + 1;  /* inside brackets */
+    char stars[WIFI_PASSWORD_LEN + 1];
     int l = strlen(c);
-    if (l > 64) l = 64;
-    memset((void *)stars, 0, 65);
+    if (l > w) l = w;
+    memset((void *)stars, 0, sizeof(stars));
     memset((void *)stars, '*', l);
     stars[l] = '\0';
     screen_puts(ix, 23, ATTRIBUTE_NORMAL, (const char *)stars);
-    input_line(ix, 23, 0, c, 64, true);
+    input_line_field(ix, 23, 0, c, WIFI_PASSWORD_LEN, w, true);
 }
 
 /**
@@ -383,7 +415,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 {
     // Up in the hosts section.
     int k = input();
-    char temp[20];
+    bool yes;
     
     if (k == KEY_HOME)
         k = '1';
@@ -423,38 +455,18 @@ HDSubState input_hosts_and_devices_hosts(void)
     case 'L':
     case 'l':
         // boot lobby.
-        memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,23,ATTRIBUTE_BOLD, "Boot Lobby Y/N? ");
-        input_line(16,23,0,(char *)temp,2, false);
+        yes = input_yes_no("Boot Lobby Y/N? ");
         screen_hosts_and_devices_hosts();
-        switch (temp[0])
+        if (yes)
         {
-        case 'Y':
-        case 'y':
             mount_and_boot_lobby();
             return HD_DONE;
-        default: // Anything but Y/y take to mean "no"
-            screen_clear_line(23);
-            return HD_HOSTS;
         }
         return HD_HOSTS;
     case 'T':
     case 't':
-        memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,23,ATTRIBUTE_BOLD, "Install Config TSR on exit Y/N? ");
-        input_line(32,23,0,(char *)temp,2, false);
-        switch (temp[0])
-        {
-        case 'Y':
-        case 'y':
-            install_tsr = true;
-            break;
-        default:
-            install_tsr = false;
-            break;
-        }
+        install_tsr = input_yes_no("Install Config TSR on exit Y/N? ");
         system_save_tsr_setting();
-        screen_clear_line(23);
         screen_hosts_and_devices_hosts();
         return HD_HOSTS;
     case KEY_RETURN:
@@ -484,7 +496,7 @@ HDSubState input_hosts_and_devices_devices(void)
 {
     // Down in the devices section.
     int k = input();
-    char temp[20];
+    bool yes;
         
     if (k == KEY_HOME) // Home
         k = '1';
@@ -542,38 +554,18 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'L':
     case 'l':
         // boot lobby.
-        memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,23,ATTRIBUTE_BOLD,"Boot Lobby Y/N? ");
-        input_line(16,23,0,(char *)temp,2, false);
+        yes = input_yes_no("Boot Lobby Y/N? ");
         screen_hosts_and_devices_devices();
-        switch (temp[0])
+        if (yes)
         {
-        case 'Y':
-        case 'y':
             mount_and_boot_lobby();
             return HD_DONE;
-        default: // Anything but Y/y take to mean "no"
-            screen_clear_line(23);
-            return HD_DEVICES;
         }
         return HD_DEVICES;
     case 'T':
     case 't':
-        memset((void *)temp, 0, sizeof(temp));
-        screen_puts(0,23,ATTRIBUTE_BOLD,"Install Config TSR on exit Y/N? ");
-        input_line(32,23,0,(char *)temp,2, false);
-        switch (temp[0])
-        {
-        case 'Y':
-        case 'y':
-            install_tsr = true;
-            break;
-        default:
-            install_tsr = false;
-            break;
-        }
+        install_tsr = input_yes_no("Install Config TSR on exit Y/N? ");
         system_save_tsr_setting();
-        screen_clear_line(23);
         screen_hosts_and_devices_devices();
         return HD_DEVICES;
     case KEY_ESCAPE:
@@ -677,10 +669,6 @@ SFSubState input_select_file_choose(void)
             copy_host_slot = selected_host_slot;
             return SF_COPY;
         }
-    case '!':
-    case 'B':
-    case 'b':
-        //mount_and_boot();
     default:
         return SF_CHOOSE;
     }
@@ -781,7 +769,7 @@ unsigned char input_select_slot_mode(char *mode)
 /**
  * @brief Handle input for the network info (show info) screen.
  *
- * Recognised keys: 'R' reconnects WiFi, 'S' opens the WiFi SSID selector,
+ * Recognized keys: 'R' reconnects WiFi, 'S' opens the WiFi SSID selector,
  * any other non-zero key returns to the hosts-and-devices screen.
  *
  * @return The next show-info sub-state.

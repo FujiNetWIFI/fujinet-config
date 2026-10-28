@@ -35,6 +35,12 @@
 #define ATTRIBUTE_STATUS   0x70  /* black on light gray  (bottom status bar)  */
 #define ATTRIBUTE_SHADOW   0x08  /* dark gray on black   (drop shadow)        */
 
+#define SCREEN_MAX_COLS   80
+#define WIFI_PASSWORD_LEN 64
+
+/* Columns between the password brackets; narrower than the password in 40-column mode. */
+#define WIFI_PASSWORD_FIELD (screen_cols - 2 < WIFI_PASSWORD_LEN ? screen_cols - 2 : WIFI_PASSWORD_LEN)
+
 /**
  * @brief screen variables
  */
