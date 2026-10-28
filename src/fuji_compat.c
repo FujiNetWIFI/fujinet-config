@@ -19,3 +19,19 @@ bool fuji_open_directory2(uint8_t hs, char *p, char *f)
   return fuji_open_directory(hs, _p);
 }
 #endif /* BUILD_APPLE2 || BUILD_ATARI */
+
+#ifdef BUILD_ADAM
+#include "typedefs.h"
+#include <string.h>
+
+#define FIRMWARE_DEVICE_SLOTS 8
+
+bool adam_put_device_slots(DeviceSlot *d, size_t count)
+{
+  static DeviceSlot slots[FIRMWARE_DEVICE_SLOTS];
+
+  memset(slots, 0, sizeof(slots));
+  memcpy(slots, d, count * sizeof(DeviceSlot));
+  return FUJICALL_D(FUJICMD_WRITE_DEVICE_SLOTS, slots, sizeof(slots));
+}
+#endif /* BUILD_ADAM */

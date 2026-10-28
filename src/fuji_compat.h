@@ -25,14 +25,26 @@ typedef enum _entry_types
 
 typedef unsigned short DirectoryPosition;
 
-//#warning "FIXME - needs to be implemented in fujinet-lib and firmware."
-
-// No platform queries the enabled state yet.
+// Not read from FujiNet yet; every device reports enabled.
 #define fuji_get_device_enabled_status(ds) true
 #define fuji_update_devices_enabled(de, count)
 
 #define fuji_device_slot_to_device(ds) (ds + FUJI_SLOT_TO_DEV_OFFSET)
 #define fuji_open_directory_filter(hs, path, filter) fuji_open_directory2(hs, path, filter)
+
+#ifdef BUILD_ADAM
+/* fujinet-lib 5.0.0 sends an aux byte ahead of the NetConfig, but the Adam
+   firmware reads the SSID right after the command. Fixed in lib e125476 (#216). */
+#undef fuji_set_ssid
+#define fuji_set_ssid(nc) FUJICALL_D(FUJICMD_SET_SSID, nc, sizeof(NetConfig))
+
+/* The firmware's WRITE DEVICE SLOTS takes all 8 slots and saves them, garbage
+   past what was sent included. The Adam uses only 4, so send those plus 4 empty.
+   Moves into the lib with fujinet-lib #242. */
+#undef fuji_put_device_slots
+#define fuji_put_device_slots(d, count) adam_put_device_slots(d, count)
+bool adam_put_device_slots(DeviceSlot *d, size_t count);
+#endif /* BUILD_ADAM */
 
 #if defined(BUILD_ADAM) || defined(BUILD_RC2014)
 #define FUJI_SLOT_TO_DEV_OFFSET 4
