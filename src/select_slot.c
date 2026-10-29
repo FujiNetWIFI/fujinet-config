@@ -13,11 +13,29 @@
 #ifdef BUILD_MSXROM
 #include "msx/device_slots.h"
 #endif /* BUILD_MSXROM */
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+#include "coco/strendswith.h"
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 char mode=0;
 
 bool create=false;
 SSSubState ss_subState;
+
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+// system_slot0_is_rom() (coco/system.c) only ever looks at device slot 0, so
+// a .CCC/.ROM always goes there, skipping the normal slot picker -- there's
+// no disk device for a cart ROM to occupy.
+static bool selected_rom_image = false;
+
+// select_file_entry_type() (select_file.c) already read the selected entry's
+// name into response, right before SELECT_SLOT is entered - no need to
+// reopen the directory and read the same entry again.
+static bool selected_file_is_rom_image(void)
+{
+  return filename_has_rom_suffix(response) != 0;
+}
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 #ifdef BUILD_ATARI
 // Device slot 8 (index 7) is reserved for the cassette (C:) device.
@@ -56,8 +74,21 @@ void select_slot_init()
       ss_subState=SS_DONE;
     }
 #endif
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+  else if (create==false && (selected_rom_image = selected_file_is_rom_image()))
+    {
+      selected_device_slot=0;
+      mode=MODE_READ;
+      ss_subState=SS_DONE;
+    }
+#endif
   else
-    ss_subState=SS_DISPLAY;
+    {
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+      selected_rom_image = false;
+#endif
+      ss_subState=SS_DISPLAY;
+    }
 }
 
 void select_slot_display()
