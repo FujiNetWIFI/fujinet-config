@@ -8,6 +8,8 @@
 #include "input.h"
 #include "constants.h"
 #include "globals.h"
+#include "connect_wifi.h"
+#include <string.h>
 
 SISubState si_subState;
 
@@ -20,6 +22,10 @@ void show_info(void)
 
   while (si_subState==SI_SHOWINFO)
     si_subState=input_show_info();
-  
+
+  // nc is not populated if wifi was already connected at startup, use SSID from adapter config
+  if (state == CONNECT_WIFI)
+    memcpy(nc.ssid, adapterConfigExt.ssid, SSID_MAXLEN);
+
   si_subState = SI_SHOWINFO;
 }

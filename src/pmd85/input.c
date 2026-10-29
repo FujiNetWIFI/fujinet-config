@@ -4,6 +4,7 @@
  */
 
 #include <conio.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "input.h"
@@ -64,9 +65,50 @@ extern bool copy_mode;
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
+#define KEY_REPEAT_START 25  // x 10ms, delay before autorepeat starts
+#define KEY_REPEAT_RATE  60 // ms, autorepeat period
+
 unsigned char input()
 {
-  return cgetc();
+  static unsigned char last_key = 0;
+  static bool repeating = false;
+  unsigned char c, i;
+
+  if (!kbhit())
+  {
+    last_key = 0;
+    return 0;
+  }
+  c = cgetc();
+
+  // in_GetKey reports held key on every scan, so do key repeat timing here
+  // (CLIB_KBHIT_DELAY is broken - kbhit.asm passes key code to msleep instead of delay)
+  if (c != last_key)
+  {
+    // fresh press: return immediately
+    last_key = c;
+    repeating = false;
+    return c;
+  }
+
+  if (!repeating)
+  {
+    // key still held: wait for repeat start delay, give up if released
+    for (i = 0; i < KEY_REPEAT_START; i++)
+    {
+      msleep(10);
+      if (getk() != c)
+      {
+        last_key = 0;
+        return 0;
+      }
+    }
+    repeating = true;
+    return c;
+  }
+
+  msleep(KEY_REPEAT_RATE);
+  return c;
 }
 
 unsigned char input_ucase(void)
@@ -97,7 +139,10 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cursor(1);            // turn cursor on
     gotoxy(x + i, y);     // update text position
 
-    a = input();
+    // wait for key, avoid cursor redraw (flicker) while idle
+    while ((a = input()) == 0)
+      ;
+
     switch (a)
     {
     case KEY_LEFT_ARROW:
@@ -348,12 +393,14 @@ SFSubState input_select_file_choose(void)
     // strncpy(source_path, path, 224); // makes mess :-(
     // old_pos = pos;
     return SF_DONE;
+	case KEY_RCL:
+    if (strcmp(path, "/") != 0)
+      return SF_DEVANCE_FOLDER;
+    // fall thru
 	case KEY_ESCAPE:
 		copy_mode = false;
 		state = HOSTS_AND_DEVICES;
 		return SF_DONE;
-	case KEY_RCL:
-		return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
 	case 'F':
 	case 'f':
 		return SF_FILTER;
@@ -503,6 +550,8 @@ SISubState input_show_info(void)
 	case 'R':
 		state = CONNECT_WIFI;
 		return SI_DONE;
+	case 0:
+		return SI_SHOWINFO;
 	default:
 		state = HOSTS_AND_DEVICES;
 		return SI_DONE;

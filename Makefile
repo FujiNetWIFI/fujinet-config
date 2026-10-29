@@ -26,7 +26,10 @@ PLATFORMS += msdos
 # Not currently in buildable state
 #PLATFORMS += pc6001
 #PLATFORMS += pc8801
-#PLATFORMS += pmd85
+
+PLATFORMS += pmd85
+
+# Not currently in buildable state
 #PLATFORMS += rc2014
 
 # Need a fujinet-lib with the S-100 bus, not in a release yet:
