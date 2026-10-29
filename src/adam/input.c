@@ -200,6 +200,7 @@ WSSubState input_set_wifi_select(void)
     case 0x85:
       return WS_SCAN;
     case 0x86:
+      screen_should_be_cleared=true;
       state=HOSTS_AND_DEVICES;
       return WS_DONE;
     case 0xA0:
