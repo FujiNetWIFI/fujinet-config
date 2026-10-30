@@ -56,8 +56,8 @@ endif
 FUJINET_LIB = 5.0.0
 
 # The H89 lib also needs the fork's h89 fixes that aren't upstream yet: the
-# drain and SLIP-sync bound (fujinet-lib #155) and the C2H mode word, which
-# makes the card's port B an input.
+# drain and SLIP-sync bound (fujinet-lib #155), and no DIR or /OE for the
+# card without its 74LVC245 (#249). The C2H mode word (#228) is upstream.
 # FUJINET_LIB=<dir> on the command line overrides this.
 FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
 ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
