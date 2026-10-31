@@ -256,7 +256,6 @@ void input_select_file_new_name(char *c)
 
 SSSubState input_select_slot_choose(void)
 {
-	// cprintf(" [1-4] SELECT SLOT\r\n [RETURN] INSERT INTO SLOT\r\n [ESC] TO ABORT.");
 	unsigned char k;
 
 	k = input_key();
@@ -270,6 +269,10 @@ SSSubState input_select_slot_choose(void)
 	case KEY_2:
 	case KEY_3:
 	case KEY_4:
+	case KEY_5:
+	case KEY_6:
+	case KEY_7:
+	case KEY_8:
 		bar_jump(k - 0x31);
 		return SS_CHOOSE;
 	// case KEY_SMART_IV:
@@ -405,6 +408,10 @@ HDSubState input_hosts_and_devices_devices(void)
 	case KEY_2:
 	case KEY_3:
 	case KEY_4:
+	case KEY_5:
+	case KEY_6:
+	case KEY_7:
+	case KEY_8:
 		bar_jump(k - KEY_1);
 		selected_device_slot = bar_get();
 		hosts_and_devices_long_filename();
