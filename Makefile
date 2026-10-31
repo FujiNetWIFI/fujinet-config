@@ -1,12 +1,24 @@
 PRODUCT = config
+# Keep in alphabetical order.
 PLATFORMS += adam
 PLATFORMS += apple2
+
+# Require special toolchains
+#PLATFORMS += apple2cda
+#PLATFORMS += apple2gs
+
 PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
-PLATFORMS += msdos
+
+# Heathkit H89 is off until a fujinet-lib release has #249 and #155.
+# Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
+#PLATFORMS += h89-cpm
+#PLATFORMS += h89-hdos
+
 PLATFORMS += model2
+PLATFORMS += msdos
 
 # Untested; see FujiNetWIFI/fujinet-config#326
 #PLATFORMS += msxrom
@@ -17,19 +29,10 @@ PLATFORMS += model2
 #PLATFORMS += pmd85
 #PLATFORMS += rc2014
 
-# Require special toolchains
-#PLATFORMS += apple2cda
-#PLATFORMS += apple2gs
-
 # Need a fujinet-lib with the S-100 bus, not in a release yet:
 #   make FUJINET_LIB=<fujinet-lib checkout> s100-cpm/r2r s100-rom/r2r
 #PLATFORMS += s100-cpm
 #PLATFORMS += s100-rom
-
-# Heathkit H89 is off until a fujinet-lib release has #249 and #155.
-# Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
-#PLATFORMS += h89-cpm
-#PLATFORMS += h89-hdos
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
