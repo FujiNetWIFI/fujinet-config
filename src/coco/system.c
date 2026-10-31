@@ -3,15 +3,8 @@
 #include "../globals.h"
 #include "strendswith.h"
 
-#define FUJI_IO_REG ((unsigned char *)0xFF41)
-
 /* Big enough to double as system_create_new()'s NewDisk; nothing else is using it then */
 char response[sizeof(NewDisk)];
-
-void system_enable_user_rom(void)
-{
-  *FUJI_IO_REG = 7;
-}
 
 bool system_slot0_is_rom(void)
 {
@@ -31,7 +24,7 @@ void system_boot(void)
     // putstr, not printf: keeps the printf library out of apps that never print.
     putstr(msg, sizeof(msg) - 1);
     pause(120);                 
-    system_enable_user_rom();   // write 7 (ROM_MODE | USERROM_ENABLE | AUTOSTART_ENABLE) to IO_CONTROL. Firmware arms the CART trigger and triggers RESET.
+    fuji_enable_user_rom();
   }
   else
   {
