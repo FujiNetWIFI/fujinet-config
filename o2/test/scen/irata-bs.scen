@@ -1,0 +1,22 @@
+# Battleship from apps.irata.online (HOSTS=SD,apps.irata.online), booted
+wait 360
+press down
+press fire
+wait 120
+press right
+wait 60
+press right
+wait 60
+screen root3
+expect root3 6 Odyssey2
+type 7
+wait 120
+press right
+wait 60
+screen o2p2
+expect o2p2 2 battleship
+type 3
+wait 300
+snap game
+wait 200
+snap game2
