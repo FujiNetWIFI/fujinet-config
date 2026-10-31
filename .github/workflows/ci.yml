@@ -14,20 +14,20 @@ jobs:
       fail-fast: false
       matrix:
         platform:
+          # Keep in alphabetical order.
           - adam
           - apple2
           - atari
           - c64
           - coco
           - dragon
-          - model2
-          - msdos
-          # Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
-          #- msxrom
-          # The H89 builds need a fujinet-lib with H89 support (see
-          # FUJINET_LIB_H89 in the Makefile).
+          # Off until a fujinet-lib release has #249 and #155 (see FUJINET_LIB_H89 in the Makefile).
           #- h89-cpm
           #- h89-hdos
+          - model2
+          - msdos
+          # Untested; see FujiNetWIFI/fujinet-config#326
+          #- msxrom
 
     container:
       image: fozztexx/defoogi:1.4.8
