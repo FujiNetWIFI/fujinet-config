@@ -1,0 +1,10 @@
+wait 360
+press fire
+wait 60
+press down
+press down
+press down
+press down
+press fire
+wait 80
+burst files 60

@@ -1,0 +1,40 @@
+# a copy (HOSTS=SD,localhost, FNPC_BIN a fujinet-pc with the COPY_FILE fix):
+# the TNFS host filtered to *Munch*, its file marked, copied into SD/apps
+wait 360
+press down
+press fire
+wait 90
+type F
+wait 40
+key *
+type 8
+key *
+type M
+type UNCH
+key *
+type 8
+key ENT
+wait 90
+press right
+wait 40
+press down
+press down
+wait 20
+type C
+wait 60
+screen pick
+expect pick T0 COPY TO HOST
+press up
+press fire
+wait 60
+press fire
+wait 60
+screen dest
+expect dest T0 /apps
+expect dest T1 C COPY HERE
+type C
+wait 180
+screen copied
+expect copied 2 K.C. Munchki
+expect copied 4 COPIED
+expectfile SD/apps/K.C. Munchkin (USA).bin

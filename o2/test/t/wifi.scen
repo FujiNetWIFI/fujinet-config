@@ -1,0 +1,18 @@
+# WiFi (a WIFIFAKE build): the scan, a network, its password, connected
+wait 400
+screen nets
+expect nets T0 WIFI NETWORKS
+expect nets 0 Dummy Cafe
+press fire
+wait 40
+screen pass
+expect pass T0 PASSWORD
+key *
+type P
+type W
+key *
+type 1
+key ENT
+wait 200
+screen hosts
+expect hosts T0 HOSTS

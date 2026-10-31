@@ -1,0 +1,45 @@
+; config.a48 -- the FujiNet CONFIG for the Magnavox Odyssey 2 / Philips
+; Videopac. A protocol 2 (APPBANK) image: the fixed half (src/fixed.inc: the
+; display engine) and NPAGES pages, one assembly per page; build.sh sets
+; PAGE (and SPIKE, for the engine's test pattern).
+
+    cpu 8048
+    include "g7000.h"
+    include "flags.inc"
+    include "equ.inc"
+    include "ram.inc"
+    include "page.inc"
+    include "fixed.inc"
+
+    if SPIKE
+    if PAGE=0
+    include "spike.inc"
+    else
+    PAGE_HEAD
+    PAGE_TAIL
+    endif
+    elseif PAGE=0
+    include "p0.inc"
+    elseif PAGE=1
+    include "p1.inc"
+    elseif PAGE=2
+    include "p2.inc"
+    elseif PAGE=3
+    include "p3.inc"
+    elseif PAGE=4
+    include "p4.inc"
+    elseif PAGE=5
+    include "p5.inc"
+    elseif PAGE=6
+    include "p6.inc"
+    elseif PAGE=7
+    include "p7.inc"
+    elseif PAGE=8
+    include "p8.inc"
+    elseif PAGE=9
+    include "p9.inc"
+    elseif PAGE=10
+    include "p10.inc"
+    elseif PAGE=11
+    include "p11.inc"
+    endif

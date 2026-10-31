@@ -1,0 +1,93 @@
+# the browser: folders and files, a .cfg hidden, up a folder, paging both
+# ways, a long name scrolling, deep folders, a filter
+wait 360
+press fire
+wait 60
+screen root
+expect root T0 /
+expect root 0 apps
+expect root 1 FujiNet
+expect root 5 Mixed Case
+expect root 7 readme.txt
+expect root T1 F FILTER
+press down
+press down
+press fire
+wait 60
+screen games
+expect games T0 /games
+expect games 0 big.bin
+expect games 1 game8k.bin
+expect games 2 K.C. Munchki
+expect games 3 x.bin
+expectnot games 4 x.cfg
+key CLR
+wait 60
+press down
+press down
+press down
+press down
+press fire
+wait 80
+screen many1
+expect many1 0 file00.bin
+expect many1 7 file07.bin
+press right
+wait 30
+screen many2
+expect many2 0 file08.bin
+press down
+press down
+press down
+press down
+press down
+press down
+press down
+press down
+wait 30
+screen many3
+expect many3 0 file16.bin
+press left
+wait 30
+screen many2b
+expect many2b 0 file08.bin
+key CLR
+wait 60
+press down
+press down
+press down
+press fire
+wait 200
+screen long
+expectnot long 0 a very long
+key CLR
+wait 60
+type 7
+wait 60
+press fire
+wait 60
+press fire
+wait 60
+screen deep
+expect deep T0 /nested/one/two
+expect deep 0 deep.bin
+key CLR
+wait 60
+key CLR
+wait 60
+screen up2
+expect up2 T0 /nested
+expect up2 0 one
+key CLR
+wait 60
+type F
+wait 40
+key *
+type 8
+type .CFG
+wait 10
+key ENT
+wait 90
+screen filt
+expect filt T1 F: ~.cfg
+expect filt 0 apps

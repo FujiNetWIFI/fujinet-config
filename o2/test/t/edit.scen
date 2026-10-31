@@ -1,0 +1,49 @@
+# the editor: the help on an empty field, closed with ? (which it types),
+# the layers' chart, rub out, delete, wipe, cancel
+wait 360
+press fire
+wait 60
+type F
+wait 40
+key ?
+wait 30
+screen h1
+expect h1 T0 HELP: TYPING
+expect h1 1 LOCK
+key ENT
+wait 30
+screen h2
+expect h2 0 x: 1~ 2~ 3~
+key ?
+wait 40
+screen q
+expect q 1 ?
+key *
+wait 20
+screen shift
+expect shift 0 SHIFT
+expect shift 7 1~2~3~4$5~6~
+key /
+wait 20
+screen sym
+expect sym 1 ?\
+key CLR
+wait 20
+type AB
+press left
+press left
+key *
+key CLR
+wait 20
+screen del
+expect del 1 ?b
+key /
+key CLR
+wait 20
+screen wiped
+expect wiped 0 00/15
+key *
+key ENT
+wait 60
+screen back
+expect back T1 F FILTER
