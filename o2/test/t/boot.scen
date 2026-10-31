@@ -1,0 +1,29 @@
+# boots that fail (too big, not a game) and one that works (the soft reset)
+wait 360
+press fire
+wait 60
+press down
+press down
+press fire
+wait 60
+press fire
+wait 60
+screen big
+expect big 2 big.bin
+expect big 6 TOO BIG
+key ENT
+wait 60
+key CLR
+wait 60
+type 8
+wait 90
+screen readme
+expect readme 6 NOT A GAME
+key ENT
+wait 60
+type 3
+wait 60
+press down
+press fire
+wait 120
+snap game8k

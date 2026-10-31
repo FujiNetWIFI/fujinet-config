@@ -1,0 +1,7 @@
+# the engine's test pattern: a still, then a burst for rowcheck
+wait 90
+snap still
+burst rows 60
+press down
+wait 10
+snap bar4

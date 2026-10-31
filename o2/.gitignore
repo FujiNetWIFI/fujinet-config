@@ -1,0 +1,3 @@
+# Build products (the top-level .gitignore has build/ too)
+build/
+__pycache__/

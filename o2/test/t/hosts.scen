@@ -1,0 +1,33 @@
+# the boot to the hosts; a host renamed through the editor's shifts
+wait 360
+screen hosts
+expect hosts T0 FUJINET  HOSTS
+expect hosts 0 1 SD
+expect hosts 1 2 --
+expect hosts T1 EDIT
+press down
+type E
+wait 30
+key *
+type M
+type Y
+key *
+key -
+key *
+type H
+type OST
+key *
+type 2
+type 1
+key *
+key =
+wait 10
+screen edit
+expect edit T0 HOST NAME
+expect edit 0 10/32
+expect edit 1 My~Host~1:
+key ENT
+wait 60
+screen renamed
+expect renamed 1 2 My~Host~1
+expectfile fnconfig.ini|name=My_Host@1:

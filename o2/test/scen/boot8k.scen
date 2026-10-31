@@ -1,0 +1,23 @@
+# boot games/game8k.bin: the bar while it loads, then the game
+wait 360
+press fire
+wait 60
+press down
+press down
+press fire
+wait 60
+press down
+snap list
+press fire
+wait 8
+snap load1
+wait 8
+snap load2
+wait 8
+snap load3
+wait 8
+snap load4
+wait 40
+snap ready
+wait 120
+snap game

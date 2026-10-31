@@ -1,0 +1,33 @@
+# info's three pages; the hosts' help; the lobby (a build with LOBBY_HOST=SD
+# LOBBY_PATH=/apps/5card.bin): 5 Card Stud starts
+wait 360
+type I
+wait 40
+screen info1
+expect info1 T0 FUJINET INFO
+expect info1 0 WIFI
+expect info1 4 IP ADDRESS
+expect info1 5 127.0.0.1
+press right
+wait 20
+screen info2
+expect info2 0 NETMASK
+expect info2 5 1.1.1.1
+press right
+wait 20
+screen info3
+expect info3 2 CONFIG
+expect info3 3 V1.0
+expect info3 5 2
+key CLR
+wait 40
+key ?
+wait 30
+screen help
+expect help T0 HELP: HOSTS
+expect help 2 RENAME
+key ENT
+wait 40
+type L
+wait 160
+snap lobby

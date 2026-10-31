@@ -1,0 +1,11 @@
+# K.C. Munchkin through CONFIG: the BIOS screen, as a power-on shows it
+wait 360
+press fire
+wait 60
+type 3
+wait 60
+press down
+press down
+press fire
+wait 300
+snap kc
