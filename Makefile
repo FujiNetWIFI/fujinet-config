@@ -8,7 +8,7 @@ PLATFORMS += dragon
 PLATFORMS += msdos
 PLATFORMS += model2
 
-# Won't build until a fujinet-lib release includes merged PR FujiNetWIFI/fujinet-lib#125
+# Untested; see FujiNetWIFI/fujinet-config#326
 #PLATFORMS += msxrom
 
 # Not currently in buildable state
@@ -26,7 +26,7 @@ PLATFORMS += model2
 #PLATFORMS += s100-cpm
 #PLATFORMS += s100-rom
 
-# Heathkit H89 needs a fujinet-lib with H89 support, which no release has yet.
+# Heathkit H89 is off until a fujinet-lib release has #249 and #155.
 # Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
 #PLATFORMS += h89-cpm
 #PLATFORMS += h89-hdos
@@ -54,11 +54,10 @@ endif
 # - empty which will use whatever is the latest
 # Pinned, because finding the latest release goes through the GitHub API,
 # whose rate limit CI runs hit.
-FUJINET_LIB = 5.0.0
+FUJINET_LIB = 5.1.0
 
-# The H89 lib also needs d08f584. It sets up the card's 8255 after a reset
-# even when EN reads high (HDOS CONFIG hung at "Contacting FujiNet..."),
-# and doesn't reboot the ESP32 when an earlier program has set it up.
+# Thom's branch has fujinet-lib #249, for the reworked card without the 74LVC245,
+# and #155. No release has either yet.
 # FUJINET_LIB=<dir> on the command line overrides this.
 FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
 ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
