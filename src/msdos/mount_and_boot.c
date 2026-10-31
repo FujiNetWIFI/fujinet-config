@@ -34,7 +34,7 @@ void mount_and_boot_lobby(void)
 
   lobby_drive = deviceDriveLetters[0];
 
-  fuji_set_boot_mode(2);
+  fuji_set_boot_mode(FUJI_BOOT_MODE_LOBBY);
 
   regs.h.ah = 0x0D;
   int86(0x21, &regs, &regs);
