@@ -6,7 +6,7 @@ The FujiNet CONFIG for the O2 cartridge (`fujinet-firmware/pico/o2`): WiFi, host
 
 | Screen | |
 |---|---|
-| Splash | The mountain is the grid in fill mode, the snow is two sprites, with a jingle. A key skips it. |
+| Splash | The FujiNet logo: its traces are the grid in lines (not fill mode), its discs four zoomed sprites, one moved down mid-frame for the fifth. The splash has its own band list (`h_lgrid`, `h_lspr`, `h_ltxt`). With a jingle; a key skips it. |
 | WiFi | The boot checks the cart's link, then WiFi enabled, connected, and an SSID saved. The scan list shows SSIDs with a signal block (green, tan or red), then OTHER to type a name. Next comes the password, SET_SSID, then connecting with dots. R rescans, CLR skips. |
 | Hosts | The 8 slots. Fire, ENT or 1-8 opens a host (an empty slot is named first). E renames, L the lobby, I info, W WiFi, ? help. The bar's long name scrolls. |
 | Browser | One READ_DIR_ENTRY in block mode brings a page of whole names. A folder sprite sits beside folders, `.cfg` files are hidden, and the bar's long name scrolls. Paging is left/right, or off the top or bottom. The scrollbar is grid column 9. CLR goes up a folder (from the top: the hosts). F filters, C marks a file to copy, then C again in the destination folder. |

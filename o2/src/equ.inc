@@ -100,6 +100,7 @@ BG_BLUE  equ 008h
 GRID_BLUE  equ 001h             ; the selection bar: dark blue
 GRID_LBLUE equ 041h
 GRID_LGREEN equ 042h            ; the boot's progress bar
+GRID_WHITE equ 047h             ; the splash's logo
 
 ; The control register ($A0). The selection bar is the grid in fill mode: a
 ; vertical segment is a whole 16 x 24 cell.
@@ -107,6 +108,8 @@ CTL_TOP equ vdc_ctrl_fore                               ; T0: the grid hidden
 CTL_ALL equ vdc_ctrl_fill|vdc_ctrl_fore|vdc_ctrl_grid   ; the rows
 CTL_GON equ vdc_ctrl_fill|vdc_ctrl_grid                 ; a band: grid on
 CTL_OFF equ 0                                           ; a band: all off
+CTL_LALL equ vdc_ctrl_fore|vdc_ctrl_grid    ; the splash's logo: the grid in
+CTL_LGON equ vdc_ctrl_grid                  ; lines, not cells
 
 ; ---- the screen ----
 ; Characters are 7 rows of 2 lines. Every screen is T0 at the top and T1 at
@@ -144,6 +147,15 @@ PALPASS equ 190                 ; pal_check (p0.inc): the passes a frame from
     ifndef GRIDNOPP
 GRIDNOPP equ 5                  ; ... and on PAL, more (h_gridp's jmp: 2 more)
     endif
+; The bands' lines (screen.inc's band list, and the splash's: p0.inc). Row
+; r's characters are at Y_ROW0 + 24r; the band before it starts when row
+; r-1's have ended, LEAD lines early (the interrupt takes about a line to
+; reach its first write).
+BL_TOP  equ 1                   ; row 0 and the grid, before T0 shows
+BL_GRID equ Y_T0+13-LEAD        ; T0 has ended: the grid on (h_grid pads its
+                                ; write into the blank)
+BL_ROW1 equ Y_ROW0+ROW_PITCH-10-LEAD
+BL_T1   equ Y_ROW0+7*ROW_PITCH+14-LEAD
     ifndef X_ROWTXT
 X_ROWTXT equ 36                 ; a row's 12 characters, centred
     endif

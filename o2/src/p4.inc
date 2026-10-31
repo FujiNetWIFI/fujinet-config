@@ -5,7 +5,7 @@
 ; (BOOT_STATE, BOOT_PCT) while the mailbox waits. So each frame the bar is
 ; drawn from it; the answer ends it. Then the cart has the game staged, and
 ; swaps it in at the console's next fetch of $400: a reset by hand
-; (fixed.inc boot_game) starts it.
+; (boot_game) starts it.
 ;
 ; The bar is grid row 4 in fill mode, nine cells, the next cell's fill
 ; shown by sprites 2 and 3 side by side (16 steps a cell): 144 in all.
@@ -190,7 +190,7 @@ br_t:
     mov a,r5
     xrl a,#60
     jnz br_l
-    FCALL boot_game             ; (never comes back)
+    jmp boot_game               ; (never comes back)
 
 fanfare:                        ; (frame, sound): the jingle again
     db 1, SND_N1, 6, SND_N2, 11, SND_N3, 16, SND_BOOT, 0
@@ -407,6 +407,35 @@ K   set 0
     db K*144/100
 K   set K+1
     endm
+
+; boot_game: the staged image takes over. The cart swaps it in at the next
+; fetch of $400, which is where the BIOS's reset code goes: so a reset by
+; hand -- everything a power-on gives the BIOS, then $000.
+boot_game:
+    dis i
+    dis tcnti
+    stop tcnt
+    mov a,#P1_VDC
+    outl p1,a
+    mov r0,#vdc_control         ; the display off first: the objects take no
+    clr a                       ; writes while it's on
+    movx @r0,a
+    mov r0,a                    ; then every VDC register to 0, as a power-on
+bgm_vdc:                        ; leaves them: the objects, the sound, the
+    movx @r0,a                  ; colours, the grid
+    inc r0
+    mov a,r0
+    xrl a,#vdc_gridv9+1
+    jz bgm_x
+    clr a
+    jmp bgm_vdc
+bgm_x:
+    mov a,#0FFh                 ; P1 as a reset leaves it: bank 0 (the cart
+    outl p1,a                   ; serves an APPBANK page whatever P1 says)
+    clr a
+    mov psw,a                   ; register bank 0, the stack empty
+    clr f1
+    jmp 000h                    ; (AS puts SEL MB0 in front of it)
 
     include "local.inc"
     if $ > 0B00h

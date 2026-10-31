@@ -24,6 +24,9 @@
 ;   h_txt   T1, then the grid's cells (its registers are closed while
 ;           it shows, and it has ended) and row 0 for the next frame
 ;
+; The splash has its own list (p0.inc): h_top, then h_lgrid, h_lspr and
+; h_ltxt, for a logo drawn in the grid's lines.
+;
 ; Object registers take writes only with the foreground off, so a band
 ; blanks it (the grid stays: a bar doesn't flicker), writes, and puts it
 ; back. A band re-arms the counter first (tim_isr), then does its VDC writes,
@@ -162,7 +165,8 @@ h_top_b:
     endif
 
 ; ===========================================================================
-;  page $5: the text writer and lines T0, T1; a new screen's objects
+;  page $5: the text writer and lines T0, T1; a new screen's objects; the
+;  splash's bands
 ; ===========================================================================
     org 500h
 
@@ -260,34 +264,23 @@ K   set 0
 K   set K+1
     endm
 
-; boot_game: the staged image takes over. The cart swaps it in at the next
-; fetch of $400, which is where the BIOS's reset code goes: so a reset by
-; hand -- everything a power-on gives the BIOS, then $000. Main program.
-boot_game:
-    dis i
-    dis tcnti
-    stop tcnt
-    mov a,#P1_VDC
-    outl p1,a
-    mov r0,#vdc_control         ; the display off first: the objects take no
-    clr a                       ; writes while it's on
+; The splash's bands (p0.inc): its logo is the grid in lines, not cells.
+; h_lgrid: T0 has ended: the grid on. h_lspr: sprite 0's Y = the argument
+; (one sprite, two discs). h_ltxt: T1, the grid left in lines -- h_txt's
+; fill would make the last row's lines cells. Each one's stub is in page $7.
+h_lgrid_b:
+    ISR_CTL CTL_LALL
+    jmp hg_arg
+h_lspr_b:
+    ISR_CTL CTL_LGON
+    call band_arg
+    mov r0,#vdc_spr0_ctrl
     movx @r0,a
-    mov r0,a                    ; then every VDC register to 0, as a power-on
-bgm_vdc:                        ; leaves them: the objects, the sound, the
-    movx @r0,a                  ; colours, the grid
-    inc r0
-    mov a,r0
-    xrl a,#vdc_gridv9+1
-    jz bgm_x
-    clr a
-    jmp bgm_vdc
-bgm_x:
-    mov a,#0FFh                 ; P1 as a reset leaves it: bank 0
-    outl p1,a
-    clr a
-    mov psw,a                   ; register bank 0, the stack empty
-    clr f1
-    jmp 000h                    ; (MB is 0: FCALL's SEL MB0 put it there)
+    ISR_CTL CTL_LALL
+    jmp hr_done
+h_ltxt_b:
+    ISR_CTL CTL_LGON
+    jmp ht_tab
 
 T0: db TXT_TAB dup (0)          ; the text lines: TXT_TAB bytes each
 T1: db TXT_TAB dup (0)
@@ -457,9 +450,21 @@ J_TXT   equ $&0FFh
     db h_txt&0FFh
 J_GRIDP equ $&0FFh
     db h_gridp&0FFh
+J_LGRID equ $&0FFh
+    db h_lgrid&0FFh
+J_LSPR  equ $&0FFh
+    db h_lspr&0FFh
+J_LTXT  equ $&0FFh
+    db h_ltxt&0FFh
 
 h_top:
     jmp h_top_b
+h_lgrid:
+    jmp h_lgrid_b
+h_lspr:
+    jmp h_lspr_b
+h_ltxt:
+    jmp h_ltxt_b
 
 ; h_grid: T0 has ended: the grid on. GRIDNOP pads the write into the
 ; horizontal blank: mid-line it would split the bar's first line,
@@ -475,6 +480,7 @@ h_grid:
     nop
     endm
     ISR_CTL CTL_ALL
+hg_arg:
     call band_arg
     ISR_OUT
 
@@ -500,6 +506,7 @@ hr_done:
 ; moves r5 on after the write).
 h_txt:
     ISR_CTL CTL_GON
+ht_tab:
     mov a,r5
     inc a
     movp a,@a

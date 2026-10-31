@@ -182,14 +182,6 @@ scr_lines:
     mov r4,#L_BOT
     jmp say_line
 
-; The bands' lines. Row r's characters are at Y_ROW0 + 24r; the band before
-; it starts when row r-1's have ended, LEAD lines early (the interrupt takes
-; about a line to reach its first write).
-BL_TOP  equ 1                   ; row 0 and the grid, before T0 shows
-BL_GRID equ Y_T0+13-LEAD        ; T0 has ended: the grid on (h_grid pads its
-                                ; write into the blank)
-BL_ROW1 equ Y_ROW0+ROW_PITCH-10-LEAD
-BL_T1   equ Y_ROW0+7*ROW_PITCH+14-LEAD
 scr_t:
     db BG_BLACK|GRID_BLUE
     db 256-BL_TOP

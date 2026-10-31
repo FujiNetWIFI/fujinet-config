@@ -125,10 +125,7 @@ ints_on:
     org 0B00h
     STRPAGE e
 s_title:    db "    FUJINET",0
-s_sys:      db " ODYSSEY 2",0
-s_config:   db "   CONFIG",0
-s_ver:      db "  V",CFG_VER,0
-s_presskey: db "   PRESS A KEY",0
+s_o2cfg:    db "ODYSSEY 2 CONFIG",0
 s_nocart1:  db " NO FUJINET",0
 s_nocart2:  db " CARTRIDGE",0
     if $ > 0C00h
@@ -136,6 +133,94 @@ s_nocart2:  db " CARTRIDGE",0
     endif
 
 ; ===========================================================================
+    org 0C00h
+; poke_at: aim the mailbox's POKE at the fixed half's address r2:A (r2 =
+; $4-$7), POKE selected (screen.inc's own). Clobbers A, r0, r1.
+poke_at:
+    mov r1,a
+    mov r0,#FN_W_REGSEL
+    mov a,#FN_REG_POKE_LO
+    movx @r0,a
+    inc r0
+    mov a,r1
+    movx @r0,a
+    dec r0
+    mov a,#FN_REG_POKE_HI
+    movx @r0,a
+    inc r0
+    mov a,r2
+    add a,#0FCh                 ; - 4: offset from $400
+    movx @r0,a
+    mov r0,#FN_W_REGSEL
+    mov a,#FN_REG_POKE
+    movx @r0,a
+    ret
+
+; poke_list: the list at offset r4 of this page into the fixed half: each
+; entry (page, offset, count, the bytes), a 0 page the end. Clobbers A,
+; r0-r2, r4, r6.
+poke_list:
+    mov a,r4
+    movp a,@a
+    jz pl_x
+    mov r2,a
+    inc r4
+    mov a,r4
+    movp a,@a
+    inc r4
+    call poke_at
+    mov a,r4
+    movp a,@a
+    mov r6,a
+    inc r4
+pl_b:
+    mov a,r4
+    movp a,@a
+    mov r0,#FN_W_REGDATA
+    movx @r0,a
+    inc r4
+    djnz r6,pl_b
+    jmp poke_list
+pl_x:
+    ret
+
+; The logo on the grid: its rows on horizontal lines 1, 3, 5 and 7, its
+; columns on vertical lines 0, 2, 4, 6 and 8 (two cells a step). A disc on
+; vertical line j and horizontal line k is at X 1+16j, Y 9+24k: MAME draws
+; a sprite 5 units right of its X and line j at 13+16j, and line k's three
+; lines from 24+24k, mid-disc.
+LG_X1   equ 1+16*2
+LG_X2   equ 1+16*4
+LG_X3   equ 1+16*6
+LG_Y0   equ 9+24*1
+LG_Y1   equ 9+24*3
+LG_Y2   equ 9+24*5
+LG_ATTR equ C_WHITE<<3|4        ; white, zoomed
+BL_LSPR equ LG_Y1+32+5          ; h_lspr: between the row of three and the
+                                ; disc below it
+lg_on:
+    db BANDS>>8, (BANDS+3)&0FFh, 9  ; the bands after h_top's
+    db J_LGRID, 0, 256-(BL_LSPR-BL_GRID)
+    db J_LSPR, LG_Y2, 256-(BL_T1-BL_LSPR)
+    db J_LTXT, T1&0FFh, 0
+    db SCRCOL>>8, SCRCOL&0FFh, 1, BG_BLACK|GRID_WHITE
+    db GRIDTAB>>8, GRIDTAB&0FFh, 10 ; the vertical traces: bit r, in row r
+    db 0Ch, 00h, 3Fh, 00h, 0F1h, 00h, 0FFh, 00h, 0C0h, 00h
+    db SPRTAB>>8, SPRTAB&0FFh, 12   ; the discs (Y, X, attribute):
+    db LG_Y1, LG_X3, LG_ATTR        ; the right one (then the bottom one)
+    db LG_Y0, LG_X2, LG_ATTR        ; the top one: h_top puts row 0's Y
+    db LG_Y1, LG_X1, LG_ATTR        ; the left one
+    db LG_Y1, LG_X2, LG_ATTR        ; the ring
+    db ROWS>>8, (ROWS+ROW_SPR)&0FFh, 1, LG_Y0
+    db 0
+lg_off:                         ; sprites 0 and 1 gone from the bands too
+    db BANDS>>8, (BANDS+7)&0FFh, 1, SPR_OFF
+    db ROWS>>8, (ROWS+ROW_SPR)&0FFh, 1, SPR_OFF
+    db 0
+    if $ > 0D00h
+    error "page 0's page $C has run out"
+    endif
+
 ; ===========================================================================
     org 0D00h
     include "snd.inc"
@@ -143,81 +228,45 @@ s_nocart2:  db " CARTRIDGE",0
 
 ; ===========================================================================
     org 0E00h
-; splash: the mountain -- the grid in fill mode, rows 1-3 (a band blanks
-; the foreground between rows, never the grid), snow on its peak (sprites 0
-; and 2, white, in row 1) -- the name, the jingle; a key or the button cuts
-; it short. Clobbers A, r0-r7.
+; splash: the FujiNet logo -- its traces the grid in lines, its discs four
+; zoomed sprites (h_lspr moves sprite 0 down a row for the fifth), on the
+; splash's own bands (fixed.inc) -- the name, the jingle; a key or the
+; button cuts it short. Clobbers A, r0-r7.
 splash:
-    mov r5,#BG_BLACK|GRID_LBLUE
-    call color
-    mov r3,#0                   ; the grid's ten columns
-spl_g:
-    mov a,r3
-    add a,#mount&0FFh
-    movp a,@a
-    mov r5,a
-    mov r0,#TMP1
-    mov a,r3
-    movx @r0,a
-    call grid_col
-    mov r0,#TMP1
-    movx a,@r0
-    inc a
-    mov r3,a
-    xrl a,#10
-    jnz spl_g
-    mov a,#P1_VDC               ; the snow: the VDC takes shapes any time
-    outl p1,a
+    call frame_sync             ; (the band list changes between two frames)
+    mov r4,#lg_on&0FFh
+    call poke_list
+    mov a,#0FFh
+    call spl_h
+    mov a,#P1_VDC               ; the discs' shapes: the VDC takes them any
+    outl p1,a                   ; time
     mov r0,#vdc_spr0_shape
-    mov r1,#snow&0FFh
-    mov r2,#8
-spl_s0:
-    mov a,r1
+    mov r1,#disc&0FFh
+spl_s:
+    mov a,r0
+    xrl a,#vdc_spr3_shape
+    jnz spl_s1
+    mov r1,#ring&0FFh           ; sprite 3: the ring
+spl_s1:
+    mov a,r0
+    anl a,#7
+    add a,r1
     movp a,@a
     movx @r0,a
     inc r0
-    inc r1
-    djnz r2,spl_s0
-    mov r0,#vdc_spr2_shape
-    mov r2,#8
-spl_s2:
-    mov a,r1
-    movp a,@a
-    movx @r0,a
-    inc r0
-    inc r1
-    djnz r2,spl_s2
+    mov a,r0
+    xrl a,#vdc_spr3_shape+8
+    jnz spl_s
     mov a,#P1_MAIN
     outl p1,a
-    mov r3,#0
-    mov r4,#Y_ROW0+ROW_PITCH
-    mov r5,#X_SNOW
-    mov r2,#C_WHITE<<3
-    call spr_at
-    mov r3,#2
-    mov r4,#Y_ROW0+ROW_PITCH
-    mov r5,#X_SNOW+8
-    mov r2,#C_WHITE<<3
-    call spr_at
     mov r4,#L_TOP
     mov a,#s_title&0FFh
     call say_e
     mov a,#C_TAN
     call col_set
-    mov r4,#4
-    mov a,#s_sys&0FFh
-    call rowc_e
-    mov r4,#5
-    mov a,#s_config&0FFh
-    call row_e
-    mov a,#C_DGREY
-    call col_set
-    mov r4,#7
-    mov a,#s_ver&0FFh
-    call rowc_e
     mov r4,#L_BOT
-    mov a,#s_presskey&0FFh
-    call say_e
+    mov a,#s_o2cfg&0FFh
+    call sayc_e
     mov r0,#TMP0                ; the frame count
     clr a
     movx @r0,a
@@ -255,19 +304,48 @@ spl_t:
     xrl a,#SPLASHF
     jnz spl_l
 spl_x:
+    mov r4,#lg_off&0FFh         ; (scr_text puts the rest back)
+    call poke_list
+    clr a
+    call spl_h
     call spr_hide
     clr a
     jmp grid_rows
 
+; spl_h: the logo's horizontal traces, grid registers $C0-$C8, ANDed with A
+; (0FFh: the logo; 0: none, as the other screens have). They take writes
+; only with the grid off: after the frame's last band. Clobbers A, r0-r3.
+spl_h:
+    mov r3,a
+    call frame_sync
+    mov a,#P1_VDC
+    outl p1,a
+    mov r0,#vdc_gridh0
+    mov r1,#hgrid&0FFh
+sh_l:
+    mov a,r1
+    movp a,@a
+    anl a,r3
+    movx @r0,a
+    inc r0
+    inc r1
+    mov a,r0
+    xrl a,#vdc_gridh8+1
+    jnz sh_l
+    mov a,#P1_MAIN
+    outl p1,a
+    ret
+
 SPLASHF equ 150                 ; frames the splash stays
-X_SNOW  equ 80                  ; the snow: two sprites over the peak
 jingle:                         ; (frame, sound), up the fifths
     db 2, SND_N1, 9, SND_N2, 16, SND_N3, 23, SND_BOOT, 0
-mount:                          ; the grid's columns: bit r, row r filled
-    db 00h, 00h, 08h, 0Ch, 0Eh, 0Eh, 0Ch, 08h, 00h, 00h
-snow:                           ; sprites 0 and 2: the peak's cap, 16 wide
-    db 80h, 0C0h, 0E0h, 0F0h, 0F8h, 0D8h, 088h, 00h
-    db 01h, 03h, 07h, 0Fh, 1Fh, 1Bh, 011h, 00h
+hgrid:                          ; $C0-$C8, the cells between vertical lines:
+    db 08h, 2Ah, 22h, 0A2h, 0A2h ; bit k, a trace on horizontal line k
+    db 0A2h, 0AAh, 0A0h, 80h
+disc:                           ; sprites 0-2: 8 x 8, zoomed 16 units x 32 lines
+    db 3Ch, 7Eh, 0FFh, 0FFh, 0FFh, 0FFh, 7Eh, 3Ch
+ring:                           ; sprite 3: the hollow one, in the middle
+    db 3Ch, 42h, 81h, 81h, 81h, 81h, 42h, 3Ch
     if $ > 0F00h
     error "page 0's page $E has run out"
     endif

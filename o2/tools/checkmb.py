@@ -52,6 +52,7 @@ SEL_MB1 = 0xF5
 # build until someone has decided which kind it is.
 ONEWAY = {
     "st_boot":     "the boot enters page 0 and never comes back",
+    "bgm_x":       "boot_game resets by hand: the BIOS at $000, never back",
 }
 
 # Bytes, then two or more spaces, then the source text. AS pads the byte column,
