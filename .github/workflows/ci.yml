@@ -20,13 +20,13 @@ jobs:
           - c64
           - coco
           - dragon
+          # Off until a fujinet-lib release has #249 and #155 (see FUJINET_LIB_H89 in the Makefile).
+          #- h89-cpm
+          #- h89-hdos
           - model2
           - msdos
           # Untested; see FujiNetWIFI/fujinet-config#326
           #- msxrom
-          # Off until a fujinet-lib release has #249 and #155 (see FUJINET_LIB_H89 in the Makefile).
-          #- h89-cpm
-          #- h89-hdos
 
     container:
       image: fozztexx/defoogi:1.4.8
