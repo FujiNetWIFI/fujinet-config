@@ -1,233 +1,47 @@
 # fujinet-config
 
-More documentation to be written as it takes shape.
+CONFIG is the program a FujiNet boots into when no disk is mounted. It sets up WiFi, browses
+hosts, mounts disk images into the device slots, copies files between hosts, and shows the
+FujiNet's network settings.
 
+## Building
 
-This repo is the primary repo for the CONFIG application for every supported platform on FujiNet.
+The cross-compilers and disk tools are in the `fozztexx/defoogi` container.
 
-In the beginning there was only Atari. And so the CONFIG application was just called fujinet-config. Then came the ADAM and now common code for all the platforms began to take shape in this repo. Apple II soon joined, then RC2014 and soon C64. Atari was merged back in here in 2022 Fall by frachel so there is one place for all platform CONFIGs going forward.
-
-## What is CONFIG?
-CONFIG is the primary management application for the FujiNet device. It manages the WIFI connections and credentials, the SD card if one is inserted , and it traverses the HOSTS for images to mount in the Virtual SLOTS. The main page of CONFIG is the familiar HOSTS and SLOTS view that greets most people at boot with a FN device active on their system. CONFIG also can copy images to and from the SD card (Atari) and it has it's own configuration screen that shows the current network configuration of the ESP32 on your local network.
-
-The CONFIG application must be coded and compiled to build a native binary application for each host platform. Then there are some scripts used to copy the CONFIG application to a bootable disk image for each platform. The process for those steps varies by platform. The final bootable disk image is then used in the main fujinet repo to flash the fs on the FN with the disk image, which is then loaded and mounted when you are booting the system without a virtual mounted disk.
-
-
-
-## Compiling on the Atari
-To compile, currently requires:
-
-### AtariSIO Tools
-
-We require the 'diratr' tool from this package to be installed and runnable.
-
-- Github: https://github.com/HiassofT/AtariSIO
-
-### CC65 built and installed on your system
-
-#### Pull down cc65 code
-   * https://github.com/cc65/cc65
-
-#### Build cc65
-
-For unix environments:
-```shell
-$ PREFIX=/usr/local/cc65 make
-$ sudo PREFIX=/usr/local/cc65 make install
-```
-
-For [MSYS2 environments](https://www.msys2.org/docs/environments/), you must be in an MSYS2 shell, and then install with
-
-```shell
-$ PREFIX=/usr/local/cc65 make
-$ PREFIX=/usr/local/cc65 make install
-```
-Note the lack of `sudo`.
-
-After this, you can use any subsystem shell (e.g. UCRT64) to run cc65 as normal.
-
-WARNING: If you are in a MinGW shell or any other sub-environment, the install will work, but will not be able to find the installed cfg, lib etc files.
-You must be in the MSYS2 shell for compiling and installing cc65, but not to run it.
-
-### Additional Tools
-
-Building config also requires these additional tools:
-
-* dir2atr - https://www.horus.com/~hias/atari/atarisio/atarisio-221009.tar.gz
-  * download, build and install on your local build system
-
-* https://github.com/FujiNetWIFI/fujinet-config-tools
-  * clone that repo and then do a `make dist` in order to get the ftools built for atari
-  * these are copied over to the FujiNet Atari Boot Disk to have available from DOS if needed
-
-
-Now with those prerequisites out of the way:
-
-`$ make -f Makefile.atari clean dist`
-
-Check for any errors. If sucessful there will be a log line:
-
-```
-created image "autorun.atr"
-```
-
-copy autorun.atr to ~//fujinet-platformio/data/BUILD_ATARI/ and then using PIO  "Upload Filesystem Image" to load the new image onto the FujiNet. Your new CONFIG should be ready to test and use.
-
-
-## Compiling on the Apple II
-To compile, currently requires:
-
-### AppleCommander built and installed on your system
-
-Arch Package
 ```sh
-yay apple-commander
-sudo ln -s /usr/bin/applecommander-ac /usr/local/bin/ac
-sudo ln -s /usr/bin/applecommander-acx /usr/local/bin/acx
+make                # every platform in PLATFORMS
+make <platform>     # one, e.g. make coco
 ```
 
-- Github: https://github.com/AppleCommander/AppleCommander
-- Requires Java 21 JDK, Gradle.
+Each build leaves the program and its disk image in `r2r/<platform>/`. `FUJINET_LIB` in the
+`Makefile` pins the fujinet-lib release; platforms left out of `PLATFORMS` say why there.
 
-### CC65 built and installed on your system
+A push to `main` opens or updates a fujinet-firmware PR with the new images:
 
-#### Pull down cc65 code
-   * https://github.com/cc65/cc65
+| Platform | Image | In fujinet-firmware `data/webui/device_specific/` |
+|---|---|---|
+| Adam | `config.ddp` | `BUILD_ADAM/autorun.ddp` |
+| Apple II | `config.po` | `BUILD_APPLE/autorun.po` |
+| Atari | `config.atr` | `BUILD_ATARI/autorun.atr` |
+| C64 | `config.prg` | `BUILD_IEC/config.prg` |
+| CoCo | `config.dsk` | `BUILD_COCO/autorun.dsk` |
+| Dragon | `config.vdk`, `AUTOLOAD.DWL`, `LOGO.DWL`, `STAGE2.DWL`, `CONFIG.DWL` | `BUILD_COCO/autorund.vdk` and the `.DWL` files |
+| MS-DOS | `config.img` | `BUILD_RS232/autorun.img` |
+| TRS-80 Model II | `config.imd` | `BUILD_RS232/autorun.imd` |
 
-#### Build cc65:
-```
-$ PREFIX=/usr/local/cc65 make
-$ sudo PREFIX=/usr/local/cc65 make install
-```
+The Model II CONFIG runs under Pickles & Trout CP/M 2.2 and reaches the FujiNet over serial port
+A; mounted images appear as drives through the
+[FujiNet CP/M driver](https://github.com/FozzTexx/fujinet-trs80-model2-driver). The H89 has its
+own notes in [`dist.h89/`](dist.h89/).
 
-### Pull PlatformIO repo & config repo
-```
-git clone https://github.com/FujiNetWIFI/fujinet-platformio.git
-git clone https://github.com/FujiNetWIFI/fujinet-config.git
-```
+## Game consoles
 
-* You need the platformIO repo because the build script expects it to be in the same directory as CONFIG, so that it can push the completed Apple boot disk into the proper folder to be pushed to the FN device.
+Each console has a standalone CONFIG with its own `Makefile` and `README.md`:
+[Arcadia 2001](arcadia/), [Astrocade](astrocade/), [Atari 2600](atari-2600/),
+[Atari 5200](atari5200/), [Atari 7800](atari7800/), [ColecoVision](coleco/),
+[Intellivision](intv/), [NES](nes/), [Odyssey 2](o2/), [Sega Master System](sms/),
+[Studio II](studio2/).
 
-Now with those prerequisites out of the way:
+## Contributing
 
-```
-cd fujinet-config-adam.git
-$ make -f Makefile.apple2 clean dist
-```
-
-Check for any errors. If sucessful there will be logs that say:
-
-```
-...
-java -jar dist.apple2/ac.jar -as dist.apple2/dist.po config.system sys <config
-cp dist.apple2/dist.po ../fujinet-platformio/data/BUILD_APPLE/autorun.po
-```
-
-you will find your autorun.po in the directory indicated above. You can now flash this to the FN using the PIO's Upload Filesytem Image.
-
-
-## Compiling on the Apple IIgs
-
-These instructions allow Apple IIgs users to build native GS/OS versions of CONFIG. Note that for generating the firmware version, instructions under __Compiling on the Apple II__ above still apply.
-
-Two makefiles allow building GS/OS versions of CONFIG:
-
-* Makefile.apple2gs builds a standalone ORCA shell EXE which can then be installed in the Utilities folder.
-* Makefile.apple2cda builds a Classic Desk Accessory (CDA) which allows configuring wifi and mounting/umounting images on the go under GS/OS or ProDOS 8, without need for rebooting.
-
-To compile, currently requires:
-
-### GoldenGate built and installed on your system
-
-Note: you'll have to buy GoldenGate before being able to build it. See the project page: https://goldengate.gitlab.io/.
-
-A copy of the Byte Works ORCA/C and its libraries is also required. You can get it there: https://juiced.gs/store/opus-ii-software/.
-
-#### Pull down GoldenGate code
-   * https://gitlab.com/GoldenGate/GoldenGate
-
-#### Build GoldenGate:
-Detailed instuctions for building the GoldenGate binaries are given in the project README.md. For installation of GoldenGate and ORCA/C components, see https://goldengate.gitlab.io/manual/#installation.
-
-Now with those prerequisites out of the way:
-
-To build the ORCA shell EXE:
-```
-$ cd fujinet-config
-$ make -f Makefile.apple2gs
-$ make -f Makefile.apple2gs dist
-```
-
-Check for any errors. If successful there will be logs that say:
-
-```
-...
-cp dist.apple2/bootable.po dist.apple2/dist.po
-java -jar dist.apple2/ac.jar -p dist.apple2/dist.po config exe <config
-```
-
-You will find the `CONFIG` shell EXE in the disp.po image. Just copy it under prefix #17, then add this to 15:SYSCMND:
-`CONFIG       U             configure Fujinet`
-
-Restart ORCA shell or issue a `commands 15:syscmnd` and you're ready.
-
-To build the CDA:
-```
-cd fujinet-config
-$ make -f Makefile.apple2cda
-$ make -f Makefile.apple2cda dist
-```
-
-Check for any errors. If successful there will be logs that say:
-
-```
-...
-cp dist.apple2/bootable.po dist.apple2/dist.po
-java -jar dist.apple2/ac.jar -p dist.apple2/dist.po fuji.da cda <config
-```
-
-You will find the `FUJI.DA CDA` in the disp.po image. Just copy it on your GS/OS boot disk under System/Desc.Accs and you'll have  `FujiNet Config` in the Desk Accessories menu after a reboot.
-
-
-## Compiling on the ADAM
-To compile, currently requires:
-
-* make
-* Z88DK (http://github.com/z88dk/z88dk)
-* eoslib (http://github.com/tschak909/eoslib)
-* smartkeyslib (http://github.com/tschak909/smartkeyslib)
-
-Make using 'make -f <file>'
-  where file is Makefile.<platform>
-
-## Compiling on the RC2014
-To compiled, currently requires:
-
-* make
-* Z88DK (http://github.com/z88dk/z88dk)
-* fujinet-rc2014 (https://github.com/juzzas/fujinet-rc2014)
-
-Make using `make -f Makefile.rc2014`
-
-## Compiling on the TRS-80 Model II
-CONFIG for the Model II runs under Pickles & Trout CP/M 2.2 and talks to the FujiNet over serial port A. Mounted images appear as drives through the [FujiNet CP/M driver](https://github.com/FozzTexx/fujinet-trs80-model2-driver).
-
-Requires Z88DK, cpmtools and libdsk (`raw2imd`); the `defoogi` Docker image has them all.
-
-```
-$ make model2/r2r
-```
-
-This produces `r2r/model2/config.imd`, an 8" IBM-3740 disk image. Boot CP/M with that disk in a drive and run `CONFIG`. "Mount drives & exit" (ESC) returns to CP/M.
-
-## Screen Shots
-
-### CONFIG on the ADAM
-![ADAM CONFIG](./docs/images/fn_adam_config_v1.jpg)
-
-
-### CONFIG on the AppleII
-![Apple II CONFIG](./docs/images/fn_apple_config_v1.jpg)
-
-### CONFIG on the Atari
-![Atari CONFIG](./docs/images/fn_atari_config_v1.jpg)
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
