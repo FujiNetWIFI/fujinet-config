@@ -24,7 +24,7 @@ jobs:
           - msdos
           # Untested; see FujiNetWIFI/fujinet-config#326
           #- msxrom
-          # The H89 builds need fujinet-lib #155 and #249, which no release has yet.
+          # Off until a fujinet-lib release has #249 and #155 (see FUJINET_LIB_H89 in the Makefile).
           #- h89-cpm
           #- h89-hdos
 
