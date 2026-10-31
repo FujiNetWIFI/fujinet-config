@@ -30,9 +30,8 @@ typedef enum
 #define ENTRY_HOSTS 3
 
 /* An eject or mode change in slot 0 takes CONFIG's disk out of drive 0. Remounting loads the
-   firmware's built-in CONFIG, so only do it after one of those.
-   TODO: FUJI_BOOT_MODE_CONFIG once the pinned fujinet-lib has it (#265). */
-#define remount_config_disk() do { if (config_disk_gone) fuji_set_boot_mode(0); } while (0)
+   firmware's built-in CONFIG, so only do it after one of those. */
+#define remount_config_disk() do { if (config_disk_gone) fuji_set_boot_mode(FUJI_BOOT_MODE_CONFIG); } while (0)
 
 void entry_set(unsigned char entry, unsigned char host_slot, unsigned char device_slot);
 

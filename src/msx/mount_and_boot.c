@@ -31,7 +31,7 @@ void boot_to_basic(void)
 void mount_and_boot_lobby(void)
 {
   screen_mount_and_boot();
-  fuji_set_boot_mode(2);
+  fuji_set_boot_mode(FUJI_BOOT_MODE_LOBBY);
   system_boot();
 }
 

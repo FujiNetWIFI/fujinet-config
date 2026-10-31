@@ -25,7 +25,7 @@ void mount_and_boot_lobby(void)
     screen_clear();
     screen_puts(3, 0, "Booting Lobby");
 
-    fuji_set_boot_mode(2);
+    fuji_set_boot_mode(FUJI_BOOT_MODE_LOBBY);
     cold_start();
 }
 
@@ -118,7 +118,7 @@ void mount_and_boot_hisio(void)
     screen_clear();
     screen_puts(3, 0, "MOUNTING HISIO BOOT");
 
-    if (!fuji_set_boot_mode(3))
+    if (!fuji_set_boot_mode(FUJI_BOOT_MODE_HISIO))
     {
         screen_error("ERROR MOUNTING HISIO BOOT");
         wait_a_moment();

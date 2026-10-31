@@ -15,7 +15,7 @@ void mount_and_boot_lobby(void)
 {
     if (screen_mount_and_boot_lobby())
     {
-        fuji_set_boot_mode(2);
+        fuji_set_boot_mode(FUJI_BOOT_MODE_LOBBY);
         system_boot();
     }
     else
