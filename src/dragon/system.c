@@ -3,15 +3,8 @@
 #include "../globals.h"
 #include "strendswith.h"
 
-#define FUJI_IO_REG ((unsigned char *)0xFF41)
-
 static NewDisk newDisk;
 char response[256];
-
-void system_enable_user_rom(void)
-{
-  *FUJI_IO_REG = 7;
-}
 
 bool system_slot0_is_rom(void)
 {
@@ -29,7 +22,7 @@ void system_boot(void)
   if (system_slot0_is_rom()) {
     printf("\nBOOTING USER ROM...\n");
     pause(120);                 
-    system_enable_user_rom();   // write 7 (ROM_MODE | USERROM_ENABLE | AUTOSTART_ENABLE) to IO_CONTROL. Firmware arms the CART trigger and triggers RESET.
+    fuji_enable_user_rom();
   }
   else
   {
