@@ -99,6 +99,8 @@ fujinet-firmware PR with the new disk images, so `main` must work on every platf
   and keep byte-wide fields `uint8_t`. A lone constant can stay a `#define`.
 - Name a literal whose meaning isn't obvious (a screen row, a key code, a buffer size).
 - Use fixed-width types for anything on the wire.
+- Keep platform lists (`PLATFORMS` in the `Makefile`, the CI matrix) in alphabetical order,
+  commented-out entries included, so a duplicate stands out.
 
 ## Comments
 
