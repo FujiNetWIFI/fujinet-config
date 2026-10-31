@@ -26,7 +26,7 @@ PLATFORMS += model2
 #PLATFORMS += s100-cpm
 #PLATFORMS += s100-rom
 
-# Heathkit H89 needs fujinet-lib #155 and #249, which no release has yet.
+# Heathkit H89 is off until a fujinet-lib release has #249 and #155.
 # Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
 #PLATFORMS += h89-cpm
 #PLATFORMS += h89-hdos
@@ -56,7 +56,8 @@ endif
 # whose rate limit CI runs hit.
 FUJINET_LIB = 5.1.0
 
-# Until then, the H89 builds use Thom's branch that has both.
+# Thom's branch has fujinet-lib #249, for the reworked card without the 74LVC245,
+# and #155. No release has either yet.
 # FUJINET_LIB=<dir> on the command line overrides this.
 FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
 ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
