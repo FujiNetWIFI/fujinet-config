@@ -103,7 +103,8 @@ LOGO_BIN_COCO = r2r/coco/LOGO.BIN
 DISK_EXTRA_DEPS_COCO := $(AUTOEXEC_COCO) $(CFGLOAD_BIN) $(LOGO_BIN_COCO)
 
 $(CFGLOAD_BIN):: $(CFGLOAD_COCO) | $(R2R_PD)
-	cmoc -o $@ $^
+	mkdir -p $(BUILD_DIR)/coco/cfgload
+	cmoc --intdir=$(BUILD_DIR)/coco/cfgload -o $@ $^
 
 # DECB .bin format, not --dragon: LOADM expects the DECB header.
 $(LOGO_BIN_COCO):: src/coco/cfgload/logo_data_coco.asm | $(R2R_PD)
@@ -226,7 +227,8 @@ DISK_EXTRA_DEPS_DRAGON := $(CFGLOAD_BIN_DRAGON) $(LOGO_DWL_DRAGON) $(STAGE2_DWL_
 # limit must clear cfgload's own usage and stay under SCREEN_BUFFER (0x6600);
 # LOGO_SCRATCH in cfgload.c must sit at or above this limit.
 $(CFGLOAD_BIN_DRAGON):: $(CFGLOAD_DRAGON) | $(R2R_PD)
-	cmoc -i -DDRAGON --dragon --limit=2600 --org=1600 -o $@ $^
+	mkdir -p $(BUILD_DIR)/dragon/cfgload
+	cmoc -i --intdir=$(BUILD_DIR)/dragon/cfgload -DDRAGON --dragon --limit=2600 --org=1600 -o $@ $^
 
 # logo_data.asm's org must match LOGO_SCRATCH in cfgload.c.
 $(LOGO_DWL_DRAGON):: src/coco/cfgload/logo_data.asm | $(R2R_PD)
@@ -235,7 +237,8 @@ $(LOGO_DWL_DRAGON):: src/coco/cfgload/logo_data.asm | $(R2R_PD)
 # limit=1600 is also CONFIG.DWL's own org (LDFLAGS_EXTRA_DRAGON) -- that
 # memory is free for CONFIG.DWL once stage2 has fetched and executed it.
 $(STAGE2_DWL_DRAGON):: $(STAGE2_DRAGON) | $(R2R_PD)
-	cmoc -i -DDRAGON --dragon --limit=6600 --org=c00 -o $@ $^
+	mkdir -p $(BUILD_DIR)/dragon/stage2
+	cmoc -i --intdir=$(BUILD_DIR)/dragon/stage2 -DDRAGON --dragon --limit=6600 --org=c00 -o $@ $^
 
 ########################################
 # Adam customization
