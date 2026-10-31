@@ -10,6 +10,7 @@
 #include "input.h"
 #include "constants.h"
 #include "globals.h"
+#include "pause.h"
 #ifdef BUILD_MSXROM
 #include "msx/device_slots.h"
 #endif /* BUILD_MSXROM */
@@ -58,10 +59,10 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     o = strlen((const char *)hostSlots[i]);
 
   screen_hosts_and_devices_edit_host_slot(i);
-  // FRUSTRATINGLY the signature is void return, so noone ever knows if the return was good or bad
-  // and just carries on and saves changes anyway. Fortunately ESC now handled well (on atari) and will save same thing back to FN
+  // FRUSTRATINGLY the signature is void return, so no one ever knows if the return was good or bad
+  // and just carries on and saves changes anyway. Fortunately ESC is now handled well (on Atari) and saves the same thing back to FN
 
-  // Save off original value of host slot so we can check if it ws modified.
+  // Save off original value of host slot so we can check if it was modified.
   memcpy(orig_host, hostSlots[i], sizeof(HostSlot));
   input_line_hosts_and_devices_host_slot(i, o, (char *)hostSlots[i]);
 
@@ -71,7 +72,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   // if host entry has changed, eject any disks that were mounted from the host slot since they won't be valid anymore.
   if ( memcmp(orig_host, hostSlots[i], sizeof(HostSlot)))
   {
-    // re-use 'o' here to save a little memory. If it's original value is needed in some future enhancement,
+    // re-use 'o' here to save a little memory. If its original value is needed in some future enhancement,
     // declare a new variable for the loop counter.
     // Walk backwards: on platforms where an eject pulls the slots below it
     // up a position, going forwards would step over a slot that just moved.
@@ -88,7 +89,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
   slots_dirty = true;
 
   // Need to re-render both hosts and devices because some devices
-  // may have been eject if they belonged to old host
+  // may have been ejected if they belonged to the old host
 #ifdef OBSOLETE
   screen_hosts_and_devices_hosts();
 #else
@@ -155,7 +156,6 @@ void hosts_and_devices_devices_clear_all(void)
 
   screen_hosts_and_devices_devices_clear_all();
 
-  // grouping this assumes same number of device and host slots..
 #ifdef BUILD_MSDOS
   bulk_eject = true;
 #endif /* BUILD_MSDOS */
@@ -299,7 +299,6 @@ void hosts_and_devices_hisio_toggle(void)
 void hosts_and_devices_done(void)
 {
   char i;
-  // char *msg[40];
 #if defined(BUILD_H89) || defined(BUILD_MODEL2)
   /* Nothing can boot from a FujiNet drive on the H89 or Model II, so this
      mounts every slot (with progress) and done() then returns to the OS. */
@@ -395,8 +394,14 @@ void hosts_and_devices(void)
     // Only pay for it when something has actually changed them.
     if (slots_dirty)
     {
-      fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
-      fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+      // Never show, and so never save back, what a failed read left behind.
+      if (!fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS)
+          || !fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS))
+      {
+        screen_error("  COULD NOT READ SLOTS.");
+        pause(150);
+        continue;
+      }
       fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
       slots_dirty = false;
     }
