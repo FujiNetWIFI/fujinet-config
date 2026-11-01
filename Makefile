@@ -131,7 +131,7 @@ endif
 # load at $2600, above the hirestxt/splash buffer ($0E00-$25FF); --limit=7BF8 keeps
 # each below the handoff data.
 CO = build/config/coco/src
-COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/fuji_compat.o $(CO)/coco/launch/runm.o \
+COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/coco/launch/runm.o \
   $(CO)/coco/launch/entry.o $(CO)/coco/bar.o $(CO)/coco/color.o $(CO)/coco/die.o $(CO)/coco/input.o \
   $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o \
   $(CO)/coco/text_hires.o
