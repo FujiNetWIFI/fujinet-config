@@ -137,9 +137,9 @@ COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/coco/launch/runm.o \
   $(CO)/coco/text_hires.o $(CO)/rom_file.o
 COCO_WIFI_OBJS = $(CO)/coco/wifi/wifi.o $(CO)/check_wifi.o $(CO)/connect_wifi.o \
   $(CO)/set_wifi.o $(CO)/show_info.o $(CO)/coco/screen_wifi.o $(CO)/coco/input_wifi.o
-COCO_MAIN_OBJS = $(CO)/coco/cfg/main.o $(CO)/coco/boot.o $(CO)/hosts_and_devices.o \
-  $(CO)/coco/mount_and_boot.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_hosts.o \
-  $(CO)/coco/input_hosts.o
+COCO_MAIN_OBJS = $(CO)/coco/cfg/main.o $(CO)/coco/boot.o $(CO)/coco/onerom_boot.o \
+  $(CO)/hosts_and_devices.o $(CO)/coco/mount_and_boot.o $(CO)/coco/screen_slots.o \
+  $(CO)/coco/screen_hosts.o $(CO)/coco/input_hosts.o
 COCO_FILES_OBJS = $(CO)/coco/files/main.o $(CO)/coco/files/globals.o $(CO)/select_file.o \
   $(CO)/select_slot.o $(CO)/destination_host_slot.o $(CO)/perform_copy.o \
   $(CO)/coco/scroll.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_files.o \
