@@ -44,6 +44,13 @@ void select_slot_init()
       selected_device_slot=0;
       ss_subState=SS_DONE;
     }
+  else if (create==false && path_is_rom_file(response))
+    {
+      selected_device_slot=0;
+      mode=MODE_READ;
+      ss_subState=SS_DONE;
+      screen_select_slot_rom_mounted();
+    }
 #ifdef BUILD_ATARI
   else if (create==false && selected_file_is_cassette())
     {

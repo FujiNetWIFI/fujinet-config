@@ -304,7 +304,7 @@ unsigned select_file_entry_type(void)
 
   fuji_set_directory_position(pos);
 
-  fuji_read_directory(128, 0, response);
+  fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
 
   if (response[0] != '\0' && response[strlen(response)-1] == '/') result = ENTRY_TYPE_FOLDER;
   else if (response[0] == '+') result = ENTRY_TYPE_LINK;

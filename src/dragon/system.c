@@ -1,21 +1,9 @@
 #include "../system.h"
 #include "../pause.h"
 #include "../globals.h"
-#include "strendswith.h"
 
 static NewDisk newDisk;
 char response[256];
-
-bool system_slot0_is_rom(void)
-{
-  static char fn[256];
-  char *name;
-
-  if (!fuji_get_device_filename(0, fn))
-    return false;
-  name = strupr(fn);
-  return strendswith(name, ".CCC") || strendswith(name, ".ROM");
-}
 
 void system_boot(void)
 {
