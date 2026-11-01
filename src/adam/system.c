@@ -3,8 +3,6 @@
 #include <eos.h>
 #include <string.h>
 
-#define FUJI_DEV 0x0F
-
 // eos.h: strip the high bit of an EOS result; 0 is success
 #define EOS_OK(r) (((r) & 0x7F) == EOS_ERR_NONE)
 
@@ -17,16 +15,15 @@ void system_boot(void)
 
 bool system_create_new(unsigned char selected_host_slot,unsigned char selected_device_slot,unsigned long selected_size,char *path)
 {
-  char nd[263]={0xE7,0x00,0x00,0x00,0x00,0x00,0x00};
-  char *c = &nd[3];
-  unsigned long *l = (unsigned long *)c;
+  NewDisk nd;
 
-  nd[1]=selected_host_slot;
-  nd[2]=selected_device_slot;
-  *l=selected_size;
-  strcpy(&nd[7],path);
+  memset(&nd, 0, sizeof(nd));
+  nd.hostSlot = selected_host_slot;
+  nd.deviceSlot = selected_device_slot;
+  nd.numBlocks = selected_size;
+  strcpy(nd.filename, path);
 
-  return eos_write_character_device(FUJI_DEV,&nd,sizeof(nd)) == ADAMNET_OK;
+  return fuji_create_new(&nd);
 }
 
 bool system_build_directory(unsigned char ds, unsigned long numBlocks, char *v)
