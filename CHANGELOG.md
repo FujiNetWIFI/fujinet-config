@@ -1,3 +1,7 @@
+## 2026-11-01
+
+* [Adam] - A new disk named without an extension gets .ddp or .dsk from the media type picked, so the FujiNet can mount it and write its directory.
+
 ## 2026-10-31
 
 * [C64] - Use all 8 of the IEC FujiNet's drive slots, so mounting works again.
