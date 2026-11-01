@@ -426,24 +426,30 @@ SFSubState input_select_file_choose(void)
     }
 }
 
+enum new_disk_type { NEW_DISK_NONE, NEW_DISK_DDP, NEW_DISK_DSK };
+static uint8_t new_type = NEW_DISK_NONE;
+
 unsigned char input_select_file_new_type(void)
 {
   switch(cgetc())
     {
     case KEY_SMART_V:
-      return 1;
+      new_type = NEW_DISK_DDP;
+      break;
     case KEY_SMART_VI:
-      return 2;
+      new_type = NEW_DISK_DSK;
+      break;
     default:
-      return 0;
+      new_type = NEW_DISK_NONE;
     }
+  return new_type;
 }
 
 unsigned long input_select_file_new_size(unsigned char t)
 {
   switch (t)
     {
-    case 1: // DDP
+    case NEW_DISK_DDP:
       switch(cgetc())
 	{
 	case KEY_SMART_III:
@@ -456,7 +462,7 @@ unsigned long input_select_file_new_size(unsigned char t)
 	  return 1; // CUSTOM
 	}
       break;
-    case 2: // DSK
+    case NEW_DISK_DSK:
       switch(cgetc())
 	{
 	case KEY_SMART_II:
@@ -484,7 +490,14 @@ unsigned long input_select_file_new_custom(void)
 
 void input_select_file_new_name(char *c)
 {
-  input_line(0,19,0,c,NEW_NAME_SIZE - 1,false);
+  size_t len;
+
+  input_line(0,19,0,c,NEW_NAME_SIZE - 5,false);
+
+  // The firmware mounts only a .ddp or .dsk; give an extensionless name the one picked
+  len = strlen(c);
+  if (len > 0 && (len < 4 || c[len - 4] != '.'))
+    strcat(c, new_type == NEW_DISK_DSK ? ".dsk" : ".ddp");
 }
 
 SSSubState input_select_slot_choose(void)
