@@ -1,5 +1,6 @@
 ## 2026-10-31
 
+* [C64] - Use all 8 of the IEC FujiNet's drive slots, so mounting works again.
 * [All] - Update fujinet-lib to 5.1.0.
 * [Odyssey 2] - Show the FujiNet logo.
 

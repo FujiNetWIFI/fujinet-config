@@ -7,6 +7,7 @@
 
 #include "../screen.h"
 #include "../globals.h"
+#include "../constants.h"
 #include "petscii.h"
 #include <conio.h>
 #include <string.h>
@@ -247,7 +248,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
 	char i;
 
 	UNUSED(e); // no platform queries the enabled state yet
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < NUM_DEVICE_SLOTS; i++)
 		screen_device_slot(y + i, i, &d[i]);
 }
 
@@ -295,7 +296,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-	bar_set(11, 1, 4, 0);
+	bar_set(11, 1, NUM_DEVICE_SLOTS, 0);
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
 	screen_print_menu("E", "JECT  ");
@@ -483,7 +484,7 @@ void screen_select_slot(const char *e)
 
 	clrscr();
 
-	gotoxy(0, 7);
+	gotoxy(0, 10);
 	cprintf("%-40s", "File Details");
 	cprintf("%8s %u-%02u-%02u %02u:%02u:%02u\r\n", "MTIME:", (unsigned char)(*e++) + 1900, *e++, *e++, *e++, *e++, *e++);
 
@@ -498,14 +499,14 @@ void screen_select_slot(const char *e)
 
 	screen_hosts_and_devices_device_slots(1, &deviceSlots[0], &deviceEnabled[0]);
 
-	bar_set(1, 1, 4, 0);
+	bar_set(1, 1, NUM_DEVICE_SLOTS, 0);
 }
 
 void screen_select_slot_choose(void)
 {
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(3, STATUS_BAR);
-	screen_print_menu("1-4", " SELECT SLOT OR USE ARROW KEYS\r\n ");
+	screen_print_menu("1-8", " SELECT SLOT OR USE ARROW KEYS\r\n ");
 	screen_print_menu("RETURN/R", ":INSERT READ ONLY\r\n ");
 	screen_print_menu("W", ":INSERT READ/WRITE\r\n ");
 	screen_print_menu("\x5F", " TO ABORT.");
@@ -520,14 +521,13 @@ void screen_select_file_new_name(void)
 
 void screen_hosts_and_devices_long_filename(const char *f)
 {
-	// TODO: implement
 	if (strlen(f) > 31)
 	{
-		gotoxy(0, STATUS_BAR - 3);
-		screen_puts_ascii_tail(f, 120);
+		gotoxy(0, STATUS_BAR - 2);
+		screen_puts_ascii_tail(f, 80);
 	}
 	else
-		cclearxy(0, STATUS_BAR - 3, 120);
+		cclearxy(0, STATUS_BAR - 2, 80);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)

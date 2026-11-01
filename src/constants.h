@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#if defined(BUILD_ATARI) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM) \
+#if defined(BUILD_ATARI) || defined(BUILD_C64) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM) \
   || defined(BUILD_S100) || defined(BUILD_H89) \
   || defined(BUILD_MODEL2)
 #define NUM_DEVICE_SLOTS 8
