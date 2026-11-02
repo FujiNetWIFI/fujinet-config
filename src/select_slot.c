@@ -193,14 +193,21 @@ void select_slot_done()
       screen_select_slot_build_eos_directory();
       if (input_select_slot_build_eos_directory())
       {
-        fuji_mount_disk_image(selected_device_slot,2); // R/W
-        screen_select_slot_build_eos_directory_label();
-        input_select_slot_build_eos_directory_label(filename);
-        screen_select_slot_build_eos_directory_creating();
-        if (!system_build_directory(selected_device_slot,selected_size,filename))
+        if (!fuji_mount_disk_image(selected_device_slot,2)) // R/W
         {
-          screen_select_slot_build_eos_directory_failed();
+          screen_error("  COULD NOT MOUNT\n  THE DISK.\n  PRESS ANY KEY.");
           input_select_slot_build_eos_directory_failed();
+        }
+        else
+        {
+          screen_select_slot_build_eos_directory_label();
+          input_select_slot_build_eos_directory_label(filename);
+          screen_select_slot_build_eos_directory_creating();
+          if (!system_build_directory(selected_device_slot,selected_size,filename))
+          {
+            screen_select_slot_build_eos_directory_failed();
+            input_select_slot_build_eos_directory_failed();
+          }
         }
       }
     }
