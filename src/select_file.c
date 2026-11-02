@@ -112,7 +112,7 @@ unsigned char select_file_display(void)
 
   // Do one more read to check EOF
   fuji_read_directory(DIR_MAX_LEN, 0, response);
-  if (response[1] == FUJI_DIR_EOF)
+  if (response[FUDGE_OFFSET] == FUJI_DIR_EOF)
     dir_eof = true;
 
   fuji_close_directory();
