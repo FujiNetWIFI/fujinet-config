@@ -1,12 +1,11 @@
 #include "../mount_and_boot.h"
 #include "../system.h"
-// #include "../screen.h"
 #include "../globals.h"
 #include "../constants.h"
 
 void boot_to_basic(void)
 {
-  // TODO: unify this with the other trampoline in system_boot()
+  // TODO: unify this with fuji_enable_user_rom()
 
   // we need to flip the switch to the other rom while not running from rom.
   // so we put this piece of code in ram at $C000 then we jump to it
@@ -14,7 +13,7 @@ void boot_to_basic(void)
   // TODO: parameterize the IO_CONTROL port address
   // C000                          .ORG   C000H
   // C000   21 FF BF               LD   hl,$bfff
-  // C003   36 05                  LD   (hl),$04
+  // C003   36 04                  LD   (hl),$04
   // C005   C3 00 00               JP   0
 
   unsigned char *code = (unsigned char *)0xC000;
@@ -54,7 +53,6 @@ void mount_and_boot(void)
   if (!fuji_mount_all())
   {
     screen_error("ERROR MOUNTING ALL");
-    // wait_a_moment();
     state = HOSTS_AND_DEVICES;
   }
   else
