@@ -97,7 +97,7 @@ unsigned char select_file_display(void)
 #else
 #define FUDGE_OFFSET 1
 #endif
-    if (response[FUDGE_OFFSET] == 0x7F) // I am truly ashamed of this, and will fix someday -thom
+    if (response[FUDGE_OFFSET] == FUJI_DIR_EOF) // I am truly ashamed of this, and will fix someday -thom
     {
       dir_eof = true;
       break;
@@ -112,7 +112,7 @@ unsigned char select_file_display(void)
 
   // Do one more read to check EOF
   fuji_read_directory(DIR_MAX_LEN, 0, response);
-  if (response[1] == 0x7F)
+  if (response[1] == FUJI_DIR_EOF)
     dir_eof = true;
 
   fuji_close_directory();
