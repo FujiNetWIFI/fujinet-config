@@ -29,7 +29,7 @@ static bool selected_file_is_cassette(void)
 {
   fuji_open_directory_filter(selected_host_slot,path,filter);
   fuji_set_directory_position(pos);
-  fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+  fuji_read_directory(MAX_FILENAME_LEN - 1 - (unsigned char)strlen(path), 0, response);
   fuji_close_directory();
 
   return (strstr(response, ".cas")!=NULL) || (strstr(response, ".CAS")!=NULL);
@@ -43,6 +43,13 @@ void select_slot_init()
       mode=0;
       selected_device_slot=0;
       ss_subState=SS_DONE;
+    }
+  else if (create==false && path_is_rom_file(response))
+    {
+      selected_device_slot=0;
+      mode=MODE_READ;
+      ss_subState=SS_DONE;
+      screen_select_slot_rom_mounted();
     }
 #ifdef BUILD_ATARI
   else if (create==false && selected_file_is_cassette())
@@ -92,7 +99,7 @@ void select_slot_display()
       /* The slot picker needs to know whether a ROM is on its way in, so
          read the raw entry name before the formatted one below and rewind
          the directory for that second read. */
-      fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+      fuji_read_directory(MAX_FILENAME_LEN - 1 - (unsigned char)strlen(path), 0, response);
       msx_set_mount_is_rom(msx_device_slot_is_rom(response));
       fuji_set_directory_position(pos);
 #endif
@@ -142,7 +149,6 @@ void select_slot_done()
 
 #ifdef BUILD_APPLE2
   bool mnt = false;
-  // int i;
 #endif
 
   // Every path below can change the device slot table on the FujiNet - even a
@@ -211,7 +217,7 @@ void select_slot_done()
 
     fuji_set_directory_position(pos);
 
-    fuji_read_directory(255-(unsigned char)strlen(path), 0, response);
+    fuji_read_directory(MAX_FILENAME_LEN - 1 - (unsigned char)strlen(path), 0, response);
     strcat(filename, response);
 
 #ifdef BUILD_MSDOS

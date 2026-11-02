@@ -11,6 +11,7 @@
 #include "../globals.h"
 #include "../input.h"
 #include "../constants.h"
+#include "../pause.h"
 
 #define SCREEN_RAM_TOP 0x0400
 #define INVERSE_MASK   0xBF   // Bit 6 clear for inverse character
@@ -353,6 +354,12 @@ void screen_select_file_new_creating(void)
     locate(0,13);
     printf("%-63s","CREATING IMAGE. PLEASE WAIT.");
     locate(0,14);
+}
+
+void screen_select_slot_rom_mounted(void)
+{
+    screen_error("ROM MOUNTED IN SLOT 0");
+    pause(120);
 }
 
 void screen_error(const char *msg)

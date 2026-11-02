@@ -97,7 +97,7 @@ unsigned char select_file_display(void)
 #else
 #define FUDGE_OFFSET 1
 #endif
-    if (response[FUDGE_OFFSET] == 0x7F) // I am truly ashamed of this, and will fix someday -thom
+    if (response[FUDGE_OFFSET] == FUJI_DIR_EOF) // I am truly ashamed of this, and will fix someday -thom
     {
       dir_eof = true;
       break;
@@ -105,14 +105,14 @@ unsigned char select_file_display(void)
     else
     {
       entry_size[i] = (unsigned char)strlen(response);
-      visibleEntries++; // could filter on e[0] to deal with message entries like on FUJINET.PL
+      visibleEntries++; // could filter on response[0] to deal with message entries like on FUJINET.PL
       screen_select_file_display_entry(i, response, 0);
     }
   }
 
   // Do one more read to check EOF
   fuji_read_directory(DIR_MAX_LEN, 0, response);
-  if (response[1] == 0x7F) // was response[2]
+  if (response[1] == FUJI_DIR_EOF)
     dir_eof = true;
 
   fuji_close_directory();
@@ -141,8 +141,6 @@ void select_file_set_source_filename(void)
 void select_display_long_filename(void)
 {
 #ifndef _CMOC_VERSION_
-  //const char *e;
-
 #ifdef BUILD_ATARI
   if ((entry_size[bar_get() - FILES_START_Y] > 30) && (entry_timer == 0))
 #else
@@ -250,8 +248,6 @@ void select_file_link(void)
 
 void select_file_advance(void)
 {
-  //const char *e;
-
   bar_clear(false);
 
   fuji_open_directory_filter(selected_host_slot, path, filter);
@@ -262,7 +258,7 @@ void select_file_advance(void)
 
   strcat(path, response); // append directory entry to end of current path
 
-  fuji_close_directory(); // have to use "e" before calling another io command, otherwise e gets wiped out
+  fuji_close_directory();
 
   pos = 0;
   dir_eof = quick_boot = prev_page = false;
@@ -297,14 +293,13 @@ void select_file_devance(void)
 
 unsigned select_file_entry_type(void)
 {
-  //const char *e;
   unsigned result;
 
   fuji_open_directory_filter(selected_host_slot, path, filter);
 
   fuji_set_directory_position(pos);
 
-  fuji_read_directory(128, 0, response);
+  fuji_read_directory(MAX_FILENAME_LEN - 1 - (unsigned char)strlen(path), 0, response);
 
   if (response[0] != '\0' && response[strlen(response)-1] == '/') result = ENTRY_TYPE_FOLDER;
   else if (response[0] == '+') result = ENTRY_TYPE_LINK;
@@ -312,7 +307,7 @@ unsigned select_file_entry_type(void)
 
   fuji_close_directory();
 
-  return result; // Offset 10 = directory flag.
+  return result;
 }
 
 void select_file_new(void)
@@ -383,8 +378,6 @@ void select_file_done(void)
 {
   if (copy_mode == true)
     state = PERFORM_COPY;
-  //  else if (select_file_is_folder())
-  //    sf_subState=SF_ADVANCE_FOLDER;
   else
     state = SELECT_SLOT;
 }

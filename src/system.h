@@ -13,9 +13,12 @@ extern bool system_build_directory(unsigned char ds, unsigned long numBlocks, ch
 #define MAX_WIFI_NETWORKS 16
 #endif
 
-#ifdef BUILD_COCO
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
 extern bool system_slot0_is_rom(void);
-#endif /* BUILD_COCO */
+extern bool path_is_rom_file(const char *name);
+#else
+#define path_is_rom_file(name) false
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 #ifdef BUILD_APPLE2
 extern void system_list_devs(void);

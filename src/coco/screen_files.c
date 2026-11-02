@@ -7,6 +7,7 @@
 #include "coco_screen.h"
 #include "../globals.h"
 #include "../constants.h"
+#include "../pause.h"
 
 static void put_padded(byte x, byte y, const char *s, byte w)
 {
@@ -316,6 +317,13 @@ void screen_select_file_new_name(void)
 void screen_select_file_new_creating(void)
 {
   screen_prompt("Creating image, please wait...");
+}
+
+void screen_select_slot_rom_mounted(void)
+{
+  menu_drawn = false;
+  screen_prompt("ROM mounted in slot 0");
+  pause(120);
 }
 
 void screen_destination_host_slot(char *h, char *p)
