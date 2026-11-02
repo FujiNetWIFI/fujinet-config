@@ -1,6 +1,7 @@
 ## 2026-11-02
 
 * [Adam] - A new disk that can't be mounted says so, instead of asking for a label and then reporting a directory failure.
+* [Adam] - The file browser sees the end of a listing that exactly fills its last page, so it no longer offers an empty next page.
 * [Apple II] - Device slot reads and writes cover all 10 slots, so changing a drive's mode no longer leaves it pointing at host 1.
 
 ## 2026-11-01
