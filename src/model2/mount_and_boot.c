@@ -24,10 +24,10 @@ void mount_and_boot(void)
   screen_mount_and_boot();
 
   failed = 0;
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
   {
     d = &deviceSlots[i];
-    if (d->hostSlot >= NUM_HOST_SLOTS || !d->file[0])
+    if (d->hostSlot >= FUJI_MAX_HOSTS || !d->file[0])
       continue;
 
     screen_mount_and_boot_slot(i, MOUNT_BUSY);

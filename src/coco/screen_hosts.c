@@ -10,8 +10,8 @@
 
 /* What the rows last showed. The shared loop calls screen_hosts_and_devices() on every switch
    between hosts and drives; rows are only redrawn when their data changed. */
-static HostSlot shown_hosts[NUM_HOST_SLOTS];
-static DeviceSlot shown_devices[NUM_DEVICE_SLOTS];
+static HostSlot shown_hosts[FUJI_MAX_HOSTS];
+static DeviceSlot shown_devices[FUJI_MAX_DISKS];
 static bool hosts_stale;
 
 /* The boxes are drawn once per screen_clear(). */
@@ -60,7 +60,7 @@ void screen_hosts_and_devices_hosts(void)
   screen_print_menu("SHIFT-DN", " Drives  ");
   screen_print_menu("BREAK", " Quit");
   screen_color_hint(true);
-  bar_set(HOSTS_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
+  bar_set(HOSTS_Y, 1, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -82,7 +82,7 @@ void screen_hosts_and_devices_devices(void)
     devices_menu = true;
     devices_menu_generation = screen_generation;
   }
-  bar_set(DEVICES_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
+  bar_set(DEVICES_Y, 1, FUJI_MAX_DISKS, selected_device_slot);
 }
 
 void screen_hosts_and_devices_devices_clear_all(void)

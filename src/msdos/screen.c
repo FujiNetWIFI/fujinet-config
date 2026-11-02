@@ -479,7 +479,7 @@ void screen_select_slot(const char *e)
 
   screen_hosts_and_devices_device_slots(DEVICES_START_MOUNT_Y, &deviceSlots, &deviceEnabled[0]);
 
-  bar_set(DEVICES_START_MOUNT_Y, 1, NUM_DEVICE_SLOTS, 0);
+  bar_set(DEVICES_START_MOUNT_Y, 1, FUJI_MAX_DISKS, 0);
 }
 
 /**
@@ -533,7 +533,7 @@ static void eject_draw_slot(unsigned char y, unsigned char ds)
     screen_puts(9, row, ATTRIBUTE_NORMAL, (const char *)padded);
 
     /* Now bar_set saves the correct BOLD/NORMAL attrs before highlighting */
-    bar_set(y, 1, NUM_DEVICE_SLOTS, ds);
+    bar_set(y, 1, FUJI_MAX_DISKS, ds);
 }
 
 /**
@@ -1033,7 +1033,7 @@ void screen_hosts_and_devices_hosts(void)
     screen_status(status_text);
     screen_status_tsr_indicator(status_text);
 
-    bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
+    bar_set(HOSTS_START_Y, 1, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 /**
@@ -1045,7 +1045,7 @@ void screen_hosts_and_devices_devices(void)
     screen_status(status_text);
     screen_status_tsr_indicator(status_text);
 
-    bar_set(DEVICES_START_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
+    bar_set(DEVICES_START_Y, 1, FUJI_MAX_DISKS, selected_device_slot);
 }
 
 /**
@@ -1056,7 +1056,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
     unsigned char slotNum;
 
-    for (slotNum = 0; slotNum < NUM_HOST_SLOTS; slotNum++)
+    for (slotNum = 0; slotNum < FUJI_MAX_HOSTS; slotNum++)
     {
         char s[2] = {0x00,0x00};
 
@@ -1081,7 +1081,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *dslot, const b
   system_refresh_drive_letters();
 
   // Display device slots
-  for (slotNum = 0; slotNum < NUM_DEVICE_SLOTS; slotNum++)
+  for (slotNum = 0; slotNum < FUJI_MAX_DISKS; slotNum++)
   {
     char dl;
 
@@ -1180,7 +1180,7 @@ void screen_destination_host_slot(char *h, char *p)
     static char label[84];
     screen_clear();
     screen_header("Copy to Host Slot");
-    screen_draw_box_titled(0, 2, screen_cols, NUM_HOST_SLOTS + 2, ATTRIBUTE_BORDER, false, "Host Slots");
+    screen_draw_box_titled(0, 2, screen_cols, FUJI_MAX_HOSTS + 2, ATTRIBUTE_BORDER, false, "Host Slots");
 
     screen_draw_box_titled(0, 13, screen_cols, 4, ATTRIBUTE_BORDER, false, "Disk Image Details");
     sprintf(label, "Host: %s", h);
@@ -1196,7 +1196,7 @@ void screen_destination_host_slot(char *h, char *p)
  */
 void screen_destination_host_slot_choose(void)
 {
-    bar_set(HOSTS_START_Y,1,NUM_HOST_SLOTS,0);
+    bar_set(HOSTS_START_Y,1,FUJI_MAX_HOSTS,0);
 }
 
 /**

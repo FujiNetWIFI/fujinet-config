@@ -40,32 +40,32 @@ void mount_and_boot_bbs(void)
     set_active_screen(SCREEN_MOUNT_AND_BOOT);
     screen_clear();
     screen_puts(3, 0, "ATARI BBS GATEWAY");
-    if (!fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS) ||
-        !fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS) ||
+    if (!fuji_get_host_slots(hostSlots, FUJI_MAX_HOSTS) ||
+        !fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS) ||
         !fuji_get_device_filename(0, old_filename))
         goto failed;
     hs = selected_host_slot;
     if (BBS_HOST[0])
     {
-        for (hs = 0; hs < NUM_HOST_SLOTS; ++hs)
+        for (hs = 0; hs < FUJI_MAX_HOSTS; ++hs)
             if (!strcmp((char *)hostSlots[hs], BBS_HOST))
                 break;
-        if (hs == NUM_HOST_SLOTS)
+        if (hs == FUJI_MAX_HOSTS)
         {
-            for (hs = 0; hs < NUM_HOST_SLOTS; ++hs)
+            for (hs = 0; hs < FUJI_MAX_HOSTS; ++hs)
                 if (!hostSlots[hs][0])
                     break;
-            if (hs == NUM_HOST_SLOTS)
+            if (hs == FUJI_MAX_HOSTS)
             {
                 screen_error("ADD BBS SERVER TO A HOST SLOT");
                 goto done;
             }
             strcpy((char *)hostSlots[hs], BBS_HOST);
-            if (!fuji_put_host_slots(hostSlots, NUM_HOST_SLOTS))
+            if (!fuji_put_host_slots(hostSlots, FUJI_MAX_HOSTS))
                 goto failed;
         }
     }
-    if (hs >= NUM_HOST_SLOTS || !hostSlots[hs][0])
+    if (hs >= FUJI_MAX_HOSTS || !hostSlots[hs][0])
     {
         screen_error("SELECT A BBS HOST FIRST");
         goto done;
@@ -89,15 +89,15 @@ failed:
     {
         fuji_unmount_disk_image(0);
         deviceSlots[0] = old_slot;
-        if (!fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS) ||
-            (old_slot.hostSlot < NUM_HOST_SLOTS &&
+        if (!fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS) ||
+            (old_slot.hostSlot < FUJI_MAX_HOSTS &&
              !fuji_set_device_filename(old_slot.mode, old_slot.hostSlot,
                                       0, old_filename)))
         {
             screen_error("ERROR RESTORING D1: - CHECK SLOTS");
             goto done;
         }
-        if (old_slot.hostSlot < NUM_HOST_SLOTS && old_filename[0] &&
+        if (old_slot.hostSlot < FUJI_MAX_HOSTS && old_filename[0] &&
             (!fuji_mount_host_slot(old_slot.hostSlot) ||
              !fuji_mount_disk_image(0, old_slot.mode)))
         {
@@ -143,13 +143,13 @@ void mount_and_boot(void)
     screen_mount_and_boot();
     set_active_screen(SCREEN_MOUNT_AND_BOOT);
 
-    if (!fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS))
+    if (!fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS))
     {
         screen_error("ERROR READING DEVICE SLOTS");
         die();
     }
 
-    if (!fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS))
+    if (!fuji_get_host_slots(hostSlots, FUJI_MAX_HOSTS))
     {
         screen_error("ERROR READING HOST SLOTS");
         die();

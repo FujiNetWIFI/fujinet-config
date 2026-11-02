@@ -12,7 +12,6 @@
 #define MODE_MOUNTED 0x40
 
 #define MAX_HOST_LEN 32
-#define NUM_HOST_SLOTS 8
 
 typedef enum _entry_types
 {

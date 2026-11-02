@@ -73,7 +73,7 @@ unsigned char io_get_wifi_status(void)
   fuji_get_wifi_status(&status);
 
   // Shouldn't do this here, but for now its temporary
-  // If ^^ is ever fixed, need to change io_set_ssid below too, which uses this colour hack
+  // If ^^ is ever fixed, need to change io_set_ssid below too, which uses this color hack
   if (status != 3)
   {
     bar_set_color(COLOR_SETTING_FAILED);
@@ -276,7 +276,7 @@ void io_update_devices_enabled(bool *e)
   int deviceNum;
 
   // doesn't exist on atari?. Just set to true.
-  for (deviceNum = 0; deviceNum < NUM_DEVICE_SLOTS; deviceNum++)
+  for (deviceNum = 0; deviceNum < FUJI_MAX_DISKS; deviceNum++)
   {
     e[deviceNum] = true;
   }

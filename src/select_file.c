@@ -236,11 +236,11 @@ void select_file_link(void)
 
   fuji_close_directory();
 
-  strcpy((char *)hostSlots[NUM_HOST_SLOTS-1], tnfsHostname);
-  fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+  strcpy((char *)hostSlots[FUJI_MAX_HOSTS-1], tnfsHostname);
+  fuji_put_host_slots(&hostSlots[0], FUJI_MAX_HOSTS);
   slots_dirty = true;
 
-  selected_host_slot = NUM_HOST_SLOTS-1;
+  selected_host_slot = FUJI_MAX_HOSTS-1;
   strcpy(selected_host_name, tnfsHostname);
   sf_subState = SF_INIT;
 

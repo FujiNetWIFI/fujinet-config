@@ -20,17 +20,17 @@
 #define HOSTS_START_Y 3
 
 // Y position on screen where the list of hosts ends
-#define HOSTS_END_Y (HOSTS_START_Y + NUM_HOST_SLOTS - 1)
+#define HOSTS_END_Y (HOSTS_START_Y + FUJI_MAX_HOSTS - 1)
 
 // Y position on screen where the device slots start.
 #define DEVICES_START_Y 14
 
 // Y position on screen where the device slots end.
-#define DEVICES_END_Y   (DEVICES_START_Y + NUM_DEVICE_SLOTS - 1)
+#define DEVICES_END_Y   (DEVICES_START_Y + FUJI_MAX_DISKS - 1)
 
 // When mounting an image the device list/drive slots are on the screen by themselves at a different location than when the hosts are also shown.
 #define DEVICES_START_MOUNT_Y   3
-#define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + NUM_DEVICE_SLOTS-1)
+#define DEVICES_END_MOUNT_Y (DEVICES_START_MOUNT_Y + FUJI_MAX_DISKS-1)
 
 // Y position on screen where the list of available wireless networks start.
 // Row 3 = first inner row of the "Available Networks" box (box top border at row 2).
@@ -63,8 +63,8 @@ extern char copySpec[256];
 extern unsigned long selected_size;
 extern unsigned char numNetworks;
 
-extern DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
-extern HostSlot hostSlots[NUM_HOST_SLOTS];
+extern DeviceSlot deviceSlots[FUJI_MAX_DISKS];
+extern HostSlot hostSlots[FUJI_MAX_HOSTS];
 extern char mode;
 
 extern DirectoryPosition pos;
@@ -74,7 +74,7 @@ extern char filter[32];
 extern bool create;
 extern bool dir_eof;
 extern bool quick_boot;
-extern bool deviceEnabled[NUM_DEVICE_SLOTS];
+extern bool deviceEnabled[FUJI_MAX_DISKS];
 extern bool backToFiles;
 extern bool backFromCopy;
 extern char _visibleEntries;

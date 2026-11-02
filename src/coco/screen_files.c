@@ -81,7 +81,7 @@ void screen_select_slot(const char *e)
   char *p;
 
   screen_frame("FujiNet Config");
-  screen_box(0, SLOT_BOX_Y, SCREEN_COLS, NUM_DEVICE_SLOTS + 2, "DRIVE SLOTS");
+  screen_box(0, SLOT_BOX_Y, SCREEN_COLS, FUJI_MAX_DISKS + 2, "DRIVE SLOTS");
   screen_hosts_and_devices_device_slots(SLOT_Y, &deviceSlots[0], &deviceEnabled[0]);
   screen_box(0, DETAIL_BOX_Y, SCREEN_COLS, 6, "FILE DETAILS");
 
@@ -134,7 +134,7 @@ void screen_select_slot(const char *e)
   screen_print_menu("ARROWS", " Select slot  ");
   screen_print_menu("BREAK", " Abort");
   screen_color_hint(true);
-  bar_set(SLOT_Y, 1, NUM_DEVICE_SLOTS, 0);
+  bar_set(SLOT_Y, 1, FUJI_MAX_DISKS, 0);
 }
 
 void screen_select_slot_mode(void)
@@ -329,7 +329,7 @@ void screen_select_slot_rom_mounted(void)
 void screen_destination_host_slot(char *h, char *p)
 {
   screen_frame("FujiNet Config");
-  screen_box(0, HOSTS_BOX_Y, SCREEN_COLS, NUM_HOST_SLOTS + 2, "COPY TO HOST SLOT");
+  screen_box(0, HOSTS_BOX_Y, SCREEN_COLS, FUJI_MAX_HOSTS + 2, "COPY TO HOST SLOT");
   screen_box_joined(DEVICES_BOX_Y, 6, "DISK IMAGE DETAILS");
   screen_puts(INFO_X, DEVICES_BOX_Y + 1, "Host: ");
   screen_puts(INFO_X + 6, DEVICES_BOX_Y + 1, h);
@@ -345,7 +345,7 @@ void screen_destination_host_slot_choose(void)
   screen_print_menu("ENTER", " Select  ");
   screen_print_menu("BREAK", " Abort");
   screen_color_hint(true);
-  bar_set(HOSTS_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
+  bar_set(HOSTS_Y, 1, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)

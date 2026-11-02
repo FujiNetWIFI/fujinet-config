@@ -248,7 +248,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
 	char i;
 
 	UNUSED(e); // no platform queries the enabled state yet
-	for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+	for (i = 0; i < FUJI_MAX_DISKS; i++)
 		screen_device_slot(y + i, i, &d[i]);
 }
 
@@ -296,7 +296,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 
 void screen_hosts_and_devices_devices(void)
 {
-	bar_set(11, 1, NUM_DEVICE_SLOTS, 0);
+	bar_set(11, 1, FUJI_MAX_DISKS, 0);
 	cclearxy(0, STATUS_BAR, 120);
 	gotoxy(0, STATUS_BAR);
 	screen_print_menu("E", "JECT  ");
@@ -499,7 +499,7 @@ void screen_select_slot(const char *e)
 
 	screen_hosts_and_devices_device_slots(1, &deviceSlots[0], &deviceEnabled[0]);
 
-	bar_set(1, 1, NUM_DEVICE_SLOTS, 0);
+	bar_set(1, 1, FUJI_MAX_DISKS, 0);
 }
 
 void screen_select_slot_choose(void)

@@ -191,7 +191,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 {
     uint8_t i;
 
-    for (i = 0; i < NUM_HOST_SLOTS; i++)
+    for (i = 0; i < FUJI_MAX_HOSTS; i++)
         host_row(HOSTS_START_Y, i, (const char *)h[i]);
 }
 
@@ -199,7 +199,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *d, const bool 
 {
     uint8_t i;
 
-    for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+    for (i = 0; i < FUJI_MAX_DISKS; i++)
         device_row(y, i, &d[i]);
 }
 
@@ -211,7 +211,7 @@ void screen_hosts_and_devices_hosts(void)
 #else
     s100_status("[1-8] Slot [E]dit [RETURN] Browse [TAB] Drives [C]onfig [ESC] Boot [Q]uit");
 #endif
-    bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, selected_host_slot);
+    bar_set(HOSTS_START_Y, 1, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -221,7 +221,7 @@ void screen_hosts_and_devices_devices(void)
 #else
     s100_status("[1-8] [E]ject [DEL] Eject all [R]ead [W]rite [TAB] Hosts [ESC] Boot [Q]uit");
 #endif
-    bar_set(DEVICES_START_Y, 1, NUM_DEVICE_SLOTS, selected_device_slot);
+    bar_set(DEVICES_START_Y, 1, FUJI_MAX_DISKS, selected_device_slot);
 }
 
 void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
@@ -399,7 +399,7 @@ void screen_select_slot(const char *e)
     }
 
     s100_status("[1-8] Slot [RETURN] Read only [W] Read/Write [E]ject [ESC] Back");
-    bar_set(DEVICES_START_MOUNT_Y, 1, NUM_DEVICE_SLOTS, 0);
+    bar_set(DEVICES_START_MOUNT_Y, 1, FUJI_MAX_DISKS, 0);
 }
 
 void screen_select_slot_choose(void)
@@ -426,7 +426,7 @@ void screen_destination_host_slot(char *h, char *p)
 
 void screen_destination_host_slot_choose(void)
 {
-    bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, 0);
+    bar_set(HOSTS_START_Y, 1, FUJI_MAX_HOSTS, 0);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)

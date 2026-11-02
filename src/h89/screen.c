@@ -114,7 +114,7 @@ void screen_drive_row(uint8_t y, uint8_t ds)
   d = &deviceSlots[ds];
   ui_line(SLOT_X, y, NULL);
   h19_put(SLOT_X, y, '1' + ds);
-  if (d->hostSlot >= NUM_HOST_SLOTS || !d->file[0])
+  if (d->hostSlot >= FUJI_MAX_HOSTS || !d->file[0])
   {
     h19_text(FILE_X, y, "Empty", 5, 0, false);
     return;
@@ -129,7 +129,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   static uint8_t i;
 
   (void)h;
-  for (i = 0; i < NUM_HOST_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_HOSTS; i++)
     host_row(i);
 }
 
@@ -139,7 +139,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *d, const bool 
 
   (void)d;
   (void)e;
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
     screen_drive_row(y + i, i);
 }
 
@@ -164,7 +164,7 @@ void screen_hosts_and_devices_hosts(void)
   ui_pane(DRIVES_PANE_Y, "Drive Slots", false);
   ui_info(NULL);
   ui_hints(hints_hosts1, hints_hosts2);
-  bar_set(HOSTS_Y, BAR_X0, NUM_HOST_SLOTS, selected_host_slot);
+  bar_set(HOSTS_Y, BAR_X0, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 void screen_hosts_and_devices_devices(void)
@@ -173,7 +173,7 @@ void screen_hosts_and_devices_devices(void)
   ui_pane(DRIVES_PANE_Y, "Drive Slots", true);
   ui_info(NULL);
   ui_hints(hints_drives1, hints_drives2);
-  bar_set(DRIVES_Y, BAR_X0, NUM_DEVICE_SLOTS, selected_device_slot);
+  bar_set(DRIVES_Y, BAR_X0, FUJI_MAX_DISKS, selected_device_slot);
 }
 
 void screen_hosts_and_devices_clear_host_slot(uint_fast8_t i)
@@ -210,7 +210,7 @@ void screen_hosts_and_devices_long_filename(const char *f)
   static DeviceSlot *d;
 
   d = &deviceSlots[selected_device_slot];
-  if (d->hostSlot >= NUM_HOST_SLOTS || !d->file[0])
+  if (d->hostSlot >= FUJI_MAX_HOSTS || !d->file[0])
   {
     ui_info(NULL);
     return;
@@ -223,7 +223,7 @@ void screen_drive_path(void)
   static DeviceSlot *d;
 
   d = &deviceSlots[selected_device_slot];
-  if (d->hostSlot >= NUM_HOST_SLOTS || !d->file[0])
+  if (d->hostSlot >= FUJI_MAX_HOSTS || !d->file[0])
     ui_info(NULL);
   else
     hosts_and_devices_long_filename();
@@ -467,7 +467,7 @@ void screen_select_slot(const char *e)
   ui_hints(create ? "[RET] Create it here  [E] Eject  [1]-[8] Slot"
                   : "[RET] Mount read only  [W] Mount read/write  [E] Eject  [1]-[8] Slot",
            "[ESC] Cancel");
-  bar_set(DRIVES_Y, BAR_X0, NUM_DEVICE_SLOTS, selected_device_slot);
+  bar_set(DRIVES_Y, BAR_X0, FUJI_MAX_DISKS, selected_device_slot);
 }
 
 void screen_select_slot_choose(void)
@@ -496,7 +496,7 @@ void screen_destination_host_slot(char *h, char *p)
 
 void screen_destination_host_slot_choose(void)
 {
-  bar_set(HOSTS_Y, BAR_X0, NUM_HOST_SLOTS, selected_host_slot);
+  bar_set(HOSTS_Y, BAR_X0, FUJI_MAX_HOSTS, selected_host_slot);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)

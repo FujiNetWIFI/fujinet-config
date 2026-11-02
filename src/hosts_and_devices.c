@@ -22,7 +22,7 @@ HDSubState hd_subState;
 #ifdef BUILD_ATARI
 bool hisio_boot_enabled = false;
 #endif /* BUILD_ATARI */
-DeviceSlot deviceSlots[NUM_DEVICE_SLOTS];
+DeviceSlot deviceSlots[FUJI_MAX_DISKS];
 DeviceSlot temp_deviceSlot;
 // Set whenever something we did could have changed the host or device slot
 // tables on the FujiNet, so that the screens below re-read them exactly once
@@ -36,7 +36,7 @@ bool slots_dirty = true;
 // from the table and would show stale rows mid-sweep.
 static bool bulk_eject = false;
 #endif /* BUILD_MSDOS */
-bool deviceEnabled[NUM_DEVICE_SLOTS];
+bool deviceEnabled[FUJI_MAX_DISKS];
 HostSlot hostSlots[8];
 char selected_host_slot = 0;
 char selected_device_slot = 0;
@@ -76,7 +76,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     // declare a new variable for the loop counter.
     // Walk backwards: on platforms where an eject pulls the slots below it
     // up a position, going forwards would step over a slot that just moved.
-    for (o = NUM_DEVICE_SLOTS; o-- > 0; )
+    for (o = FUJI_MAX_DISKS; o-- > 0; )
     {
       if ( deviceSlots[o].hostSlot == i )
       {
@@ -85,7 +85,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
     }
   }
 
-  fuji_put_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+  fuji_put_host_slots(&hostSlots[0], FUJI_MAX_HOSTS);
   slots_dirty = true;
 
   // Need to re-render both hosts and devices because some devices
@@ -100,7 +100,7 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
 
 void hosts_and_devices_hosts(void)
 {
-  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+  fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);
 
   if (!quick_boot)
   	screen_hosts_and_devices_hosts();
@@ -138,12 +138,12 @@ void hosts_and_devices_eject(unsigned char ds)
   memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
   deviceSlots[ds].hostSlot = 0xFF;
   deviceSlots[ds].mode = 0;
-  fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
 #endif // OBSOLETE
 #ifdef BUILD_MSDOS
   if (!bulk_eject)
 #endif /* BUILD_MSDOS */
-    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS);
   screen_hosts_and_devices_eject(ds);
 #ifdef OBSOLETE
   hosts_and_devices_long_filename();
@@ -160,7 +160,7 @@ void hosts_and_devices_devices_clear_all(void)
   bulk_eject = true;
 #endif /* BUILD_MSDOS */
 
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
     hosts_and_devices_eject(i);
 
 #ifdef BUILD_MSDOS
@@ -177,7 +177,7 @@ void hosts_and_devices_devices(void)
 {
   char k = 0;
 
-  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+  fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);
   screen_hosts_and_devices_devices();
 #ifndef BUILD_MSDOS
   // screen_hosts_and_devices_long_filename() is an empty stub on MS-DOS, so
@@ -216,7 +216,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
   fuji_set_device_filename(m, selected_host_slot, selected_device_slot, temp_filename);
 
-  fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
   slots_dirty = true;
 
   // Make sure host slot is mounted or it will fail mounting disk
@@ -239,7 +239,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
     screen_error(""); // clear the error msg
   }
   screen_hosts_and_devices_device_slots(DEVICES_START_Y, deviceSlots, deviceEnabled); // redraw the disks
@@ -257,7 +257,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
-    fuji_put_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+    fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
   }
   screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled); // redraw the disks
   screen_hosts_and_devices_devices_selected(selected_device_slot);
@@ -282,7 +282,7 @@ void hosts_and_devices_devices_enable_toggle(unsigned char ds)
 
   deviceEnabled[ds] = fuji_get_device_enabled_status(io_device_slot_to_device(ds));
 
-  fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+  fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);
   screen_hosts_and_devices_device_slots(11, deviceSlots, deviceEnabled);
   bar_update();
 }
@@ -332,7 +332,7 @@ void hosts_and_devices_done(void)
   gotoxy(SCR_X0, SCR_Y0);
   textcolor(LIST_TITLE_COLOR); cprintf("MOUNTING DEVICES...");
 #endif
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
   {
     if (deviceSlots[i].hostSlot != 0xFF)
     {
@@ -380,9 +380,9 @@ void hosts_and_devices(void)
     hd_subState = HD_HOSTS;
 
 #ifdef BUILD_PMD85
-    fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS);
-    fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
-    fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+    fuji_get_host_slots(hostSlots, FUJI_MAX_HOSTS);
+    fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS);
+    fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);
     screen_hosts_and_devices(hostSlots, deviceSlots, deviceEnabled);
 #endif
 
@@ -395,14 +395,14 @@ void hosts_and_devices(void)
     if (slots_dirty)
     {
       // Never show, and so never save back, what a failed read left behind.
-      if (!fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS)
-          || !fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS))
+      if (!fuji_get_host_slots(&hostSlots[0], FUJI_MAX_HOSTS)
+          || !fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS))
       {
         screen_error("  COULD NOT READ SLOTS.");
         pause(150);
         continue;
       }
-      fuji_update_devices_enabled(deviceEnabled, NUM_DEVICE_SLOTS);
+      fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);
       slots_dirty = false;
     }
 
