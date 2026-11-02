@@ -1,5 +1,6 @@
 ## 2026-11-02
 
+* [C64] - The slot screen reads the 32-bit directory entry size the firmware now sends, so it shows the filename and full size again.
 * [Adam] - A new disk that can't be mounted says so, instead of asking for a label and then reporting a directory failure.
 * [Adam] - The file browser sees the end of a listing that exactly fills its last page, so it no longer offers an empty next page.
 * [Apple II] - Device slot reads and writes cover all 10 slots, so changing a drive's mode no longer leaves it pointing at host 1.

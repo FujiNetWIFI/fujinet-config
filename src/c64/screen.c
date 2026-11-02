@@ -478,22 +478,15 @@ void screen_select_file_filter(void)
 
 void screen_select_slot(const char *e)
 {
-	unsigned int s;
-	unsigned char low;
-	unsigned char high;
-
 	clrscr();
 
 	gotoxy(0, 10);
 	cprintf("%-40s", "File Details");
 	cprintf("%8s %u-%02u-%02u %02u:%02u:%02u\r\n", "MTIME:", (unsigned char)(*e++) + 1900, *e++, *e++, *e++, *e++, *e++);
 
-	low = *e++;
-	high = *e++;
-	s = low + (high << 8);
-	cprintf("%8s %u\r\n\r\n", "SIZE:", s);
+	cprintf("%8s %lu\r\n\r\n", "SIZE:", *(const unsigned long *)e);
 
-	e += 2; // skip is_dir, media_type
+	e += sizeof(unsigned long) + 2; // skip flags, media_type
 	// Filename is next
 	screen_puts_ascii(e, 40);
 
