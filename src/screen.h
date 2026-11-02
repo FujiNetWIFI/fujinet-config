@@ -100,6 +100,11 @@ void screen_select_slot(const char *e);
 void screen_select_slot_choose(void);
 void screen_select_slot_mode(void);
 void screen_select_slot_eject(uint8_t ds);
+#if defined(BUILD_COCO) || defined(BUILD_DRAGON)
+void screen_select_slot_rom_mounted(void);
+#else
+#define screen_select_slot_rom_mounted()
+#endif /* BUILD_COCO || BUILD_DRAGON */
 
 #ifndef BUILD_MSDOS
 bool screen_mount_and_boot_lobby(void);
