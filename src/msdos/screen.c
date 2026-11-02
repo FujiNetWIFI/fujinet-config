@@ -419,31 +419,13 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* acx)
     screen_puts_clip(vx, 16, ATTRIBUTE_BOLD, GIT_VERSION, vw);
 }
 
-/* Matches rs232Fuji::set_additional_direntry_details() packed layout:
-     dirEntryTimestamp (6) + uint32_t size (4) + uint8_t flags (1) + uint8_t mediatype (1) = 12 bytes
-   followed immediately by the null-terminated filename. */
-#pragma pack(1)
-struct _file_info {
-    unsigned char  year;      /* offset  0: years since 1970 (firmware subtracts 70) */
-    unsigned char  month;     /* offset  1                                            */
-    unsigned char  day;       /* offset  2                                            */
-    unsigned char  hour;      /* offset  3                                            */
-    unsigned char  minute;    /* offset  4                                            */
-    unsigned char  second;    /* offset  5                                            */
-    unsigned long  size;      /* offset  6: uint32_t little-endian file size          */
-    unsigned char  flags;     /* offset 10: DET_FF_DIR=0x01, DET_FF_TRUNC=0x02       */
-    unsigned char  mediatype; /* offset 11                                            */
-    /* filename (null-terminated) follows at offset 12 = sizeof(struct _file_info)   */
-};
-#pragma pack()
-
 /**
  * @brief Display the drive-slot selection screen with file details for the selected entry.
- * @param e Pointer to a packed _file_info struct followed by the null-terminated filename.
+ * @param e Pointer to a FujiDirEntry.
  */
 void screen_select_slot(const char *e)
 {
-  struct _file_info *i = (struct _file_info *)e;
+  const FujiDirEntry *f = (const FujiDirEntry *)e;
   static char fullpath[256];
   static char tmp[84];
 
@@ -455,8 +437,7 @@ void screen_select_slot(const char *e)
 
   if (create == false)
   {
-    /* Filename follows struct at offset 12 (= sizeof struct _file_info) */
-    sprintf((char *)fullpath, "%s%s", path, (char *)(i + 1));
+    sprintf((char *)fullpath, "%s%s", path, f->filename);
     fullpath[screen_cols - 2] = '\0';
 
     screen_draw_box_titled(0, 14, screen_cols, 5, ATTRIBUTE_BORDER, false, "File Details");
@@ -466,14 +447,14 @@ void screen_select_slot(const char *e)
     /* Year is years-since-1970 */
     screen_puts(1, 16, ATTRIBUTE_NORMAL, "Date: ");
     sprintf((char *)tmp, "%04u-%02u-%02u  %02u:%02u:%02u",
-            (unsigned)(1970 + i->year), i->month, i->day, i->hour, i->minute, i->second);
+            (unsigned)(1970 + f->modified.year), f->modified.month, f->modified.day, f->modified.hour, f->modified.minute, f->modified.second);
     screen_puts(7, 16, ATTRIBUTE_BOLD, (const char *)tmp);
 
     screen_puts(1, 17, ATTRIBUTE_NORMAL, "Size: ");
-    if (i->size >= 1024UL)
-      sprintf((char *)tmp, "%lu K", i->size >> 10);
+    if (f->size >= 1024UL)
+      sprintf((char *)tmp, "%lu K", f->size >> 10);
     else
-      sprintf((char *)tmp, "%lu bytes", i->size);
+      sprintf((char *)tmp, "%lu bytes", f->size);
     screen_puts(7, 17, ATTRIBUTE_BOLD, (const char *)tmp);
   }
 

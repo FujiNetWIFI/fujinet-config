@@ -257,7 +257,7 @@ void screen_show_info_extended(bool, AdapterConfigExtended *ac)
 
 void screen_select_slot(const char *e)
 {
-  unsigned long *s;
+  const FujiDirEntry *f = (const FujiDirEntry *)e;
   screen_dlist_select_slot();
   set_active_screen(SCREEN_SELECT_SLOT);
 
@@ -274,20 +274,16 @@ void screen_select_slot(const char *e)
     memset(d, 0, sizeof(d));
 
     // Modified time
-    sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", (*e++) + 1970, *e++, *e++, *e++, *e++, *e++);
+    sprintf(d, "%8s %04u-%02u-%02u %02u:%02u:%02u", "MTIME:", f->modified.year + 1970, f->modified.month, f->modified.day, f->modified.hour, f->modified.minute, f->modified.second);
     screen_puts(0, DEVICES_END_MOUNT_Y + 3, d);
 
-    
     // File size
-    s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-
-    sprintf(d, "%8s %lu K", "SIZE:", *s >> 10);
+    sprintf(d, "%8s %lu K", "SIZE:", f->size >> 10);
     screen_puts(0, DEVICES_END_MOUNT_Y + 4, d);
 
-     e += sizeof(unsigned long) + 3; // Skip isdir, trunc, type
-     
     // Filename: a longer one would wrap onto the MTIME row
     screen_puts(3, DEVICES_END_MOUNT_Y + 2, "FILE:");
+    e = f->filename;
     if (strlen(e) > FILENAME_COLS)
     {
       memcpy(d, e, FILENAME_COLS - ELLIPSIS_LEN);

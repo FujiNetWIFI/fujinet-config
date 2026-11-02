@@ -702,7 +702,7 @@ void screen_select_file_filter(void)
 
 void screen_select_slot(const char *e)
 {
-  unsigned long *s;
+  const FujiDirEntry *f = (const FujiDirEntry *)e;
   static const char ss[] = " SmartPort Drives";
   static const char ds[] = " Disk II Drives";
 
@@ -722,13 +722,11 @@ void screen_select_slot(const char *e)
 
   gotoxy(0,13);
   cprintf("%-40s","File details");
-  cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTime:",*e++,*e++,*e++,*e++,*e++,*e++);
+  cprintf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\r\n","MTime:",f->modified.year,f->modified.month,f->modified.day,f->modified.hour,f->modified.minute,f->modified.second);
 
-  s=(unsigned long *)e; // Cast the next four bytes as a long integer.
-  cprintf("%8s %lu K\r\n\r\n","Size:",*s >> 10); // Quickly divide by 1024
+  cprintf("%8s %lu K\r\n\r\n","Size:",f->size >> 10); // Quickly divide by 1024
 
-  e += sizeof(unsigned long) + 3; // I do not need the next two bytes.
-  cprintf("%-40s",e);
+  cprintf("%-40s",f->filename);
 
   screen_hosts_and_devices_device_slots(2,&deviceSlots[0],&deviceEnabled[0]);
   if (screenDeviceSmartport) 

@@ -172,22 +172,7 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended* ac)
 
 void screen_select_slot(const char *e)
 {
-  unsigned long *s;
-
-  struct _additl_info
-  {
-    byte year;
-    byte month;
-    byte day;
-    byte hour;
-    byte min;
-    byte sec;
-    unsigned long size;
-    byte isdir;
-    byte trunc;
-    byte type;
-    byte *filename;
-  } *i = (struct _additl_info *)e;
+  const FujiDirEntry *f = (const FujiDirEntry *)e;
   
   cls(4);
 
@@ -200,11 +185,11 @@ void screen_select_slot(const char *e)
   printf("%32s","FILE DETAILS");
   bar_draw(6,false);
 
-  printf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",i->year,i->month,i->day,i->hour,i->min,i->sec);
+  printf("%8s 20%02u-%02u-%02u %02u:%02u:%02u\n","MTIME:",f->modified.year,f->modified.month,f->modified.day,f->modified.hour,f->modified.minute,f->modified.second);
 
-  printf("%8s %lu K\n","SIZE:",i->size >> 10); // Quickly divide by 1024
+  printf("%8s %lu K\n","SIZE:",f->size >> 10); // Quickly divide by 1024
 
-  printf("%96s",screen_upper((char *)&e[13]));
+  printf("%96s",screen_upper((char *)f->filename));
 
   locate(0,13);
   printf("   arrow keys  TO SELECT SLOT   ");
