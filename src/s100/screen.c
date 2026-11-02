@@ -371,7 +371,7 @@ void screen_select_slot(const char *e)
     if (create)
     {
         s100_puts(1, 13, "New image: ");
-        s100_puts(12, 13, &e[11]);
+        s100_puts(12, 13, f->filename);
     }
     else
     {

@@ -63,20 +63,7 @@ static void put_wrapped(byte y, const char *s, byte lines)
 
 void screen_select_slot(const char *e)
 {
-  struct _additl_info
-  {
-    byte year;
-    byte month;
-    byte day;
-    byte hour;
-    byte min;
-    byte sec;
-    unsigned long size;
-    byte isdir;
-    byte trunc;
-    byte type;
-    byte *filename;
-  } *i = (struct _additl_info *)e;
+  const FujiDirEntry *f = (const FujiDirEntry *)e;
   char s[LIST_W + 1];
   char *p;
 
@@ -85,42 +72,39 @@ void screen_select_slot(const char *e)
   screen_hosts_and_devices_device_slots(SLOT_Y, &deviceSlots[0], &deviceEnabled[0]);
   screen_box(0, DETAIL_BOX_Y, SCREEN_COLS, 6, "FILE DETAILS");
 
-  if (create == true)
+  put_wrapped(DETAIL_BOX_Y + 1, f->filename, 2);
+
+  if (create == false)
   {
-    put_wrapped(DETAIL_BOX_Y + 1, e + 11, 2);
-  }
-  else
-  {
-    put_wrapped(DETAIL_BOX_Y + 1, e + 13, 2);
     strcpy(s, "Date: 20");
-    p = put2(s + 8, i->year);
+    p = put2(s + 8, f->modified.year);
     *p++ = '-';
-    p = put2(p, i->month);
+    p = put2(p, f->modified.month);
     *p++ = '-';
-    p = put2(p, i->day);
+    p = put2(p, f->modified.day);
     *p++ = ' ';
-    p = put2(p, i->hour);
+    p = put2(p, f->modified.hour);
     *p++ = ':';
-    p = put2(p, i->min);
+    p = put2(p, f->modified.minute);
     *p++ = ':';
-    p = put2(p, i->sec);
+    p = put2(p, f->modified.second);
     *p = 0;
     screen_puts(INFO_X, DETAIL_BOX_Y + 3, s);
 
     strcpy(s, "Size: ");
-    if (i->size >= 1048576UL)
+    if (f->size >= 1048576UL)
     {
-      p = put_uint(s + 6, (unsigned)(i->size >> 20));
+      p = put_uint(s + 6, (unsigned)(f->size >> 20));
       strcpy(p, " M");
     }
-    else if (i->size >= 1024UL)
+    else if (f->size >= 1024UL)
     {
-      p = put_uint(s + 6, (unsigned)(i->size >> 10));
+      p = put_uint(s + 6, (unsigned)(f->size >> 10));
       strcpy(p, " K");
     }
     else
     {
-      p = put_uint(s + 6, (unsigned)i->size);
+      p = put_uint(s + 6, (unsigned)f->size);
       strcpy(p, " bytes");
     }
     screen_puts(INFO_X, DETAIL_BOX_Y + 4, s);

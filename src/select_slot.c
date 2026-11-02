@@ -71,13 +71,10 @@ void select_slot_display()
 {
   if (create==true)
     {
-#if defined(BUILD_COCO) || defined(BUILD_H89) || defined(BUILD_MODEL2)
-      char dispPath[11 + DIR_MAX_LEN + 1];
-#else
-      char dispPath[42];
-#endif
+      // A new disk has no entry yet: only the name is filled in
+      char dispPath[sizeof(FujiDirEntry) - MAX_FILENAME_LEN + DIR_MAX_LEN + 1];
       memset(dispPath,0,sizeof(dispPath));
-      strncpy(&dispPath[11],path,DIR_MAX_LEN);
+      strncpy(((FujiDirEntry *)dispPath)->filename,path,DIR_MAX_LEN);
 #ifdef BUILD_MSXROM
       msx_set_mount_is_rom(false); // a newly created image is always a disk
 #endif

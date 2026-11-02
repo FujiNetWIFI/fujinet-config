@@ -414,8 +414,7 @@ static char *two(uint8_t n, char *p)
 
 void screen_select_slot(const char *e)
 {
-  static const uint8_t *u;
-  static uint32_t size;
+  static const FujiDirEntry *f;
   static char *p;
   static char num[12];
 
@@ -429,34 +428,32 @@ void screen_select_slot(const char *e)
   }
   else
   {
-    /* The entry has its details ahead of its name: a timestamp (years
-       from 1970), the size, flags and the media type */
-    u = (const uint8_t *)e;
+    f = (const FujiDirEntry *)e;
     ui_labelled(LIST_Y + 1, "Folder", path);
-    ui_labelled(LIST_Y + 2, "File", e + 12);
+    ui_labelled(LIST_Y + 2, "File", f->filename);
 
-    size = (uint32_t)u[6] | ((uint32_t)u[7] << 8) | ((uint32_t)u[8] << 16) | ((uint32_t)u[9] << 24);
-    if (size >= 10240UL)
+    if (f->size >= 10240UL)
     {
-      strcpy(buf, ui_num((size + 1023) >> 10, num));
+      strcpy(buf, ui_num((f->size + 1023) >> 10, num));
       strcat(buf, "K");
     }
     else
     {
-      strcpy(buf, ui_num(size, num));
+      strcpy(buf, ui_num(f->size, num));
       strcat(buf, " bytes");
     }
     ui_labelled(LIST_Y + 3, "Size", buf);
 
-    p = ui_num(1970 + u[0], buf) + 4;
+    /* Years from 1970 */
+    p = ui_num(1970 + f->modified.year, buf) + 4;
     *p++ = '-';
-    p = two(u[1], p);
+    p = two(f->modified.month, p);
     *p++ = '-';
-    p = two(u[2], p);
+    p = two(f->modified.day, p);
     *p++ = ' ';
-    p = two(u[3], p);
+    p = two(f->modified.hour, p);
     *p++ = ':';
-    p = two(u[4], p);
+    p = two(f->modified.minute, p);
     *p = 0;
     ui_labelled(LIST_Y + 4, "Date", buf);
   }
