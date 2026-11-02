@@ -34,7 +34,7 @@ void mount_and_boot(void)
       continue;
 
     screen_mount_and_boot_slot(i, MOUNT_BUSY);
-    if (fuji_mount_host_slot(d->hostSlot) && fuji_mount_disk_image(i, (d->mode & 0x03) ? (d->mode & 0x03) : MODE_READ))
+    if (fuji_mount_host_slot(d->hostSlot) && fuji_mount_disk_image(i, (d->mode & (FUJI_DISK_MODE_READ | FUJI_DISK_MODE_WRITE)) ? (d->mode & (FUJI_DISK_MODE_READ | FUJI_DISK_MODE_WRITE)) : FUJI_DISK_MODE_READ))
       screen_mount_and_boot_slot(i, MOUNT_OK);
     else
     {

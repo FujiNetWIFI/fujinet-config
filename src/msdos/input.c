@@ -537,14 +537,14 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'R':
         // set device mode to read
         selected_device_slot = bar_get();
-        hosts_and_devices_devices_set_mode(MODE_READ);
+        hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_READ);
         screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
         return HD_DEVICES;
     case 'W':
     case 'w':
         // set device mode to write
         selected_device_slot = bar_get();
-        hosts_and_devices_devices_set_mode(MODE_WRITE);
+        hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_WRITE);
         screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], NULL);
         return HD_DEVICES;
     case 'C':
@@ -722,13 +722,13 @@ SSSubState input_select_slot_choose(void)
     case KEY_RETURN:
         // Read-only mount
         selected_device_slot = bar_get();
-        mode = 1;
+        mode = FUJI_DISK_MODE_READ;
         return SS_DONE;
     case 'W':
     case 'w':
         // Read-write mount
         selected_device_slot = bar_get();
-        mode = 2;
+        mode = FUJI_DISK_MODE_WRITE;
         return SS_DONE;
     default:
         return SS_CHOOSE;

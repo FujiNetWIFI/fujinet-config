@@ -77,8 +77,8 @@ void mount_and_boot_bbs(void)
         goto failed;
     changed = true;
     slots_dirty = true;
-    if (!fuji_set_device_filename(1, hs, 0, BBS_PATH) ||
-        !fuji_mount_disk_image(0, 1) ||
+    if (!fuji_set_device_filename(FUJI_DISK_MODE_READ, hs, 0, BBS_PATH) ||
+        !fuji_mount_disk_image(0, FUJI_DISK_MODE_READ) ||
         !fuji_set_boot_config(0))
         goto failed;
     cold_start();

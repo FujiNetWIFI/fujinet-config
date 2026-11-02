@@ -40,14 +40,14 @@ void select_slot_init()
 {
   if (quick_boot==true)
     {
-      mode=0;
+      mode=FUJI_DISK_MODE_READ;
       selected_device_slot=0;
       ss_subState=SS_DONE;
     }
   else if (create==false && path_is_rom_file(response))
     {
       selected_device_slot=0;
-      mode=MODE_READ;
+      mode=FUJI_DISK_MODE_READ;
       ss_subState=SS_DONE;
       screen_select_slot_rom_mounted();
     }
@@ -59,7 +59,7 @@ void select_slot_init()
       // slot and mode here and skip the slot picker so that selecting a
       // cassette always behaves consistently.
       selected_device_slot=CASSETTE_DEVICE_SLOT;
-      mode=MODE_READ;
+      mode=FUJI_DISK_MODE_READ;
       ss_subState=SS_DONE;
     }
 #endif
@@ -147,13 +147,9 @@ void select_slot_done()
 {
   char filename[256];
 
-#ifdef BUILD_APPLE2
-  bool mnt = false;
-#endif
-
   // Every path below can change the device slot table on the FujiNet - even a
   // refused NEW DISK leaves its name in the slot - and the firmware also owns
-  // the MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
+  // the FUJI_DISK_MODE_MOUNTED bit, so our copy has to be re-read next time it is needed.
   slots_dirty = true;
 
   memset(filename,0,sizeof(filename));
@@ -177,14 +173,14 @@ void select_slot_done()
 #else
     memcpy(deviceSlots[selected_device_slot].file,path,DIR_MAX_LEN);
 #endif
-    deviceSlots[selected_device_slot].mode=2;
+    deviceSlots[selected_device_slot].mode=FUJI_DISK_MODE_WRITE;
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #if !defined(BUILD_ATARI) && !defined(BUILD_APPLE2) && !defined(__CBM__)
     fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
 #endif
     // A new disk is for writing on, whichever key picked the slot
-    fuji_set_device_filename(MODE_WRITE, selected_host_slot, selected_device_slot, path);
+    fuji_set_device_filename(FUJI_DISK_MODE_WRITE, selected_host_slot, selected_device_slot, path);
 
 #ifdef BUILD_ADAM
     // An EOS directory holds the disk's size in 16 bits
@@ -193,7 +189,7 @@ void select_slot_done()
       screen_select_slot_build_eos_directory();
       if (input_select_slot_build_eos_directory())
       {
-        if (!fuji_mount_disk_image(selected_device_slot,2)) // R/W
+        if (!fuji_mount_disk_image(selected_device_slot,FUJI_DISK_MODE_WRITE))
         {
           screen_error("  COULD NOT MOUNT\n  THE DISK.\n  PRESS ANY KEY.");
           input_select_slot_build_eos_directory_failed();
@@ -244,40 +240,6 @@ void select_slot_done()
 #endif
 
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
-
-#ifdef OBSOLETE
-    fuji_set_directory_position(pos);
-
-    fuji_read_directory(DIR_MAX_LEN, 0, response);
-    memcpy(deviceSlots[selected_device_slot].file, response, DIR_MAX_LEN);
-    deviceSlots[selected_device_slot].mode=mode;
-    deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
-
-#ifndef BUILD_ATARI
-    fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
-#endif
-
-#ifdef BUILD_APPLE2
-    // Try to mount the disk and error on failure
-    /* Disabled for now because it ends up mounting now and during
-       mount and boot phase which could mean extra looong time to
-       wait. Maybe add a new fuji command to check if disk is
-       already mounted for use during mount and boot?
-    mnt = io_mount_disk_image(selected_device_slot, mode);
-
-    if (mnt)
-    {
-      // Display error for a moment
-      screen_error("ERROR MOUNTING DISK");
-      for (i = 0; i < 4000; i++)
-        mnt = true; // Do nothing to let the message display
-      io_umount_disk_image(selected_device_slot);
-      memset(deviceSlots[selected_device_slot].file,0,FILE_MAXLEN);
-      deviceSlots[selected_device_slot].hostSlot=0xFF;
-      io_put_device_slots(&deviceSlots[0]);
-    }*/
-#endif
-#endif // OBSOLETE
 
     fuji_close_directory();
   }

@@ -41,7 +41,7 @@ void system_boot(void)
       print("FujiNet drives:\r\n");
     print("  ");
     con_out('1' + i);
-    print((deviceSlots[i].mode & 0x03) == MODE_WRITE ? " R/W " : " R/O ");
+    print((deviceSlots[i].mode & (FUJI_DISK_MODE_READ | FUJI_DISK_MODE_WRITE)) == FUJI_DISK_MODE_WRITE ? " R/W " : " R/O ");
     print((const char *)hostSlots[deviceSlots[i].hostSlot]);
     print(":");
     print((const char *)deviceSlots[i].file);

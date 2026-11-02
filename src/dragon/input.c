@@ -502,12 +502,12 @@ HDSubState input_hosts_and_devices_devices(void)
 	case 'R':
 	case 'r':
 		selected_device_slot = (byte)bar_get();
-		hosts_and_devices_devices_set_mode(MODE_READ);
+		hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_READ);
 		return HD_DEVICES;
 	case 'W':
 	case 'w':
 		selected_device_slot = (byte)bar_get();
-		hosts_and_devices_devices_set_mode(MODE_WRITE);
+		hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_WRITE);
 		return HD_DEVICES;
 	case KEY_BREAK:
 		return HD_DONE;
@@ -662,7 +662,7 @@ SSSubState input_select_slot_choose(void)
 	case KEY_ENTER: // ENTER
 	case 'R':
 	case 'r':
-		mode = MODE_READ;
+		mode = FUJI_DISK_MODE_READ;
 		selected_device_slot = (char)bar_get();
 		// After New, path ends in the new name; select_file_new() saved the folder
 		if (!create)
@@ -671,7 +671,7 @@ SSSubState input_select_slot_choose(void)
 		return SS_DONE;
 	case 'W':
 	case 'w':
-		mode = MODE_WRITE;
+		mode = FUJI_DISK_MODE_WRITE;
 		selected_device_slot = (char)bar_get();
 		return SS_DONE;
 	case KEY_UP_ARROW:

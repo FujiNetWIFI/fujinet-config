@@ -293,12 +293,12 @@ SSSubState input_select_slot_choose(void)
   case 'r':
   case KEY_RETURN:
     selected_device_slot=bar_get();
-    mode=0; // ?? read/write mode?
+    mode=FUJI_DISK_MODE_READ;
     return SS_DONE;
   case 'W':
   case 'w':
     selected_device_slot=bar_get();
-    mode=2;
+    mode=FUJI_DISK_MODE_WRITE;
     return SS_DONE;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:
@@ -415,12 +415,12 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'R':
   case 'r':
     selected_device_slot=bar_get();
-    hosts_and_devices_devices_set_mode(0);
+    hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_READ);
     return HD_DEVICES;
   case 'W':
   case 'w':
     selected_device_slot=bar_get();
-    hosts_and_devices_devices_set_mode(2);
+    hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_WRITE);
     return HD_DEVICES;
   case KEY_UP_ARROW:
   case KEY_LEFT_ARROW:

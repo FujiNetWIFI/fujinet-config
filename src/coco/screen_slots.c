@@ -38,11 +38,11 @@ static void put_row(byte y, char a, char b, char c, byte crole, const char *text
 
 static char device_slot_mode(unsigned char mode)
 {
-  switch (mode & ~MODE_MOUNTED)
+  switch (mode & ~FUJI_DISK_MODE_MOUNTED)
   {
-  case MODE_READ:
+  case FUJI_DISK_MODE_READ:
     return 'R';
-  case MODE_WRITE:
+  case FUJI_DISK_MODE_WRITE:
     return 'W';
   }
   return ' ';

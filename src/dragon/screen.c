@@ -447,15 +447,15 @@ const char host_slot_char(unsigned char hostSlot)
 const char device_slot_mode(unsigned char mode)
 {
   // Mask out 0x40
-  unsigned char masked_mode = mode & ~MODE_MOUNTED;
+  unsigned char masked_mode = mode & ~FUJI_DISK_MODE_MOUNTED;
 
   switch(masked_mode)
     {
     case 0:
       return 0x80;
-    case MODE_READ:
+    case FUJI_DISK_MODE_READ:
       return 0xAF;
-    case MODE_WRITE:
+    case FUJI_DISK_MODE_WRITE:
       return 0x9F;
     }
 }
