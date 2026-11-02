@@ -1,16 +1,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#if defined(BUILD_ATARI) || defined(BUILD_C64) || defined(BUILD_MSDOS) || defined(BUILD_MSXROM) \
-  || defined(BUILD_S100) || defined(BUILD_H89) \
-  || defined(BUILD_MODEL2)
-#define NUM_DEVICE_SLOTS 8
-#elif defined(BUILD_APPLE2)
+#ifdef BUILD_APPLE2
 #define MAX_SMARTPORT 8
 #define MAX_DISKII    2
-#define NUM_DEVICE_SLOTS MAX_SMARTPORT+MAX_DISKII
-#else
-#define NUM_DEVICE_SLOTS 4
 #endif
 
 #if defined(_CMOC_VERSION_) && defined(DRAGON)

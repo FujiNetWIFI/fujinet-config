@@ -32,7 +32,7 @@ void msx_compact_device_slots(uint8_t ds)
   uint8_t i, m;
 
   // Work from a fresh copy: ds has already been unmounted by the caller.
-  fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS);
 
   for (i = ds; i < MSX_MAX_SLOTS - 1; i++)
   {

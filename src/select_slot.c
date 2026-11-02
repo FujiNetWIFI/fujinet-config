@@ -91,7 +91,7 @@ void select_slot_display()
 
       if (slots_dirty)
         {
-          fuji_get_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+          fuji_get_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
           slots_dirty = false;
         }
 
@@ -127,7 +127,7 @@ void select_slot_eject(unsigned char ds)
 #endif /* BUILD_COCO */
   memset(deviceSlots[ds].file,0,FILE_MAXLEN);
   deviceSlots[ds].hostSlot=0xFF;
-  fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+  fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
   screen_select_slot_eject(ds);
 }
 
@@ -181,7 +181,7 @@ void select_slot_done()
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #if !defined(BUILD_ATARI) && !defined(BUILD_APPLE2) && !defined(__CBM__)
-    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+    fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
 #endif
     // A new disk is for writing on, whichever key picked the slot
     fuji_set_device_filename(MODE_WRITE, selected_host_slot, selected_device_slot, path);
@@ -233,7 +233,7 @@ void select_slot_done()
     deviceSlots[selected_device_slot].mode=mode;
     memset(deviceSlots[selected_device_slot].file,0,FILE_MAXLEN);
     strncpy((char *)deviceSlots[selected_device_slot].file,response,FILE_MAXLEN-1);
-    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+    fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
 #endif
 
     fuji_set_device_filename(mode, selected_host_slot, selected_device_slot, filename);
@@ -247,7 +247,7 @@ void select_slot_done()
     deviceSlots[selected_device_slot].hostSlot=selected_host_slot;
 
 #ifndef BUILD_ATARI
-    fuji_put_device_slots(&deviceSlots[0], NUM_DEVICE_SLOTS);
+    fuji_put_device_slots(&deviceSlots[0], FUJI_MAX_DISKS);
 #endif
 
 #ifdef BUILD_APPLE2

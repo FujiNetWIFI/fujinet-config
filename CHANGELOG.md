@@ -1,3 +1,7 @@
+## 2026-11-02
+
+* [Apple II] - Device slot reads and writes cover all 10 slots, so changing a drive's mode no longer leaves it pointing at host 1.
+
 ## 2026-11-01
 
 * [Adam] - A new disk named without an extension gets .ddp or .dsk from the media type picked, so the FujiNet can mount it and write its directory.

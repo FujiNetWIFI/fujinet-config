@@ -33,9 +33,9 @@ void system_boot(void)
   static uint8_t i, n;
 
   n = 0;
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
   {
-    if (deviceSlots[i].hostSlot >= NUM_HOST_SLOTS || !deviceSlots[i].file[0])
+    if (deviceSlots[i].hostSlot >= FUJI_MAX_HOSTS || !deviceSlots[i].file[0])
       continue;
     if (!n++)
       print("FujiNet drives:\r\n");

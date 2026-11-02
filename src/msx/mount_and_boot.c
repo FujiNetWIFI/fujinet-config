@@ -39,13 +39,13 @@ void mount_and_boot(void)
 {
   screen_mount_and_boot();
 
-  if (!fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS))
+  if (!fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS))
   {
     screen_error("ERROR READING DEVICE SLOTS");
     die();
   }
 
-  if (!fuji_get_host_slots(hostSlots, NUM_HOST_SLOTS))
+  if (!fuji_get_host_slots(hostSlots, FUJI_MAX_HOSTS))
   {
     screen_error("ERROR READING HOST SLOTS");
     die();

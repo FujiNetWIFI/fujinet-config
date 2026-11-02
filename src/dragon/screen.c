@@ -23,7 +23,7 @@ char text_empty[] = "Empty";
 static byte orig_casflag;
 
 char uppercase_tmp[32]; // temp space for strupr(s) output.
-                        // so original strings doesn't get changed.
+                        // so original strings don't get changed.
 
 char *screen_upper(char *s)
 {
@@ -214,7 +214,7 @@ void screen_select_slot(const char *e)
   screen_add_shadow(12,RED);
   screen_add_shadow(15,RED);
   
-  bar_set(1,1,NUM_DEVICE_SLOTS,0);
+  bar_set(1,1,FUJI_MAX_DISKS,0);
 }
 
 void screen_select_slot_mode(void)
@@ -295,7 +295,7 @@ void screen_select_file_prev(void)
 void screen_select_file_display_entry(unsigned char y, const char *e, unsigned entryType)
 {
   locate(0,y+3);
-  printf("%-32s",screen_upper((char *)e)); // skip the first two chars from FN (hold over from Adam)
+  printf("%-32s",screen_upper((char *)e));
 }
 
 void screen_select_file_choose(char visibleEntries)
@@ -415,7 +415,7 @@ void screen_hosts_and_devices_devices()
   screen_add_shadow(5,RED);
     
   screen_hosts_and_devices_device_slots(1,&deviceSlots[0],NULL);
-  bar_set(1,1,NUM_DEVICE_SLOTS,selected_device_slot);
+  bar_set(1,1,FUJI_MAX_DISKS,selected_device_slot);
 }
 
 void screen_hosts_and_devices_host_slots(HostSlot *h)
@@ -466,7 +466,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, c
 
   sp += 32;  // start one line down. 
 
-  for (int i=0;i<NUM_DEVICE_SLOTS;i++)
+  for (int i=0;i<FUJI_MAX_DISKS;i++)
     {
       locate(0,(unsigned char)i+1);
       printf("%u%c",i,host_slot_char(dslot->hostSlot));

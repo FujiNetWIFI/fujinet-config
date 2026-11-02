@@ -157,7 +157,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     return HD_HOSTS;
   case KEY_DOWN_ARROW:
     /* Off the bottom of the hosts into the drives */
-    if (bar_get() == NUM_HOST_SLOTS - 1)
+    if (bar_get() == FUJI_MAX_HOSTS - 1)
     {
       selected_device_slot = 0;
       return HD_DEVICES;
@@ -211,7 +211,7 @@ static void devices_set_mode(uint8_t m)
   static char hs;
 
   selected_device_slot = bar_get();
-  if (deviceSlots[selected_device_slot].hostSlot >= NUM_HOST_SLOTS
+  if (deviceSlots[selected_device_slot].hostSlot >= FUJI_MAX_HOSTS
       || !deviceSlots[selected_device_slot].file[0])
     return;
 
@@ -242,7 +242,7 @@ HDSubState input_hosts_and_devices_devices(void)
     /* Off the top of the drives into the hosts */
     if (bar_get() == 0)
     {
-      selected_host_slot = NUM_HOST_SLOTS - 1;
+      selected_host_slot = FUJI_MAX_HOSTS - 1;
       return HD_HOSTS;
     }
     bar_up();

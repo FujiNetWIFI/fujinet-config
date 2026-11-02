@@ -25,7 +25,7 @@ void destination_host_slot_init()
 
 void destination_host_slot_display()
 {
-  fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
+  fuji_get_host_slots(&hostSlots[0], FUJI_MAX_HOSTS);
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
   dh_subState=DH_CHOOSE;
 }

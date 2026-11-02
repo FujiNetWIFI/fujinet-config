@@ -577,7 +577,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *)
 {
   unsigned char slotNum;
 
-  for (slotNum = 0; slotNum < NUM_HOST_SLOTS; slotNum++)
+  for (slotNum = 0; slotNum < FUJI_MAX_HOSTS; slotNum++)
   {
     set_cursor(2, slotNum + HOSTS_START_Y);
     put_char(slotNum + '1');
@@ -597,7 +597,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *, const bool *
     fuji_get_device_filename(7, fn);
 
   // Display device slots
-  for (slotNum = 0; slotNum < NUM_DEVICE_SLOTS; slotNum++)
+  for (slotNum = 0; slotNum < FUJI_MAX_DISKS; slotNum++)
   {
     dinfo[1] = 0x20;
     dinfo[2] = (slotNum == 7 && strstr(fn, ".cas") != NULL) ? 'C' : (0x31 + slotNum);

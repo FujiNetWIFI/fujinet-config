@@ -136,9 +136,9 @@ void screen_fujinetlogo(void)
 
   for (i = 0; i < 11; i++)
   {
-      gotoxy(SCR_X0 + 2 + i, SCR_Y0 + 12);    // fuji scrolling across left to centre
+      gotoxy(SCR_X0 + 2 + i, SCR_Y0 + 12);    // fuji scrolling across left to center
       cprintf(" FUJI*");
-      gotoxy(SCR_X0 + 29 - i, SCR_Y0 + 12);   // net scrolling back right to centre
+      gotoxy(SCR_X0 + 29 - i, SCR_Y0 + 12);   // net scrolling back right to center
       cprintf("*NET ");
       gotoxy(SCR_X0 + 18, SCR_Y0 + i);      // * coming down from the top
       cprintf(" ");
@@ -650,7 +650,7 @@ void screen_select_slot(char *e)
 
 	screen_clear();
 
-	screen_draw_list_area(SCR_Y0, NUM_DEVICE_SLOTS, "PLACE IN DEVICE SLOT", 1);
+	screen_draw_list_area(SCR_Y0, FUJI_MAX_DISKS, "PLACE IN DEVICE SLOT", 1);
 
 	screen_hosts_and_devices_device_slots(SCR_Y0 + 1, &deviceSlots[0], &deviceEnabled[0]);
 
@@ -668,7 +668,7 @@ void screen_select_slot(char *e)
 	// handle long filename
 	screen_print_multiline(SCR_Y0 + 13, info->filename);
 
-	bar_set(SCR_Y0 + 1, SCR_X0 + 2, NUM_DEVICE_SLOTS, 0);
+	bar_set(SCR_Y0 + 1, SCR_X0 + 2, FUJI_MAX_DISKS, 0);
 }
 
 void screen_select_slot_choose(void)

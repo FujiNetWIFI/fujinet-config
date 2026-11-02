@@ -432,7 +432,7 @@ HDSubState input_hosts_and_devices_hosts(void)
     case '6':
     case '7':
     case '8':
-        bar_set(HOSTS_START_Y,1,NUM_HOST_SLOTS,k-'1');
+        bar_set(HOSTS_START_Y,1,FUJI_MAX_HOSTS,k-'1');
         selected_host_slot = bar_get();
         return HD_HOSTS;
     case KEY_UP_ARROW:
@@ -513,7 +513,7 @@ HDSubState input_hosts_and_devices_devices(void)
     case '6':
     case '7':
     case '8':
-        bar_set(DEVICES_START_Y,1,NUM_DEVICE_SLOTS,k-'1');
+        bar_set(DEVICES_START_Y,1,FUJI_MAX_DISKS,k-'1');
         selected_device_slot = bar_get();
         return HD_DEVICES;
     case KEY_DELETE:
@@ -697,7 +697,7 @@ SSSubState input_select_slot_choose(void)
     case '6':
     case '7':
     case '8':
-        bar_set(DEVICES_START_MOUNT_Y, 1, NUM_DEVICE_SLOTS, k - '1');
+        bar_set(DEVICES_START_MOUNT_Y, 1, FUJI_MAX_DISKS, k - '1');
         selected_device_slot = bar_get();
         return SS_CHOOSE;
     case KEY_UP_ARROW:
@@ -824,7 +824,7 @@ DHSubState input_destination_host_slot_choose(void)
     case '6':
     case '7':
     case '8':
-        bar_set(HOSTS_START_Y, 1, NUM_HOST_SLOTS, k - '1');
+        bar_set(HOSTS_START_Y, 1, FUJI_MAX_HOSTS, k - '1');
         selected_host_slot = bar_get();
         return DH_CHOOSE;
     case KEY_UP_ARROW:

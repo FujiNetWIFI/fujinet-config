@@ -21,7 +21,7 @@ void system_boot(void)
   unsigned char i;
 
   clrscr();
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++)
   {
     if (deviceSlots[i].hostSlot == 0xFF)
       continue;

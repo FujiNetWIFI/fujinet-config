@@ -53,7 +53,7 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
   byte *p = &h[0];
   byte i;
 
-  for (i = 0; i < NUM_HOST_SLOTS; i++)
+  for (i = 0; i < FUJI_MAX_HOSTS; i++)
   {
     put_row(HOSTS_Y + i, '1' + i, 0, 0, 0, p[0] ? (char *)p : text_empty, p[0] ? ROLE_TEXT : ROLE_EMPTY, 4);
     p += 32;
@@ -77,7 +77,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *dslot, c
   if (y == 1)
     y = DEVICES_Y;
 
-  for (i = 0; i < NUM_DEVICE_SLOTS; i++, dslot++)
+  for (i = 0; i < FUJI_MAX_DISKS; i++, dslot++)
     device_row(y, i, dslot);
 }
 

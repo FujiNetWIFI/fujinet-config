@@ -24,8 +24,8 @@ int main(void)
   }
 
   screen_init();
-  fuji_get_host_slots(&hostSlots[0], NUM_HOST_SLOTS);
-  fuji_get_device_slots(deviceSlots, NUM_DEVICE_SLOTS);
+  fuji_get_host_slots(&hostSlots[0], FUJI_MAX_HOSTS);
+  fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS);
   strcpy(selected_host_name, (char *)hostSlots[selected_host_slot]);
   state = SELECT_FILE;
 
