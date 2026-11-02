@@ -365,10 +365,10 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
       line = y + i;
       if (d[i].file[0]) {
           switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
-            case MODE_READ:
+            case FUJI_DISK_MODE_READ:
               rw_mode = 'R';
               break;
-            case MODE_WRITE:
+            case FUJI_DISK_MODE_WRITE:
               rw_mode = 'W';
               break;
             default:
@@ -397,10 +397,10 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, const
       if (d[i].file[0]) 
       {
           switch (d[i].mode & 0x0f) { // mask of the disk mounted bit 0x40
-            case MODE_READ:
+            case FUJI_DISK_MODE_READ:
               rw_mode = 'R';
               break;
-            case MODE_WRITE:
+            case FUJI_DISK_MODE_WRITE:
               rw_mode = 'W';
               break;
             default:

@@ -449,13 +449,13 @@ HDSubState input_hosts_and_devices_devices(void)
   case 'R':
     // set device mode to read
     selected_device_slot = bar_get() - DEVICES_START_Y;
-    hosts_and_devices_devices_set_mode(MODE_READ);
+    hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_READ);
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], (bool *) "");
     return HD_DEVICES;
   case 'W':
     // set device mode to write
     selected_device_slot = bar_get() - DEVICES_START_Y;
-    hosts_and_devices_devices_set_mode(MODE_WRITE);
+    hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_WRITE);
     screen_hosts_and_devices_device_slots(DEVICES_START_Y, &deviceSlots[0], (bool *) "");
     return HD_DEVICES;
   case 'C':

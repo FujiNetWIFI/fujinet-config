@@ -90,12 +90,8 @@ void hosts_and_devices_edit_host_slot(uint_fast8_t i)
 
   // Need to re-render both hosts and devices because some devices
   // may have been ejected if they belonged to the old host
-#ifdef OBSOLETE
-  screen_hosts_and_devices_hosts();
-#else
   screen_hosts_and_devices(&hostSlots[0], deviceSlots, deviceEnabled);
   screen_hosts_and_devices_hosts();
-#endif // OBSOLETE
 }
 
 void hosts_and_devices_hosts(void)
@@ -134,20 +130,11 @@ void hosts_and_devices_eject(unsigned char ds)
     msx_compact_device_slots(ds);
 #endif /* BUILD_MSXROM */
 
-#ifdef OBSOLETE
-  memset(deviceSlots[ds].file, 0, FILE_MAXLEN);
-  deviceSlots[ds].hostSlot = 0xFF;
-  deviceSlots[ds].mode = 0;
-  fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
-#endif // OBSOLETE
 #ifdef BUILD_MSDOS
   if (!bulk_eject)
 #endif /* BUILD_MSDOS */
     fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS);
   screen_hosts_and_devices_eject(ds);
-#ifdef OBSOLETE
-  hosts_and_devices_long_filename();
-#endif // OBSOLETE
 }
 
 void hosts_and_devices_devices_clear_all(void)
@@ -237,7 +224,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
       // Do nothing to let the message display
 
     // likely failed on setting write mode, make it read only
-    temp_deviceSlot.mode = MODE_READ;
+    temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
     fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
     screen_error(""); // clear the error msg
@@ -255,7 +242,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     for (i = 0; i < 4000; i++)
       mnt = true; // Do nothing to let the message display
     // likely failed on setting write mode, make it read only
-    temp_deviceSlot.mode = MODE_READ;
+    temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
     fuji_put_device_slots(deviceSlots, FUJI_MAX_DISKS);
   }
@@ -356,7 +343,7 @@ void hosts_and_devices_done(void)
       textcolor(TEXT_COLOR); cprintf("%s", deviceSlots[i].file);
 #endif
 #ifdef BUILD_APPLE2
-      if(!(deviceSlots[i].mode & MODE_MOUNTED)) // skip if disk was already mounted
+      if(!(deviceSlots[i].mode & FUJI_DISK_MODE_MOUNTED)) // skip if disk was already mounted
 #endif
       {
         fuji_mount_host_slot(deviceSlots[i].hostSlot);

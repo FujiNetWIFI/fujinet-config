@@ -61,12 +61,12 @@ static void screen_device_slot(unsigned char y, unsigned char i, const DeviceSlo
 		return;
 	}
 
-	switch (d->mode & 0x0f) // without MODE_MOUNTED
+	switch (d->mode & 0x0f) // without FUJI_DISK_MODE_MOUNTED
 	{
-	case MODE_READ:
+	case FUJI_DISK_MODE_READ:
 		m = 'R';
 		break;
-	case MODE_WRITE:
+	case FUJI_DISK_MODE_WRITE:
 		m = 'W';
 		break;
 	default:

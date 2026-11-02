@@ -169,7 +169,7 @@ static void device_row(uint8_t y, uint8_t i, const DeviceSlot *d)
     if (d->file[0])
     {
         b[0] = '1' + d->hostSlot;
-        b[1] = d->mode & MODE_WRITE ? 'W' : 'R';
+        b[1] = d->mode & FUJI_DISK_MODE_WRITE ? 'W' : 'R';
     }
     s100_puts(4, y + i, b);
     puts_clr(7, y + i, d->file[0] ? (const char *)d->file : text_empty);

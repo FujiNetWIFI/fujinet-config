@@ -607,7 +607,7 @@ void screen_hosts_and_devices_device_slots(uint8_t y, DeviceSlot *, const bool *
     if (deviceSlots[slotNum].file[0] != 0x00)
     {
       dinfo[0] = deviceSlots[slotNum].hostSlot + 0x31;
-      dinfo[3] = (deviceSlots[slotNum].mode == 0x02 ? 'W' : 'R');
+      dinfo[3] = (deviceSlots[slotNum].mode == FUJI_DISK_MODE_WRITE ? 'W' : 'R');
     }
     else
     {

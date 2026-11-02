@@ -119,7 +119,7 @@ void screen_drive_row(uint8_t y, uint8_t ds)
     h19_text(FILE_X, y, "Empty", 5, 0, false);
     return;
   }
-  h19_text(MODE_X, y, (d->mode & 0x03) == MODE_WRITE ? "R/W" : "R/O", 3, 0, false);
+  h19_text(MODE_X, y, (d->mode & (FUJI_DISK_MODE_READ | FUJI_DISK_MODE_WRITE)) == FUJI_DISK_MODE_WRITE ? "R/W" : "R/O", 3, 0, false);
   h19_text(FILE_X, y, (const char *)d->file, FILE_W, 0, false);
   h19_text(DRIVE_HOST_X, y, (const char *)hostSlots[d->hostSlot], DRIVE_HOST_W, 0, false);
 }

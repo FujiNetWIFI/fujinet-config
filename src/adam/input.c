@@ -522,7 +522,7 @@ SSSubState input_select_slot_choose(void)
     case KEY_RETURN:
     case KEY_SMART_V:
       selected_device_slot=bar_get();
-      mode=0;
+      mode=FUJI_DISK_MODE_READ;
       // After New, path ends in the new name; select_file_new() saved the folder
       if (!create)
         strncpy(source_path, path, 224);
@@ -530,7 +530,7 @@ SSSubState input_select_slot_choose(void)
       return SS_DONE;
     case KEY_SMART_VI:
       selected_device_slot=bar_get();
-      mode=2;
+      mode=FUJI_DISK_MODE_WRITE;
       return SS_DONE;
     case KEY_UP_ARROW:
       bar_up();

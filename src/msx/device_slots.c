@@ -48,8 +48,8 @@ void msx_compact_device_slots(uint8_t ds)
     if (!fuji_get_device_filename(i + 1, filename))
       return; // leave the rest in place rather than dropping the tail slot
 
-    m = deviceSlots[i + 1].mode & (MODE_READ | MODE_WRITE);
-    fuji_set_device_filename(m ? m : MODE_READ, deviceSlots[i + 1].hostSlot, i, filename);
+    m = deviceSlots[i + 1].mode & (FUJI_DISK_MODE_READ | FUJI_DISK_MODE_WRITE);
+    fuji_set_device_filename(m ? m : FUJI_DISK_MODE_READ, deviceSlots[i + 1].hostSlot, i, filename);
   }
 
   // Nothing left to pull into the last slot.

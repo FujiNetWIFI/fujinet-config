@@ -183,7 +183,7 @@ void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool 
   {
       textcolor(15);
       gotoxy(0,i+y+1);
-      textbackground(d[i].mode == 0x02 ? GREEN : BLUE);
+      textbackground(d[i].mode == FUJI_DISK_MODE_WRITE ? GREEN : BLUE);
       cprintf("%d",i+1);
       textcolor(0);
       textbackground(15);
