@@ -1,3 +1,7 @@
+## 2026-11-03
+
+* [NES] - A long filename scrolls sideways on the selection bar, so the whole name can be read instead of a "..." in the middle.
+
 ## 2026-11-02
 
 * [C64] - The slot screen reads the 32-bit directory entry size the firmware now sends, so it shows the filename and full size again.

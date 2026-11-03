@@ -149,6 +149,26 @@ void disp_row_invert(unsigned char row, bool on)
     revers(0);
 }
 
+void disp_row_save(unsigned char row, char *buf)
+{
+    if (row < DISP_ROWS)
+        memcpy(buf, &shadow[row][IN_L], IN_W);
+}
+
+void disp_row_restore(unsigned char row, const char *buf, bool hi)
+{
+    unsigned char i;
+
+    if (row >= DISP_ROWS)
+        return;
+    memcpy(&shadow[row][IN_L], buf, IN_W);
+    revers(hi ? 1 : 0);
+    gotoxy(IN_L, row);
+    for (i = 0; i < IN_W; i++)
+        cputc(buf[i]);
+    revers(0);
+}
+
 void disp_bar_reset(void)
 {
     memset(bar_last, 0xFF, sizeof bar_last);

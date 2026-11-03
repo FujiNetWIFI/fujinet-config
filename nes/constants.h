@@ -31,6 +31,9 @@ enum {
 #define LIST_TOP     5
 #define LIST_ROWS    16
 #define NAMELEN      27         /* display width: col 3..29 */
+#define SCROLL_DELAY 45         /* frames the bar rests before a name scrolls */
+#define SCROLL_HOLD  60         /* frames held at each end of the name */
+#define SCROLL_STEP  8          /* frames per character scrolled */
 #define FULLLEN      120        /* re-read width when building a full path */
 #define PAYLOAD_LEN  256        /* the fixed buffer the ESP32 expects */
 #define STATUS_ROW   22
