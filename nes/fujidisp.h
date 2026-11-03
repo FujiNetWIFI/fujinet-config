@@ -67,6 +67,11 @@ void disp_frame(const char *title);
  * network traffic. Idempotent in both directions. */
 void disp_row_invert(unsigned char row, bool on);
 
+/* Copy IN_L..IN_R of a row's shadow (IN_W bytes) out to `buf`, or paint
+ * `buf` back over it, reverse video if `hi`. */
+void disp_row_save(unsigned char row, char *buf);
+void disp_row_restore(unsigned char row, const char *buf, bool hi);
+
 /* A `cells`-wide progress bar at (col,row) showing num/den, to the pixel.
  * Only the cells that changed since the last call are rewritten; call
  * disp_bar_reset() before drawing a new bar. */

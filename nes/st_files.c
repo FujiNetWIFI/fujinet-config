@@ -2,7 +2,8 @@
  *
  * One seek per page then sequential reads (READ_DIR_ENTRY advances the
  * cursor itself), names drawn straight from the reply window at display
- * width and re-read at full width the moment one is acted on. `path` is
+ * width. The firmware shortens a longer name with "...", so a bar that rests
+ * on one re-reads it at full width and scrolls it; so does acting on one. `path` is
  * '/'-prefixed, '/'-terminated, appended to on descend and truncated at the
  * previous '/' on devance.
  */
@@ -15,6 +16,13 @@
 #include "fujiraw.h"
 #include "sfx.h"
 #include "state.h"
+
+/* The marquee on the selected row. `saved` keeps the row as the page drew
+ * it. `scroll_len` is the full name's length once fetched, 0 until then. */
+static char saved[IN_W];
+static unsigned int idle;
+static unsigned char scroll_len, scroll_off, scroll_wait;
+static bool scroll_dead;        /* nothing to scroll on this row */
 
 bool dir_seek(unsigned int pos)
 {
@@ -69,11 +77,90 @@ static void list_clear_from(unsigned char i)
         disp_row_clear((unsigned char)(LIST_TOP + i));
 }
 
+/* Put the selected row back as the page drew it and restart the marquee. */
+static void scroll_clear(void)
+{
+    idle = 0;
+    scroll_len = 0;
+    scroll_off = 0;
+    scroll_dead = false;
+}
+
+static void scroll_reset(void)
+{
+    if (scroll_len != 0 && nrows != 0)
+        disp_row_restore((unsigned char)(LIST_TOP + cur), saved, true);
+    scroll_clear();
+}
+
+static void scroll_paint(void)
+{
+    volatile unsigned char *name = FN_REPLY;
+    unsigned char col, at;
+
+    for (col = 0; col < NAMELEN; col++) {
+        at = (unsigned char)(scroll_off + col);
+        disp_char_hi((unsigned char)(3 + col), (unsigned char)(LIST_TOP + cur),
+                     at < scroll_len ? (char)name[at] : ' ', true);
+    }
+}
+
+/* One call per idle frame. */
+static void files_tick(void)
+{
+    volatile unsigned char *name;
+    unsigned char row = (unsigned char)(LIST_TOP + cur);
+    unsigned char shown;
+
+    if (nrows == 0 || scroll_dead)
+        return;
+    if (scroll_len == 0) {
+        if (++idle < SCROLL_DELAY)
+            return;
+        disp_row_save(row, saved);
+        for (shown = IN_W; shown > 0 && saved[shown - 1] == ' '; shown--)
+            ;
+        /* The firmware cuts a name at NAMELEN - 1 characters, so a shorter
+         * one is whole. */
+        if (shown < NAMELEN - 1 ||
+            !dir_seek(top + cur) || !dir_read_entry(FULLLEN)) {
+            scroll_dead = true;
+            return;
+        }
+        name = FN_REPLY;
+        for (shown = 0; shown < FULLLEN && name[shown] != 0; shown++)
+            ;
+        if (shown <= NAMELEN) {
+            scroll_dead = true;
+            return;
+        }
+        scroll_len = shown;
+        scroll_off = 0;
+        scroll_wait = SCROLL_HOLD;
+        scroll_paint();
+        return;
+    }
+    if (scroll_wait != 0) {
+        scroll_wait--;
+        return;
+    }
+    if (scroll_off + NAMELEN >= scroll_len) {
+        scroll_off = 0;
+        scroll_wait = SCROLL_HOLD;
+    } else {
+        scroll_off++;
+        scroll_wait = (unsigned char)(scroll_off + NAMELEN >= scroll_len ?
+                                      SCROLL_HOLD : SCROLL_STEP);
+    }
+    scroll_paint();
+}
+
 static void files_page(void)
 {
     volatile unsigned char *name;
     unsigned char i;
 
+    scroll_clear();
     if (!dir_seek(top)) {
         list_clear_from(0);
         fail("SEEK");
@@ -125,6 +212,7 @@ static void fmove(signed char d)
 {
     if (d < 0) {
         if (nrows != 0 && cur > 0) {
+            scroll_reset();
             disp_row_invert((unsigned char)(LIST_TOP + cur), false);
             cur--;
             disp_row_invert((unsigned char)(LIST_TOP + cur), true);
@@ -137,6 +225,7 @@ static void fmove(signed char d)
         if (nrows == 0)
             return;
         if ((unsigned char)(cur + 1) < nrows) {
+            scroll_reset();
             disp_row_invert((unsigned char)(LIST_TOP + cur), false);
             cur++;
             disp_row_invert((unsigned char)(LIST_TOP + cur), true);
@@ -245,6 +334,9 @@ void st_files(void)
         unsigned char ev = in_read();
 
         switch (ev) {
+        case IN_NONE:
+            files_tick();
+            break;
         case IN_UP:
             fmove(-1);
             break;
