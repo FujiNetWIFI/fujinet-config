@@ -26,9 +26,10 @@ built from a RAM prefix plus a filename that only exists in the reply window.
 | `st_boot.c` | mount into device slot 0 (a browsed file or the lobby), progress, jump to the loader ROM |
 | `fujiraw.c` | the four streamed transactions |
 | `fujidisp.c` `fujiin.c` `fujiedit.c` | the platform layer: conio text with a WRAM shadow for the reverse-video bar, frames, the progress bar and the blinking cursor; joystick with auto-repeat; the on-screen keyboard |
+| `fujilogo.c` `oam.s` | the FujiNet logo in sprites (beside its wordmark on HOST SLOTS, faded behind the file list), the page-aligned sprite shadow and its DMA at a quiet vblank |
 | `disp_pal.s` | one palette entry through cc65's vblank write buffer |
 | `sfx.c` | the sounds: key click, BEEP, the accept arpeggio, the typing blip |
-| `font.txt` `tools/mkfont.py` | the character set and frame/bar tiles, and the script that makes them the CHR-ROM (`build/font.s`, replacing cc65's `neschar.s`) |
+| `font.txt` `logo.txt` `tools/mkfont.py` | the character set, frame, bar, scroll-bar and wordmark tiles; the logo's 64x64 art; and the script that makes them the CHR-ROM (`build/font.s`, replacing cc65's `neschar.s`) |
 | `constants.h` | states, geometry, command payload shapes |
 
 ## Scope
@@ -51,6 +52,12 @@ CONFIG looks and sounds like the Famicom's Family BASIC cartridge:
 - **Screen.** White text on black, using Family BASIC's palette (`0F 30 21 02`).
   - Every menu sits in the GAME BASIC menu's light-blue double frame, with the title set into its top edge.
   - Inside the frame is the same 28-column text area BASIC uses.
+- **Logo.** HOST SLOTS shows the FujiNet logo under the list: the network-node symbol in white and light blue between tall `FUJI` and `NET` letters.
+  - In the file browser the symbol sits behind the list in dark blues. The names and the selection bar draw over it, and it shows through between the letters.
+  - The symbol is 25 sprites from the CHR-ROM's otherwise empty `$1000` table (cc65 runs the PPU in 8x16 sprite mode). The wordmark is background tiles.
+- **Scroll bar.** The file browser's thumb rides the frame's right rail beside the list, sized and placed to the pixel.
+  - The cartridge reads a directory one entry at a time, so CONFIG counts the entries once when a directory is opened or filtered (`COUNTING...`, with a running tally for big ones).
+  - A list that fits on one page leaves the rail plain.
 - **Words.** Legends read `A--OPEN  B--BACK`. Errors read `?MOUNT ERROR 8A`, the way BASIC prints `?SN ERROR`.
 - **Power-on.** A screen in the style of BASIC's boot screen: the name types itself out, then `OK` and a blinking block cursor.
 - **Text editor.** A BASIC prompt: `HOST NAME?` with a blinking cursor. The pad's keyboard grid sits in a frame below it.
@@ -62,7 +69,8 @@ CONFIG looks and sounds like the Famicom's Family BASIC cartridge:
 
 The font, tiles and sounds are this project's own work. They are drawn and
 written to match the style of the original, not copied from its ROM.
-`font.txt` is plain ASCII art, so you can edit it directly.
+`font.txt` is plain ASCII art, so you can edit it directly. So is `logo.txt`,
+drawn from the FujiNet logo's own geometry.
 
 ## Controls
 

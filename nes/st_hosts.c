@@ -46,6 +46,7 @@ static void hosts_draw(void)
     draw_frame("HOST SLOTS");
     status_line("A--OPEN  SEL--RENAME");
     legend_line("B--WIFI  START--INFO");
+    disp_logo(LOGO_HOSTS);
 
     if (!FUJICALL(FUJICMD_READ_HOST_SLOTS)) {
         fail("HOSTS");

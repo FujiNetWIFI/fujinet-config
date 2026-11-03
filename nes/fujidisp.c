@@ -8,6 +8,14 @@
  * background palette is the whole screen. */
 static const unsigned char palette[4] = { 0x0F, 0x30, 0x21, 0x02 };
 
+/* Sprite palettes 0 and 1, the logo's (fujilogo.c): colour 1 its circles, 2
+ * its lines. 0 is the watermark's dark blues behind the file list, 1 the
+ * frame's white and light blue on HOST SLOTS. */
+static const unsigned char spr_palette[2][3] = {
+    { 0x0C, 0x01, 0x0F },
+    { 0x30, 0x21, 0x0F },
+};
+
 void __fastcall__ disp_pal_set(unsigned char idx, unsigned char val);
 
 /* The shadow: what each cell shows, without the reverse bit. In WRAM, where
@@ -21,6 +29,7 @@ static bool cur_lit;            /* ...and showing its block right now */
 static unsigned char blink;     /* frames into the 24-frame blink */
 
 static unsigned char bar_last[DISP_COLS];
+static unsigned char sb_last[DISP_ROWS];
 
 static char clean(char c)
 {
@@ -33,15 +42,26 @@ void disp_init(void)
 
     for (i = 0; i < 4; i++)
         disp_pal_set(i, palette[i]);
+    for (i = 0; i < 3; i++) {
+        disp_pal_set((unsigned char)(0x11 + i), spr_palette[0][i]);
+        disp_pal_set((unsigned char)(0x15 + i), spr_palette[1][i]);
+    }
     revers(0);
     disp_cls();
 }
 
 void disp_cls(void)
 {
+    /* The logo goes first, or it would sit on the blank screen for a
+     * frame. Then OAM is written again: it is DRAM the PPU refreshes only
+     * while rendering, and clrscr() has just stopped that for a few
+     * milliseconds. */
+    disp_logo(LOGO_OFF);
     cur_on = false;
     clrscr();
+    oam_sync();
     memset(shadow, ' ', sizeof shadow);
+    memset(sb_last, 0xFF, sizeof sb_last);
 }
 
 void disp_row_clear(unsigned char row)
@@ -196,6 +216,41 @@ void disp_bar(unsigned char col, unsigned char row, unsigned char cells,
         if (bar_last[i] != t) {
             bar_last[i] = t;
             disp_tile((unsigned char)(col + i), row, t);
+        }
+    }
+}
+
+void disp_scroll(unsigned char col, unsigned char row, unsigned char cells,
+                 unsigned int first, unsigned int count)
+{
+    unsigned char px = (unsigned char)(cells * 8u);
+    unsigned char pos = 0, len = 0, end, top, i, t;
+    unsigned long at;
+
+    if (count > cells) {
+        len = (unsigned char)((unsigned int)cells * px / count);
+        if (len < 8)
+            len = 8;
+        /* clamped before it narrows: a directory that grew since it was
+         * counted can be paged past `count` */
+        at = (unsigned long)first * px / count;
+        pos = (unsigned char)(px - len);
+        if (at < pos)
+            pos = (unsigned char)at;
+    }
+    end = (unsigned char)(pos + len);
+    for (i = 0, top = 0; i < cells; i++, top += 8) {
+        if (len == 0 || end <= top || pos >= (unsigned char)(top + 8))
+            t = T_VLINE;
+        else if (pos > top)
+            t = (unsigned char)(T_SB_START + (pos - top) - 1);
+        else if (end < (unsigned char)(top + 8))
+            t = (unsigned char)(T_SB_END + (end - top) - 1);
+        else
+            t = T_SB_FULL;
+        if (sb_last[row + i] != t) {
+            sb_last[row + i] = t;
+            disp_tile(col, (unsigned char)(row + i), t);
         }
     }
 }
