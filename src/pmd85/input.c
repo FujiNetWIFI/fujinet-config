@@ -394,6 +394,19 @@ SFSubState input_select_file_choose(void)
     // strncpy(source_path, path, 224); // makes mess :-(
     // old_pos = pos;
     return SF_DONE;
+	case KEY_K10:
+		// mount file into ROM module slot and boot, ignore folders and links
+		if (copy_mode)
+			break;
+		pos += bar_get();
+		if (select_file_entry_type() != ENTRY_TYPE_FILE)
+		{
+			pos -= bar_get();
+			break;
+		}
+		quick_boot = true;
+		state = SELECT_SLOT;
+		return SF_DONE;
 	case KEY_RCL:
     if (strcmp(path, "/") != 0)
       return SF_DEVANCE_FOLDER;
