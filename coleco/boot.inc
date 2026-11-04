@@ -549,25 +549,40 @@ bs_wait:
         DJNZ    bs_wait
         JP      src_spec
 
+; Copied to RAM and run there: it uses only relative jumps.
 swap_stub:
-        DB      3EH,00H,0D3H,0BFH       ; ld a,0 / out (VDP_CTRL),a
-        DB      3EH,81H,0D3H,0BFH       ; ld a,81H / out (VDP_CTRL),a
-        DB      0DBH,0BFH               ; in a,(VDP_CTRL)
-        DB      0,0,0,0,0,0,0,0         ; nop x 8
-        DB      3EH,9FH,0D3H,0FFH       ; the PSG's four channels silent
-        DB      3EH,0BFH,0D3H,0FFH
-        DB      3EH,0DFH,0D3H,0FFH
-        DB      3EH,0FFH,0D3H,0FFH
-        DB      3AH,0FEH,0FDH           ; ld a,(FN_SWAP): the swap
-        DB      21H,00H,80H             ; ld hl,8000H: registers 0-7 = 0
-        DB      06H,08H                 ; ld b,8
-        DB      7DH                     ; loop: ld a,l
-        DB      0D3H,0BFH               ; out (VDP_CTRL),a
-        DB      7CH                     ; ld a,h
-        DB      0D3H,0BFH               ; out (VDP_CTRL),a
-        DB      24H                     ; inc h
-        DB      10H,0F8H                ; djnz loop
-        DB      0C3H,00H,00H            ; jp 0
+        XOR     A                       ; screen and interrupt off
+        OUT     (VDP_CTRL),A
+        LD      A,81H
+        OUT     (VDP_CTRL),A
+        IN      A,(VDP_CTRL)
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        LD      A,9FH                   ; the PSG's four channels silent
+        OUT     (PSG_PORT),A
+        LD      A,0BFH
+        OUT     (PSG_PORT),A
+        LD      A,0DFH
+        OUT     (PSG_PORT),A
+        LD      A,0FFH
+        OUT     (PSG_PORT),A
+        LD      A,(FN_SWAP)             ; the swap
+        LD      HL,8000H                ; VDP registers 0-7 = 0
+        LD      B,8
+ss_vreg:
+        LD      A,L
+        OUT     (VDP_CTRL),A
+        LD      A,H
+        OUT     (VDP_CTRL),A
+        INC     H
+        DJNZ    ss_vreg
+        JP      0
 SWAP_STUB_LEN   EQU     $-swap_stub
 
         IF      BARTEST
