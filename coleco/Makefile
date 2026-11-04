@@ -1,80 +1,53 @@
-# FujiNet CONFIG for the ColecoVision.
+# FujiNet CONFIG for the ColecoVision, in Z80 assembly.
 #
-# Standalone, like intv/ -- not wired into the MekkoGX framework above it.
-# Builds with z88dk's +coleco target, os7lib (the OS7 BIOS bindings) and
-# fujinet-lib-experimental's coleco target (the mailbox transport).
+# Standalone, like the other console CONFIGs: not part of the MekkoGX build
+# above it. Needs zmac 1.3 (ZMAC=, else zmac on PATH, else
+# ~/Workspace/zmac-1.3/zmac) and python3.
 #
-#   make            build/config.bin (stamped, exactly 32768 bytes)
-#   make install    copy it into the pico bring-up tree, where build-cart.sh
-#                   prefers it over the testrom stand-in
-#   make cart       install + build the RP2040 firmware with it baked in
+#   make            build/config.bin (32768 bytes, claim stamped, checked)
+#   make install    into the pico tree's build/, where build-cart.sh
+#                   bakes it into the cartridge firmware
+#   make cart       install, then build that firmware
+#   make run        MAME, windowed, against a fujinet-pc (see run.sh)
+#   make drive      a scripted headless session: STEPS='t:HOSTS;k:fire;d'
+#                   (emu/drive.lua lists the step language)
 #   make clean
 #
-# Environment overrides:
-#   Z88DK        z88dk root                     (default ~/Workspace/z88dk)
-#   OS7LIB       os7lib checkout                (default ~/Workspace/os7lib)
-#   FNLIB        fujinet-lib-experimental       (default ~/Workspace/fujinet-lib-experimental)
-#   PICO_COLECO  the cartridge bring-up tree    (default ~/Workspace/fujinet-firmware/pico/coleco)
+# PICO_COLECO is the cartridge tree, MAME_DIR a MAME with its fujinet
+# cartridge device applied, FUJINET_TCP a fujinet-pc's BoIP listener.
 
-Z88DK       ?= $(HOME)/Workspace/z88dk
-OS7LIB      ?= $(HOME)/Workspace/os7lib
-FNLIB       ?= $(HOME)/Workspace/fujinet-lib-experimental
 PICO_COLECO ?= $(HOME)/Workspace/fujinet-firmware/pico/coleco
+MAME_DIR    ?= $(HOME)/Workspace/mame
+FUJINET_TCP ?= 127.0.0.1:9995
+STEPS       ?= t:HOSTS;d;q
+SECONDS     ?= 180
 
-export ZCCCFG = $(Z88DK)/lib/config
-export PATH  := $(Z88DK)/bin:$(PATH)
+SOURCES = config.asm $(wildcard *.inc) font.txt tools/mkfont.py build.sh
 
-APP  = config.c st_wifi.c st_hosts.c st_files.c st_copy.c st_info.c st_boot.c \
-       st_lobby.c fujiraw.c
-PLAT = fujidisp.c fujiin.c fujisnd.c fujiedit.c fujisplash.c fujisplash_data.c
-SRCS = $(APP) $(PLAT)
-
-FNLIB_LIB = $(FNLIB)/r2r/coleco/fujinet.coleco.lib
-
-CFLAGS = +coleco -O2 -I. -I$(OS7LIB)/src -I$(FNLIB)/include -I$(FNLIB)/bus/coleco
-
-# The link line is the pico bring-up's build.sh, which is a shipped game's
-# plus the 32K/fence contract; see that script for the why of each pragma.
-LDFLAGS = +coleco -m -s \
-  -pragma-define:CRT_ORG_BSS=0x702C \
-  -pragma-define:CRT_COLECO_SPRITE_NAME_SIZE=128 \
-  -pragma-define:CRT_COLECO_SPRITE_ORDER_SIZE=32 \
-  -pragma-define:CRT_COLECO_BIOS_BUFFER_SIZE=32 \
-  -pragma-define:CRT_COLECO_BIOS_CONTROLLER_SIZE=12 \
-  -pragma-define:CRT_ENABLE_STDIO=0 \
-  -pragma-define:REGISTER_SP=0x73B8 \
-  -pragma-define:CLIB_FOPEN_MAX=0 \
-  -pragma-define:fputc_cons=0 \
-  -pragma-define:CLIB_DEFAULT_SCREEN_MODE=-1 \
-  -Cz--romsize=32768 -Cz--rombase=32768 \
-  -Cz--code-fence=0xF800 -Cz--data-fence=0xF800 \
-  -L$(OS7LIB) -los7 \
-  -L$(FNLIB)/r2r/coleco -lfujinet.coleco.lib
-
+.PHONY: all install cart run drive clean
 all: build/config.bin
 
-# A config.bin that failed the stamp or the RAM guard must not survive with a
-# fresh mtime, or it would never be re-checked.
-.DELETE_ON_ERROR:
-
-$(FNLIB_LIB):
-	$(MAKE) -C $(FNLIB) coleco/r2r
-
-build/config.bin: $(SRCS) $(wildcard *.h) $(FNLIB_LIB)
-	mkdir -p build
-	zcc $(CFLAGS) $(LDFLAGS) $(SRCS) -o build/config -create-app
-	@if [ -f build/config.rom ]; then mv build/config.rom $@; else mv build/config $@; fi
-	@rm -f *.sym   # zcc -s writes per-source symbol files next to the sources
-	python3 $(FNLIB)/makefiles/coleco-romstamp.py --stamp $@
-	./bsscheck.py build/config.map
+build/config.bin: $(SOURCES)
+	./build.sh
 
 install: build/config.bin
+	mkdir -p $(PICO_COLECO)/build
 	cp build/config.bin $(PICO_COLECO)/build/config.bin
 
 cart: install
 	cd $(PICO_COLECO) && ./build-cart.sh
 
+run: build/config.bin
+	./run.sh
+
+# MAME runs from its own tree, or it ignores -autoboot_script.
+drive: build/config.bin
+	mkdir -p build/snap
+	cd $(MAME_DIR) && DRIVE_STEPS='$(STEPS)' FUJINET_TCP=$(FUJINET_TCP) \
+	  ./mame coleco -cartslot fujinet -cart $(CURDIR)/build/config.bin \
+	  -video none -sound none -nothrottle -seconds_to_run $(SECONDS) \
+	  -snapshot_directory $(CURDIR)/build/snap \
+	  -autoboot_script $(CURDIR)/emu/drive.lua
+
 clean:
 	rm -rf build
-
-.PHONY: all install cart clean

@@ -1,3 +1,7 @@
+## 2026-11-04
+
+* [ColecoVision] - CONFIG rewritten in assembly after the Master System's: COMMAND menus, a progress bar while a game loads, long names that scroll, and new sounds. A file that isn't a cartridge image now says so instead of hanging.
+
 ## 2026-11-03
 
 * [NES] - A long filename scrolls sideways on the selection bar, so the whole name can be read instead of a "..." in the middle.
