@@ -1,137 +1,88 @@
 # FujiNet CONFIG for the ColecoVision
 
-The ColecoVision counterpart of this repository's CONFIG: a 32K cartridge
-client, baked into the FujiNet cartridge's RP2040 firmware as the boot ROM.
-Standalone like `../intv/` — it mirrors `src/`'s state machine without sharing
-its code, because the shared code assumes a keyboard, four device slots and
-kilobytes of buffers, and this machine has a keypad, one cartridge slot, and
-**1K of RAM**.
+CONFIG for the FujiNet ColecoVision cartridge (`fujinet-firmware/pico/coleco`): a 32K Z80
+assembly program the cartridge serves at power-on. It is the Master System CONFIG
+(`../sms`, branch `sms-phantasy-star`) screen for screen, in its Phantasy Star style: windows
+with rounded frames, a blinking pointer, a COMMAND menu, a progress window for mounting and
+booting, long names that scroll, and the same sounds.
 
-Built in C with z88dk's `+coleco` target, [os7lib](https://github.com/tschak909/os7lib)
-(the OS7 BIOS bindings — display, controllers, everything goes through the
-console's own BIOS), and **fujinet-lib-experimental's `coleco` target**, which
-carries the cartridge-mailbox transport. Every FujiNet transaction goes
-through the lib's `fuji_*`/`FUJICALL_*` API except five that must stream their
-payloads byte-by-byte (`fujiraw.c`) because a 256-byte staging buffer does not
-fit in RAM.
-
-Grown from the bring-up stand-in at
-`fujinet-firmware/pico/coleco/testrom/fujicfg.c`; the display/input/editor
-layer here (`fuji*.c`) is the canonical copy of that testrom's, extended.
+It runs bare metal: no OS7 calls and no interrupts. The VDP's frame flag is polled, so nothing
+ever lands between a VDP address and its data, or inside a mailbox transaction. The console
+has 1K of RAM, so host slots, directory pages, scan results and the adapter config are drawn
+straight out of the cartridge's 1K reply window at F800H and streamed straight back into the
+next payload. `path` and `src_spec` are the only copies in RAM.
 
 ## Layout
 
 | file | purpose |
 |---|---|
-| `config.c` | entry point, state dispatcher, shared drawing helpers |
-| `st_wifi.c` | CHECK_WIFI / CONNECT_WIFI / SET_WIFI (scan, pick, password, custom SSID) |
-| `st_hosts.c` | host slots: open, keypad jump, rename; doubles as the copy-destination picker |
-| `st_files.c` | file browser: paging, descend/devance, filter |
-| `st_copy.c` | host-to-host copy (mark → pick host → copy here) |
-| `st_info.c` | adapter info (GET_ADAPTERCONFIG_EXTENDED) |
-| `st_boot.c` | mount into device slot 0, progress, ROM swap |
-| `st_lobby.c` | keypad 0: mount and boot the Game Lobby from ec.tnfs.io |
-| `fujiraw.c` | the five streamed transactions the lib's buffer-shaped calls can't express here |
-| `fujidisp.c` `fujiin.c` `fujiedit.c` `fujisnd.c` `fujisplash*.c` | the platform layer: OS7 Graphics-1 text + inverse-charset selection bar, POLLER input with vblank-paced repeat, the on-screen keyboard, PSG click, splash |
-| `constants.h` | states, geometry, command payload shapes, **the RAM rules** |
-| `bsscheck.py` | build guard: fails the link if statics eat into the stack |
+| `config.asm` | header, start, the RAM map, the state dispatcher, the COMMAND menu, shared helpers |
+| `wifi.inc` | check / scan / pick / password / custom SSID / join |
+| `hosts.inc` | host slots: open, rename, keypad jump, copy destination; the game lobby |
+| `browse.inc` | the file browser: paging, descend and climb, filter, the long-name scroll |
+| `copy.inc` | host-to-host copy |
+| `info.inc` | adapter info (GET_ADAPTERCONFIG_EXTENDED) |
+| `boot.inc` | mount into device slot 0 with the progress window, then the ROM swap |
+| `edit.inc` | the on-screen keyboard |
+| `fujicmd.inc` `mailbox.inc` | Fuji commands on the cartridge mailbox |
+| `vdp.inc` `disp.inc` | Graphics I: windows, text, pop-ups, the pointer, colours and fades |
+| `input.inc` `sound.inc` `sfx.inc` | the controller; the PSG sequencer and its sounds |
+| `splash.inc` `logo.inc` | the splash and the FujiNet wordmark |
+| `strings.inc` | every word on screen |
+| `font.txt` `tools/mkfont.py` | the tiles, built into Graphics I patterns |
+| `tools/checkrom.py` | the image layout check, vendored from `pico/coleco/tools` |
+| `emu/drive.lua` | scripted MAME sessions |
 
-## Scope
+## Controls
 
-INTV parity. In: WiFi setup, eight host slots with rename, file browser with
-paging and filter, mount & boot, host-to-host copy, adapter info, lobby boot.
-Deliberately out (same as intv): the device-slot screen, mount/eject,
-read/write mode toggles, new-disk, appkeys. `DEVICE_SLOT` is hardwired to 0 —
-the ColecoVision has exactly one thing to mount into: the cartridge.
+The left button is the Master System's button 1, the right button is button 2, and `*` is
+Pause: it opens the screen's COMMAND menu. The keypad's shortcuts are the menu items' own.
 
-## What 1K of RAM means
+| screen | stick | left | right | `*` menu | keypad |
+|---|---|---|---|---|---|
+| HOSTS | move | open host | WiFi setup | info, lobby, rename, WiFi | `1`-`8` open that slot, `9` rename, `0` lobby, `#` info |
+| HOSTS (copy) | move | pick destination | cancel copy | | `1`-`8` pick that slot |
+| FILES | move, left/right page | open folder / boot file | up a folder (at `/`: hosts) | filter, copy, hosts | `1` up, `4` filter, `5` copy, `#` hosts |
+| FILES (copy) | as above | open folder | up (at `/`: cancel copy) | copy here, cancel copy | `1` up (at `/`: pick another host), `5` copy here |
+| NETWORKS | move, left/right page | pick | hosts | rescan | `#` rescan |
+| INFO | | back | back | | |
+| keyboard | grid | type | rub out | end | digits type, `#` end; ESC is the cancel |
 
-The cartridge exposes its whole 1K reply as directly addressable ROM at
-`$F800`, so host slots, directory pages, scan results and the adapter config
-are **drawn straight out of the reply window and streamed straight back** into
-the next payload — never copied into RAM. The only reply→RAM copies in the
-program are the two bounded strings `path[96]` and `src_spec[96]`. The
-browser's filter has no buffer at all: it aliases the on-screen keyboard's
-`fn_entry`. Statics end around `$72C0`, leaving ~250 bytes of stack, and
-`bsscheck.py` fails the build if that changes for the worse.
-
-## Keys
-
-| screen | joystick / fire | keypad |
-|---|---|---|
-| HOSTS | move bar / open host | `1-8` jump+open, `9` rename, `0` lobby, `#` info, `*` wifi setup |
-| HOSTS (copy) | move / pick destination | `1-8` jump+pick, `*` cancel copy |
-| FILES | move (page-crossing), left/right page / open dir or boot file | `1` up-dir (at `/`: back to hosts), `4` filter, `5` mark copy / copy here, `*` hosts (cancels copy) |
-| WIFI | move / pick network (password follows) | `#` rescan, `*` back |
-| INFO | fire = back | `*` back |
-| keyboard | grid; fire picks | `0-9` type digits, `*` backspace, `#` OK; cancel is the ESC **cell** only |
+In a menu the stick moves, left picks, and right or `*` cancels.
 
 ## Build
 
-Needs: z88dk, os7lib (built: `os7.lib`), fujinet-lib-experimental (its coleco
-lib is built automatically via `make -C $FNLIB coleco/r2r`).
+    make            # build/config.bin: 32768 bytes, claim stamped, checkrom-clean
+    make install    # into $PICO_COLECO/build, where build-cart.sh bakes it
+    make cart       # install, then build the cartridge firmware
 
-```sh
-make                # -> build/config.bin, stamped and RAM-checked
-make install        # copy into $PICO_COLECO/build/, where build-cart.sh
-                    # prefers it over the testrom stand-in
-make cart           # install + build the RP2040 firmware (fujicoleco.uf2)
-```
+Needs zmac 1.3 (`ZMAC=`, else `zmac` on PATH, else `~/Workspace/zmac-1.3/zmac`) and python3.
+The build reports the ROM used and the stack's room; the assembler fails if the RAM map grows
+into the stack.
 
-Env overrides: `Z88DK`, `OS7LIB`, `FNLIB`, `PICO_COLECO` (defaults all under
-`~/Workspace`).
+Test builds, never to ship: `BARTEST=1` runs the progress bar without a mount, `WIFIFAKE=1`
+always goes through the WiFi screens, `LOBBY_HOST=` changes the lobby's host.
 
 ## Test in MAME
 
-Needs a MAME with the bring-up's cartridge device grafted in
-(`$PICO_COLECO/emu/apply.sh`) and a fujinet-pc BoIP listener on
-`127.0.0.1:9995`.
+Needs a MAME with the cartridge device applied (`$PICO_COLECO/emu/apply.sh`) and a
+fujinet-pc listening for BoIP.
 
-```sh
-./run.sh                                   # windowed
-SCREEN_AT=8 ./run.sh --headless "SELECT A HOST"
-DRIVE_HOST=1 DRIVE_DOWN=9 ./run.sh --drive # browse and boot, headless
-DRIVE_SCRIPT="hash,wait" DRIVE_EXPECT=VERSION ./run.sh --drive
-```
+    make run FUJINET_TCP=127.0.0.1:9995
+    make drive FUJINET_TCP=... STEPS='t:SELECT A HOST.;k:fire;t:SELECT A FILE.;d;s:files;q'
 
-`DRIVE_SCRIPT` can walk every screen including the on-screen keyboard (the
-grid is deterministic). See `$PICO_COLECO/emu/drive.lua` for the vocabulary.
+`emu/drive.lua` lists the step language: waits, key presses, text checks, screen dumps and
+PNG snapshots (in `build/snap`). MAME runs a mount inside a single mailbox read, so the
+progress bar goes straight from 0 to 100 there; `BARTEST=1` shows it part-filled.
 
-## Flash to hardware
+## Limitations
 
-`make cart`, then flash `$PICO_COLECO/firmware/build-fujicoleco/fujicoleco.uf2`
-(BOOTSEL). After booting a game the only way back to CONFIG is a power cycle —
-RESET does not reach the cartridge; the firmware's power-sense watchdog
-reboots it into CONFIG.
-
-## Known limitations
-
-- WiFi scan shows at most 15 networks, no scan paging; row 16 is always
-  "OTHER (TYPE AN SSID)".
-- Paths are capped at 95 characters (`PATH TOO LONG` past that).
-- Cancelling the filter editor keeps its edits — the editor mutates the
-  filter in place, and there is no RAM for a scratch copy. `*` (backspace) it
-  empty to clear.
-- Going up a directory lands on page one of the parent (no page-position
-  stack — matches `src/select_file.c`, drops intv's restore nicety).
-- Paging one past the end of an exactly-full directory shows an empty page;
-  up/left goes back.
-- No `.cfg`-sibling copy (that is an Intellivision memory-map concern).
-- Copy shows no progress bar: COPY_FILE is one host-side transaction whose
-  ACK arrives when the copy is done. The cartridge grants it the 60-second
-  mount budget (`fujimail.c`), and the client outwaits that.
-- The lobby path is `/coleco/lobby.rom` on `ec.tnfs.io`, by symmetry with
-  `/intv/lobby.rom` — **not provisioned on the server yet** (as of 2026-09).
-  Until it is, keypad 0 shows `EMOUNT` and returns to the hosts screen.
-- A fujinet-pc built from master won't push `.col` images (its
-  `discover_mediatype()` gained COL on the `colecovision-bringup` branch);
-  `.rom`/`.bin` boot fine either way.
-
-## Provenance
-
-The `fuji*.c/h` platform layer is canonical HERE; the copies in
-`fujinet-firmware/pico/coleco/testrom/` are the bring-up's snapshot. Fix bugs
-here and sync there. The mailbox transport itself lives in
-fujinet-lib-experimental (`bus/coleco/`), mirrored from
-`fujinet-firmware/pico/coleco/firmware/include/fuji_mailbox.h` — that header
-is the wire-protocol source of truth.
+- ColecoVision's status page has a percent but no byte counts, so the progress window shows
+  no "nnK OF nnK" line.
+- Paths are capped at 95 characters (`THE PATH IS TOO LONG.`).
+- Cancelling the filter keeps its edits: the filter is the keyboard's buffer.
+- Up a folder lands on page one of the parent.
+- Paging one past the end of an exactly full directory shows an empty page; up or left goes
+  back.
+- The lobby is `/coleco/lobby.rom` on `ec.tnfs.io`, which is not there yet.
+- After a game boots, only a power cycle brings CONFIG back.

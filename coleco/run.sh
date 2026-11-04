@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# run.sh -- build, install into the pico bring-up tree, and run in MAME
-# through that tree's own run.sh (which needs a MAME with emu/apply.sh run
-# against it for -cartslot fujinet).
+# run.sh -- build CONFIG and run it in MAME, windowed, against a fujinet-pc.
 #
-#   ./run.sh                          interactive
-#   ./run.sh --headless "SELECT A HOST"   headless, PASS/FAIL on a string
-#   ./run.sh --drive                  headless, drive the controller
+#   FUJINET_TCP=host:port   the fujinet-pc's BoIP listener (default
+#                           127.0.0.1:9995)
+#   MAME_DIR=path           a MAME with the fujinet cartridge device applied
+#                           (fujinet-firmware/pico/coleco/emu/apply.sh)
 #
-# Env: PICO_COLECO (default ~/Workspace/fujinet-firmware/pico/coleco), plus
-# everything the bring-up's run.sh honors: MAME_DIR, SCREEN_EXPECT, SCREEN_AT,
-# SCREEN_RESET_AT, DRIVE_SCRIPT, DRIVE_HOST, DRIVE_DOWN, FUJINET_DEBUG...
+# The controller is MAME's: the keypad is the PC numpad (* is numpad +,
+# # numpad -), the stick the arrow keys, the two buttons as MAME maps them.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PICO_COLECO=${PICO_COLECO:-$HOME/Workspace/fujinet-firmware/pico/coleco}
-
+MAME_DIR=${MAME_DIR:-$HOME/Workspace/mame}
 make
-cp build/config.bin "$PICO_COLECO/build/config.bin"
-exec "$PICO_COLECO/run.sh" config "$@"
+export FUJINET_TCP=${FUJINET_TCP:-127.0.0.1:9995}
+
+# MAME runs from its own tree.
+cd "$MAME_DIR"
+exec ./mame coleco -cartslot fujinet -cart "$OLDPWD/build/config.bin" \
+    -window -nomax "$@"
