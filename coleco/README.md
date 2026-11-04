@@ -77,8 +77,8 @@ progress bar goes straight from 0 to 100 there; `BARTEST=1` shows it part-filled
 
 ## Limitations
 
-- ColecoVision's status page has a percent but no byte counts, so the progress window shows
-  no "nnK OF nnK" line.
+- The progress window's byte counts ("13K OF 32K") need cartridge firmware that reports them;
+  on older carts it shows the percent alone.
 - Paths are capped at 95 characters (`THE PATH IS TOO LONG.`).
 - Cancelling the filter keeps its edits: the filter is the keyboard's buffer.
 - Up a folder lands on page one of the parent.

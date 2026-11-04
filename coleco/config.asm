@@ -125,7 +125,11 @@ bt_want_px      EQU     bt_shown_px+1
 bt_shown_pct    EQU     bt_want_px+1
 bt_want_pct     EQU     bt_shown_pct+1
 bt_hi           EQU     bt_want_pct+1   ; apply: the bar's far edge
-fade_level      EQU     bt_hi+1
+bt_got_k        EQU     bt_hi+1         ; 2: K arrived, from the cart
+bt_tot_k        EQU     bt_got_k+2      ; 2: K in all; 0: no counts
+bt_shown_k      EQU     bt_tot_k+2      ; 2: the count on screen
+bt_bytes_on     EQU     bt_shown_k+2    ; the byte line is drawn
+fade_level      EQU     bt_bytes_on+1
 snd_slaved      EQU     fade_level+1    ; T2 is following T1
 snd_def         EQU     snd_slaved+1    ; 2: snd_play's own scratch
 snd_vol         EQU     snd_def+2

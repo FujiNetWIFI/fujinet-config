@@ -6,8 +6,8 @@
 ; image to the cart inside MOUNT_IMAGE, before it ACKs, so the mount is
 ; sent by hand (mount_start) and, while its ACK is outstanding, this reads
 ; only the cart's status page and the VDP: a mailbox write would queue
-; behind the mount. The percent goes into a pop-up over the browser.
-; ColecoVision's status page has a percent but no byte counts.
+; behind the mount. The percent, and the byte counts on carts that report
+; them, go into a pop-up over the browser.
 
 BW_X0           EQU     2               ; the window
 BW_Y0           EQU     4
@@ -21,6 +21,8 @@ BAR_ROW         EQU     9
 BAR_COL         EQU     4               ; first cell; the caps either side
 BAR_CELLS       EQU     20
 PCT_COL         EQU     25              ; "100%" in 25-28
+BYTES_ROW       EQU     11              ; "  13K OF 32K"
+K_WIDTH         EQU     4               ; the count's columns
 
 IDLE_GRACE      EQU     60              ; ACKed but nothing pushed: no ROM
 QUIET_MAX       EQU     4200            ; 70 s with no change: past the
@@ -79,7 +81,11 @@ pr_px:  LD      A,B
 
 ; apply: only what changed, and on the bar only the cells between the
 ; old edge and the new one.
-apply:  LD      A,(bt_shown_px)
+apply:  CALL    apply_bar
+        JP      apply_bytes
+
+apply_bar:
+        LD      A,(bt_shown_px)
         LD      C,A
         LD      A,(bt_want_px)
         CP      C
@@ -159,6 +165,135 @@ ap_tens:
         LD      DE,BAR_ROW*256+PCT_COL
         JP      disp_str
 
+; read_kb: HL = the 24-bit count at HL on the status page, in K. The cart
+; writes it low byte first, so it is read until two reads agree.
+read_kb:
+        PUSH    HL
+        CALL    rk_once
+        POP     HL
+        PUSH    DE
+        PUSH    HL
+        CALL    rk_once
+        POP     HL
+        POP     BC
+        LD      A,B
+        CP      D
+        JR      NZ,read_kb
+        LD      A,C
+        CP      E
+        JR      NZ,read_kb
+        EX      DE,HL
+        RET
+; rk_once: DE = the count at HL over 1024. Clobbers A, HL.
+rk_once:
+        INC     HL
+        LD      A,(HL)                  ; bits 8-15
+        RRCA
+        RRCA
+        AND     3FH
+        LD      E,A
+        INC     HL
+        LD      A,(HL)                  ; bits 16-23
+        LD      D,A
+        RRCA
+        RRCA
+        AND     0C0H
+        OR      E
+        LD      E,A
+        LD      A,D
+        SRL     A
+        SRL     A
+        LD      D,A
+        RET
+
+; div10: HL = HL / 10, A = the remainder. Preserves BC and DE.
+div10:  PUSH    BC
+        LD      B,16
+        XOR     A
+dv_bit: ADD     HL,HL
+        RLA
+        CP      10
+        JR      C,dv_next
+        SUB     10
+        INC     L
+dv_next:
+        DJNZ    dv_bit
+        POP     BC
+        RET
+
+; put_dec: HL in decimal, written leftward to end just before DE. Leaves
+; DE on the first digit.
+put_dec:
+        CALL    div10
+        ADD     A,'0'
+        DEC     DE
+        LD      (DE),A
+        LD      A,H
+        OR      L
+        JR      NZ,put_dec
+        RET
+
+; ab_count: rowbuf's first K_WIDTH columns: bt_got_k, right-aligned.
+ab_count:
+        LD      HL,(bt_got_k)
+        LD      (bt_shown_k),HL
+        LD      DE,10000
+        OR      A
+        SBC     HL,DE
+        ADD     HL,DE
+        JR      C,abc_fits
+        LD      HL,9999
+abc_fits:
+        LD      A,' '
+        LD      (rowbuf),A
+        LD      (rowbuf+1),A
+        LD      (rowbuf+2),A
+        LD      (rowbuf+3),A
+        LD      DE,rowbuf+K_WIDTH
+        JP      put_dec
+
+; apply_bytes: "  13K OF 32K", drawn whole once, then only the count as
+; it changes. Nothing on a cart that reports no total.
+apply_bytes:
+        LD      HL,(bt_tot_k)
+        LD      A,H
+        OR      L
+        RET     Z
+        LD      A,(bt_bytes_on)
+        OR      A
+        JR      Z,ab_line
+        LD      HL,(bt_got_k)
+        LD      DE,(bt_shown_k)
+        OR      A
+        SBC     HL,DE
+        RET     Z
+        CALL    ab_count
+        XOR     A
+        LD      (rowbuf+K_WIDTH),A
+        JR      ab_draw
+ab_line:
+        LD      A,1
+        LD      (bt_bytes_on),A
+        CALL    ab_count
+        LD      HL,str_k_of
+        LD      DE,rowbuf+K_WIDTH
+        CALL    str_copy
+        PUSH    DE                      ; the total, digits then "K", built
+        LD      A,'K'                   ; at the far end of rowbuf
+        LD      (rowbuf+24),A
+        XOR     A
+        LD      (rowbuf+25),A
+        LD      HL,(bt_tot_k)
+        LD      DE,rowbuf+24
+        CALL    put_dec
+        EX      DE,HL
+        POP     DE
+        CALL    str_copy
+ab_draw:
+        LD      HL,rowbuf
+        LD      DE,BYTES_ROW*256+BW_COL
+        JP      disp_str
+
 ; boot_begin: the progress window over the browser, titled with the tail
 ; of the name at HL. Open it BEFORE setting the path: that reply repaints
 ; the window the name may be read from.
@@ -193,7 +328,11 @@ bb_name:
         LD      E,BAR_COL+BAR_CELLS
         LD      A,T_CAPR
         CALL    disp_tile
+        LD      HL,0
+        LD      (bt_tot_k),HL
+        LD      (bt_got_k),HL
         XOR     A
+        LD      (bt_bytes_on),A
         LD      (bt_want_px),A
         LD      (bt_shown_px),A
         LD      B,A
@@ -338,10 +477,21 @@ bm_pct: LD      A,(bt_last_st)
         LD      A,(FN_BOOTPCT)
         LD      HL,bt_last_pct
         CP      (HL)
-        JR      Z,bm_quiet
+        JR      Z,bm_count
         LD      (HL),A
         CALL    prepare
         CALL    bm_alive
+bm_count:
+        LD      HL,FN_BOOTTOT
+        CALL    read_kb
+        LD      (bt_tot_k),HL
+        LD      HL,FN_BOOTGOT
+        CALL    read_kb
+        LD      DE,(bt_got_k)
+        LD      (bt_got_k),HL
+        OR      A
+        SBC     HL,DE
+        CALL    NZ,bm_alive
 bm_quiet:
         LD      HL,(bt_quiet)
         INC     HL
@@ -361,6 +511,10 @@ bm_alive:
 ; The window ends full, the chime plays, the scene fades out, and the PSG
 ; goes quiet so nothing carries into the game.
 bm_ready:
+        LD      HL,FN_BOOTTOT
+        CALL    read_kb
+        LD      (bt_tot_k),HL
+        LD      (bt_got_k),HL
         LD      A,100
         CALL    prepare
         LD      A,1
@@ -417,11 +571,13 @@ swap_stub:
 SWAP_STUB_LEN   EQU     $-swap_stub
 
         IF      BARTEST
-; bar_test: the window's bar runs 0-100% over five seconds with no mount,
-; for screenshots; then READY, and it stays.
+; bar_test: the window's bar runs 0-100% of a 32K image over five
+; seconds with no mount, for screenshots; then READY, and it stays.
 bar_test:
         LD      HL,str_loading
         CALL    bw_phase
+        LD      HL,32
+        LD      (bt_tot_k),HL
         XOR     A
         LD      (bt_last_pct),A
 btest_loop:
@@ -431,6 +587,26 @@ btest_loop:
         INC     A
         LD      (bt_last_pct),A
         CALL    prepare
+        LD      A,(bt_last_pct)         ; K = percent x 32 / 100
+        LD      L,A
+        LD      H,0
+        ADD     HL,HL
+        ADD     HL,HL
+        ADD     HL,HL
+        ADD     HL,HL
+        ADD     HL,HL
+        LD      DE,100
+        LD      B,0
+btest_div:
+        OR      A
+        SBC     HL,DE
+        JR      C,btest_got
+        INC     B
+        JR      btest_div
+btest_got:
+        LD      L,B
+        LD      H,0
+        LD      (bt_got_k),HL
         CALL    apply
         LD      A,(bt_last_pct)
         CP      100

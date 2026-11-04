@@ -17,6 +17,9 @@ FN_REPLYCMD     EQU     0FC03H          ; 06H ACK / 15H NAK
 FN_BOOTSTATE    EQU     0FC06H
 FN_BOOTPCT      EQU     0FC07H          ; 0-100 while the image arrives
 FN_BOOTERR      EQU     0FC08H
+FN_BOOTGOT      EQU     0FC16H          ; image bytes so far, 24-bit LE
+FN_BOOTTOT      EQU     0FC19H          ; image size, 24-bit LE; 0 on carts
+                                        ; that don't count
 FN_MAGICF       EQU     0FC09H          ; 'F'
 FN_MAGICN       EQU     0FC0AH          ; 'N'
 FN_SWAP         EQU     0FDFEH          ; read once, armed: the staged image

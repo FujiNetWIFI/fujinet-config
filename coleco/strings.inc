@@ -80,6 +80,7 @@ str_not_rom:            DB      "NOT A CARTRIDGE IMAGE.",0
 str_mounting:           DB      "MOUNTING",0
 str_loading:            DB      "LOADING ",0
 str_ready:              DB      "READY   ",0
+str_k_of:               DB      "K OF ",0
 
 ; adapter info
 str_i_ssid:             DB      "SSID",0
