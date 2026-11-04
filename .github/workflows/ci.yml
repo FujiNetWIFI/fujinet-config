@@ -28,6 +28,7 @@ jobs:
           - msdos
           # Untested; see FujiNetWIFI/fujinet-config#326
           #- msxrom
+          - pmd85
 
     container:
       image: fozztexx/defoogi:1.4.8
