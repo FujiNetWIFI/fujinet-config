@@ -65,7 +65,7 @@ extern bool copy_mode;
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-#define KEY_REPEAT_START 25  // x 10ms, delay before autorepeat starts
+#define KEY_REPEAT_START 30  // x 10ms, delay before autorepeat starts
 #define KEY_REPEAT_RATE  60 // ms, autorepeat period
 
 unsigned char input()
@@ -243,6 +243,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_7:
   case KEY_8:
     bar_jump(k-KEY_1);
+    selected_host_slot = bar_get();
     return HD_HOSTS;
   case KEY_TAB:
     bar_clear(false);
@@ -396,7 +397,19 @@ SFSubState input_select_file_choose(void)
 	case KEY_RCL:
     if (strcmp(path, "/") != 0)
       return SF_DEVANCE_FOLDER;
-    // fall thru
+    if (copy_mode)
+    {
+      // Up to destination host selection, restore source host and path
+      // (select_file_init will save path to source_path again)
+      selected_host_slot = copy_host_slot;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+      strcpy(path, source_path);
+      state = DESTINATION_HOST_SLOT;
+      return SF_DONE;
+    }
+    // Up to Hosts
+		state = HOSTS_AND_DEVICES;
+		return SF_DONE;
 	case KEY_ESCAPE:
 		copy_mode = false;
 		state = HOSTS_AND_DEVICES;
@@ -407,11 +420,14 @@ SFSubState input_select_file_choose(void)
 	// case 'N':
 	// case 'n':
 	// 	return SF_NEW;
-	// case 'C':
-	// case 'c':
-	// 	pos += bar_get();
-	// 	select_file_set_source_filename();
-	// 	return SF_COPY;
+	case 'C':
+	case 'c':
+    if (copy_mode)
+      return SF_DONE;
+		pos += bar_get();
+		select_file_set_source_filename();
+    copy_host_slot = selected_host_slot;
+		return SF_COPY;
 	case ',':
 	case '<':
 		if (pos > 0)
@@ -533,7 +549,40 @@ unsigned char input_select_slot_mode(char *mode)
 
 DHSubState input_destination_host_slot_choose(void)
 {
-  return DH_CHOOSE;
+  unsigned char k=input();
+
+  switch(k)
+    {
+    case KEY_RETURN:
+      selected_host_slot=bar_get();
+      copy_mode=true;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+      return DH_DONE;
+    case KEY_ESCAPE:
+      copy_mode=false;
+      state=HOSTS_AND_DEVICES;
+      return DH_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-KEY_1);
+      return DH_CHOOSE;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return DH_CHOOSE;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return DH_CHOOSE;
+    default:
+      return DH_CHOOSE;
+    }
 }
 
 SISubState input_show_info(void)
