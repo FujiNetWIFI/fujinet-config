@@ -176,6 +176,9 @@ START:  LODI,R0 $20             ; interrupts inhibited
         STRA,R0 V_KEY
         BSTA,UN SRESET          ; path "/", paging cleared
         BSTA,UN DINI
+        LODI,R0 TSPLSH>>8       ; the FujiNet mark, until a key or ~1.5 s
+        LODI,R1 TSPLSH&$FF
+        BSTA,UN SPLASH
     IF BARTEST
         BCTA,UN BTEST
     ENDIF
@@ -201,6 +204,8 @@ MB_TXLIB:
         INCLUDE "txlib.inc"
 MB_UI:
         INCLUDE "ui.inc"
+MB_SPLASH:
+        INCLUDE "splash.inc"
 MB_EDIT:
         INCLUDE "edit.inc"
 MB_HOSTS:

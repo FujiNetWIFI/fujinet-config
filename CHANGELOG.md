@@ -1,6 +1,7 @@
 ## 2026-11-04
 
 * [Arcadia] - The file browser marks a folder with a folder symbol instead of a trailing "/", and a long name scrolls sideways on the selected row.
+* [Arcadia] - A FujiNet splash screen with the boot fanfare at power-on.
 * [Arcadia] - A folder with a long name (34 or more characters) opens instead of being treated as a file.
 * [ColecoVision] - CONFIG rewritten in assembly after the Master System's: COMMAND menus, a progress bar while a game loads, long names that scroll, and new sounds. A file that isn't a cartridge image now says so instead of hanging.
 

@@ -34,6 +34,18 @@ TESSID: STRAT   0,0
 TEPASS: STRAT   0,0
         DB      1,"PASSWORD",0
 
+; ---- splash (raw cells: attribute + glyph, drawn by SPLASH) -------------------
+; Three nodes on a bar, in the built-in diamond halves ($0C $0D over $0F
+; $0E) and edge lines ($06 over $04), then FUJI in the accent ink and NET.
+; Each run is its cell-1, the cells, 0; a 0 where a run would start ends.
+TSPLSH: STRAT   5,2
+        DB      $CC,$CD,$86,$86,$86,$CC,$CD,$86,$86,$86,$CC,$CD,0
+        STRAT   6,2
+        DB      $CF,$CE,$84,$84,$84,$CF,$CE,$84,$84,$84,$CF,$CE,0
+        STRAT   8,5
+        DB      $DF,$EE,$E3,$E2,$A7,$9E,$AD,0
+        DB      0
+
 ; ---- fields (DPRTN, not positioned) ----------------------------------------
 TEMPTY: DB      "--------",0
 TOTHER: DB      "OTHER NETWORK",0

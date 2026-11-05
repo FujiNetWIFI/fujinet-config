@@ -18,6 +18,7 @@ Included:
   scrollbar
 - Copy between hosts, with the `.cfg` sibling
 - Info screen
+- A power-on splash: three network nodes on a bar, FUJINET under them
 - Boot with a block-graphics progress bar
 - Sound cues
 
@@ -66,6 +67,10 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 - **Charset.** The charset has 64 glyphs, with no lowercase and few symbols.
   The user-defined bank adds `/ - _ ( ) :`, a folder mark and a placeholder box.
   The folder's slot holds `%` on the bar screens; the browser reloads it.
+- **Splash.** `TSPLSH` in `strings.inc` lists runs of raw cells (attribute +
+  glyph), not ASCII, so the diamonds and edge lines come from the built-in
+  charset and cost no UDC. It shows for the fanfare plus about 1.5 s, or until
+  a key.
 - **Long names.** A name wider than its 13 cells rests selected for about a
   second, then `marquee.inc` reads it whole and slides it, holding at each end.
   A name of 34 or more characters comes back from the firmware ellipsized and
@@ -94,6 +99,7 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 | `copy.inc` | 1 | COPY_FILE + `.cfg` sibling |
 | `mailbox.inc` | 2 | cart mailbox transport, command wrappers, page-1 pointer words |
 | `wifi.inc` | 2 | power-on check, connect, scan/select/password/save, info |
+| `splash.inc` | 1 | the power-on splash: draws raw-cell runs, plays the fanfare, waits |
 | `boot.inc` | 2 | SET_DEVICE_FULLPATH, hand-committed MOUNT_IMAGE + bar, stub swap |
 | `marquee.inc` | 2 | the long-name marquee: ticked and put back by `GETKEY` |
 | `sound.inc` | 2 | 2637 tone/noise cues |
@@ -106,7 +112,7 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 
 - **ROM.** The client gets 6,912 bytes: CPU `$0000-$0FFF` plus
   `$2000-$2AFF`, with no banking (A14 is not on the connector). It uses
-  4,035 + 2,765 = 6,800, leaving 112 spare. `tools/checksize.py` prints
+  4,074 + 2,803 = 6,877, leaving 35 spare. `tools/checksize.py` prints
   the per-module ledger on every build.
 - **RAM.** There are 292 bytes, ledgered in `config.asm`.
   - Nothing is buffered. Names stream straight from the reply window, which
