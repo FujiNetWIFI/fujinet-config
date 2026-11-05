@@ -46,7 +46,7 @@ BARCLS: DB      $00,$64,$76,$7F
 
 ; BARPCT: the bar at R0 percent (0-100) plus "NN%" on the row below.
 ; steps = pct/2 - pct/20 = pct*45/100 within half a step.
-; Calls two down. Clobbers R0-R3, V_T0, V_T2, V_FLD.
+; Calls two down. Clobbers R0-R3, V_T0, V_T1, V_T2, V_FLD.
 BARPCT: STRA,R0 V_T2
         ANDI,R0 $FE
         RRR,R0
@@ -58,6 +58,9 @@ BP1:    SUBI,R0 20
         BCTR,UN BP1
 BP2:    LODZ    R1
         BSTA,UN BARSTP
+        LODI,R1 GPCT&7          ; '%' takes the folder's slot
+        LODI,R2 GXPCT
+        BSTA,UN UDCLD
         DAT     BARROW+2,5
         LODI,R3 5
         ZBSR    *ZDROWS

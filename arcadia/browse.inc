@@ -6,8 +6,8 @@
 ; CLOSE_DIRECTORY, drawn straight from the reply window. Only per-row
 ; metadata survives (V_ROWM: offset from the page's top position and
 ; the directory flag). *.cfg entries are suppressed;
-; directories arrive with a trailing '/' from the firmware and get the
-; accent colour.
+; directories arrive with a trailing '/' from the firmware; they show a
+; folder glyph in column 0 and the name in the accent colour, without it.
 ;
 ; Names are crunched to LISTLEN, so anything that must open (descend,
 ; boot, copy) re-reads the row at FULLLEN. A re-read leaves
@@ -42,6 +42,9 @@ SFRSET: BSTR,UN SFRST0
 SFDRAW: LODI,R0 14
         STRA,R0 V_HLW
         BSTA,UN DCLS
+        LODI,R1 GFOLD&7         ; the bar screens leave '%' in this slot
+        LODI,R2 5
+        BSTA,UN UDCLD
         DCOL    AACC            ; title row: the tail of the path
         SETSTR  V_PATH
         DAT     0,0
@@ -93,9 +96,22 @@ SFD2:   BSTA,UN SNAMLN
 SFD3:   LODA,R0 V_CNT           ; the row, cols 0-13
         STRA,R0 V_CUR
         ZBSR    *ZROWCEL
+        LODA,R0 V_T2
+        ANDI,R0 $40             ; col 0: the folder mark, or a blank
+        BCTR,EQ SFD4
+        LODI,R0 GFOLD
+SFD4:   ZBSR    *ZDPUTC
         SETSTR  FNRDATA
-        LODI,R1 14
-        ZBSR    *ZDPRTN
+        LODI,R1 13              ; a folder's name is shown without its '/'
+        LODA,R0 V_T2
+        ANDI,R0 $40
+        BCTR,EQ SFD5
+        LODA,R0 V_NLEN
+        SUBI,R0 1
+        COMI,R0 13
+        BCFR,LT SFD5
+        STRZ    R1
+SFD5:   ZBSR    *ZDPRTN
         LODA,R1 V_CNT
         LODA,R0 V_T2
         STRA,R0 V_ROWM,R1

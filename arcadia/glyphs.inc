@@ -2,7 +2,7 @@
 ;
 ; Rows 1-7 of each 8x8 glyph (row 0 is always blank, as in the 2637's own
 ; font), 5 pixels wide in bits 5-1 to match the built-in letters. Glyphs
-; 0-7 are the CONFIG bank, loaded into $38-$3F by UDCCFG; 8-27 are the
+; 0-7 are the CONFIG bank, loaded into $38-$3F by UDCCFG; 8-28 are the
 ; symbols the charset lacks, which only the editor shows (one at a time,
 ; in the preview slot $3F). XLAT bit 7 entries index this table.
 
@@ -11,7 +11,7 @@ GLYPHS: DB      $02,$04,$04,$08,$10,$10,$20     ;  0 /
         DB      $00,$00,$00,$00,$00,$00,$3E     ;  2 _
         DB      $04,$08,$10,$10,$10,$08,$04     ;  3 (
         DB      $10,$08,$04,$04,$04,$08,$10     ;  4 )
-        DB      $32,$32,$04,$08,$10,$26,$26     ;  5 %
+        DB      $38,$3E,$3E,$3E,$3E,$3E,$3E     ;  5 folder
         DB      $00,$3E,$22,$22,$22,$3E,$00     ;  6 placeholder box
         DB      $00,$00,$08,$00,$00,$08,$00     ;  7 :
         DB      $08,$08,$08,$08,$08,$00,$08     ;  8 !
@@ -34,3 +34,4 @@ GLYPHS: DB      $02,$04,$04,$08,$10,$10,$20     ;  0 /
         DB      $08,$08,$08,$08,$08,$08,$08     ; 25 |
         DB      $18,$04,$04,$02,$04,$04,$18     ; 26 }
         DB      $00,$00,$10,$2A,$04,$00,$00     ; 27 ~
+        DB      $32,$32,$04,$08,$10,$26,$26     ; 28 %

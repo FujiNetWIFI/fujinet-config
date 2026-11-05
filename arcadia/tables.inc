@@ -5,7 +5,7 @@
 ; Bit 7 set = a symbol the charset lacks: DXLAT draws it as GPLACE, and
 ; the low bits are its glyphs.inc index, which the editor loads into the
 ; preview slot. ':' is glyph 7 in the CONFIG bank itself ($3F).
-XLAT:   DB      $00,$88,$89,$8A,$37,GPCT,$8B,$8C        ; spc ! " # $ % & '
+XLAT:   DB      $00,$88,$89,$8A,$37,$9C,$8B,$8C         ; spc ! " # $ % & '
         DB      GLPAR,GRPAR,$8D,$36,$35,GDASH,$34,GSLASH ; ( ) * + , - . /
         DB      $10,$11,$12,$13,$14,$15,$16,$17         ; 0-7
         DB      $18,$19,GCOLON,$8E,$8F,$90,$91,$92      ; 8 9 : ; < = > ?

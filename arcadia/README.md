@@ -13,8 +13,8 @@ Included:
 - WiFi: scan, custom SSID, password, connect
 - Host slots: list, mount, rename
 - Game Lobby shortcut
-- Browser: paging, subfolders, `.cfg` suppression, filter, block-graphics
-  scrollbar
+- Browser: paging, subfolders marked with a folder glyph, `.cfg` suppression,
+  filter, block-graphics scrollbar
 - Copy between hosts, with the `.cfg` sibling
 - Info screen
 - Boot with a block-graphics progress bar
@@ -64,10 +64,11 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
   - `bar.inc` keeps the rules: a mosaic run always reaches the end of its
     row, and no data cell is an exact `$C0` or `$40`.
 - **Charset.** The charset has 64 glyphs, with no lowercase and few symbols.
-  The user-defined bank adds `/ - _ ( ) % :` and a placeholder box.
+  The user-defined bank adds `/ - _ ( ) :`, a folder mark and a placeholder box.
+  The folder's slot holds `%` on the bar screens; the browser reloads it.
 - **Editor.** A 16 × 6 grid of ASCII `$20-$7F`.
   - Lowercase is drawn in the accent ink.
-  - The 21 symbols the charset lacks draw as the box, except under the grid
+  - The 22 symbols the charset lacks draw as the box, except under the grid
     cursor. There, UDC `$3F` is reloaded with the real glyph, so you see
     exactly what FIRE will type.
 
@@ -99,7 +100,7 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 
 - **ROM.** The client gets 6,912 bytes: CPU `$0000-$0FFF` plus
   `$2000-$2AFF`, with no banking (A14 is not on the connector). It uses
-  3,955 + 2,546 = 6,501, leaving 411 spare. `tools/checksize.py` prints
+  3,997 + 2,553 = 6,550, leaving 362 spare. `tools/checksize.py` prints
   the per-module ledger on every build.
 - **RAM.** There are 292 bytes, ledgered in `config.asm`.
   - Nothing is buffered. Names stream straight from the reply window, which

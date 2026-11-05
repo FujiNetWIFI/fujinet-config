@@ -56,7 +56,9 @@ GDASH   EQU     $39
 GUSCOR  EQU     $3A
 GLPAR   EQU     $3B
 GRPAR   EQU     $3C
-GPCT    EQU     $3D
+GFOLD   EQU     $3D             ; the browser's folder mark
+GPCT    EQU     GFOLD           ; the bar screens swap '%' (GXPCT) into the slot
+GXPCT   EQU     28              ; glyphs.inc index of '%'
 GPLACE  EQU     $3E             ; any symbol the charset lacks
 GCOLON  EQU     $3F             ; ':' -- the editor's live preview slot
 NGLYPH  EQU     7               ; bitmap rows stored per glyph (rows 1-7)

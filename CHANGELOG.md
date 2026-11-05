@@ -1,5 +1,6 @@
 ## 2026-11-04
 
+* [Arcadia] - The file browser marks a folder with a folder symbol instead of a trailing "/".
 * [ColecoVision] - CONFIG rewritten in assembly after the Master System's: COMMAND menus, a progress bar while a game loads, long names that scroll, and new sounds. A file that isn't a cartridge image now says so instead of hanging.
 
 ## 2026-11-03
