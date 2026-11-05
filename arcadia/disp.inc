@@ -120,8 +120,12 @@ UDCL1:  LODA,R0 *PGLYPH,R2,+
         BCFR,EQ UDCL1
         RETC,UN
 
-; DCLS: the whole screen to blank page cells. Leaf. Clobbers R0,R3.
-DCLS:   LODI,R3 208
+; DCLS: the whole screen to blank page cells, and the browser's marquee
+; off (the browser arms it again once its page is drawn). Leaf.
+; Clobbers R0,R3.
+DCLS:   LODI,R0 $FF
+        STRA,R0 V_MQL
+        LODI,R3 208
         LODI,R0 ANORM
 DCLS1:  STRA,R0 SCREEN-1,R3
         BDRR,R3 DCLS1

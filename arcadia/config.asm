@@ -100,7 +100,11 @@ V_CTRY  EQU     $1AF9           ; connect polls so far
 V_SCUR  EQU     $1AFA           ; browser cursor across a redraw
 V_ERRC  EQU     $1AFB           ; the code UFAIL shows
 V_NLEN  EQU     $1AFC           ; SNAMLN's result
-;       $1AFD-$1AFF spare
+V_MQT   EQU     $1AFD           ; marquee: frames until its next move
+V_MQO   EQU     $1AFE           ; marquee: first name character shown
+V_MQL   EQU     $1AFF           ; marquee: 0 fresh, 1 nothing to scroll, the
+                                ;   name's length (14-119) once read,
+                                ;   $FF off (every screen but the browser)
 
 ; -- per-phase aliases of the scratch cells --
 V_LTIM  EQU     V_T6            ; LCOMMIT: 64-frame units left
@@ -219,6 +223,8 @@ MB_WIFI:
         INCLUDE "wifi.inc"
 MB_BOOT:
         INCLUDE "boot.inc"
+MB_MARQ:
+        INCLUDE "marquee.inc"
 MB_SOUND:
         INCLUDE "sound.inc"
 MB_TABLES:

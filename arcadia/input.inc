@@ -132,8 +132,14 @@ KSHELD: COMI,R0 KUP             ; digits are < $80: never repeat
 KSNONE: LODI,R0 KNONE
         RETC,UN
 
-; GETKEY: block for a fresh control; R0 = its code. Calls three down.
+; GETKEY: block for a fresh control; R0 = its code. Each idle frame ticks
+; the browser's marquee and a control first puts its row back (both do
+; nothing on any other screen). Calls five down.
 GETKEY: BSTR,UN KEYSCN
         COMI,R0 KNONE
-        BCTR,EQ GETKEY
+        BCFR,EQ GKEY1
+        BSTA,UN MQTICK
+        BCTR,UN GETKEY
+GKEY1:  BSTA,UN MQREST
+        LODA,R0 V_KEY           ; the control KEYSCN latched
         RETC,UN

@@ -5,12 +5,14 @@
 ; SET_DIRECTORY_POSITION / READ_DIR_ENTRY pair per row +
 ; CLOSE_DIRECTORY, drawn straight from the reply window. Only per-row
 ; metadata survives (V_ROWM: offset from the page's top position and
-; the directory flag). *.cfg entries are suppressed;
-; directories arrive with a trailing '/' from the firmware; they show a
-; folder glyph in column 0 and the name in the accent colour, without it.
+; the directory flag, bit 7 a name wider than the row for the marquee).
+; *.cfg entries are suppressed; directories arrive with a trailing '/'
+; from the firmware and show a folder glyph in column 0 and the name in
+; the accent colour, without it.
 ;
 ; Names are crunched to LISTLEN, so anything that must open (descend,
-; boot, copy) re-reads the row at FULLLEN. A re-read leaves
+; boot, copy) re-reads the row at FULLLEN, and so does the page draw for
+; a name that long: a crunched folder has lost its '/'. A re-read leaves
 ; the directory open: CLOSE_DIRECTORY zeroes the window, and the next
 ; OPEN_DIRECTORY closes the old one anyway.
 ;
@@ -84,7 +86,12 @@ SFD1:   LODA,R0 V_CNT
         STRA,R0 V_EOF
         BCTA,UN SFDE
 SFD2:   BSTA,UN SNAMLN
-        BSTA,UN SISCFG
+        COMI,R3 LISTLEN-2       ; the firmware adds a folder's '/' only to a
+        BCTR,LT SFD2A           ;   shorter name: read this one whole
+        LODI,R1 FULLLEN
+        BSTA,UN CDE16
+        BSTA,UN SNAMLN
+SFD2A:  BSTA,UN SISCFG
         BCTA,EQ SFDNX           ; a .cfg: suppressed
         DCOL    ANORM
         BSTA,UN SISDIR
@@ -102,16 +109,18 @@ SFD3:   LODA,R0 V_CNT           ; the row, cols 0-13
         LODI,R0 GFOLD
 SFD4:   ZBSR    *ZDPUTC
         SETSTR  FNRDATA
-        LODI,R1 13              ; a folder's name is shown without its '/'
+        LODA,R1 V_NLEN          ; a folder's name is shown without its '/'
         LODA,R0 V_T2
         ANDI,R0 $40
         BCTR,EQ SFD5
-        LODA,R0 V_NLEN
-        SUBI,R0 1
-        COMI,R0 13
-        BCFR,LT SFD5
-        STRZ    R1
-SFD5:   ZBSR    *ZDPRTN
+        SUBI,R1 1
+SFD5:   COMI,R1 14              ; wider than 13 cells: the marquee shows the rest
+        BCTR,LT SFD6
+        LODA,R0 V_T2
+        IORI,R0 $80
+        STRA,R0 V_T2
+        LODI,R1 13
+SFD6:   ZBSR    *ZDPRTN
         LODA,R1 V_CNT
         LODA,R0 V_T2
         STRA,R0 V_ROWM,R1
@@ -143,6 +152,7 @@ SFDF:   LODA,R0 V_CUR           ; keep the cursor on a real row
         SUBI,R0 1
         STRA,R0 V_CUR
 SFDF1:  BSTA,UN LHI
+        BSTA,UN MQARM
 SFLEG:  BSTA,UN SBAR
         LODA,R0 V_CMODE
         BCTR,EQ SFL1

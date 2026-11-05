@@ -13,8 +13,9 @@ Included:
 - WiFi: scan, custom SSID, password, connect
 - Host slots: list, mount, rename
 - Game Lobby shortcut
-- Browser: paging, subfolders marked with a folder glyph, `.cfg` suppression,
-  filter, block-graphics scrollbar
+- Browser: paging, subfolders marked with a folder glyph, a long name that
+  scrolls on the selected row, `.cfg` suppression, filter, block-graphics
+  scrollbar
 - Copy between hosts, with the `.cfg` sibling
 - Info screen
 - Boot with a block-graphics progress bar
@@ -23,9 +24,8 @@ Included:
 Out of scope, as on every console port: the device-slot screen,
 mount/eject, read/write toggles, new disk, and appkeys.
 
-The ROM budget ruled out two things the plan had: a marquee for long names
-(names show 14 characters, as on the Astrocade, NES and SMS) and a
-got/total bytes line for the cart firmware's future protocol v2.
+The ROM budget ruled out the got/total bytes line the plan had, for the cart
+firmware's future protocol v2.
 
 ## Controls
 
@@ -66,6 +66,11 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 - **Charset.** The charset has 64 glyphs, with no lowercase and few symbols.
   The user-defined bank adds `/ - _ ( ) :`, a folder mark and a placeholder box.
   The folder's slot holds `%` on the bar screens; the browser reloads it.
+- **Long names.** A name wider than its 13 cells rests selected for about a
+  second, then `marquee.inc` reads it whole and slides it, holding at each end.
+  A name of 34 or more characters comes back from the firmware ellipsized and
+  with no `/`, so the page draw reads those whole to tell a folder from a file.
+  Folders over 117 characters still look like files.
 - **Editor.** A 16 × 6 grid of ASCII `$20-$7F`.
   - Lowercase is drawn in the accent ink.
   - The 22 symbols the charset lacks draw as the box, except under the grid
@@ -90,6 +95,7 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 | `mailbox.inc` | 2 | cart mailbox transport, command wrappers, page-1 pointer words |
 | `wifi.inc` | 2 | power-on check, connect, scan/select/password/save, info |
 | `boot.inc` | 2 | SET_DEVICE_FULLPATH, hand-committed MOUNT_IMAGE + bar, stub swap |
+| `marquee.inc` | 2 | the long-name marquee: ticked and put back by `GETKEY` |
 | `sound.inc` | 2 | 2637 tone/noise cues |
 | `tables.inc`, `glyphs.inc`, `strings.inc` | 2 | XLAT, keypad tables, UDC bitmaps, every literal |
 | `bartest.inc` | 1 | `BARTEST=1` widget test screens |
@@ -100,7 +106,7 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 
 - **ROM.** The client gets 6,912 bytes: CPU `$0000-$0FFF` plus
   `$2000-$2AFF`, with no banking (A14 is not on the connector). It uses
-  3,997 + 2,553 = 6,550, leaving 362 spare. `tools/checksize.py` prints
+  4,035 + 2,765 = 6,800, leaving 112 spare. `tools/checksize.py` prints
   the per-module ledger on every build.
 - **RAM.** There are 292 bytes, ledgered in `config.asm`.
   - Nothing is buffered. Names stream straight from the reply window, which
@@ -119,7 +125,8 @@ re-skins as "COPY TO HOST"; pick a slot, browse to a folder, then press `5`
 - **Return stack.** It is the 2650's 8-entry on-chip stack.
   - States are entered with BCTA.
   - `checkdepth --flow` follows calls, branches, fall-through and the
-    vectors. The worst chain is 5.
+    vectors. The worst chain is 8, the marquee's full-name read from
+    `GETKEY`.
 - **SEQ.** It always derives from the cart's ACKSEQ, because console RESET
   restarts CONFIG but not the cart.
 
