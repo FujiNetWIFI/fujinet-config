@@ -6,7 +6,7 @@
 ; that was configured once and never touched again.
 ; ---------------------------------------------------------------------------
 
-SWIFI:	ENTER
+SWIFI:
 	LI CVAL3
 	LR 3,A
 	DCI SWTITLE
@@ -62,7 +62,7 @@ SWIN1:	CI EV_BACK
 ; SSCAN -- pick a network. The list scrolls, and the last row is always
 ; "OTHER (ENTER SSID)" for a hidden network.
 ; ---------------------------------------------------------------------------
-SSCAN:	ENTER
+SSCAN:
 	LI CVAL3
 	LR 3,A
 	DCI SSTITLE
@@ -338,7 +338,7 @@ SSRX:	LEAVE
 ; ---------------------------------------------------------------------------
 ; SCONN -- send the credentials and wait for the link.
 ; ---------------------------------------------------------------------------
-SCONN:	ENTER
+SCONN:
 	LI CVAL3
 	LR 3,A
 	DCI SNTITLE
@@ -360,14 +360,33 @@ SCONN:	ENTER
 	PI SETERR
 	JMP FAIL
 
-	; poll until the link comes up, bounded: 30 tries with the adapter's own
-	; delay between them is comfortably longer than an association takes
+	; Poll until the link comes up, bounded: 30 tries with a delay between
+	; them is comfortably longer than an association takes. The delay is cut
+	; into short slices with an input scan after each, so a brief press still
+	; cancels.
 SNPOLL:	LI 30
 	DCI VPOLLN
 	ST			; RAM, not r9: FNGO stores the sequence there
-SNP1:	LI 200
+SNP1:	LI 50
+	DCI VPOLLS
+	ST
+SNPS:	LIS 4
 	LR 3,A
 	PI DELAYMS
+	PI INSCAN
+	LR A,0
+	CI EV_NONE
+	BZ SNPS1
+	LI ST_WIFI
+	LR 0,A
+	JMP GOTO		; any input cancels
+SNPS1:	DCI VPOLLS
+	LM
+	AI 0FFH
+	DCI VPOLLS
+	ST
+	CI 0
+	BNZ SNPS
 	PI CWIFIS
 	CI 0
 	BNZ SNP2

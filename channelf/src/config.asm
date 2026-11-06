@@ -7,7 +7,8 @@
 ;
 ; SCOPE. Astrocade parity: WiFi (scan, custom SSID, on-screen keyboard, connect),
 ; the 8 host slots (list, mount, rename), directory browsing (paging, subfolder
-; navigation), copying a file between host slots, adapter info, and boot.
+; navigation), copying a file to a folder on another host slot, adapter info,
+; and boot.
 ; Deliberately out of scope, as on every console port: the device-slot screen,
 ; mount/eject, read/write toggles, new-disk and appkeys -- none of them is
 ; needed to get from power-on to a booted cartridge, which is this program's
@@ -16,8 +17,11 @@
 ;
 ; STRUCTURE. The F8 keeps one return address, so this is a flat state machine
 ; that JMPs between states, with calls at most two deep through the BIOS
-; K-stack (see f8call.inc). CONFIG_BOOT (0xD9) is deliberately never sent:
-; CONFIG lives in cart flash, and the flag would only unmount device slot 0.
+; K-stack (see f8call.inc). A state is reached by JMP and never returns, so it
+; takes no ENTER: nothing would pop the entry, and the nine-deep stack would
+; overflow after a handful of screen changes. CONFIG_BOOT (0xD9) is deliberately
+; never sent: CONFIG lives in cart flash, and the flag would only unmount
+; device slot 0.
 ;
 ; RAM. 30K in the cartridge's arena at $8000. Unlike every sibling port there
 ; is no ledger and no rationing -- the Arcadia client lives in 84 bytes and the
@@ -36,7 +40,6 @@ ST_HOST	EQU 4			; the 8 host slots
 ST_FILE	EQU 5			; directory browser
 ST_INFO	EQU 6			; adapter info
 ST_BOOT	EQU 7			; mount and swap
-ST_COPY	EQU 8			; pick a destination host
 
 ; what the editor is editing, so it knows where to put the result
 ED_SSID	EQU 0
@@ -67,21 +70,29 @@ VEDMAX	EQU 08016H		; field width
 VEDCASE	EQU 08017H		; 0 lower, 1 upper
 VSCANN	EQU 08018H		; networks the scan found
 VSCANB	EQU 08019H		; first network shown on this page
-VCOPYH	EQU 0801AH		; copy destination host
+VCHOST	EQU 0801AH		; host slot the copy source is on
 VPEND	EQU 0801BH		; pending state, for screens that return
+VCMODE	EQU 0801EH		; 1 while picking a copy destination
+VSRCD	EQU 0801FH		; length of VSRC's folder part, '/' included
 VPOLLN	EQU 08032H		; link-poll countdown (r9 belongs to FNGO)
+VPOLLS	EQU 08035H		; input samples left in this poll
 VEDDR	EQU 08033H		; keyboard row being drawn
 VEDDC	EQU 08034H		; keyboard column being drawn
-VDIR	EQU 08020H		; NROWS bytes: is that row a directory?
-VPATH	EQU 08100H		; current path, NUL-terminated
-VNAME	EQU 08200H		; the selected entry, at full length
-VENTRY	EQU 08280H		; editor accumulator
+VDISP	EQU 08040H		; a name or path cut to the screen, NAMEW + NUL
+VPATH	EQU 08100H		; current path, NUL-terminated, at most PATHMAX
+VNAME	EQU 08200H		; the selected entry at FULLLN: up to 255 with its NUL
 VSSID	EQU 08300H		; 33
 VPASS	EQU 08340H		; 64
+VENTRY	EQU 08380H		; editor accumulator, at most 64
 VFULL	EQU 08400H		; VPATH + VNAME, the boot path
 VSRC	EQU 08500H		; copy source path
 VHOSTS	EQU 08600H		; 8 x 32, the host slot table
 STUB	EQU 08800H		; the swap stub
+
+; The longest folder path, or folder plus file, CONFIG will build. COPY_FILE
+; carries "source|folder" in the mailbox's 320-byte TX buffer after four bytes
+; of parameters, so two paths and the bar must fit in 316.
+PATHMAX	EQU 150
 
 	ORG 0800H
 	DB 55H			; cart signature -- the BIOS compares this at $0800
@@ -156,11 +167,8 @@ MD6:	CI ST_INFO
 	BNZ MD7
 	JMP SINFO
 MD7:	CI ST_BOOT
-	BNZ MD8
-	JMP SBOOT
-MD8:	CI ST_COPY
 	BNZ MAIN
-	JMP SCOPY
+	JMP SBOOT
 
 ; ---------------------------------------------------------------------------
 ; GOTO -- set VSTATE from r0 and re-dispatch. Reached by JMP, never called.

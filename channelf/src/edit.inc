@@ -17,7 +17,7 @@ EDKROW	EQU 2			; first list row of the keyboard
 EDCROW	EQU 6			; the control row
 EDNCTL	EQU 5			; CASE SPC DEL OK ESC
 
-SEDIT:	ENTER
+SEDIT:
 	DCI VEDX
 	CLR
 	ST
@@ -165,8 +165,8 @@ SEDPM2:	DCI VEDX
 	CI 0
 	BZ SEDPINS
 	LR A,0
-	CI 61H
-	BP SEDPINS		; $61 >= A: not a lowercase letter
+	CI 60H
+	BP SEDPINS		; $60 >= A: below 'a'
 	CI 7AH
 	BM SEDPINS
 	AI 0E0H			; -$20: uppercase
@@ -445,8 +445,8 @@ EDDRM2:	DCI VEDDC
 	CI 0
 	BZ EDDRPUT
 	LR A,4
-	CI 61H
-	BP EDDRPUT		; $61 >= A: not a lowercase letter
+	CI 60H
+	BP EDDRPUT		; $60 >= A: below 'a'
 	CI 7AH
 	BM EDDRPUT
 	AI 0E0H

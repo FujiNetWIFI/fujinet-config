@@ -6,21 +6,38 @@
 ; scrolls: VHTOP is the first slot shown and VCUR the row within the viewport.
 ;
 ; An empty slot shows as "-- EMPTY --" and can be renamed; a named one mounts.
+;
+; In copy mode (VCMODE) the same list picks the host a file is copied to: the
+; title and footer say so, and MODE cancels the copy instead of renaming.
 ; ---------------------------------------------------------------------------
 
 VHTOP	EQU 0801CH		; first host slot visible
 VHSEL	EQU 0801DH		; slot the cursor is on
 
-SHOST:	ENTER
+SHOST:
 	LI CVAL3
 	LR 3,A
+	DCI VCMODE
+	LM
+	CI 0
+	BNZ SHTC
 	DCI SHTITLE
-	XDC
+	BR SHT1
+SHTC:	DCI SHTCOPY
+SHT1:	XDC
 	PI UITITLE
+	DCI VCMODE
+	LM
+	CI 0
+	BNZ SHFC
 	LI CVAL1
 	LR 3,A
 	DCI SHFOOT
-	XDC
+	BR SHF1
+SHFC:	LI CVAL2
+	LR 3,A
+	DCI SHFCOPY
+SHF1:	XDC
 	PI UIFOOT
 
 	PI CRHOSTS
@@ -73,7 +90,12 @@ SHI2:	CI EV_SEL
 	JMP SHSEL
 SHI3:	CI EV_BACK
 	BNZ SHI4
+	DCI VCMODE
+	LM
+	CI 0
+	BNZ SHCANC
 	JMP SHREN
+SHCANC:	JMP CPBACK
 SHI4:	CI EV_PGDN
 	BNZ SHI5
 	JMP SHINFO
@@ -302,4 +324,6 @@ SHRX:	LEAVE
 
 SHTITLE: DB "FUJINET HOSTS",0
 SHFOOT:	DB "FIRE:OPEN MODE:NAME",0
+SHTCOPY: DB "COPY TO HOST",0
+SHFCOPY: DB "FIRE:OPEN MODE:CANCEL",0
 SHEMPTY: DB "-- EMPTY --",0

@@ -14,7 +14,7 @@
 ; ---------------------------------------------------------------------------
 
 NROWS	EQU 7			; list rows on screen
-NAMELN	EQU 21			; usable width after the gutter
+NAMEW	EQU 22			; cells a name gets after the gutter
 UICOLS	EQU 23
 
 ; UIROWY -- r2 = the pixel row for list row r0 (0..NROWS-1).
@@ -182,6 +182,16 @@ UICURN:	DCI VROW
 UICURX:	LEAVE
 
 UICSTR:	DB ">",0
+
+; NOTEKEY -- show the string at DC1 on the footer in colour r3, then wait for any
+;   input. Reached by PI; calls one level down.
+NOTEKEY: ENTER
+	PI UIFOOT
+NKWAIT:	PI INSCAN
+	LR A,0
+	CI EV_NONE
+	BZ NKWAIT
+	LEAVE
 
 ; UICLRL -- blank every list row. Reached by PI; calls one level down.
 UICLRL:	ENTER

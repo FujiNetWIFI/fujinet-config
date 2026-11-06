@@ -7,7 +7,7 @@
 ; is why the arena survives a swap even though the mailbox decode does not.
 ; ---------------------------------------------------------------------------
 
-SBOOT:	ENTER
+SBOOT:
 	LI CVAL3
 	LR 3,A
 	DCI SBTITLE
@@ -23,10 +23,11 @@ SBOOT:	ENTER
 	PI PATHFULL		; VFULL = VPATH + VNAME
 	LI CVAL1
 	LR 3,A
-	CLR
-	LR 0,A
 	DCI VFULL
 	XDC
+	PI TAILFIT
+	CLR
+	LR 0,A
 	PI UIROW
 
 	DCI VHOST
@@ -50,14 +51,14 @@ SBMIMG:	PI CMIMG
 	PI SETERR
 	JMP FAIL
 
+; IDLE and XFER are the states before READY, not errors: only FAILED stops the
+; wait.
 SBWAIT:	DCI FNBSTAT
 	LM
 	CI FNB_RDY
 	BZ SBGO
-	DCI FNBSTAT
-	LM
 	CI FNB_FAIL
-	BM SBWAIT
+	BNZ SBWAIT
 	DCI FNBERR
 	LM
 	LR 1,A

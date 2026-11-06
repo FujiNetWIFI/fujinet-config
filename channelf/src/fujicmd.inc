@@ -13,13 +13,16 @@
 ;     1-BASED where every other command's are 0-based.
 ;   - SET_SSID is exactly 97 bytes: ssid[33] + password[64].
 ;   - READ_DIR_ENTRY with maxlen 31 makes the firmware prepend icon bytes; any
-;     other length does not, which is why NAMELN is 21 and FULLLN is 63.
+;     other length does not. The maxlen is one byte, so FULLLN is 255, the most it
+;     can ask for.
 ;   - Never seek to directory position 0: a freshly opened directory is already
 ;     there, and dir_seek(0) fails outright on an empty one, which would read
 ;     as an error rather than as the empty listing it is.
 ; ---------------------------------------------------------------------------
 
-FULLLN	EQU 63			; re-read width for a name we must actually open
+; READ_DIR_ENTRY width. The firmware cuts a longer name to fit, and adds a
+; folder's '/' only when the name is two characters short of the width.
+FULLLN	EQU 255
 
 ; CMHOST -- MOUNT_HOST(r0 = host slot).
 CMHOST:	ENTER
@@ -285,9 +288,11 @@ CSSID:	ENTER
 	PI FNACK
 	LEAVE
 
-; CCOPY -- COPY_FILE(r0 = source host, r1 = destination host) over VSRC.
-;   Sent at EXACT length, unlike every other path command here, and the host
-;   slots are 1-BASED. Both are the server's rules, not ours.
+; CCOPY -- COPY_FILE(r0 = source host, r1 = destination host): VSRC to the folder
+;   VPATH. The payload is the copySpec "source|folder", the folder ending in '/'
+;   so the firmware names the copy after the source. Sent at EXACT length, unlike
+;   every other path command here, and the host slots are 1-BASED. Both are the
+;   server's rules, not ours.
 CCOPY:	ENTER
 	LR A,0
 	LR 4,A
@@ -311,6 +316,12 @@ CCOPY:	ENTER
 	DCI VSRC
 	XDC
 	PI FNTXS		; exact length, no padding
+	PI FNTXP
+	LI '|'
+	ST
+	DCI VPATH
+	XDC
+	PI FNTXS
 	PI FNGO
 	PI FNACK
 	LEAVE

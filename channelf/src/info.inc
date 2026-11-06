@@ -6,7 +6,7 @@
 ; so the rows are drawn straight out of the reply window with no copying.
 ; ---------------------------------------------------------------------------
 
-SINFO:	ENTER
+SINFO:
 	LI CVAL3
 	LR 3,A
 	DCI SITITLE

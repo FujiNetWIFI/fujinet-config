@@ -15,16 +15,15 @@ at `$47FC`, or the cartridge boots it with the mailbox dead;
 
 Astrocade parity: WiFi (status, scan, custom SSID, on-screen keyboard,
 connect), the eight host slots (list, mount, rename), directory browsing
-(paging, subfolder navigation), copying a file between host slots, adapter
-info, and boot. Deliberately out of scope, as on every console port: the
+(paging, subfolder navigation), copying a file to a folder on another host slot,
+adapter info, and boot. Deliberately out of scope, as on every console port: the
 device-slot screen, mount/eject, read/write toggles, new-disk and appkeys --
 none is needed to get from power-on to a booted cartridge, which is this
 program's whole job. `DEVICE_SLOT` is hardwired to 0; the Channel F has exactly
 one thing to mount into. `CONFIG_BOOT` (`0xD9`) is never sent: CONFIG lives in
 cart flash, and the flag would only unmount device slot 0.
 
-**5,875 bytes** in a 16K window -- within 400 bytes of the Astrocade port's
-5,501 for the same feature set.
+**6,398 bytes** in the 16K window.
 
 ## Screen
 
@@ -52,7 +51,31 @@ is unambiguous, which is the only thing the user actually needs.
 | MODE | back, or rename on the host list |
 | TIME / HOLD | page up / page down |
 | twist counter-clockwise | adapter info |
-| twist clockwise | copy this file to another host |
+| twist clockwise | copy this file; in copy mode, copy into this folder |
+
+## Names and paths
+
+Every row is read at the widest `READ_DIR_ENTRY` allows (255) and cut to the
+22 cells a name gets: a name that is too long keeps 21 characters and ends in
+`/` if it is a folder, `~` if it is a file. A narrower read would make the
+firmware drop a folder's `/` once the name nears the width, and the folder would
+list, and boot, as a file. The title shows the end of a path that is wider than
+the row, after a `~`.
+
+A path, or a path and a file name, is limited to 150 characters: `COPY_FILE`
+carries a source and a folder in the mailbox's 320-byte transmit buffer, and
+longer ones would be cut short. A folder or file that would go past it says
+`PATH TOO LONG` and stays where it is.
+
+## Copying
+
+Twist clockwise on a file records it and opens the host list as `COPY TO HOST`.
+Pick the destination host, browse to a folder on it as usual, then twist
+clockwise again (or press fire on a file) to copy into the folder on screen.
+`MODE` goes up a folder and, at the host list, cancels. Copying a file into the
+folder it came from on the same host is refused: the copy would truncate it
+before reading it. When the copy is done the browser returns to the source
+folder.
 
 ## What the F8 makes you do differently
 
@@ -60,7 +83,13 @@ is unambiguous, which is the only thing the user actually needs.
 routine reached by `PI` cannot call anything. `f8call.inc`'s `ENTER`/`LEAVE`
 push it onto the BIOS's own K stack at r40-r58 -- nine levels, the same
 mechanism the console's `clrscrn` uses. Everything that can avoid nesting does:
-`UIROW` inlines its row arithmetic and tail-jumps into `DSTR`.
+`UIROW` inlines its row arithmetic and tail-jumps into `DSTR`. A screen state is
+reached by `JMP` and never returns, so it takes no `ENTER`; nothing would pop
+it, and the stack would overflow after nine screen changes.
+
+**`BM` and `BP` are signed.** An unsigned compare is the carry of the subtract
+(`BC`/`BNC`), and a 16-bit add takes its carry from the `AS` of the low byte --
+`LR` leaves the flags alone.
 
 **`PI` and `JMP` clobber the accumulator.** Both stash the target address's high
 byte in A. No argument or result may travel in A across a call -- which also
