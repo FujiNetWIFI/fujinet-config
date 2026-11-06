@@ -5,7 +5,8 @@
 ; is one round trip. Eight slots do not fit in a seven-row viewport, so the list
 ; scrolls: VHTOP is the first slot shown and VCUR the row within the viewport.
 ;
-; An empty slot shows as "-- EMPTY --" and can be renamed; a named one mounts.
+; An empty slot shows as "-- EMPTY --" and can be renamed but not mounted; a
+; named one mounts.
 ;
 ; In copy mode (VCMODE) the same list picks the host a file is copied to: the
 ; title and footer say so, and MODE cancels the copy instead of renaming.
@@ -166,7 +167,13 @@ SHUOK:	AI 0FFH
 
 ; SHSEL -- mount the selected host and go browsing.
 SHSEL:	PI SHSLOT		; r0 = the absolute slot number
-	DCI VHOST
+	PI SHNAME		; the firmware fails MOUNT_HOST on an empty name
+	XDC
+	LM
+	CI 0
+	BNZ SHSELM
+	JMP SHIN
+SHSELM:	DCI VHOST
 	LR A,0
 	ST
 	PI CMHOST
