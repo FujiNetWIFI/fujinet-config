@@ -17,8 +17,6 @@
 #define UNUSED(x) (void)(x);
 
 static const char *empty = "EMPTY";
-static const char *off = "OFF";
-//static const char *eol = "\x1bb$[\x1bb/EOL\x1bb$]\x1bb/";
 
 extern bool copy_mode;
 extern char copy_host_name[32];
@@ -125,34 +123,6 @@ void screen_print_menu(const char *si, const char *sc)
 	cputs(si);
 	textcolor(MENU_ITEM_COLOR);
 	cputs(sc);
-}
-
-void screen_fujinetlogo(void)
-{
-  unsigned char i, j;
-
-  gotoxy(SCR_X0 + 18, SCR_Y0 + 12);
-  cprintf("O");
-
-  for (i = 0; i < 11; i++)
-  {
-      gotoxy(SCR_X0 + 2 + i, SCR_Y0 + 12);    // fuji scrolling across left to center
-      cprintf(" FUJI*");
-      gotoxy(SCR_X0 + 29 - i, SCR_Y0 + 12);   // net scrolling back right to center
-      cprintf("*NET ");
-      gotoxy(SCR_X0 + 18, SCR_Y0 + i);      // * coming down from the top
-      cprintf(" ");
-      gotoxy(SCR_X0 + 18, SCR_Y0 + 1 + i);
-      cprintf("*");
-      gotoxy(SCR_X0 + 19, SCR_Y0 + 23 - i);   // * coming up from bottom
-      cprintf("*");
-      gotoxy(SCR_X0 + 19, SCR_Y0 + 24 - i);
-      cprintf(" ");
-   }
-   for(i = 0; i < 10; i++) // delay a bit
-   {
-      for(j = 0; j < 255; j++);
-   }
 }
 
 void screen_draw_list_area(unsigned char ypos, unsigned char lines, const char *title, unsigned char vbar)
@@ -264,8 +234,8 @@ void screen_set_wifi_select_network(unsigned char nn)
 
 	gotoxy(SCR_X0, STATUS_BAR + 1);
 	screen_print_menu("EOL", ":SELECT  ");
-	screen_print_menu("R", "ESCAN  ");
-	screen_print_menu("H", "IDDEN SSID  ");
+	screen_print_menu("R", ":RESCAN  ");
+	screen_print_menu("H", ":HIDDEN  ");
 	screen_print_menu("K0", ":SKIP");
 	//gotoxy(SCR_X0, STATUS_BAR + 2);
 
@@ -290,34 +260,34 @@ void screen_connect_wifi(NetConfig *nc)
 	gotoxy(SCR_X0, STATUS_BAR);
 	cputs("CONNECTING TO NETWORK:");
 	gotoxy(SCR_X0, STATUS_BAR+1);
-	cprintf("%s", nc->ssid);
+	cputs(nc->ssid);
 }
 
 void screen_destination_host_slot(char *h, char *p)
 {
 	screen_clear();
-	gotoxy(0, 12);
-	cprintf("COPY FROM HOST SLOT");
-	chlinexy(0, 13, 40);
-	gotoxy(0, 14);
-	cprintf("%-32s", h);
-	gotoxy(0, 15);
-	cprintf("%-128s", p);
+	textcolor(LIST_TITLE_COLOR);
+	gotoxy(SCR_X0, SCR_Y0 + 12);
+	cputs("COPY FROM HOST SLOT");
+	textcolor(TEXT_COLOR);
+	gotoxy(SCR_X0, SCR_Y0 + 13);
+	cputs(h);
+	screen_print_multiline(SCR_Y0 + 14, p);
 }
 
 void screen_destination_host_slot_choose(void)
 {
-	gotoxy(0, 0);
-	cprintf("COPY TO HOST SLOT");
-	chlinexy(0, 1, 40);
+	gotoxy(SCR_X0, SCR_Y0);
+	textcolor(LIST_TITLE_COLOR);
+	cputs("COPY TO HOST SLOT");
 
 	screen_clear_status();
-	gotoxy(0, STATUS_BAR);
-	screen_print_menu("1-8", ":CHOOSE SLOT\r\n");
-	screen_print_menu("EOL", ":SELECT SLOT\r\n");
+	gotoxy(SCR_X0 + 5, STATUS_BAR);
+	screen_print_menu("1-8", ":SLOT  ");
+	screen_print_menu("EOL", ":BROWSE  ");
 	screen_print_menu("K0", ":ABORT");
 
-	bar_set(2, 1, 8, selected_host_slot);
+	bar_set(SCR_Y0 + 1, SCR_X0 + 2, 8, selected_host_slot);
 }
 
 void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
@@ -360,12 +330,10 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
 	UNUSED(hs);
+	UNUSED(e);	// device enable is not hooked up, assume always enabled
 	if (fn[0] != 0x00)
 		return fn;
-	else if (e == false)
-		return &off[0];
-	else
-		return &empty[0];
+	return &empty[0];
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -386,14 +354,14 @@ void screen_hosts_and_devices_hosts(void)
 {
 	screen_clear_status();
 
-	gotoxy(SCR_X0, STATUS_BAR);
+	gotoxy(SCR_X0 + 1, STATUS_BAR);
 	screen_print_menu("1-8", ":SLOT  ");
-	screen_print_menu("E", "DIT  ");
+	screen_print_menu("E", ":EDIT  ");
 	screen_print_menu("EOL", ":BROWSE  ");
-	screen_print_menu("C-D", ":DEVICES");
-	gotoxy(SCR_X0 + 12, STATUS_BAR+1);
-	screen_print_menu("C", "ONFIG  ");
-	screen_print_menu("K10", ":BOOT  ");
+	screen_print_menu("K10", ":BOOT");
+	gotoxy(SCR_X0 + 9, STATUS_BAR+1);
+	screen_print_menu("C-D", ":DEVICES  ");
+	screen_print_menu("C", ":CONFIG");
 
 	bar_set(SCR_Y0 + 1, SCR_X0 + 2, 8, selected_host_slot);
 }
@@ -401,14 +369,14 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
 	screen_clear_status();
-	gotoxy(SCR_X0, STATUS_BAR);
+	gotoxy(SCR_X0 + 3, STATUS_BAR);
 	screen_print_menu("1-4", ":SLOT  ");
-	screen_print_menu("E", "JECT  ");
-	screen_print_menu("R", "EAD  ");
-	screen_print_menu("W", "RITE  ");
-	screen_print_menu("C-D", ":HOSTS");
-	gotoxy(SCR_X0+12, STATUS_BAR + 1);
-	screen_print_menu("C", "ONFIG  ");
+	screen_print_menu("E", ":EJECT  ");
+	screen_print_menu("R", ":READ  ");
+	screen_print_menu("W", ":WRITE  ");
+	gotoxy(SCR_X0 + 6, STATUS_BAR + 1);
+	screen_print_menu("C-D", ":HOSTS  ");
+	screen_print_menu("C", ":CONFIG  ");
 	screen_print_menu("K10", ":BOOT");
 
 	bar_set(SCR_Y0 + 12, SCR_X0 + 2, 4, selected_device_slot);
@@ -431,16 +399,16 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
 	screen_clear();
-	gotoxy(0, 0);
-	cprintf("%32s", "COPYING FILE FROM:");
-	gotoxy(0, 1);
-	cprintf("%32s", sh);
-	gotoxy(0, 2);
-	cprintf("%-128s", p);
-	gotoxy(0, 6);
-	cprintf("%32s", dh);
-	gotoxy(0, 7);
-	cprintf("%-128s", dp);
+	gotoxy(SCR_X0, SCR_Y0);
+	cputs("COPYING FILE FROM:");
+	gotoxy(SCR_X0, SCR_Y0 + 1);
+	cputs(sh);
+	screen_print_multiline(SCR_Y0 + 2, p);
+	gotoxy(SCR_X0, SCR_Y0 + 8);
+	cputs("TO:");
+	gotoxy(SCR_X0, SCR_Y0 + 9);
+	cputs(dh);
+	screen_print_multiline(SCR_Y0 + 10, dp);
 }
 
 char *_info_str(const char *s)
@@ -455,6 +423,9 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *acx)
 	gotoxy(SCR_X0 + 5, SCR_Y0 + 2);
 	textcolor(TITLE3_COLOR);
 	cprintf("F U J I N E T      C O N F I G");
+	gotoxy(SCR_X0 + 5, SCR_Y0 + 3);
+	textcolor(TITLE4_COLOR);
+	cprintf("fnlib %s", FNLIB_VERSION_FULL);
 	textcolor(TEXT_COLOR);
 	gotoxy(SCR_X0 + 8, SCR_Y0 + 6);
 	cprintf(       "SSID: %s", _info_str(acx->ssid));
@@ -471,12 +442,14 @@ void screen_show_info_extended(bool printerEnabled, AdapterConfigExtended *acx)
 	gotoxy(SCR_X0 + 7, SCR_Y0 + 12);
 	cprintf(      "BSSID: %s", _info_str(acx->sBssid));
 	gotoxy(SCR_X0 + 5, SCR_Y0 + 13);
-	cprintf(    "VERSION: %s", _info_str(acx->fn_version));
+	cprintf(    "FUJINET: %s", _info_str(acx->fn_version));
+	gotoxy(SCR_X0 + 6, SCR_Y0 + 14);
+	cprintf("CONFIG: %s", GIT_VERSION);
 
 	screen_clear_status();
-	gotoxy(SCR_X0 + 9, STATUS_BAR);
-	screen_print_menu("C", "HANGE SSID  ");
-	screen_print_menu("R", "ECONNECT");
+	gotoxy(SCR_X0 + 7, STATUS_BAR);
+	screen_print_menu("C", ":CHANGE SSID  ");
+	screen_print_menu("R", ":RECONNECT");
 	gotoxy(SCR_X0 + 4, STATUS_BAR + 1);
 	cprintf("PRESS ANY KEY TO RETURN TO HOSTS");
 }
@@ -505,6 +478,11 @@ void screen_select_file_display(char *p, char *f)
 
 	// content area
 	screen_draw_list_area(SCR_Y0, 18, selected_host_name, 0);
+	if(copy_mode)
+	{
+		gotoxy(SCR_X0, SCR_Y0);
+		cputs("COPY MODE");
+	}
 	// "address" line
 	screen_set_region(SCR_X0, SCR_Y0 + 1, 40, 1);
 	screen_fill_region(EDITLINE_PATTERN_ON);
@@ -522,17 +500,20 @@ void screen_select_file_display(char *p, char *f)
 	//revers(1);
 
 	screen_clear_status();
-	gotoxy(SCR_X0, STATUS_BAR);
+	gotoxy(SCR_X0 + 2, STATUS_BAR);
 	screen_print_menu("EOL", ":CHOOSE  ");
     screen_print_menu("K0",":ABORT  ");
-    screen_print_menu("F","ILTER  ");
-    screen_print_menu("","NEW  "); // TODO
-    screen_print_menu("","COPY");  // TODO
-	if (l > 1)
-	{
-		gotoxy(SCR_X0 + 15, STATUS_BAR+1);
-		screen_print_menu("RCL", ":UPDIR");
-	}
+	if (copy_mode)
+		screen_print_menu("C",":COPY HERE");
+	else
+    	screen_print_menu("K10",":QUICK BOOT");
+	gotoxy(SCR_X0 + 6, STATUS_BAR + 1);
+    screen_print_menu("F",":FILTER  ");
+	if (copy_mode)
+		cputs("      ");
+	else
+    	screen_print_menu("C",":COPY  ");
+	screen_print_menu("RCL", ":UPDIR");
 }
 
 void screen_print_bracket_dots()
@@ -546,7 +527,7 @@ void screen_select_file_prev(void)
 {
 	gotoxy(SCR_X0 + 1, SCR_Y0 + 2);
 	screen_print_bracket_dots();
-	gotoxy(SCR_X0 + 7, STATUS_BAR+1);
+	gotoxy(SCR_X0 + 13, STATUS_BAR + 2);
     screen_print_menu("<",":PREV");
 }
 
@@ -561,7 +542,7 @@ void screen_select_file_next(void)
 {
 	gotoxy(SCR_X0 + 1, SCR_Y0 + 18);
 	screen_print_bracket_dots();
-	gotoxy(SCR_X0 + 26, STATUS_BAR+1);
+	gotoxy(SCR_X0 + 21, STATUS_BAR + 2);
     screen_print_menu(">",":NEXT");
 }
 
@@ -668,17 +649,18 @@ void screen_select_slot(char *e)
 	// handle long filename
 	screen_print_multiline(SCR_Y0 + 13, info->filename);
 
-	bar_set(SCR_Y0 + 1, SCR_X0 + 2, FUJI_MAX_DISKS, 0);
+	bar_set(SCR_Y0 + 1, SCR_X0 + 2, FUJI_MAX_DISKS, FUJI_MAX_DISKS - 1); // preset on last slot which is ROM Module
 }
 
 void screen_select_slot_choose(void)
 {
 	screen_clear_status();
-	gotoxy(SCR_X0 + 0, STATUS_BAR);
-	screen_print_menu("1-4", ":SLOT ");
-	screen_print_menu("EOL\x1b" "b/:\x1b" "b$R", "EAD  ");
-	screen_print_menu("W", "RITE  ");
-	screen_print_menu("E", "JECT ");
+	gotoxy(SCR_X0 + 2, STATUS_BAR);
+	screen_print_menu("1-4", ":SLOT  ");
+	screen_print_menu("EOL", ":READ  ");
+	screen_print_menu("W", ":WRITE  ");
+	screen_print_menu("E", ":EJECT");
+	gotoxy(SCR_X0 + 16, STATUS_BAR + 1);
 	screen_print_menu("K0", ":ABORT");
 }
 
@@ -748,5 +730,10 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
 	gotoxy(SCR_X0 + 3, SCR_Y0 + 1 + hs);
 	textcolor(LIST_COLOR);
 	cprintf(empty);
+}
+
+void screen_end(void)
+{
+  return;
 }
 #endif /* BUILD_PMD85 */

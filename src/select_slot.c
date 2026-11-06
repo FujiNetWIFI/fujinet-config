@@ -41,7 +41,7 @@ void select_slot_init()
   if (quick_boot==true)
     {
       mode=FUJI_DISK_MODE_READ;
-      selected_device_slot=0;
+      selected_device_slot=QUICK_BOOT_DEVICE_SLOT;
       ss_subState=SS_DONE;
     }
   else if (create==false && path_is_rom_file(response))

@@ -48,6 +48,13 @@
 #define DIR_MAX_LEN 36
 #endif
 
+/* Device slot a quick boot mounts the selected file into */
+#ifdef BUILD_PMD85
+#define QUICK_BOOT_DEVICE_SLOT (FUJI_MAX_DISKS - 1) /* ROM module */
+#else
+#define QUICK_BOOT_DEVICE_SLOT 0
+#endif
+
 #if defined(BUILED_APPLE2) || defined(BUILD_C64)
 #define PRINTER 0
 #else

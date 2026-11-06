@@ -4,6 +4,7 @@
  */
 
 #include <conio.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "input.h"
@@ -64,9 +65,50 @@ extern bool copy_mode;
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
+#define KEY_REPEAT_START 30  // x 10ms, delay before autorepeat starts
+#define KEY_REPEAT_RATE  60 // ms, autorepeat period
+
 unsigned char input()
 {
-  return cgetc();
+  static unsigned char last_key = 0;
+  static bool repeating = false;
+  unsigned char c, i;
+
+  if (!kbhit())
+  {
+    last_key = 0;
+    return 0;
+  }
+  c = cgetc();
+
+  // in_GetKey reports held key on every scan, so do key repeat timing here
+  // (CLIB_KBHIT_DELAY is broken - kbhit.asm passes key code to msleep instead of delay)
+  if (c != last_key)
+  {
+    // fresh press: return immediately
+    last_key = c;
+    repeating = false;
+    return c;
+  }
+
+  if (!repeating)
+  {
+    // key still held: wait for repeat start delay, give up if released
+    for (i = 0; i < KEY_REPEAT_START; i++)
+    {
+      msleep(10);
+      if (getk() != c)
+      {
+        last_key = 0;
+        return 0;
+      }
+    }
+    repeating = true;
+    return c;
+  }
+
+  msleep(KEY_REPEAT_RATE);
+  return c;
 }
 
 unsigned char input_ucase(void)
@@ -97,7 +139,10 @@ void input_line(unsigned char x, unsigned char y, unsigned char o, char *c, unsi
     cursor(1);            // turn cursor on
     gotoxy(x + i, y);     // update text position
 
-    a = input();
+    // wait for key, avoid cursor redraw (flicker) while idle
+    while ((a = input()) == 0)
+      ;
+
     switch (a)
     {
     case KEY_LEFT_ARROW:
@@ -198,6 +243,7 @@ HDSubState input_hosts_and_devices_hosts(void)
   case KEY_7:
   case KEY_8:
     bar_jump(k-KEY_1);
+    selected_host_slot = bar_get();
     return HD_HOSTS;
   case KEY_TAB:
     bar_clear(false);
@@ -348,23 +394,53 @@ SFSubState input_select_file_choose(void)
     // strncpy(source_path, path, 224); // makes mess :-(
     // old_pos = pos;
     return SF_DONE;
+	case KEY_K10:
+		// mount file into ROM module slot and boot, ignore folders and links
+		if (copy_mode)
+			break;
+		pos += bar_get();
+		if (select_file_entry_type() != ENTRY_TYPE_FILE)
+		{
+			pos -= bar_get();
+			break;
+		}
+		quick_boot = true;
+		state = SELECT_SLOT;
+		return SF_DONE;
+	case KEY_RCL:
+    if (strcmp(path, "/") != 0)
+      return SF_DEVANCE_FOLDER;
+    if (copy_mode)
+    {
+      // Up to destination host selection, restore source host and path
+      // (select_file_init will save path to source_path again)
+      selected_host_slot = copy_host_slot;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+      strcpy(path, source_path);
+      state = DESTINATION_HOST_SLOT;
+      return SF_DONE;
+    }
+    // Up to Hosts
+		state = HOSTS_AND_DEVICES;
+		return SF_DONE;
 	case KEY_ESCAPE:
 		copy_mode = false;
 		state = HOSTS_AND_DEVICES;
 		return SF_DONE;
-	case KEY_RCL:
-		return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
 	case 'F':
 	case 'f':
 		return SF_FILTER;
 	// case 'N':
 	// case 'n':
 	// 	return SF_NEW;
-	// case 'C':
-	// case 'c':
-	// 	pos += bar_get();
-	// 	select_file_set_source_filename();
-	// 	return SF_COPY;
+	case 'C':
+	case 'c':
+    if (copy_mode)
+      return SF_DONE;
+		pos += bar_get();
+		select_file_set_source_filename();
+    copy_host_slot = selected_host_slot;
+		return SF_COPY;
 	case ',':
 	case '<':
 		if (pos > 0)
@@ -486,7 +562,40 @@ unsigned char input_select_slot_mode(char *mode)
 
 DHSubState input_destination_host_slot_choose(void)
 {
-  return DH_CHOOSE;
+  unsigned char k=input();
+
+  switch(k)
+    {
+    case KEY_RETURN:
+      selected_host_slot=bar_get();
+      copy_mode=true;
+      strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+      return DH_DONE;
+    case KEY_ESCAPE:
+      copy_mode=false;
+      state=HOSTS_AND_DEVICES;
+      return DH_ABORT;
+    case KEY_1:
+    case KEY_2:
+    case KEY_3:
+    case KEY_4:
+    case KEY_5:
+    case KEY_6:
+    case KEY_7:
+    case KEY_8:
+      bar_jump(k-KEY_1);
+      return DH_CHOOSE;
+    case KEY_UP_ARROW:
+    case KEY_LEFT_ARROW:
+      bar_up();
+      return DH_CHOOSE;
+    case KEY_DOWN_ARROW:
+    case KEY_RIGHT_ARROW:
+      bar_down();
+      return DH_CHOOSE;
+    default:
+      return DH_CHOOSE;
+    }
 }
 
 SISubState input_show_info(void)
@@ -503,6 +612,8 @@ SISubState input_show_info(void)
 	case 'R':
 		state = CONNECT_WIFI;
 		return SI_DONE;
+	case 0:
+		return SI_SHOWINFO;
 	default:
 		state = HOSTS_AND_DEVICES;
 		return SI_DONE;
