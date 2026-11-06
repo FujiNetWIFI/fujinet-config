@@ -74,6 +74,10 @@ VCHOST	EQU 0801AH		; host slot the copy source is on
 VPEND	EQU 0801BH		; pending state, for screens that return
 VCMODE	EQU 0801EH		; 1 while picking a copy destination
 VSRCD	EQU 0801FH		; length of VSRC's folder part, '/' included
+VBSEQ	EQU 08036H		; boot: the MOUNT_IMAGE sequence
+VBPCT	EQU 08037H		; boot: last percentage drawn
+VBTMO	EQU 08038H		; boot: polls left before giving up
+VBCEL	EQU 08039H		; boot: filled bar cells
 VPOLLN	EQU 08032H		; link-poll countdown (r9 belongs to FNGO)
 VPOLLS	EQU 08035H		; input samples left in this poll
 VEDDR	EQU 08033H		; keyboard row being drawn

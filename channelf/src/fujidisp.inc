@@ -267,7 +267,8 @@ DHEXS2:	ST
 	POP
 
 ; ---------------------------------------------------------------------------
-; DCLRR -- clear a band of cells to the background value.
+; DCLRR -- clear a band of cells to the background value; DFILLR -- the same band
+;   in the colour in r3.
 ;   r0 = cells wide, r1 = left pixel column, r2 = top pixel row.
 ;   Clears DCELLH pixel rows.
 ;
@@ -278,8 +279,10 @@ DHEXS2:	ST
 ;   Anything a caller needs across a DCLRR must live somewhere else -- this
 ;   eats most of the directly-addressable file.
 ; ---------------------------------------------------------------------------
+DFILLR:	LR A,3
+	BR DCLRC
 DCLRR:	LI CVAL0
-	COM
+DCLRC:	COM
 	OUTS 1			; background, constant for the whole fill
 	LR A,0
 	SL 1

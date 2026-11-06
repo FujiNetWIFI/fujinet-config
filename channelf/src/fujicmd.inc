@@ -184,25 +184,6 @@ CSDFP:	ENTER
 	PI FNACK
 	LEAVE
 
-; CMIMG -- MOUNT_IMAGE(dev 0, read mode).
-CMIMG:	ENTER
-	LI FD_FUJI
-	LR 0,A
-	LI FC_MIMG
-	LR 1,A
-	LIS 2
-	LR 2,A
-	PI FNBEG
-	CLR
-	LR 0,A
-	PI FNPB
-	LIS 1
-	LR 0,A
-	PI FNPB
-	PI FNGO
-	PI FNACK
-	LEAVE
-
 ; CADPTX -- GET_ADAPTERCONFIG_EXTENDED. ssid at +0, fn_version at +125,
 ;   sLocalIP at +140, all as text in the reply window.
 CADPTX:	ENTER
