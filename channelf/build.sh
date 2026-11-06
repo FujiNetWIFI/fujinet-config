@@ -14,9 +14,9 @@ P2BIN="${P2BIN:-$HOME/asl/p2bin}"
 [ -x "$P2BIN" ] || { echo "build.sh: no p2bin at $P2BIN" >&2; exit 1; }
 
 mkdir -p build
-python3 tools/mkfont.py src/font.inc
+python3 tools/mkfont.py build/font.inc
 
-( cd src && "$ASL" config.asm -L -i . -q )
+( cd src && "$ASL" config.asm -L -i ../build -q )
 "$P2BIN" src/config.p build/config.bin -r 0x800-0x47ff -l 0xff -q
 mv -f src/config.lst build/config.lst 2>/dev/null || true
 rm -f src/config.p

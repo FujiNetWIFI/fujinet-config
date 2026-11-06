@@ -11,6 +11,6 @@ build/config.bin: $(wildcard src/*.asm src/*.inc) tools/mkfont.py
 	ASL=$(ASL) P2BIN=$(P2BIN) ./build.sh
 
 clean:
-	rm -rf build src/font.inc
+	rm -rf build
 
 .PHONY: all clean
