@@ -48,9 +48,9 @@ A build must not leave files in the source tree. Intermediate output goes under 
 - `dist.<platform>/`: files the disk-image rules copy onto a platform's disk.
 - `makefiles/`: the MekkoGX build framework, shared with other FujiNet projects. Don't customize it;
   project rules go in the top-level `Makefile`.
-- Console directories (`arcadia`, `astrocade`, `atari-2600`, `atari5200`, `atari7800`, `coleco`,
-  `intv`, `nes`, `o2`, `sms`, `studio2`): standalone CONFIGs, each with its own `Makefile` and
-  `README.md`. The top-level build and CI don't build them.
+- Console directories (`arcadia`, `astrocade`, `atari-2600`, `atari5200`, `atari7800`, `channelf`,
+  `coleco`, `intv`, `nes`, `o2`, `sms`, `studio2`): standalone CONFIGs, each with its own `Makefile`
+  and `README.md`. The top-level build and CI don't build them.
 
 ## Design principles
 

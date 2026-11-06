@@ -1,3 +1,7 @@
+## 2026-11-06
+
+* [Channel F] - New CONFIG for the Fairchild Channel F: WiFi, host slots, a file browser with paging and folders, copying a file to a folder on another host, and boot.
+
 ## 2026-11-04
 
 * [ColecoVision] - CONFIG rewritten in assembly after the Master System's: COMMAND menus, a progress bar while a game loads, long names that scroll, and new sounds. A file that isn't a cartridge image now says so instead of hanging.

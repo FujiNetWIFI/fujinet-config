@@ -38,9 +38,9 @@ own notes in [`dist.h89/`](dist.h89/).
 
 Each console has a standalone CONFIG with its own `Makefile` and `README.md`:
 [Arcadia 2001](arcadia/), [Astrocade](astrocade/), [Atari 2600](atari-2600/),
-[Atari 5200](atari5200/), [Atari 7800](atari7800/), [ColecoVision](coleco/),
-[Intellivision](intv/), [NES](nes/), [Odyssey 2](o2/), [Sega Master System](sms/),
-[Studio II](studio2/).
+[Atari 5200](atari5200/), [Atari 7800](atari7800/), [Channel F](channelf/),
+[ColecoVision](coleco/), [Intellivision](intv/), [NES](nes/), [Odyssey 2](o2/),
+[Sega Master System](sms/), [Studio II](studio2/).
 
 ## Contributing
 
