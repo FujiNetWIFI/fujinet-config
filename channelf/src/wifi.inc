@@ -85,6 +85,12 @@ SSCAN:
 	JMP FAIL
 SSOK:	DCI FNREPLY
 	LM
+	LR 0,A
+	AI 256-SCANMAX-1	; unsigned: the list compares below are signed
+	BNC SSOK1
+	LI SCANMAX
+	LR 0,A
+SSOK1:	LR A,0
 	DCI VSCANN
 	ST
 	DCI VSCANB
@@ -265,6 +271,8 @@ SSPCP:	LM
 	LI ST_EDIT
 	LR 0,A
 	JMP GOTO
+
+SCANMAX	EQU 100
 
 ; SSTOTAL -- r0 = VSCANN + 1, the OTHER row included. Leaf.
 SSTOTAL: DCI VSCANN
