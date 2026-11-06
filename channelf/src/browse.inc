@@ -410,10 +410,9 @@ SFFULLN: ENTER
 	LM
 	AS 4
 	LR 0,A
-	LR A,5
+	LR A,5			; LR leaves W alone: C is still the add's
 	LR 1,A
-	LR A,0
-	BNZ SFFN1
+	BNC SFFN1
 	LR A,1
 	INC
 	LR 1,A
