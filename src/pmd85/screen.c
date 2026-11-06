@@ -125,36 +125,6 @@ void screen_print_menu(const char *si, const char *sc)
 	cputs(sc);
 }
 
-#if 0
-void screen_fujinetlogo(void)
-{
-  unsigned char i, j;
-
-  gotoxy(SCR_X0 + 18, SCR_Y0 + 12);
-  cprintf("O");
-
-  for (i = 0; i < 11; i++)
-  {
-      gotoxy(SCR_X0 + 2 + i, SCR_Y0 + 12);    // fuji scrolling across left to center
-      cprintf(" FUJI*");
-      gotoxy(SCR_X0 + 29 - i, SCR_Y0 + 12);   // net scrolling back right to center
-      cprintf("*NET ");
-      gotoxy(SCR_X0 + 18, SCR_Y0 + i);      // * coming down from the top
-      cprintf(" ");
-      gotoxy(SCR_X0 + 18, SCR_Y0 + 1 + i);
-      cprintf("*");
-      gotoxy(SCR_X0 + 19, SCR_Y0 + 23 - i);   // * coming up from bottom
-      cprintf("*");
-      gotoxy(SCR_X0 + 19, SCR_Y0 + 24 - i);
-      cprintf(" ");
-   }
-   for(i = 0; i < 10; i++) // delay a bit
-   {
-      for(j = 0; j < 255; j++);
-   }
-}
-#endif
-
 void screen_draw_list_area(unsigned char ypos, unsigned char lines, const char *title, unsigned char vbar)
 {
 	// main area
@@ -314,9 +284,7 @@ void screen_destination_host_slot_choose(void)
 	screen_clear_status();
 	gotoxy(SCR_X0 + 5, STATUS_BAR);
 	screen_print_menu("1-8", ":SLOT  ");
-	//gotoxy(SCR_X0, STATUS_BAR+1);
 	screen_print_menu("EOL", ":BROWSE  ");
-	//gotoxy(SCR_X0, STATUS_BAR+2);
 	screen_print_menu("K0", ":ABORT");
 
 	bar_set(SCR_Y0 + 1, SCR_X0 + 2, 8, selected_host_slot);
@@ -512,7 +480,6 @@ void screen_select_file_display(char *p, char *f)
 	screen_draw_list_area(SCR_Y0, 18, selected_host_name, 0);
 	if(copy_mode)
 	{
-		//setcolor();
 		gotoxy(SCR_X0, SCR_Y0);
 		cputs("COPY MODE");
 	}
@@ -542,7 +509,6 @@ void screen_select_file_display(char *p, char *f)
     	screen_print_menu("K10",":QUICK BOOT");
 	gotoxy(SCR_X0 + 6, STATUS_BAR + 1);
     screen_print_menu("F",":FILTER  ");
-    //screen_print_menu("N",":NEW  ");
 	if (copy_mode)
 		cputs("      ");
 	else
@@ -691,7 +657,6 @@ void screen_select_slot_choose(void)
 	screen_clear_status();
 	gotoxy(SCR_X0 + 2, STATUS_BAR);
 	screen_print_menu("1-4", ":SLOT  ");
-	// screen_print_menu("EOL\x1b" "b/:\x1b" "b$R", "EAD  ");
 	screen_print_menu("EOL", ":READ  ");
 	screen_print_menu("W", ":WRITE  ");
 	screen_print_menu("E", ":EJECT");

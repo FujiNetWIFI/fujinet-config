@@ -10,8 +10,9 @@ void system_boot(void)
 #endasm
 }
 
-extern bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
-                              uint32_t selected_size, const char *path)
+bool system_create_new(uint8_t selected_host_slot, uint8_t selected_device_slot,
+                       uint32_t selected_size, const char *path)
 {
 	// TODO implement
+	return false;
 }
