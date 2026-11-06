@@ -23,13 +23,10 @@ PLATFORMS += msdos
 # Untested; see FujiNetWIFI/fujinet-config#326
 #PLATFORMS += msxrom
 
-# Not currently in buildable state
+# pc6001, pc8801 and rc2014 are not currently in a buildable state
 #PLATFORMS += pc6001
 #PLATFORMS += pc8801
-
 PLATFORMS += pmd85
-
-# Not currently in buildable state
 #PLATFORMS += rc2014
 
 # Need a fujinet-lib with the S-100 bus, not in a release yet:

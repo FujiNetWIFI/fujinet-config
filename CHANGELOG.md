@@ -1,6 +1,7 @@
 ## 2026-11-06
 
 * [Channel F] - New CONFIG for the Fairchild Channel F: WiFi, host slots, a file browser with paging and folders, copying a file to a folder on another host, and boot.
+* [PMD 85] - CONFIG for the Tesla PMD 85 builds and runs again: WiFi, host and device slots, a file browser with copy, and K10 quick boot into the ROM module slot.
 
 ## 2026-11-04
 

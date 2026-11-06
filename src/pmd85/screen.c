@@ -441,7 +441,6 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 	gotoxy(SCR_X0, SCR_Y0 + 9);
 	cputs(dh);
 	screen_print_multiline(SCR_Y0 + 10, dp);
-cgetc();
 }
 
 char *_info_str(const char *s)
