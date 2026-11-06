@@ -17,8 +17,6 @@
 #define UNUSED(x) (void)(x);
 
 static const char *empty = "EMPTY";
-static const char *off = "OFF";
-//static const char *eol = "\x1bb$[\x1bb/EOL\x1bb$]\x1bb/";
 
 extern bool copy_mode;
 extern char copy_host_name[32];
@@ -364,12 +362,10 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
 const char *screen_hosts_and_devices_device_slot(unsigned char hs, bool e, char *fn)
 {
 	UNUSED(hs);
+	UNUSED(e);	// device enable is not hooked up, assume always enabled
 	if (fn[0] != 0x00)
 		return fn;
-	else if (e == false)
-		return &off[0];
-	else
-		return &empty[0];
+	return &empty[0];
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -544,7 +540,7 @@ void screen_select_file_display(char *p, char *f)
 	if (copy_mode)
 		screen_print_menu("C",":COPY HERE");
 	else
-    	screen_print_menu("K10",":MOUNT+BOOT");
+    	screen_print_menu("K10",":QUICK BOOT");
 	gotoxy(SCR_X0 + 6, STATUS_BAR + 1);
     screen_print_menu("F",":FILTER  ");
     //screen_print_menu("N",":NEW  ");

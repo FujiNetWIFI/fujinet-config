@@ -7,8 +7,8 @@
 // Text colors and Fill patterns
 
 #if !defined(PMD_COLOR_MONO) && !defined(PMD_COLOR_RGBM) && !defined(PMD_COLOR_ACE)
-// default color mode
-#define PMD_COLOR_ACE
+// build using this color mode
+#define PMD_COLOR_MONO
 #endif
 
 /* -----------------------  MONO ----------------------- */
