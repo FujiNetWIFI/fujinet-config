@@ -9,7 +9,10 @@ void system_boot(void)
     // putstr, not printf: keeps the printf library out of apps that never print.
     putstr(msg, sizeof(msg) - 1);
     pause(120);
-    fuji_enable_user_rom();
+    // Tries a live, reset-free jump over One ROM's DriveWire bridge first;
+    // falls back to fuji_enable_user_rom()'s plain hardware trigger (a real
+    // reset) if no One ROM companion answers - see onerom_boot.c.
+    system_enable_user_rom();
   }
   else
   {
