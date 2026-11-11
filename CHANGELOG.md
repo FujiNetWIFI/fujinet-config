@@ -1,3 +1,7 @@
+## 2026-11-11
+
+* [Adam] - L on the host and disk slot screens boots the lobby.
+
 ## 2026-11-06
 
 * [Channel F] - New CONFIG for the Fairchild Channel F: WiFi, host slots, a file browser with paging and folders, copying a file to a folder on another host, and boot.

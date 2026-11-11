@@ -12,6 +12,7 @@
 #include "../hosts_and_devices.h"
 #include "../select_file.h"
 #include "../select_slot.h"
+#include "../mount_and_boot.h"
 
 #include <video/tms99x8.h>
 #include <eos.h>
@@ -226,7 +227,7 @@ void input_line_set_wifi_password(char *c)
 
 HDSubState input_hosts_and_devices_hosts(void)
 {
-  unsigned char k=input();
+  unsigned char k=input_ucase();
 
   switch(k)
     {
@@ -255,6 +256,11 @@ HDSubState input_hosts_and_devices_hosts(void)
       }
       else
         return HD_HOSTS;
+    case KEY_L:
+      mount_and_boot_lobby();
+      selected_host_slot=bar_get();
+      screen_hosts_and_devices_hosts();
+      return HD_HOSTS;
     case KEY_SMART_IV:
       state=SHOW_INFO;
       return HD_DONE;
@@ -283,7 +289,7 @@ HDSubState input_hosts_and_devices_hosts(void)
 
 HDSubState input_hosts_and_devices_devices(void)
 {
-  unsigned char k=input();
+  unsigned char k=input_ucase();
   switch(k)
     {
     case KEY_1:
@@ -298,6 +304,10 @@ HDSubState input_hosts_and_devices_devices(void)
         screen_should_be_cleared=false;
       bar_clear(false);
       return HD_HOSTS;
+    case KEY_L:
+      mount_and_boot_lobby();
+      screen_hosts_and_devices_devices();
+      return HD_DEVICES;
     case KEY_SMART_IV:
       hosts_and_devices_eject(bar_get());
       return HD_DEVICES;

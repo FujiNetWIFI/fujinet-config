@@ -7,6 +7,7 @@
 
 #include "../screen.h"
 #include "../globals.h"
+#include "../input.h"
 #include <video/tms99x8.h>
 #include <smartkeys.h>
 #include <conio.h>
@@ -16,6 +17,7 @@
 
 #define MAX_DISK_SLOTS (4)
 #define STR_MAX_DISK_SLOTS "4"
+#define INPUT_NO_KEY 1 // input() returns 0 or 1 until a key arrives
 
 bool screen_should_be_cleared=true;
 
@@ -243,7 +245,7 @@ bool any_slot_occupied()
 void screen_hosts_and_devices_hosts(void)
 {
   smartkeys_display(NULL,NULL,NULL,"  SHOW\n CONFIG","  EDIT\n  SLOT","  BOOT");
-  smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] GO TO DISK SLOTS");
+  smartkeys_status("  [RETURN] SELECT HOST\n  [1-8] SELECT SLOT\n  [TAB] DISKS  [L] LOBBY");
   bar_clear(false);
   bar_set(0,1,8,selected_host_slot);
 }
@@ -251,7 +253,7 @@ void screen_hosts_and_devices_hosts(void)
 void screen_hosts_and_devices_devices(void)
 {
   smartkeys_display(NULL,NULL,NULL," EJECT"," ON/OFF\n TOGGLE","  BOOT");
-  smartkeys_status("  [TAB] GO TO HOST SLOTS\n  [CLEAR] EJECT ALL SLOTS");
+  smartkeys_status("  [TAB] GO TO HOST SLOTS\n  [CLEAR] EJECT ALL SLOTS\n  [L] BOOT LOBBY");
   bar_clear(false);
   bar_set(11,1,4,selected_device_slot);
 }
@@ -560,6 +562,19 @@ void screen_select_slot_build_eos_directory_failed(void)
   smartkeys_display(NULL,NULL,NULL,NULL,NULL,NULL);
   smartkeys_status("  COULD NOT WRITE\n  THE DIRECTORY.\n  PRESS ANY KEY.");
   smartkeys_sound_play(SOUND_NEGATIVE_BUZZ);
+}
+
+bool screen_mount_and_boot_lobby(void)
+{
+  unsigned char k;
+
+  smartkeys_display(NULL,NULL,NULL,NULL,"  YES","   NO");
+  smartkeys_status("  BOOT THE LOBBY?");
+  smartkeys_sound_play(SOUND_POSITIVE_CHIME);
+
+  // Not cgetc(): input()'s pending read would see the same key
+  while ((k = input()) <= INPUT_NO_KEY);
+  return k == SMARTKEY_V;
 }
 
 void screen_destination_host_slot(char *h, char *p)

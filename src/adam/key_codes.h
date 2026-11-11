@@ -11,6 +11,7 @@
 #define KEY_6            0x36
 #define KEY_7            0x37
 #define KEY_8            0x38
+#define KEY_L            0x4C
 #define KEY_HOME         0x80
 #define KEY_SMART_I      0x81
 #define KEY_SMART_II     0x82
