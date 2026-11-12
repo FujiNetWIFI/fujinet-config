@@ -2,8 +2,9 @@
 
 CONFIG is the program a FujiNet boots into: it sets up WiFi, browses hosts, and mounts disk images
 into the device slots. One set of shared sources in `src/` is built for every computer in the
-`PLATFORMS` list of the top-level `Makefile` (Adam, Apple II, Atari, C64, CoCo, Dragon, MS-DOS,
-TRS-80 Model II). The game consoles each have a standalone CONFIG in a directory of its own.
+`PLATFORMS` list of the top-level `Makefile` (Adam, Apple II, Atari, C64, CoCo, Dragon, Heathkit
+H89, MS-DOS, MSX, PMD 85, TRS-80 Model II). The game consoles each have a standalone CONFIG in a
+directory of its own.
 
 This is the working reference for anyone changing the code: new contributors, regulars, and AI
 coding assistants alike.
@@ -19,9 +20,9 @@ coding assistants alike.
 
 ## Build
 
-The cross-compilers are cc65 (Apple II, Atari, C64), CMOC (CoCo, Dragon), z88dk (Adam, Model II)
-and Open Watcom (MS-DOS). The `fozztexx/defoogi` container has all of them and the disk tools; CI
-uses it.
+The cross-compilers are cc65 (Apple II, Atari, C64), CMOC (CoCo, Dragon), z88dk (Adam, H89, Model
+II, MSX, PMD 85) and Open Watcom (MS-DOS). The `fozztexx/defoogi` container has all of them and the
+disk tools; CI uses it.
 
 ```sh
 make                # every platform in PLATFORMS
