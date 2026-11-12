@@ -158,7 +158,7 @@ void select_slot_done()
     if (!system_create_new(selected_host_slot,selected_device_slot,selected_size,path))
     {
       screen_error("  COULD NOT CREATE DISK.");
-      pause(150);
+      fuji_sleep_ms(2500);
       goto not_created;
     }
 #if defined(BUILD_COCO) || defined(BUILD_H89) || defined(BUILD_MODEL2)
@@ -217,7 +217,7 @@ void select_slot_done()
     strcat(filename, response);
 
 #ifdef BUILD_MSDOS
-    pause(6);
+    fuji_sleep_ms(100);
 #endif
 
 #ifdef BUILD_ADAM

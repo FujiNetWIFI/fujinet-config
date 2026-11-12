@@ -29,7 +29,7 @@ void connect_wifi(void)
 #endif /* _CMOC_VERSION_ */
 		{
 			screen_error("CONNECTION ABORTED");
-			pause(150);
+			fuji_sleep_ms(2500);
 			state=SET_WIFI;
 			return;
 		}
@@ -40,7 +40,7 @@ void connect_wifi(void)
 		{
 		case 1:
 			screen_error("NO SSID AVAILABLE");
-			pause(150);
+			fuji_sleep_ms(2500);
 			return;
 		case 3:
 			fuji_get_ssid(&nc);
@@ -53,24 +53,24 @@ void connect_wifi(void)
 #if defined(BUILD_ADAM) || defined(BUILD_MSXROM)
                         screen_should_be_cleared=true;
 #endif
-			pause(60);
+			fuji_sleep_ms(1000);
 			return;
 		case 4:
 			screen_error("CONNECT FAILED");
-			pause(150);
+			fuji_sleep_ms(2500);
 			return;
 		case 5:
 			screen_error("CONNECTION LOST");
-			pause(150);
+			fuji_sleep_ms(2500);
 			return;
 		default:
 			screen_error("PLEASE WAIT...(ESC TO ABORT)");
- 			pause(150);
+ 			fuji_sleep_ms(2500);
 			retries--;
 			break;
 		}
 	}
 	screen_error("UNABLE TO CONNECT");
-	pause(150);
+	fuji_sleep_ms(2500);
 	state = SET_WIFI;
 }

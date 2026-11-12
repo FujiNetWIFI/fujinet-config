@@ -76,7 +76,7 @@ void screen_color_hint(bool show);
 void screen_box_joined(byte y, byte h, const char *title);
 /* Redraw device slot i of a list whose first slot is on row y */
 void screen_device_slot(byte y, byte i);
-void screen_message_target(byte y, bool center, byte hold);
+void screen_message_target(byte y, bool center, bool hold);
 bool screen_select_file_row_is_dir(byte y);
 
 void bar_unlit(void);

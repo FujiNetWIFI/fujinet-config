@@ -6,13 +6,12 @@
 
 #include <cmoc.h>
 #include <fujinet-fuji.h>
-#include "../pause.h"
+/* Not ../pause.h: there, fuji_sleep_ms() is this function */
 
-void pause(unsigned char delay)
+void dragon_sleep_ms(unsigned ms)
 {
 	asm
 	{
-		// fuji_wait_jiffies() counts the 60 Hz interrupt, which may not be on yet
     lda     $FF03 // get control register of PIA0, port B
     ora     #1
     sta     $FF03 // enable 60 Hz interrupt
@@ -21,7 +20,7 @@ void pause(unsigned char delay)
     andcc   #$AF
 	}
 
-	fuji_wait_jiffies(delay);
+	fuji_sleep_ms(ms);
 }
 
 #endif /* _CMOC_VERSION_ */

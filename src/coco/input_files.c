@@ -35,7 +35,8 @@ unsigned char input_select_file_new_type(void)
 unsigned long input_select_file_new_size(unsigned char t)
 {
   char c[4];
-  unsigned long n;
+  char *p;
+  unsigned short n = 0;
 
   memset(c, 0, sizeof(c));
   input_digits_only = true;
@@ -43,8 +44,10 @@ unsigned long input_select_file_new_size(unsigned char t)
     c[0] = 0;
   input_digits_only = false;
 
+  for (p = c; *p; p++)
+    n = n * 10 + (*p - '0');
+
   /* The firmware takes the drive count as one byte */
-  n = atol(c);
   if (n > 255)
   {
     screen_error("MAX 255 DRIVES.");

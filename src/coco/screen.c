@@ -9,12 +9,14 @@
 #include "../globals.h"
 #include "../pause.h"
 
+#define MSG_HOLD_MS 2000
+
 char text_empty[] = "<Empty>";
 unsigned screen_generation;
 static byte orig_casflag;
 static byte msg_y = STATUS_Y;
 static bool msg_center;
-static byte msg_hold;
+static bool msg_hold;
 static byte cur_x, cur_y;
 
 void screen_init(void)
@@ -123,8 +125,8 @@ void screen_prompt(const char *s)
   screen_puts(MENU_X, MENU_Y1, s);
 }
 
-/* Where screen_error() draws; hold pauses (ticks) so a message about to be left behind can be read. */
-void screen_message_target(byte y, bool center, byte hold)
+/* Where screen_error() draws; hold keeps a message about to be left behind up for MSG_HOLD_MS. */
+void screen_message_target(byte y, bool center, bool hold)
 {
   msg_y = y;
   msg_center = center;
@@ -135,7 +137,7 @@ void screen_message_target(byte y, bool center, byte hold)
 /* Shared code reports progress and success through screen_error() too. */
 static bool is_status(const char *msg)
 {
-  return strncmp(msg, "CONNECTION SUCCESS", 18) == 0 || strncmp(msg, "PLEASE WAIT", 11) == 0;
+  return memcmp(msg, "CONNECTION SUCCESS", 18) == 0 || memcmp(msg, "PLEASE WAIT", 11) == 0;
 }
 #else
 #define is_status(msg) false
@@ -144,13 +146,13 @@ static bool is_status(const char *msg)
 void screen_error(const char *msg)
 {
   /* Shared code names ESC; the CoCo key is BREAK. */
-  if (strncmp(msg, "PLEASE WAIT...(ESC", 18) == 0)
+  if (memcmp(msg, "PLEASE WAIT...(ESC", 18) == 0)
     msg = "PLEASE WAIT...(BREAK TO ABORT)";
   screen_clear_line(msg_y);
   screen_puts_role(msg_center ? (SCREEN_COLS - (byte)strlen(msg)) / 2 : MENU_X, msg_y, msg,
                    is_status(msg) ? ROLE_STATUS : ROLE_ERROR);
   if (msg_hold)
-    pause(msg_hold);
+    fuji_sleep_ms(MSG_HOLD_MS);
 }
 
 static void hline(byte x, byte y, byte n)
@@ -195,7 +197,7 @@ void screen_title(const char *title)
 void screen_frame(const char *title)
 {
   screen_clear();
-  screen_message_target(STATUS_Y, false, 0);
+  screen_message_target(STATUS_Y, false, false);
   screen_title(title);
   screen_box(0, MENU_BOX_Y, SCREEN_COLS, SCREEN_ROWS - MENU_BOX_Y, NULL);
 }

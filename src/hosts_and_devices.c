@@ -219,7 +219,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
     // Display error for a moment then redraw menu after
     strcpy(err_msg, "ERROR SETTING DISK MODE: ");
     screen_error(err_msg);
-    pause(150);
+    fuji_sleep_ms(2500);
 
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
@@ -236,7 +236,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   {
     // Display error for a moment then redraw menu after
     screen_error("Error setting disk mode");
-    pause(150);
+    fuji_sleep_ms(2500);
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));
@@ -382,7 +382,7 @@ void hosts_and_devices(void)
           || !fuji_get_device_slots(deviceSlots, FUJI_MAX_DISKS))
       {
         screen_error("  COULD NOT READ SLOTS.");
-        pause(150);
+        fuji_sleep_ms(2500);
         continue;
       }
       fuji_update_devices_enabled(deviceEnabled, FUJI_MAX_DISKS);

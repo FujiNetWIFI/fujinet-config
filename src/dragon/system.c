@@ -9,12 +9,12 @@ void system_boot(void)
 {
   if (system_slot0_is_rom()) {
     printf("\nBOOTING USER ROM...\n");
-    pause(120);                 
+    fuji_sleep_ms(2000);                 
     fuji_enable_user_rom();
   }
   else
   {
-    pause(120);
+    fuji_sleep_ms(2000);
   }
 
 #ifndef DRAGON

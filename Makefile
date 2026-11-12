@@ -119,7 +119,7 @@ endif
 CO = build/config/coco/src
 COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/coco/launch/runm.o \
   $(CO)/coco/launch/entry.o $(CO)/coco/bar.o $(CO)/coco/color.o $(CO)/coco/die.o $(CO)/coco/input.o \
-  $(CO)/coco/pause.o $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o \
+  $(CO)/coco/screen.o $(CO)/coco/strendswith.o $(CO)/coco/system.o \
   $(CO)/coco/text_hires.o $(CO)/rom_file.o
 COCO_WIFI_OBJS = $(CO)/coco/wifi/wifi.o $(CO)/check_wifi.o $(CO)/connect_wifi.o \
   $(CO)/set_wifi.o $(CO)/show_info.o $(CO)/coco/screen_wifi.o $(CO)/coco/input_wifi.o
