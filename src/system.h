@@ -20,6 +20,13 @@ extern bool path_is_rom_file(const char *name);
 #define path_is_rom_file(name) false
 #endif /* BUILD_COCO || BUILD_DRAGON */
 
+#ifdef BUILD_COCO
+// Boots an already-mounted slot 0 cartridge live, over One ROM's DriveWire
+// bridge, without a hardware reset - src/coco/onerom_boot.c. Falls back to
+// the normal FUJI_IO_REG trigger (a real reset) if no One ROM answers.
+extern void system_enable_user_rom(void);
+#endif /* BUILD_COCO */
+
 #ifdef BUILD_APPLE2
 extern void system_list_devs(void);
 #endif /* BUILD_APPLE2 */
