@@ -182,7 +182,7 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   bool mnt;
   char err_msg[64];
 #elif defined(BUILD_APPLE2)
-  bool mnt = false;
+  bool mnt;
 #endif
 
   memset(temp_filename, 0, sizeof(temp_filename));
@@ -216,12 +216,10 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   // Check for error
   if (!mnt)
   {
-    unsigned int i;
     // Display error for a moment then redraw menu after
     strcpy(err_msg, "ERROR SETTING DISK MODE: ");
     screen_error(err_msg);
-    for (i = 0; i < 6000; i++)
-      // Do nothing to let the message display
+    pause(150);
 
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
@@ -236,11 +234,9 @@ void hosts_and_devices_devices_set_mode(unsigned char m)
   // Check for error
   if (!mnt)
   {
-    unsigned int i;
     // Display error for a moment then redraw menu after
     screen_error("Error setting disk mode");
-    for (i = 0; i < 4000; i++)
-      mnt = true; // Do nothing to let the message display
+    pause(150);
     // likely failed on setting write mode, make it read only
     temp_deviceSlot.mode = FUJI_DISK_MODE_READ;
     memcpy(&deviceSlots[selected_device_slot], &temp_deviceSlot, sizeof(DeviceSlot));

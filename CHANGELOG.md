@@ -1,5 +1,6 @@
 ## 2026-11-12
 
+* [All] - Messages stay up for the same time on every platform; on Adam, Apple II, Atari and PMD 85 some flashed past or never showed.
 * [All] - Update fujinet-lib to 5.1.1.
 
 ## 2026-11-11

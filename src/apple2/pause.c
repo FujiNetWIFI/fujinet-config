@@ -1,14 +1,11 @@
 #ifdef BUILD_APPLE2
 
-#pragma warn (unused-param, push, off)
+#include <fujinet-fuji.h>
+#include "../pause.h"
+
 void pause(unsigned char delay)
 {
-    int a,b;
-
-    for (a=0;a<delay;a++)
-        for (b=0;b<40;b++);
-
+  fuji_wait_jiffies(delay);
 }
 
-#pragma warn (unused-param, pop)
-#endif
+#endif /* BUILD_APPLE2 */

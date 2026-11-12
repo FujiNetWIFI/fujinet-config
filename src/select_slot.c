@@ -158,11 +158,7 @@ void select_slot_done()
     if (!system_create_new(selected_host_slot,selected_device_slot,selected_size,path))
     {
       screen_error("  COULD NOT CREATE DISK.");
-#ifdef BUILD_APPLE2
-      pause(255); // the Apple II's pause() runs about 4x short
-#else
       pause(150);
-#endif
       goto not_created;
     }
 #if defined(BUILD_COCO) || defined(BUILD_H89) || defined(BUILD_MODEL2)
