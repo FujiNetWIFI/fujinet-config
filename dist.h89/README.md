@@ -9,12 +9,10 @@ graphics characters for the frame, and the 25th line for the status.
 ## Building
 
 ```sh
-make FUJINET_LIB=~/Workspace/fujinet-lib h89
+make h89
 ```
 
-`FUJINET_LIB` can be left out: the Makefile then fetches the fujinet-lib
-branch named in `FUJINET_LIB_H89`. Each build leaves the program and a 100K
-H17 disk with it on in `r2r/`:
+Each build leaves the program and a 100K H17 disk with it on in `r2r/`:
 
 | | |
 |---|---|

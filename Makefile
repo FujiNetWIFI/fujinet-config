@@ -11,17 +11,11 @@ PLATFORMS += atari
 PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += dragon
-
-# Heathkit H89 is off until a fujinet-lib release has #249 and #155.
-# Build them with make h89 (or make h89-cpm/r2r, make h89-hdos/r2r).
-#PLATFORMS += h89-cpm
-#PLATFORMS += h89-hdos
-
+PLATFORMS += h89-cpm
+PLATFORMS += h89-hdos
 PLATFORMS += model2
 PLATFORMS += msdos
-
-# Untested; see FujiNetWIFI/fujinet-config#326
-#PLATFORMS += msxrom
+PLATFORMS += msxrom
 
 # pc6001, pc8801 and rc2014 are not currently in a buildable state
 #PLATFORMS += pc6001
@@ -57,15 +51,7 @@ endif
 # - empty which will use whatever is the latest
 # Pinned, because finding the latest release goes through the GitHub API,
 # whose rate limit CI runs hit.
-FUJINET_LIB = 5.1.0
-
-# Thom's branch has fujinet-lib #249, for the reworked card without the 74LVC245,
-# and #155. No release has either yet.
-# FUJINET_LIB=<dir> on the command line overrides this.
-FUJINET_LIB_H89 ?= https://github.com/tschak909/fujinet-lib.git\#h89-setup-after-reset
-ifneq ($(filter h89-cpm h89-hdos,$(PLATFORM)),)
-  FUJINET_LIB = $(FUJINET_LIB_H89)
-endif
+FUJINET_LIB = 5.1.1
 
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2

@@ -1,3 +1,7 @@
+## 2026-11-12
+
+* [All] - Update fujinet-lib to 5.1.1.
+
 ## 2026-11-11
 
 * [Adam] - L on the host and disk slot screens boots the lobby.
