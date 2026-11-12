@@ -2,6 +2,7 @@
 
 * [All] - Messages stay up for the same time on every platform; on Adam, Apple II, Atari and PMD 85 some flashed past or never showed.
 * [All] - Update fujinet-lib to 5.1.1.
+* [CoCo] - After a W mount, or a ROM or CCC mounted in slot 0, the file browser comes back to the folder it was in.
 
 ## 2026-11-11
 
