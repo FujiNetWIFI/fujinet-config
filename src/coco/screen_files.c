@@ -66,6 +66,7 @@ void screen_select_slot(const char *e)
   const FujiDirEntry *f = (const FujiDirEntry *)e;
   char s[LIST_W + 1];
   char *p;
+  unsigned size_hi, size_lo;
 
   screen_frame("FujiNet Config");
   screen_box(0, SLOT_BOX_Y, SCREEN_COLS, FUJI_MAX_DISKS + 2, "DRIVE SLOTS");
@@ -91,20 +92,23 @@ void screen_select_slot(const char *e)
     *p = 0;
     screen_puts(INFO_X, DETAIL_BOX_Y + 3, s);
 
+    /* 16-bit halves keep the 32-bit runtime out; the 6809 stores the high word first */
+    size_hi = ((const unsigned *)&f->size)[0];
+    size_lo = ((const unsigned *)&f->size)[1];
     strcpy(s, "Size: ");
-    if (f->size >= 1048576UL)
+    if (size_hi >= 0x10)
     {
-      p = put_uint(s + 6, (unsigned)(f->size >> 20));
+      p = put_uint(s + 6, size_hi >> 4);
       strcpy(p, " M");
     }
-    else if (f->size >= 1024UL)
+    else if (size_hi || size_lo >= 1024)
     {
-      p = put_uint(s + 6, (unsigned)(f->size >> 10));
+      p = put_uint(s + 6, (size_hi << 6) | (size_lo >> 10));
       strcpy(p, " K");
     }
     else
     {
-      p = put_uint(s + 6, (unsigned)f->size);
+      p = put_uint(s + 6, size_lo);
       strcpy(p, " bytes");
     }
     screen_puts(INFO_X, DETAIL_BOX_Y + 4, s);
@@ -181,7 +185,7 @@ void screen_select_file(void)
 {
   file_boxes();
   file_info(path, filter);
-  screen_message_target(FILES_Y, true, 120);
+  screen_message_target(FILES_Y, true, true);
   screen_puts(FILE_X + 1, FILES_Y, "Opening...");
 }
 
@@ -192,7 +196,7 @@ void screen_select_file_display(char *p, char *f)
 
   file_boxes();
   file_info(p, f);
-  screen_message_target(FILES_Y, true, 120);
+  screen_message_target(FILES_Y, true, true);
 
   for (y = FILES_Y; y < FILES_Y + ENTRIES_PER_PAGE; y++)
     put_padded(FILE_X, y, "", FILE_W);
@@ -307,7 +311,7 @@ void screen_select_slot_rom_mounted(void)
 {
   menu_drawn = false;
   screen_prompt("ROM mounted in slot 0");
-  pause(120);
+  fuji_sleep_ms(2000);
 }
 
 void screen_destination_host_slot(char *h, char *p)

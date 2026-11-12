@@ -13,7 +13,7 @@ void mount_and_boot_lobby(void)
 	if (screen_mount_and_boot_lobby())
 	{
 		fuji_set_boot_mode(FUJI_BOOT_MODE_LOBBY);
-		pause(120);
+		fuji_sleep_ms(2000);
 		coldStart();
 	}
 	else

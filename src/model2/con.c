@@ -45,19 +45,7 @@ int con_in(void) __naked
 #endasm
 }
 
-/* Special functions: B = the function number, CALL 40h; results come back
-   in the registers */
-uint32_t con_ticks(void) __naked
-{
-#asm
-    ld      b,14
-    call    40h         ; DE = low word, HL = high word
-    ex      de,hl
-    ret
-#endasm
-}
-
-/* Special function n, with nothing passed or returned */
+/* P&T special function n (B = n, CALL 40h), with nothing passed or returned */
 static void special(uint8_t n) __z88dk_fastcall __naked
 {
 #asm

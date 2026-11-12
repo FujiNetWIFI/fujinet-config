@@ -32,7 +32,7 @@ void screen_set_wifi_extended(AdapterConfigExtended *ac)
   center_puts(3, s);
   screen_box(0, NETWORKS_BOX_Y, SCREEN_COLS, MAX_WIFI_NETWORKS + 3, "AVAILABLE NETWORKS");
   center_puts(NETWORKS_Y + MAX_WIFI_NETWORKS / 2, "Scanning for networks...");
-  screen_message_target(NETWORKS_Y + MAX_WIFI_NETWORKS / 2, true, 120);
+  screen_message_target(NETWORKS_Y + MAX_WIFI_NETWORKS / 2, true, true);
 }
 
 void screen_set_wifi_display_ssid(char n, SSIDInfo *s)
@@ -115,7 +115,7 @@ void screen_connect_wifi(NetConfig *nc)
   screen_box(0, PROMPT_BOX_Y - 1, SCREEN_COLS, 9, "CONNECTING");
   center_puts(PROMPT_BOX_Y + 1, "Connecting to network:");
   center_puts(PROMPT_BOX_Y + 3, nc->ssid);
-  screen_message_target(PROMPT_BOX_Y + 5, true, 0);
+  screen_message_target(PROMPT_BOX_Y + 5, true, false);
   screen_move(MENU_X, MENU_Y1);
   screen_print_menu("BREAK", " Abort");
 }

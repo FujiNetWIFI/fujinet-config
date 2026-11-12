@@ -344,7 +344,7 @@ void screen_select_file_new_creating(void)
 void screen_select_slot_rom_mounted(void)
 {
     screen_error("ROM MOUNTED IN SLOT 0");
-    pause(120);
+    fuji_sleep_ms(2000);
 }
 
 void screen_error(const char *msg)

@@ -20,8 +20,6 @@
 #include "cursor.h"
 #include "stdarg.h"
 
-extern void system_set_fps();
-
 static const uint8_t *KEY_ADDRESSES[] = {
   0xF87F, 0xF88F, 0xF89F, 0xF8AF, 0xF8BF, 0xF8CF, 0xF8DF, 0xF8EF, 0xF8FF, 0xF90F
 };
@@ -229,8 +227,6 @@ void screen_init(void)
   set_mode_default();
   draw_logo(12,9);
   keyboard_click(false);
-  // should probably move this to a common system_init
-  system_set_fps();
 }
 
 
