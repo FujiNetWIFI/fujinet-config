@@ -138,8 +138,10 @@ SFSubState input_select_file_choose(void)
         return SF_ADVANCE_FOLDER;
       else if (entryType == ENTRY_TYPE_LINK)
         return SF_LINK;
-      else
-        return SF_DONE;
+      // The browser comes back to this folder after the mount
+      if (!copy_mode)
+        strcpy(source_path, path);
+      return SF_DONE;
     case KEY_UP_ARROW:
       scroll_reset(false);
       if ((bar_get() == 0) && (pos > 0))
@@ -203,9 +205,6 @@ SSSubState input_select_slot_choose(void)
   case 'r':
     mode = FUJI_DISK_MODE_READ;
     selected_device_slot = (char)bar_get();
-    // After New, path ends in the new name; select_file_new() saved the folder
-    if (!create)
-      strncpy(source_path, path, 224);
     old_pos = pos;
     return SS_DONE;
   case 'W':
