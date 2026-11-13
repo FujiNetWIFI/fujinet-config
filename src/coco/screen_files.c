@@ -150,7 +150,7 @@ void screen_select_slot_build_eos_directory_creating(void)
 {
 }
 
-/* Paging keeps the menu; a redrawn frame or a prompt in the menu box clears this */
+/* Paging keeps the menu; a redrawn frame or a prompt left in the menu box clears this */
 static bool menu_drawn;
 
 static void file_boxes(void)
@@ -249,17 +249,12 @@ bool screen_select_file_row_is_dir(byte y)
 
 byte redraw_row = 0xFF;
 
-void screen_select_file_choose(char visibleEntries)
+void screen_select_file_menu(void)
 {
-  byte row;
-
-  if (menu_drawn)
-    goto bar;
-  menu_drawn = true;
   screen_menu_clear();
   screen_move(MENU_X, MENU_Y1);
   screen_print_menu("ENTER", " Select  ");
-  screen_print_menu("<-", " Up dir  ");
+  screen_print_menu("<-", " Up dir ");
   screen_print_menu("BREAK", copy_mode == true ? " Abort" : " Back");
   screen_move(MENU_X, MENU_Y2);
   if (copy_mode == true)
@@ -271,9 +266,20 @@ void screen_select_file_choose(char visibleEntries)
     screen_print_menu("F", "ilter  ");
     screen_print_menu("N", "ew  ");
     screen_print_menu("C", "opy  ");
+    screen_print_menu("B", "oot ");
   }
-  screen_print_menu("SHIFT-UP/DN", " Page");
+  screen_print_menu("SH-UP/DN", " Page");
   screen_color_hint(true);
+}
+
+void screen_select_file_choose(char visibleEntries)
+{
+  byte row;
+
+  if (menu_drawn)
+    goto bar;
+  menu_drawn = true;
+  screen_select_file_menu();
 
 bar:
   row = prev_page ? visibleEntries - 1 : 0;
@@ -281,6 +287,11 @@ bar:
     row = redraw_row;
   redraw_row = 0xFF;
   bar_set(FILES_Y, 1, visibleEntries, row);
+}
+
+void screen_select_file_boot(void)
+{
+  screen_prompt("Boot now? Y/N");
 }
 
 void screen_select_file_new_type(void)

@@ -3,6 +3,8 @@
 #include "../../select_slot.h"
 #include "../../perform_copy.h"
 #include "../../destination_host_slot.h"
+#include "../../hosts_and_devices.h"
+#include "../../system.h"
 #include "../coco_screen.h"
 #include "../../typedefs.h"
 #include "../../globals.h"
@@ -44,6 +46,13 @@ int main(void)
       break;
     case PERFORM_COPY:
       perform_copy();
+      break;
+    case DONE:
+      screen_mount_and_boot();
+      hosts_and_devices_done();
+      fuji_set_boot_config(0);
+      screen_handoff();
+      system_boot();
       break;
     default:
       entry_set(ENTRY_HOSTS, selected_host_slot, selected_device_slot);

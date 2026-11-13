@@ -50,6 +50,11 @@ void screen_leave_graphics(void)
   txt_close();
 }
 
+void screen_mount_and_boot(void)
+{
+  screen_leave_graphics();
+}
+
 void screen_loading(const char *what)
 {
   char s[SCREEN_COLS];
