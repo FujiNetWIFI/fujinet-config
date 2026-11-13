@@ -122,6 +122,20 @@ SFSubState input_select_file_choose(void)
     case KEY_BREAK:
       state = HOSTS_AND_DEVICES;
       return SF_DONE;
+    case 'B':
+    case 'b':
+      if (copy_mode == true)
+        break;
+      screen_select_file_boot();
+      while (!(k = inkey()))
+        ;
+      if (k == 'Y' || k == 'y')
+      {
+        state = DONE;
+        return SF_DONE;
+      }
+      screen_select_file_menu();
+      break;
     case KEY_REDRAW:
       scroll_reset(false);
       redraw_row = (byte)bar_get();
@@ -129,7 +143,7 @@ SFSubState input_select_file_choose(void)
       screen_clear();
       return SF_DISPLAY;
     case KEY_LEFT_ARROW:
-      return strcmp(path, "/") == 0 ? SF_CHOOSE : SF_DEVANCE_FOLDER;
+      return path[0] == '/' && !path[1] ? SF_CHOOSE : SF_DEVANCE_FOLDER;
     case KEY_RIGHT_ARROW:
     case KEY_ENTER:
       pos += bar_get();

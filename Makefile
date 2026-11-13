@@ -80,7 +80,7 @@ CFLAGS_EXTRA_Z88DK = -Os
 ########################################
 # CoCo customization
 
-# RUNM keeps the caller's stack, so every app resets S or each hop sinks it toward $7BF8.
+# RUNM keeps the caller's stack, so every app resets S or each hop sinks it toward $7C00.
 # --initial-s only takes effect when compiling main().
 CFLAGS_EXTRA_COCO = -Wno-assign-in-condition --initial-s=7F00
 AUTOEXEC_COCO = dist.coco/autoexec.bas
@@ -114,7 +114,7 @@ endif
 # CoCo apps: WIFI -> MAIN <-> FILES (browse, slot select, copy); MAIN <-> WIFI (info).
 # They hand off through struct entry_data (src/coco/launch/entry.h) and link explicit
 # object lists, since the SRC_DIRS glob would merge them into one program. All three
-# load at $2600, above the hirestxt/splash buffer ($0E00-$25FF); --limit=7BF8 keeps
+# load at $2600, above the hirestxt/splash buffer ($0E00-$25FF); --limit=7C00 keeps
 # each below the handoff data.
 CO = build/config/coco/src
 COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/coco/launch/runm.o \
@@ -124,9 +124,10 @@ COCO_COMMON_OBJS = $(CO)/debug.o $(CO)/coco/launch/runm.o \
 COCO_WIFI_OBJS = $(CO)/coco/wifi/wifi.o $(CO)/check_wifi.o $(CO)/connect_wifi.o \
   $(CO)/set_wifi.o $(CO)/show_info.o $(CO)/coco/screen_wifi.o $(CO)/coco/input_wifi.o
 COCO_MAIN_OBJS = $(CO)/coco/cfg/main.o $(CO)/coco/boot.o $(CO)/hosts_and_devices.o \
-  $(CO)/coco/mount_and_boot.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_hosts.o \
-  $(CO)/coco/input_hosts.o
-COCO_FILES_OBJS = $(CO)/coco/files/main.o $(CO)/coco/files/globals.o $(CO)/select_file.o \
+  $(CO)/hosts_and_devices_done.o $(CO)/coco/mount_and_boot.o $(CO)/coco/screen_slots.o \
+  $(CO)/coco/screen_hosts.o $(CO)/coco/input_hosts.o
+COCO_FILES_OBJS = $(CO)/coco/files/main.o $(CO)/coco/files/globals.o $(CO)/coco/boot.o \
+  $(CO)/hosts_and_devices_done.o $(CO)/select_file.o \
   $(CO)/select_slot.o $(CO)/destination_host_slot.o $(CO)/perform_copy.o \
   $(CO)/coco/scroll.o $(CO)/coco/screen_slots.o $(CO)/coco/screen_files.o \
   $(CO)/coco/input_files.o
@@ -155,7 +156,7 @@ r2r/coco/files3.bin: $(subst $(CO)/,$(CO3)/,$(COCO_FILES_OBJS)) $(COCO3_COMMON_O
 
 $(COCO_SPLIT_BINS) $(COCO3_SPLIT_BINS):
 	@mkdir -p r2r/coco
-	$(LD) -o $@ --org=2600 --limit=7BF8 $^ $(LIBS)
+	$(LD) -o $@ --org=2600 --limit=7C00 $^ $(LIBS)
 
 coco/disk-post::
 	$(call coco-copy,-t -0,$(AUTOEXEC_COCO),$(DISK))

@@ -1,7 +1,7 @@
 #ifdef _CMOC_VERSION_
 
 /**
- * Hosts and devices screen, the lobby prompt and the exit to the text screen for mounting.
+ * Hosts and devices screen and the lobby prompt.
  */
 
 #include "coco_screen.h"
@@ -104,11 +104,6 @@ void screen_hosts_and_devices_eject(unsigned char ds)
 
 void screen_hosts_and_devices_long_filename(const char *f)
 {
-}
-
-void screen_mount_and_boot(void)
-{
-  screen_leave_graphics();
 }
 
 bool screen_mount_and_boot_lobby(void)

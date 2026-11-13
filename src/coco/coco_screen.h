@@ -78,6 +78,8 @@ void screen_box_joined(byte y, byte h, const char *title);
 void screen_device_slot(byte y, byte i);
 void screen_message_target(byte y, bool center, bool hold);
 bool screen_select_file_row_is_dir(byte y);
+void screen_select_file_menu(void);
+void screen_select_file_boot(void);
 
 void bar_unlit(void);
 bool bar_cell_lit(byte x, byte y);

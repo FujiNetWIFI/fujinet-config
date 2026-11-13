@@ -8,7 +8,7 @@ struct entry_data
   unsigned char joystick;    /* JoySide; survives entry_take(), cleared by cfgload */
 };
 
-#define ENTRY_DATA ((struct entry_data *)0x7BF8)
+#define ENTRY_DATA ((struct entry_data *)0x7C00)
 
 /* The CoCo 3 builds are WIFI3, MAIN3 and FILES3 on disk. */
 #ifdef COCO3
