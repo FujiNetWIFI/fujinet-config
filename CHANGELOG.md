@@ -4,6 +4,7 @@
 * [All] - Update fujinet-lib to 5.1.1.
 * [CoCo] - After a W mount, or a ROM or CCC mounted in slot 0, the file browser comes back to the folder it was in.
 * [CoCo] - B in the file browser boots the mounted disks after a Y/N check, without going back to the hosts screen.
+* [CoCo, Dragon] - A ROM in slot 0 that can't be mounted shows COULD NOT LOAD THE ROM and boots normally, instead of resetting into the cartridge.
 
 ## 2026-11-11
 

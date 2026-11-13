@@ -7,15 +7,19 @@ char response[256];
 
 void system_boot(void)
 {
-  if (system_slot0_is_rom()) {
-    printf("\nBOOTING USER ROM...\n");
-    fuji_sleep_ms(2000);                 
+  bool rom = system_slot0_is_rom();
+
+  if (rom) {
+    if (deviceSlots[0].hostSlot == 0xFF) {
+      printf("\nCOULD NOT LOAD THE ROM\n");
+      rom = false;
+    }
+    else
+      printf("\nBOOTING USER ROM...\n");
+  }
+  fuji_sleep_ms(2000);
+  if (rom)
     fuji_enable_user_rom();
-  }
-  else
-  {
-    fuji_sleep_ms(2000);
-  }
 
 #ifndef DRAGON
   coldStart();
