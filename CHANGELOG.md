@@ -1,6 +1,7 @@
 ## 2026-11-17
 
 * [CoCo] - B in the file browser mounts the disk picked last too.
+* [CoCo] - On a CoCo 3, Basic's hi-res commands such as HSCREEN no longer crash after leaving CONFIG.
 
 ## 2026-11-12
 

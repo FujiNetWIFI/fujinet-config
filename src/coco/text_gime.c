@@ -76,6 +76,9 @@ static const byte role_fg[] = { P_TEXT, P_TITLE, P_BOX, P_KEY_FG, P_ERROR, P_STA
 /* Slots 0-3 mirror task 0's program blocks; 4-7 are the screen. */
 static const byte task1_map[8] = { 56, 57, 58, 59, 0, 1, 2, 3 };
 
+/* Basic's task 1; its hi-res commands switch to it without reloading it. */
+static const byte basic_task1_map[8] = { 0x38, 0x30, 0x31, 0x32, 0x33, 0x3D, 0x35, 0x3F };
+
 /* The PMODE 4 splash buffer ($0E00-$25FF) is free once the GIME screen is up. */
 #define FONT      ((byte *)0x0E00)
 #define CELL_CHAR (FONT + NUM_GLYPHS * GLYPH_ROWS)
@@ -209,6 +212,7 @@ void txt_close(void)
   txt_release();
   INTS_OFF();
   *(byte *)0xFF91 = 0;
+  memcpy((void *)0xFFA8, basic_task1_map, sizeof(basic_task1_map));
   *(byte *)0xFF98 = 0;
   *(byte *)0xFF99 = 0;
   *(byte *)0xFF9A = 0;
