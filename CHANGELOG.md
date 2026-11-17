@@ -1,3 +1,7 @@
+## 2026-11-17
+
+* [CoCo] - B in the file browser mounts the disk picked last too.
+
 ## 2026-11-12
 
 * [All] - Messages stay up for the same time on every platform; on Adam, Apple II, Atari and PMD 85 some flashed past or never showed.
