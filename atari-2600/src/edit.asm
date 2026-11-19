@@ -378,11 +378,8 @@ MNDS2:  ; CLEAR
 MNTITL: DB      "ACTIONS",0
 MNCNT   EQU     3
 MNTBL:  DB      "ACCEPT",0
-        DS      16-7
         DB      "CANCEL",0
-        DS      16-7
         DB      "CLEAR",0
-        DS      16-6
 
 ; Field -> maximum characters. One less than the buffer the server reads, so
 ; there is always room for the NUL the payload is padded with.

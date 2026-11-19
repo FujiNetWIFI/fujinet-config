@@ -326,37 +326,19 @@ ICF1:   lda     FNRPLY,x
         cpx     RDMAX
         bcc     ICF1
 ICF2:   cpx     #4
-        bcc     ICFNO
-        dex
+        bcc     ICFNO           ; too short; the compare left Z clear
+        ldy     #3
+ICF3:   dex
         lda     FNRPLY,x
-        jsr     LOWER
-        cmp     #'g'
+        ora     #$20            ; fold case; '.' already has the bit
+        cmp     CFGEXT,y
         bne     ICFNO
-        dex
-        lda     FNRPLY,x
-        jsr     LOWER
-        cmp     #'f'
-        bne     ICFNO
-        dex
-        lda     FNRPLY,x
-        jsr     LOWER
-        cmp     #'c'
-        bne     ICFNO
-        dex
-        lda     FNRPLY,x
-        cmp     #'.'
-        rts                     ; Z is set exactly when it is a .cfg
-ICFNO:  lda     #1
-        cmp     #0              ; force Z clear
-        rts
+        dey
+        bpl     ICF3
+        lda     #0              ; Z set
+ICFNO:  rts
 
-LOWER:  cmp     #'A'
-        bcc     LOW9
-        cmp     #'Z'+1
-        bcs     LOW9
-        clc
-        adc     #32
-LOW9:   rts
+CFGEXT: DB      ".cfg"
 
 ; ---------------------------------------------------------------------------
 ; RDVIS -- read the next entry that should be SHOWN, skipping .cfg siblings.
@@ -439,7 +421,6 @@ DRC:    sta     FNRSEL+FH_TCHR
         ldy     #FNTCOL-1
         jsr     PUTRPL
         jsr     FNENDR
-
         ldx     CFWANT
         inx
         stx     CFCNT
@@ -488,6 +469,39 @@ PUTRPL: lda     FNRPLY,x
 PUTR2:  rts
 
 ; ---------------------------------------------------------------------------
+; WALK -- re-open the directory and read up to the selection, leaving its whole
+; name (NAMEMX, not the listing's cut one) in the reply window. Z set on
+; success; a failed transport is recorded, and running off the end means the
+; selection is gone.
+WALK:   jsr     ODIR
+        bne     WKX
+        jsr     SEEK
+        bne     WKX
+        lda     #0
+        sta     CFWANT
+WK1:    lda     #NAMEMX
+        jsr     RDVISN
+        bne     WKX
+        jsr     FNEOF
+        beq     WKEND
+        lda     CFWANT
+        cmp     CFSEL
+        beq     WKX             ; found: Z set
+        inc     CFWANT
+        jmp     WK1
+WKEND:  lda     #1              ; Z clear
+WKX:    rts
+
+; NMLEN -- X = the length of the name in the reply window.
+NMLEN:  ldx     #0
+NML1:   lda     FNRPLY,x
+        beq     NML2
+        inx
+        cpx     #NAMEMX
+        bcc     NML1
+NML2:   rts
+
+; ---------------------------------------------------------------------------
 ; PICK -- descend into the selection, or boot it.
 ;
 ; The name is not in RAM, so the directory is re-opened and re-read up to the
@@ -495,35 +509,13 @@ PUTR2:  rts
 ; means a folder.
 PICK:   lda     #2
         sta     VBLANK
-        jsr     ODIR
-        beq     PK1
-        jmp     PKBAD
-PK1:    jsr     SEEK
-        beq     PK2
-        jmp     PKBAD
-PK2:    lda     #0
-        sta     CFWANT
-PKSKIP: lda     #NAMEMX         ; the whole name, not the listing's cut one
-        jsr     RDVISN
-        beq     PKS1
-        jmp     PKBAD
-PKS1:   jsr     FNEOF
-        bne     PKS2
-        jmp     PKBAD           ; ran off the end: the selection is gone
-PKS2:   lda     CFWANT
-        cmp     CFSEL
+        jsr     WALK
         beq     PKGOT
-        inc     CFWANT
-        jmp     PKSKIP
+        jmp     PKBAD
 
 ; Folder or file? Walk to the NUL and look at the byte before it.
-PKGOT:  ldx     #0
-PKL1:   lda     FNRPLY,x
-        beq     PKL2
-        inx
-        cpx     #NAMEMX
-        bcc     PKL1
-PKL2:   cpx     #0
+PKGOT:  jsr     NMLEN
+        cpx     #0
         bne     PKL3
         jmp     PKBAD           ; an empty name is nothing to act on
 PKL3:   dex
@@ -584,8 +576,6 @@ PKMARK: lda     #FP_SEED        ; scratch <- buffer 0, the full path
         lda     #BANKHST        ; pick a destination host
         jmp     CFGOTO          ; does not return
 
-PKBAD2: lda     #5
-        sta     CFSTEP
 PKBAD:  jsr     SHOWERR
         lda     #0
         sta     VBLANK
@@ -645,15 +635,10 @@ ASKFIL: lda     #FP_SEL1
 MNTITL: DB      "ACTIONS",0
 MNCNT   EQU     5
 MNTBL:  DB      "UP DIR",0
-        DS      16-7
         DB      "FILTER",0
-        DS      16-7
         DB      "INFO",0
-        DS      16-5
         DB      "COPY",0
-        DS      16-5
         DB      "COPY HERE",0
-        DS      16-10
 
 ; ---------------------------------------------------------------------------
 SHOWERR:
