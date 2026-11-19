@@ -89,6 +89,10 @@ APPVBL: jsr     INREPT
         sta     CFKEY
 
 AVLIST: lda     CFKEY
+        bne     AVKEY
+        jmp     SCTICK          ; nothing pressed: the highlighted name may scroll
+AVKEY:  jsr     SCRST
+        lda     CFKEY
         and     #IN_DOWN
         beq     AV1
         lda     CFSEL
@@ -359,7 +363,8 @@ RDV9:   rts
 
 ; ---------------------------------------------------------------------------
 ; DRAW -- re-list the current directory page.
-DRAW:   jsr     FNCLS
+DRAW:   jsr     SCINIT
+        jsr     FNCLS
         lda     #(TTITLE)&$FF
         sta     FNPTRL
         lda     #(TTITLE)>>8
@@ -421,6 +426,7 @@ DRC:    sta     FNRSEL+FH_TCHR
         ldy     #FNTCOL-1
         jsr     PUTRPL
         jsr     FNENDR
+        jsr     MKCUT
         ldx     CFWANT
         inx
         stx     CFCNT
@@ -500,6 +506,135 @@ NML1:   lda     FNRPLY,x
         cpx     #NAMEMX
         bcc     NML1
 NML2:   rts
+
+; ---------------------------------------------------------------------------
+; The scroll. A name cut to the row's width bounces through it once the
+; cursor has rested: CFMLEN is the direction (1 right, $FF left), 0 while the
+; rest is counted, 2 when there is nothing to scroll; CFMENU is the offset
+; into the name and CFTMR the frames to the next change. The full name comes
+; from one WALK and stays in the reply window, so a step costs no transaction.
+SC_IDLE EQU     45
+SC_STEP EQU     6
+SC_HOLD EQU     30
+
+; SCINIT -- a fresh listing: nothing cut yet, scroll waiting.
+SCINIT: lda     #0
+        sta     CFCUT
+        sta     CFCUT+1
+        sta     CFMENU
+        sta     CFMLEN
+        lda     #SC_IDLE
+        sta     CFTMR
+        rts
+
+; MKCUT -- after PUTRPL: if the name ran past the row, mark the row cut.
+MKCUT:  cpy     #0
+        bne     MKC9            ; the whole name fit
+        lda     FNRPLY,x
+        beq     MKC9
+        lda     CFWANT
+        jsr     BITOF
+        ora     CFCUT,x
+        sta     CFCUT,x
+MKC9:   rts
+
+; BITOF -- row A as a bit: A = the bit within its byte, X = which byte.
+BITOF:  tay
+        and     #7
+        tax
+        lda     #0
+        sec
+BIT1:   rol     a
+        dex
+        bpl     BIT1
+        pha
+        tya
+        lsr     a
+        lsr     a
+        lsr     a
+        tax
+        pla
+        rts
+
+; SCROW -- the highlighted row, from the name at offset CFMENU.
+SCROW:  lda     CFSEL
+        clc
+        adc     #ROW0
+        jsr     FNROWA
+        lda     #'>'
+        sta     FNRSEL+FH_TCHR
+        ldx     CFMENU
+        ldy     #FNTCOL-1
+        jsr     PUTRPL
+        jmp     FNENDR
+
+; SCRST -- before a press is acted on: the row back as listed, the rest
+; counted again.
+SCRST:  lda     CFMLEN
+        beq     SCR1
+        cmp     #2
+        beq     SCR1
+        lda     #0
+        sta     CFMENU
+        jsr     SCROW
+SCR1:   lda     #0
+        sta     CFMLEN
+        lda     #SC_IDLE
+        sta     CFTMR
+        rts
+
+; SCTICK -- once a frame while nothing is pressed.
+SCTICK: lda     CFMLEN
+        cmp     #2
+        beq     SCT9
+        dec     CFTMR
+        bne     SCT9
+        lda     CFMLEN
+        bne     SCSTEP
+        lda     CFSEL           ; rested: only a cut name is worth the fetch
+        jsr     BITOF
+        and     CFCUT,x
+        beq     SCOFF
+        lda     #2              ; blank while we talk, as PICK does
+        sta     VBLANK
+        jsr     WALK
+        php
+        lda     #0
+        sta     VBLANK
+        plp
+        bne     SCOFF
+        jsr     NMLEN
+        cpx     #FNTCOL
+        bcc     SCOFF           ; it fits after all
+        lda     #1
+        sta     CFMLEN
+        lda     #SC_HOLD
+        sta     CFTMR
+        rts
+SCOFF:  lda     #2
+        sta     CFMLEN
+SCT9:   rts
+
+SCSTEP: lda     #SC_STEP
+        sta     CFTMR
+        lda     CFMENU
+        clc
+        adc     CFMLEN
+        sta     CFMENU
+        beq     SCEND           ; back at the start
+        jsr     NMLEN
+        txa
+        sec
+        sbc     #FNTCOL-1       ; the last offset that fills the row
+        cmp     CFMENU
+        bne     SCDRAW
+        lda     #$FF
+        bne     SCSET
+SCEND:  lda     #1
+SCSET:  sta     CFMLEN
+        lda     #SC_HOLD
+        sta     CFTMR
+SCDRAW: jmp     SCROW
 
 ; ---------------------------------------------------------------------------
 ; PICK -- descend into the selection, or boot it.
