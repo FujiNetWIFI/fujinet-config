@@ -72,7 +72,7 @@ held in the cartridge. The console holds a cursor and a handful of flags.
 | 3 | Keyboard | ↑↓←→ move the grid, FIRE type, SELECT menu |
 | 4 | WiFi | ↑↓ move, FIRE pick, SELECT skip |
 | 5 | Boot | progress bar; FIRE dismisses a failure |
-| 6 | (unused) | |
+| 6 | Action menu | ↑↓ move, FIRE choose, SELECT close |
 
 **SELECT opens an action menu.** The Intellivision reaches info, the lobby,
 rename, filter, copy and up-a-level with a twelve-key keypad; this console has
@@ -144,15 +144,9 @@ not a served image, so the flag would only unmount device slot 0 — which
   re-reads its entry at 128. The Intellivision bounce-scrolls the highlighted
   name; this is the one parity item outstanding.
 
-  It needs about 180 bytes and the browser bank has 76. More banks would not
-  help — a bank is 2K whatever the image size. The way in is to move the action
-  menu into a bank of its own: it is modal already, it costs the hosts, browser
-  and keyboard banks about 250 bytes each in `menu.inc` plus their tables, and
-  one shared table with a per-caller mask would pay for all three. The scroll
-  itself is then cheap, because the mechanism exists: load the full name once
-  into a cartridge buffer when the cursor goes idle, then slide a window over
-  it with `FN_BLIT_PATH` and re-poke the gutter with `FN_BLIT_TCELL` — no round
-  trip per frame, only one when the cursor settles.
+  It needs about 200 bytes; with the menu in a bank of its own the browser has
+  about 300. The mechanism is the browser's own: fetch the full name once when
+  the cursor rests, then slide a window over it.
 - **The WiFi list is capped at twelve** with no paging, as on the Intellivision.
 
 ## Tests

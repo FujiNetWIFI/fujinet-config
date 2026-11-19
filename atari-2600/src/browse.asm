@@ -35,12 +35,23 @@ START:  lda     #2
         lda     #0
         sta     CFERR
         sta     CFSTEP
-        sta     CFMOPN
 
 ; Coming back from the keyboard with a filter. A new pattern renumbers every
 ; entry in the directory, so the page and the cursor both have to go back to
 ; the start -- keeping them would point at a row that no longer exists.
         lda     CFFLAG
+        and     #CFF_MENU
+        beq     STNM
+        lda     CFFLAG
+        and     #$FF-CFF_MENU
+        sta     CFFLAG
+        lda     CFSUB
+        cmp     #MNNONE
+        beq     STDRAW
+        jsr     MNDISP          ; UP DIR, FILTER and INFO do not return
+        jmp     STDRAW
+
+STNM:   lda     CFFLAG
         and     #CFF_EDIT
         beq     STDRAW
 
@@ -76,19 +87,6 @@ STDRAW: jsr     DRAW
 ; ---------------------------------------------------------------------------
 APPVBL: jsr     INREPT
         sta     CFKEY
-
-        lda     CFMOPN
-        beq     AVLIST
-        lda     CFKEY
-        jsr     MNKEY
-        sta     CFTMPB
-        lda     CFMOPN
-        bne     AVDONE
-        lda     CFTMPB
-        cmp     #MNNONE
-        beq     AVMRED
-        jsr     MNDISP          ; UP DIR, FILTER and INFO do not return
-AVMRED: jmp     AVRE
 
 AVLIST: lda     CFKEY
         and     #IN_DOWN
@@ -139,8 +137,10 @@ AV3:    lda     CFKEY
 AV4:    lda     CFKEY
         and     #IN_SEL
         beq     AV5
-        jsr     MNOPEN
-        rts
+        lda     #MN_BROWSE
+        sta     CFSUB
+        lda     #BANKMNU
+        jmp     CFGOTO          ; does not return
 
 AV5:    lda     CFKEY
         and     #IN_FIRE
@@ -636,14 +636,6 @@ ASKFIL: lda     #FP_SEL1
         lda     #BANKEDT
         jmp     CFGOTO          ; does not return
 
-MNTITL: DB      "ACTIONS",0
-MNCNT   EQU     5
-MNTBL:  DB      "UP DIR",0
-        DB      "FILTER",0
-        DB      "INFO",0
-        DB      "COPY",0
-        DB      "COPY HERE",0
-
 ; ---------------------------------------------------------------------------
 SHOWERR:
         jsr     SNDERR
@@ -666,7 +658,6 @@ THINT:  DB      "SEL=UP",0
 ; Row colours for the kernel: the hint sits under the list.
         RCOLS   ROWERR,ROW0+NROWS+1
 
-        INCLUDE "menu.inc"
         INCLUDE "ui.inc"
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"

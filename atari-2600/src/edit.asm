@@ -52,40 +52,39 @@ EDDEL   EQU     $7F             ; the last cell: backspace
 START:  lda     #2
         sta     VBLANK
 
+        lda     CFFLAG
+        and     #CFF_MENU
+        bne     STMENU
+
         lda     #0
         sta     EDCOL          ; grid column
         sta     EDROW          ; grid row
-        sta     CFMOPN
 
         ; Everything this bank does is to buffer 3, so select it once.
         lda     #FP_SEL3
         sta     FNRSEL+FH_PATHO
 
-        jsr     DRAW
+STDRAW: jsr     DRAW
 
         lda     #0
         sta     VBLANK
         jsr     DINIT
         jmp     DLOOP
 
+; The menu answered. The grid cursor is where it was; only the screen needs
+; repainting, after whatever the item does.
+STMENU: lda     CFFLAG
+        and     #$FF-CFF_MENU
+        sta     CFFLAG
+        lda     CFSUB
+        cmp     #MNNONE
+        beq     STDRAW
+        jsr     MNDISP          ; ACCEPT and CANCEL do not return
+        jmp     STDRAW
+
 ; ---------------------------------------------------------------------------
 APPVBL: jsr     INREPT
         sta     CFKEY
-
-        lda     CFMOPN
-        beq     AVGRID
-
-        lda     CFKEY
-        jsr     MNKEY
-        sta     CFTMPB
-        lda     CFMOPN
-        bne     AVDONE
-        lda     CFTMPB
-        cmp     #MNNONE
-        beq     AVMRED
-        jsr     MNDISP          ; ACCEPT and CANCEL do not return
-AVMRED: jsr     DRAW
-        rts
 
 AVGRID: lda     CFKEY
         and     #IN_RIGHT
@@ -126,8 +125,10 @@ AVG3:   lda     CFKEY
 AVG4:   lda     CFKEY
         and     #IN_SEL
         beq     AVG5
-        jsr     MNOPEN
-        rts
+        lda     #MN_EDIT
+        sta     CFSUB
+        lda     #BANKMNU
+        jmp     CFGOTO          ; does not return
 
 AVG5:   lda     CFKEY
         and     #IN_FIRE
@@ -375,12 +376,6 @@ MNDS2:  ; CLEAR
         sta     CFELEN
         rts
 
-MNTITL: DB      "ACTIONS",0
-MNCNT   EQU     3
-MNTBL:  DB      "ACCEPT",0
-        DB      "CANCEL",0
-        DB      "CLEAR",0
-
 ; Field -> maximum characters. One less than the buffer the server reads, so
 ; there is always room for the NUL the payload is padded with.
 EDMAXT: DB      32              ; ED_SSID: MAX_SSID_LEN
@@ -415,7 +410,6 @@ RCOLTB: DB      COLTTL,COLPTH,COLHNT,COLTXT
         FATAL   "RCOLTB is not one byte per row"
         ENDIF
 
-        INCLUDE "menu.inc"
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"
 
