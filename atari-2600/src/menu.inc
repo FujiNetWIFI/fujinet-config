@@ -16,12 +16,9 @@
 ; bar.
 ;
 ; Each bank supplies:
-;   MNTBL   a table of labels, SIXTEEN bytes per entry, NUL-terminated within
+;   MNTBL   the labels, packed one after another, each NUL-terminated
 ;   MNCNT   how many of them
-; and dispatches on the index this returns. Sixteen rather than a packed
-; stride so the index is four shifts instead of a multiply; the banks that
-; have a menu all have several hundred bytes free, and none of them has
-; several hundred spare cycles.
+; and dispatches on the index this returns.
 
 MNROW0  EQU     12              ; first item row; the title sits above it
 MNMAX   EQU     6               ; rows reserved, so a short menu still clears
@@ -49,6 +46,7 @@ MNDT1:  lda     MNTITL,y
 MNDT2:  jsr     FNENDR
 
         ldx     #0
+        ldy     #0              ; the table offset; FNROWA and FNENDR leave Y alone
 MND1:   txa
         clc
         adc     #MNROW0
@@ -64,17 +62,12 @@ MND1:   txa
 MND2:   lda     #' '
 MND3:   sta     FNRSEL+FH_TCHR
 
-        txa
-        asl     a
-        asl     a
-        asl     a
-        asl     a               ; item * 16
-        tay
 MND4:   lda     MNTBL,y
-        beq     MND5
+        beq     MND45
         sta     FNRSEL+FH_TCHR
         iny
         bne     MND4
+MND45:  iny                     ; past the NUL: the next item
 
 MND5:   jsr     FNENDR
         inx

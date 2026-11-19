@@ -581,13 +581,9 @@ MNCNT   EQU     4
 ; Sixteen bytes an entry; see menu.inc. Eleven usable columns, because column
 ; zero is the cursor gutter.
 MNTBL:  DB      "INFO",0
-        DS      16-5
         DB      "RENAME",0
-        DS      16-7
         DB      "WIFI",0
-        DS      16-5
         DB      "LOBBY",0
-        DS      16-6
 
 ; The lobby's host and ROM. ONE literal each, so there is one place to correct
 ; when the path on the server is confirmed -- the Intellivision uses
