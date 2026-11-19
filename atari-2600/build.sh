@@ -46,7 +46,7 @@ else
     echo "build.sh: no fuji_mailbox.h at $FN2600 -- skipping the equate check" >&2
 fi
 
-BANKS=(hosts browse info edit wifi boot copy)
+BANKS=(hosts browse misc edit wifi boot)
 TAIL=config
 
 # p2bin prints "(N Bytes)" -- the span it actually transferred out of the .p,
