@@ -1,3 +1,7 @@
+## 2026-11-19
+
+* [Atari 2600] - The action menu no longer depends on stray bus bits to know how many items it has.
+
 ## 2026-11-17
 
 * [CoCo] - B in the file browser mounts the disk picked last too.
