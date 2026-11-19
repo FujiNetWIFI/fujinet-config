@@ -7,7 +7,7 @@
 ; one. Empty slots are drawn as such and refuse to mount.
 ;
 ; FIRE mounts the slot, points the cartridge's working directory at "/", and
-; enters the browser. SELECT opens the action menu (see menu.inc), which is
+; enters the browser. SELECT opens the action menu (see menu.asm), which is
 ; how everything the Intellivision reaches with a keypad digit is reached
 ; here.
 
@@ -30,7 +30,6 @@ START:  lda     #2
         lda     #0
         sta     CFERR
         sta     CFSTEP
-        sta     CFMOPN
 
 ; Coming back from the keyboard is not a cold start: the cursor has to stay
 ; where the user left it, and CFSUB carries the verdict. Everything else about
@@ -39,6 +38,18 @@ START:  lda     #2
 ; issues no transactions at all. That is what makes a rename cost one round
 ; trip instead of two.
         lda     CFFLAG
+        and     #CFF_MENU
+        beq     STNM
+        lda     CFFLAG
+        and     #$FF-CFF_MENU
+        sta     CFFLAG
+        lda     CFSUB
+        cmp     #MNNONE
+        beq     STCHK
+        jsr     MNDISP          ; may CFGOTO away and never return
+        jmp     STCHK
+
+STNM:   lda     CFFLAG
         and     #CFF_EDIT
         beq     STCOLD
 
@@ -71,24 +82,6 @@ SHOWN:  lda     #0
 APPVBL: jsr     INREPT
         sta     CFKEY
 
-        lda     CFMOPN
-        beq     AVLIST
-
-; The menu owns the stick while it is up. MNKEY redraws itself as the cursor
-; moves; it closes on a choice or on SELECT, and either way the screen
-; underneath has to be repainted, because the planes cannot be read back.
-        lda     CFKEY
-        jsr     MNKEY
-        sta     CFTMPB
-        lda     CFMOPN
-        bne     AVDONE
-        lda     CFTMPB
-        cmp     #MNNONE
-        beq     AVMRED
-        jsr     MNDISP          ; may CFGOTO away and never return
-AVMRED: jsr     DRAW
-        rts
-
 AVLIST: lda     CFKEY
         and     #IN_DOWN
         beq     AV1
@@ -111,8 +104,10 @@ AV1:    lda     CFKEY
 AV2:    lda     CFKEY
         and     #IN_SEL
         beq     AV3
-        jsr     MNOPEN
-        rts
+        lda     #MN_HOSTS
+        sta     CFSUB
+        lda     #BANKMNU
+        jmp     CFGOTO          ; does not return
 AV3:    lda     CFKEY
         and     #IN_FIRE
         beq     AVDONE
@@ -577,16 +572,6 @@ WRHE:   lda     #2
         sta     CFSTEP
 WRHOK:  rts
 
-MNTITL: DB      "ACTIONS",0
-MNCNT   EQU     4
-
-; Sixteen bytes an entry; see menu.inc. Eleven usable columns, because column
-; zero is the cursor gutter.
-MNTBL:  DB      "INFO",0
-        DB      "RENAME",0
-        DB      "WIFI",0
-        DB      "LOBBY",0
-
 ; The lobby's host and ROM. ONE literal each, so there is one place to correct
 ; when the path on the server is confirmed -- the Intellivision uses
 ; ec.tnfs.io + /intv/lobby.rom, and this is the 2600's equivalent.
@@ -602,7 +587,6 @@ THINT:  DB      "SEL=MENU",0
 ; Row colours for the kernel: the hint sits under the eight slots.
         RCOLS   ROWERR,ROW0+NHOSTS+1
 
-        INCLUDE "menu.inc"
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"
 

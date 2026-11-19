@@ -99,6 +99,7 @@ BANKHST EQU     0               ; host slots
 BANKDIR EQU     1               ; the directory browser
 MI_INFO EQU     0               ; CFSUB for the misc bank: the adapter info
 MI_COPY EQU     1               ; ... and the copy
+BANKMNU EQU     6               ; the SELECT action menu
 BANKMSC EQU     2               ; adapter info and host-to-host copy; CFSUB picks
 BANKEDT EQU     3               ; the on-screen keyboard
 BANKWIF EQU     4               ; wifi: check, scan, pick, connect
@@ -148,6 +149,7 @@ ED_FILT EQU     3
 CFF_FILT EQU    $01             ; a filter is set
 CFF_WIFI EQU    $02             ; wifi is enabled in the adapter's config
 CFF_EDIT EQU    $04             ; an edit is outstanding; CFSUB has its verdict
+CFF_MENU EQU    $08             ; the menu answered; CFSUB has the item or MNNONE
 
 ED_NO   EQU     0               ; cancelled
 ED_OK   EQU     1               ; accepted
@@ -169,7 +171,7 @@ CFKEY   EQU     $B3             ; this frame's newly-pressed input
 ; time share bytes, which is why several of these are named twice: the action
 ; menu is not up while the keyboard grid is, and neither is up while the
 ; browser is bounce-scrolling a filename.
-CFMOPN  EQU     $B4             ; nonzero while the action menu is showing
+CFMOPN  EQU     $B4             ; the menu bank's: nonzero until an item is chosen
 CFSUB   EQU     $B5             ; sub-state within the current bank
 CFRET   EQU     $B6             ; bank to return to from a modal screen
 CFCOPY  EQU     $B7             ; 0 idle, 1 source marked, 2 picking a host
@@ -208,6 +210,15 @@ SAVSP   EQU     $97             ; the stack pointer, while the kernel uses S
 BTPF    EQU     $98             ; the boot bar's PF2; only the boot bank's
                                 ;   kernel reads it
 RDMAX   EQU     $99             ; the browser's READ_DIR_ENTRY maxlen
+
+; The action menu is a bank of its own. A bank enters it with CFSUB = which
+; menu (below) and CFGOTO BANKMNU; it comes back with CFF_MENU set in CFFLAG
+; and CFSUB = the item chosen, or MNNONE for a cancel. The planes it painted
+; over are the caller's to redraw.
+MN_HOSTS EQU    0
+MN_BROWSE EQU   1
+MN_EDIT EQU     2
+MNNONE  EQU     $FF
 
 HOSTSLN EQU     32              ; MAX_HOSTNAME_LEN: the stride in the reply
 NHOSTS  EQU     8               ; MAX_HOST_SLOTS

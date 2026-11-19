@@ -39,6 +39,11 @@ PFSIDE  EQU     $01
 FRMH    EQU     4               ; lines in the top and bottom edges
 
 ; ---------------- DINIT: TIA setup and player positioning ----------------
+; Its delay loop must not cross a page, and where DINIT lands depends on the
+; bank's code before it: push it along when the loop would.
+        IF      ((*+18)&$FF)>=$FC
+        DS      8
+        ENDIF
 DINIT:
 ; Two players, three copies each, eight pixels apart: P0 draws groups 0,2,4
 ; and P1 groups 1,3,5, interleaving to 48 contiguous pixels. VDELP is what
