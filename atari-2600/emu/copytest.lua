@@ -131,7 +131,7 @@ _G._copytest = emu.add_machine_frame_notifier(function()
         -- how this test first "passed" while reading a browser row.
         if pump() then
             if read_row(0):find("COPYING") then
-                local msg = read_row(8)
+                local msg = read_row(7)
                 if msg:gsub("%s","") ~= "" then
                     if msg:find("FAILED") then
                         dump("the copy reported failure: " .. string.format("%q", msg))

@@ -68,11 +68,11 @@ held in the cartridge. The console holds a cursor and a handful of flags.
 |---|---|---|
 | 0 | Host slots | ↑↓ move, FIRE mount and browse, SELECT menu |
 | 1 | Browser | ↑↓ move, ←→ page, ← at page 0 goes up, FIRE descend or boot, SELECT menu |
-| 2 | Adapter info | FIRE or SELECT back |
+| 2 | Adapter info, and the copy | FIRE or SELECT back; the copy returns by itself or on FIRE |
 | 3 | Keyboard | ↑↓←→ move the grid, FIRE type, SELECT menu |
 | 4 | WiFi | ↑↓ move, FIRE pick, SELECT skip |
 | 5 | Boot | progress bar; FIRE dismisses a failure |
-| 6 | Copy | FIRE returns early |
+| 6 | (unused) | |
 
 **SELECT opens an action menu.** The Intellivision reaches info, the lobby,
 rename, filter, copy and up-a-level with a twelve-key keypad; this console has

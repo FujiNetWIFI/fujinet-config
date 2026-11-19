@@ -97,11 +97,12 @@ RCI     SET     RCI+1
 
 BANKHST EQU     0               ; host slots
 BANKDIR EQU     1               ; the directory browser
-BANKINF EQU     2               ; adapter info
+MI_INFO EQU     0               ; CFSUB for the misc bank: the adapter info
+MI_COPY EQU     1               ; ... and the copy
+BANKMSC EQU     2               ; adapter info and host-to-host copy; CFSUB picks
 BANKEDT EQU     3               ; the on-screen keyboard
 BANKWIF EQU     4               ; wifi: check, scan, pick, connect
 BANKBOT EQU     5               ; mount and boot, with a progress bar
-BANKCPY EQU     6               ; host-to-host copy
 
 ; CFCOPY: where a copy has got to. The source's full path lives in cartridge
 ; buffer 2 from the moment it is marked, which is what lets the user browse

@@ -345,7 +345,9 @@ SHOWERR:
 ; MNDISP -- act on the chosen menu item.
 MNDISP: cmp     #0
         bne     MNDS1
-        lda     #BANKINF
+        lda     #MI_INFO
+        sta     CFSUB
+        lda     #BANKMSC
         jmp     CFGOTO          ; does not return
 
 MNDS1:  cmp     #1

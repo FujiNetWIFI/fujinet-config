@@ -1,4 +1,21 @@
-; copy.asm -- CONFIG bank 6: copy a file from one host to another.
+; misc.asm -- CONFIG bank 2: the two small screens, adapter info and copy.
+;
+; They share a bank because every bank carries its own display kernel and
+; libraries, so a screen that is small still costs a whole 2K; sharing one
+; frees a bank. CFSUB says which was asked for (MI_INFO, MI_COPY), set by
+; whoever switches here, and stays put while the screen is up.
+;
+; The kernel reads ONE row colour table per bank, so both screens use the
+; rows the same way: a light-blue label above a white value, an error row, a
+; hint row.
+;
+; ---- info ------------------------------------------------------------------
+; GET_ADAPTERCONFIG_EXTENDED, rendered straight out of the reply window. The
+; reply is 240 bytes and the window is 512, so it lands in slice 0 whole and
+; every field a client wants is below offset 256 -- which is why a single-byte
+; index reaches all of them. Any button goes back to the host screen.
+;
+; ---- copy ------------------------------------------------------------------
 ;
 ; Three presses, spread over three screens, and the state that survives them
 ; is all in the cartridge:
@@ -29,14 +46,26 @@
         CPU     6502
         INCLUDE "vcs.inc"
 
+FNLRRPL EQU     1
+
         INCLUDE "fujinet.inc"
         INCLUDE "cfgdefs.inc"
 
-CPROWS  EQU     2               ; the source
+; Field offsets inside the packed AdapterConfigExtended, from
+; lib/device/fujiDevice/fujiDevice.h.
+AC_SSID EQU     0               ; char[33]
+AC_HOST EQU     33              ; char[64]
+AC_VER  EQU     125             ; char[15]
+AC_SIP  EQU     140             ; char[16], already formatted as text
+AC_SGW  EQU     156             ; char[16]
+AC_SMSK EQU     172             ; char[16]
+AC_SDNS EQU     188             ; char[16]
+AC_SMAC EQU     204             ; char[18]
+
+CPROWS  EQU     3               ; the source, under its label
 CPROWD  EQU     5               ; the destination
-CPROWM  EQU     8               ; what happened
+CPROWM  EQU     7               ; what happened
 CPROWE  EQU     18
-CPROWH  EQU     20
 CPWAIT  EQU     180             ; frames to hold the result before going back
 
         ORG     $1000
@@ -47,32 +76,152 @@ START:  lda     #2
         sta     CFERR
         sta     CFSTEP
         sta     CFMOPN
+        lda     CFSUB
+        bne     CSTART
+        jsr     IDRAW
+        jmp     SHOW
 
-        jsr     DRAW
+CSTART: jsr     CDRAW
         jsr     DOCOPY
-
         lda     #CPWAIT
         sta     CFTMR
         lda     #CP_DONE
         sta     CFCOPY
-        lda     #0
+SHOW:   lda     #0
         sta     VBLANK
         jsr     DINIT
         jmp     DLOOP
 
 ; ---------------------------------------------------------------------------
+APPVBL: lda     CFSUB
+        beq     IAPPVBL
+        jmp     CAPPVBL
+IAPPVBL: jsr     INSCAN
+        jsr     SNDKEY
+        and     #IN_FIRE|IN_SEL
+        beq     IAVDONE
+        lda     #BANKHST
+        jmp     CFGOTO          ; does not return
+IAVDONE: rts
+
+; ---------------------------------------------------------------------------
+IDRAW:   jsr     FNCLS
+        lda     #(ITTITLE)&$FF
+        sta     FNPTRL
+        lda     #(ITTITLE)>>8
+        sta     FNPTRH
+        lda     #0
+        jsr     FNRSTR
+
+        lda     #FNDEVF
+        sta     FNDEV
+        lda     #FNCADPX
+        sta     FNCMD
+        lda     #0
+        sta     FNNPR
+        jsr     FNBEG
+        jsr     FNGO
+        sta     CFERR
+        cmp     #FNEOK
+        bne     IDRBAD
+        jsr     FNACK
+        sta     CFERR
+        cmp     #FNEOK
+        bne     IDRBAD
+
+        ; Twelve columns will not hold a label and a value on one row, so each
+        ; field gets a label row and a value row. Eight fields, sixteen rows,
+        ; and the screen is twenty-one.
+        ldx     #0              ; index into FIELDS
+        ldy     #ROW0           ; the row being written
+IDRF:    sty     CFWANT
+        lda     FIELDS,x
+        cmp     #$FF
+        beq     IDRDONE
+        sta     CFSEL           ; the reply offset, borrowed as scratch
+        inx
+        stx     CFCNT
+
+        ; The label.
+        lda     LBLLO-1,x
+        sta     FNPTRL
+        lda     LBLHI-1,x
+        sta     FNPTRH
+        lda     CFWANT
+        jsr     FNRSTR
+
+        ; The value, straight from the reply window.
+        lda     CFWANT
+        clc
+        adc     #1
+        pha
+        ldx     CFSEL
+        ldy     #FNTCOL
+        pla
+        jsr     FNRRPL
+
+        ldx     CFCNT
+        lda     CFWANT
+        clc
+        adc     #2
+        tay
+        cpy     #ROW0+18
+        bcc     IDRF
+IDRDONE: lda     #(ITHINT)&$FF
+        sta     FNPTRL
+        lda     #(ITHINT)>>8
+        sta     FNPTRH
+        lda     #ROWERR+1
+        jsr     FNRSTR
+        rts
+
+IDRBAD:  jsr     SNDERR
+        lda     #1
+        sta     CFSTEP
+        lda     #ROWERR
+        jsr     FNROWA
+        lda     #'E'
+        sta     FNRSEL+FH_TCHR
+        lda     CFSTEP
+        jsr     FNHEX
+        lda     #' '
+        sta     FNRSEL+FH_TCHR
+        lda     CFERR
+        jsr     FNHEX
+        jsr     FNENDR
+        rts
+
+; The fields, as reply offsets, terminated by $FF. Every one is below 256, so
+; the offset is a byte and FNRRPL can reach it with X alone.
+FIELDS: DB      AC_SSID, AC_SIP, AC_SGW, AC_SDNS, AC_SMAC, AC_VER, $FF
+
+LBLLO:  DB      (LSSID)&$FF, (LIP)&$FF, (LGW)&$FF, (LDNS)&$FF
+        DB      (LMAC)&$FF, (LVER)&$FF
+LBLHI:  DB      (LSSID)>>8, (LIP)>>8, (LGW)>>8, (LDNS)>>8
+        DB      (LMAC)>>8, (LVER)>>8
+
+LSSID:  DB      "SSID",0
+LIP:    DB      "IP",0
+LGW:    DB      "GATEWAY",0
+LDNS:   DB      "DNS",0
+LMAC:   DB      "MAC",0
+LVER:   DB      "VERSION",0
+ITTITLE: DB      "FN INFO",0
+ITHINT:  DB      "FIRE=BACK",0
+
+; ---------------------------------------------------------------------------
 ; The result is held long enough to read, then the browser gets the user back
 ; where the copy was made. FIRE cuts the wait short.
-APPVBL: jsr     INREPT
+CAPPVBL: jsr     INREPT
         and     #IN_FIRE
         bne     AVBACK
         dec     CFTMR
-        bne     AVDONE
+        bne     CAVDONE
 AVBACK: lda     #CP_IDLE
         sta     CFCOPY
         lda     #BANKDIR
         jmp     CFGOTO          ; does not return
-AVDONE: rts
+CAVDONE: rts
 
 ; ---------------------------------------------------------------------------
 ; DOCOPY -- COPY_FILE, then the .cfg sibling.
@@ -91,11 +240,13 @@ DOCOPY: jsr     CFILE
         jsr     CFILE
         lda     #(TCOPY)&$FF
         ldx     #(TCOPY)>>8
+        ldy     #CPROWM
         jmp     MSG
 
 CPFAIL: jsr     SHOWERR
         lda     #(TFAIL)&$FF
         ldx     #(TFAIL)>>8
+        ldy     #CPROWM
         jmp     MSG
 
 ; TOCFG -- turn "...bin" into "...cfg" in buffer 2 by popping three characters
@@ -161,19 +312,28 @@ CFE:    lda     CFTMPA
 CFOK:   rts
 
 ; ---------------------------------------------------------------------------
-; MSG -- a NUL-terminated string at A/X onto the result row.
+; MSG -- a NUL-terminated string at A/X onto text row Y.
 MSG:    sta     FNPTRL
         stx     FNPTRH
-        lda     #CPROWM
+        tya
         jmp     FNRSTR
 
-DRAW:   jsr     FNCLS
-        lda     #(TTITLE)&$FF
+CDRAW:   jsr     FNCLS
+        lda     #(CTTITLE)&$FF
         sta     FNPTRL
-        lda     #(TTITLE)>>8
+        lda     #(CTTITLE)>>8
         sta     FNPTRH
         lda     #0
         jsr     FNRSTR
+
+        lda     #(TFROM)&$FF
+        ldx     #(TFROM)>>8
+        ldy     #CPROWS-1
+        jsr     MSG
+        lda     #(TTO)&$FF
+        ldx     #(TTO)>>8
+        ldy     #CPROWD-1
+        jsr     MSG
 
         lda     #FP_SEL2        ; from
         jsr     PATHR2
@@ -185,11 +345,11 @@ DRAW:   jsr     FNCLS
         lda     #CPROWD
         jsr     PATHRW
 
-        lda     #(THINT)&$FF
+        lda     #(CTHINT)&$FF
         sta     FNPTRL
-        lda     #(THINT)>>8
+        lda     #(CTHINT)>>8
         sta     FNPTRH
-        lda     #CPROWH
+        lda     #ROWERR+1
         jmp     FNRSTR
 
 ; PATHR2 -- select buffer A and work out the tail-anchored source offset.
@@ -227,13 +387,22 @@ SHOWERR: jsr    SNDERR
         jsr     FNHEX
         jmp     FNENDR
 
-TTITLE: DB      "COPYING",0
+CTTITLE: DB      "COPYING",0
 TCOPY:  DB      "COPIED",0
 TFAIL:  DB      "COPY FAILED",0
-THINT:  DB      "FIRE=BACK",0
+TFROM:  DB      "FROM",0
+TTO:    DB      "TO",0
+CTHINT:  DB      "FIRE=BACK",0
 
-; Row colours for the kernel.
-        RCOLS   CPROWE,CPROWH
+; Row colours for the kernel: each label above its value.
+RCOLTB: DB      COLTTL,COLTXT
+        REPT    6
+        DB      COLPTH,COLTXT
+        ENDM
+        DB      COLTXT,COLTXT,COLTXT,COLTXT,COLERR,COLHNT,COLTXT
+        IF      *-RCOLTB<>TROWS
+        FATAL   "RCOLTB is not one byte per row"
+        ENDIF
 
         INCLUDE "fujilib.inc"
         INCLUDE "fujidisp.inc"

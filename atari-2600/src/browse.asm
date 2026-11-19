@@ -593,7 +593,9 @@ MNDS1:  cmp     #1
 
 MNDS2:  cmp     #2
         bne     MNDS3
-        lda     #BANKINF
+        lda     #MI_INFO
+        sta     CFSUB
+        lda     #BANKMSC
         jmp     CFGOTO          ; does not return
 
 MNDS3:  cmp     #3
@@ -607,7 +609,9 @@ MNDS4:  cmp     #4
         lda     CFCOPY          ; nothing marked: say so rather than copying
         cmp     #CP_MARK        ;   something arbitrary
         bne     MNDS9
-        lda     #BANKCPY
+        lda     #MI_COPY
+        sta     CFSUB
+        lda     #BANKMSC
         jmp     CFGOTO          ; does not return
 MNDS9:  rts
 
