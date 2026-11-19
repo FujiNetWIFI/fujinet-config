@@ -1,5 +1,6 @@
 ## 2026-11-19
 
+* [Atari 2600] - Long filenames scroll in the file browser.
 * [Atari 2600] - The action menu no longer depends on stray bus bits to know how many items it has.
 
 ## 2026-11-17

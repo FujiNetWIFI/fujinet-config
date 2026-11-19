@@ -220,6 +220,9 @@ MN_BROWSE EQU   1
 MN_EDIT EQU     2
 MNNONE  EQU     $FF
 
+CFCUT   EQU     $9A             ; the browser's rows whose name was cut, one bit
+                                ;   each over two bytes ($9A-$9B)
+
 HOSTSLN EQU     32              ; MAX_HOSTNAME_LEN: the stride in the reply
 NHOSTS  EQU     8               ; MAX_HOST_SLOTS
 DEVSLOT EQU     0               ; this console has one thing to mount into

@@ -74,6 +74,12 @@ held in the cartridge. The console holds a cursor and a handful of flags.
 | 5 | Boot | progress bar; FIRE dismisses a failure |
 | 6 | Action menu | ↑↓ move, FIRE choose, SELECT close |
 
+**A name too long for its row scrolls.** Rest the cursor on one and, after about
+a second, the full name bounces through the row, pausing at each end; any press puts
+it back. The browser marks which rows were cut as it lists them, so resting on
+a short name costs nothing, and the full name comes from one directory walk that
+stays in the reply window, so a step is no round trip.
+
 **SELECT opens an action menu.** The Intellivision reaches info, the lobby,
 rename, filter, copy and up-a-level with a twelve-key keypad; this console has
 three buttons and twelve columns to name anything in. A chord or a long press
@@ -139,14 +145,6 @@ not a served image, so the flag would only unmount device slot 0 — which
   `/intv/lobby.rom`); it mounts the host and claims a slot correctly, and will
   boot as soon as that directory exists. The path is one literal in
   `src/hosts.asm`.
-- **Long names are truncated, not scrolled.** Eleven visible columns against a
-  30-character `READ_DIR_ENTRY`. Only the listing: picking a file or folder
-  re-reads its entry at 128. The Intellivision bounce-scrolls the highlighted
-  name; this is the one parity item outstanding.
-
-  It needs about 200 bytes; with the menu in a bank of its own the browser has
-  about 300. The mechanism is the browser's own: fetch the full name once when
-  the cursor rests, then slide a window over it.
 - **The WiFi list is capped at twelve** with no paging, as on the Intellivision.
 
 ## Tests
@@ -161,11 +159,12 @@ lossy and would fail on real filenames.
     ./run.sh edittest     # typing, backspace, and that CANCEL does not write
     ./run.sh accepttest   # ACCEPT really writes a host slot (and restores it)
     ./run.sh pagetest     # .cfg suppression, the path row, the filter
+    ./run.sh scrolltest   # a long name slides, and a short one stays put
     ./run.sh copytest     # mark, pick a host, copy, verify by re-listing
     BOOT_IMAGE=... CFG_DIR=VCS/ CFG_NAME=DEEP.BIN ./run.sh cfgtest
 
 Most need longer than `run.sh`'s default ten emulated seconds (`SECS=300`).
-`pagetest` and `copytest` need a `SOAK/` folder of `.bin`/`.cfg` pairs on host
+`pagetest`, `scrolltest` and `copytest` need a `SOAK/` folder of `.bin`/`.cfg` pairs on host
 slot 0. They write to a real FujiNet: `lobbytest` puts back the slot it
 claims, `copytest` leaves `soak2k.bin` in the root for the shell to delete, and
 `accepttest` assumes slot 3 is empty and leaves it empty.
