@@ -54,7 +54,7 @@ MND1:   txa
         adc     #MNROW0
         jsr     FNROWA
 
-        cpx     MNCNT
+        cpx     #MNCNT
         bcs     MND5            ; past the last item: leave the row blank
 
         cpx     CFMENU
@@ -97,7 +97,7 @@ MNKEY:  sta     CFTMPA
         lda     CFMENU
         clc
         adc     #1
-        cmp     MNCNT
+        cmp     #MNCNT
         bcs     MNKNO
         sta     CFMENU
         jsr     MNDRAW
