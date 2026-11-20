@@ -37,8 +37,8 @@ enum {
 #define MODE_READ    1
 
 /* The FujiNet Game Lobby: the hosts screen's ninth row boots it. */
-#define LOBBY_HOST   "ec.tnfs.io"
-#define LOBBY_PATH   "/atari5200/lobby.a52"
+#define LOBBY_HOST   "apps.irata.online"
+#define LOBBY_PATH   "/ATARI-5200/FUJINET/lobby.a52"
 
 #define PATH_MAX_LEN 128        /* current directory, '/'-terminated */
 #define SPEC_MAX_LEN 128        /* copy source full path / custom-SSID scratch */
