@@ -4,7 +4,6 @@
  */
 
 #include <conio.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "input.h"
@@ -18,7 +17,7 @@
 #include "../select_file.h"
 #include "../select_slot.h"
 
-#define KEY_EOL          0x0A
+#define KEY_EOL          0x0D
 #define KEY_RETURN       KEY_EOL
 #define KEY_SPACE        0x20
 #define KEY_K0           0x1B
@@ -48,11 +47,13 @@
 #define KEY_9            0x39
 #define KEY_0            0x30
 #define KEY_HOME         0x0B
-#define KEY_END          0x0D
+#define KEY_END          0x0A
 #define KEY_UP_ARROW     KEY_HOME
 #define KEY_DOWN_ARROW   KEY_END
 #define KEY_LEFT_ARROW   0x0C
 #define KEY_RIGHT_ARROW  0x09
+#define KEY_LEFT_TAB     0x8F // |<-
+#define KEY_RIGHT_TAB    0x90 // ->|
 #define KEY_RCL          0x8D
 #define KEY_CLR          0x8E
 
@@ -61,59 +62,24 @@ extern bool long_entry_displayed;
 extern unsigned char copy_host_slot;
 extern bool copy_mode;
 
+// keyboard.asm: own scan with key repeat, z88dk's table has no |<- and ->|
+extern unsigned char pmd85_kbhit(void);
+extern unsigned char pmd85_cgetc(void);
+
 /**
  * Get input from keyboard/joystick
  * @return keycode (or synthesized keycode if joystick)
  */
-#define KEY_REPEAT_START 30  // x 10ms, delay before autorepeat starts
-#define KEY_REPEAT_RATE  60 // ms, autorepeat period
-
 unsigned char input()
 {
-  static unsigned char last_key = 0;
-  static bool repeating = false;
-  unsigned char c, i;
-
-  if (!kbhit())
-  {
-    last_key = 0;
-    return 0;
-  }
-  c = cgetc();
-
-  // in_GetKey reports held key on every scan, so do key repeat timing here
-  // (CLIB_KBHIT_DELAY is broken - kbhit.asm passes key code to msleep instead of delay)
-  if (c != last_key)
-  {
-    // fresh press: return immediately
-    last_key = c;
-    repeating = false;
-    return c;
-  }
-
-  if (!repeating)
-  {
-    // key still held: wait for repeat start delay, give up if released
-    for (i = 0; i < KEY_REPEAT_START; i++)
-    {
-      msleep(10);
-      if (getk() != c)
-      {
-        last_key = 0;
-        return 0;
-      }
-    }
-    repeating = true;
-    return c;
-  }
-
-  msleep(KEY_REPEAT_RATE);
-  return c;
+  if (pmd85_kbhit())
+    return pmd85_cgetc();
+  return 0;
 }
 
 unsigned char input_ucase(void)
 {
-  unsigned char c = cgetc();
+  unsigned char c = pmd85_cgetc();
   if ((c>='a') && (c<='z')) c&=~32;
   return c;
 }
@@ -196,11 +162,11 @@ WSSubState input_set_wifi_select(void)
       state=HOSTS_AND_DEVICES;
       return WS_DONE;
     case KEY_UP_ARROW: // up arrow
-    case KEY_LEFT_ARROW:
+    case KEY_LEFT_TAB:
       bar_up();
       return WS_SELECT;
     case KEY_DOWN_ARROW: // down arrow
-    case KEY_RIGHT_ARROW:
+    case KEY_RIGHT_TAB:
       bar_down();
       return WS_SELECT;
     default:
@@ -225,12 +191,12 @@ HDSubState input_hosts_and_devices_hosts(void)
   switch (k)
   {
   case KEY_UP_ARROW:
-  case KEY_LEFT_ARROW:
+  case KEY_LEFT_TAB:
     bar_up();
     selected_host_slot = bar_get();
     return HD_HOSTS;
   case KEY_DOWN_ARROW:
-  case KEY_RIGHT_ARROW:
+  case KEY_RIGHT_TAB:
     bar_down();
     selected_host_slot = bar_get();
     return HD_HOSTS;
@@ -280,13 +246,13 @@ HDSubState input_hosts_and_devices_devices(void)
   switch(k)
     {
     case KEY_UP_ARROW:
-    case KEY_LEFT_ARROW:
+    case KEY_LEFT_TAB:
       bar_up();
       selected_device_slot=bar_get();
       // hosts_and_devices_long_filename();
       return HD_DEVICES;
     case KEY_DOWN_ARROW:
-    case KEY_RIGHT_ARROW:
+    case KEY_RIGHT_TAB:
       bar_down();
       selected_device_slot=bar_get();
       // hosts_and_devices_long_filename();
@@ -369,7 +335,7 @@ SFSubState input_select_file_choose(void)
 	switch (k)
 	{
 	case KEY_UP_ARROW:
-	case KEY_LEFT_ARROW:
+	case KEY_LEFT_TAB:
 		if ((bar_get() == 0) && (pos > 0))
 			return SF_PREV_PAGE;
     long_entry_displayed = false;
@@ -377,7 +343,7 @@ SFSubState input_select_file_choose(void)
     select_display_long_filename();
     break;
 	case KEY_DOWN_ARROW:
-	case KEY_RIGHT_ARROW:
+	case KEY_RIGHT_TAB:
 		if ((bar_get() == 14) && (dir_eof == false))
 			return SF_NEXT_PAGE;
     long_entry_displayed = false;
@@ -489,11 +455,11 @@ SSSubState input_select_slot_choose(void)
       // state = HOSTS_AND_DEVICES;
       return SS_DONE;
     case KEY_UP_ARROW:
-    case KEY_LEFT_ARROW:
+    case KEY_LEFT_TAB:
       bar_up();
       return SS_CHOOSE;
     case KEY_DOWN_ARROW:
-    case KEY_RIGHT_ARROW:
+    case KEY_RIGHT_TAB:
       bar_down();
       return SS_CHOOSE;
     // Memory Module 'M' -> '4'
@@ -586,11 +552,11 @@ DHSubState input_destination_host_slot_choose(void)
       bar_jump(k-KEY_1);
       return DH_CHOOSE;
     case KEY_UP_ARROW:
-    case KEY_LEFT_ARROW:
+    case KEY_LEFT_TAB:
       bar_up();
       return DH_CHOOSE;
     case KEY_DOWN_ARROW:
-    case KEY_RIGHT_ARROW:
+    case KEY_RIGHT_TAB:
       bar_down();
       return DH_CHOOSE;
     default:
