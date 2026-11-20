@@ -1,3 +1,7 @@
+## 2026-11-20
+
+* [Adam] - A new disk's EOS directory is written in full, so the image is a valid EOS volume.
+
 ## 2026-11-19
 
 * [Atari 2600] - Long filenames scroll in the file browser.

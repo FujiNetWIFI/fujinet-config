@@ -628,7 +628,7 @@ bool input_select_slot_build_eos_directory(void)
 
 void input_select_slot_build_eos_directory_label(char *c)
 {
-  input_line(0,19,0,c,12,false);
+  input_line(0,19,0,c,11,false);
 }
 
 void input_select_slot_build_eos_directory_failed(void)
