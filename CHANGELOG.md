@@ -1,3 +1,8 @@
+## 2026-11-21
+
+* [PMD 85] - |<- and ->| move the selection in lists, like UP and DOWN
+* [PMD 85] - On boot, load and run ROM Module if PMD 85-1 is detected
+
 ## 2026-11-20
 
 * [Adam] - A new disk's EOS directory is written in full, so the image is a valid EOS volume.
