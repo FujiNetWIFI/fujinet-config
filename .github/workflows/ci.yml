@@ -40,6 +40,10 @@ jobs:
       - name: Build
         run: make ${{ matrix.platform }}/r2r
 
+      - name: Test the Adam EOS directory
+        if: matrix.platform == 'adam'
+        run: make -C tests/adam
+
       - name: Upload artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:
