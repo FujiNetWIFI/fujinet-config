@@ -1,3 +1,7 @@
+## 2026-11-25
+
+* [S-100] - Follows the card's new pipe layout: CONTROL at +1, TICK at +2 (FujiNetWIFI/fujinet-firmware#2530).
+
 ## 2026-11-21
 
 * [PMD 85] - |<- and ->| move the selection in lists, like UP and DOWN
