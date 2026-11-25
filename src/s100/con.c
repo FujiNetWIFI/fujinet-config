@@ -11,7 +11,8 @@
 
 #define PIPE_GETC    0
 #define PIPE_STATUS  1
-#define PIPE_CONTROL 3 /* write; a read is the 1 kHz TICK */
+#define PIPE_CONTROL 1 /* write; a read is STATUS */
+#define PIPE_TICK    2 /* the card's 1 kHz count */
 #define ST_AVAIL     0x80
 #define CTL_FLUSH    0x08
 #define CTL_LOAD     0x20
@@ -36,7 +37,7 @@ static uint8_t cp[6];
 
 static uint8_t tick(void)
 {
-    return s100_in(s100.base + PIPE_CONTROL);
+    return s100_in(s100.base + PIPE_TICK);
 }
 
 static bool is_card(uint8_t b)
