@@ -156,15 +156,23 @@ void hide_menu(void)
   show_menu(0);
 }
 
+static const uint8_t logo_x[8] = { 3, 1, 1, 0, 1, 1, 1, 3 };
+static const char * const logo_rows[8] = {
+  "\xA6",
+  "\xA7\xA5\xA1\xA2\xA7\xA5",
+  "\xA6 \xA3\xA4\xA6",
+  "\xA5\xA1\xA2\x9D\x9E\xA1\xA2\xA5",
+  "\xA3\xA4\x9F\xA0\xA3\xA4",
+  "\xA7\xA5\xA7\xA5\xA1\xA2\xA5",
+  "\xA6 \xA6 \xA3\xA4",
+  "\xA6 \xA6",
+};
+
 void draw_logo(uint8_t x, uint8_t y) {
-  gotoxy(x+3, y+0); cprintf(  "%c", 0xA6);
-  gotoxy(x+1, y+1); cprintf(  "%c%c%c%c%c%c", 0xA7,0xA5,0xA1,0xA2,0xA7,0xA5);
-  gotoxy(x+1, y+2); cprintf(  "%c %c%c%c", 0xA6,0xA3,0xA4,0xA6);
-  gotoxy(x+0, y+3); cprintf("%c%c%c%c%c%c%c%c", 0xA5,0xA1,0xA2,0x9D,0x9E,0xA1,0xA2,0xA5);
-  gotoxy(x+1, y+4); cprintf("%c%c%c%c%c%c", 0xA3,0xA4,0x9F,0xA0,0xA3,0xA4);
-  gotoxy(x+1, y+5); cprintf(  "%c%c%c%c%c%c%c", 0xA7,0xA5,0xA7,0xA5,0xA1,0xA2,0xA5);
-  gotoxy(x+1, y+6); cprintf(  "%c %c %c%c", 0xA6,0xA6,0xA3,0xA4);
-  gotoxy(x+3, y+7); cprintf(  "%c %c", 0xA6,0xA6);
+  for (uint8_t i = 0; i < 8; i++) {
+    gotoxy(x+logo_x[i], y+i);
+    cputs(logo_rows[i]);
+  }
 }
 
 void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark)
@@ -215,17 +223,30 @@ void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark
 
 void set_mode_default(void)
 {
+  // vdp_set_mode() clears the patterns and fills the colours with the
+  // current style, so set the style first and there's no clrscr() to do.
+  // The second call sets the border, which needs the mode already set.
+  style_white_on_black();
   vdp_set_mode(2);
   style_white_on_black();
-  clrscr();
 }
 
 void screen_init(void)
 {
   void *param = &udg;
+
+  // Black backdrop with the display off, so the screen goes black at once
+  // and stays black while the mode is set up.
+  vdp_set_reg(7, (VDP_INK_WHITE << 4) | VDP_INK_BLACK);
+  vdp_noblank();
+
   console_ioctl(IOCTL_GENCON_SET_UDGS, &param);
   set_mode_default();
+
+  // vdp_set_mode() turned the display on; show the logo only once it's drawn
+  vdp_noblank();
   draw_logo(12,9);
+  vdp_blank();
   keyboard_click(false);
 }
 
@@ -782,8 +803,9 @@ void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 
 void screen_mount_and_boot()
 {
-  clrscr();
+  // bar_clear() repaints the bar's row blue, so before clrscr()
   bar_clear(false);
+  clrscr();
   show_status("Mounting and booting...");
 }
 
