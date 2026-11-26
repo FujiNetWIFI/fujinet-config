@@ -652,7 +652,7 @@ void screen_select_file_choose(char visibleEntries)
 
   if (copy_mode == true) {
     show_status("Select destination");
-    show_menu(1, 'c',"_copy");
+    show_menu(1, 'c',"_copy here");
   }
   else {
     show_status("Select a file to mount");
@@ -744,8 +744,9 @@ void screen_destination_host_slot(char *h, char *p)
 {
   vdp_noblank();
 
-  // style_white_on_blue();
+  style_white_on_black();
   clrscr();
+  bar_clear(false);
 
   gotoxy(0,10); cprintf("%32s","COPY FROM HOST SLOT");
   gotoxy(0,11); cprintf("%32s",h);
@@ -759,23 +760,29 @@ void screen_destination_host_slot_choose(void)
 {
   show_status("Choose a destination");
   hide_menu();
+  bar_set(0,3,8,selected_host_slot);
 }
 
 void screen_perform_copy(char *sh, char *p, char *dh, char *dp)
 {
+  char *f = strrchr(p, '/');
+  uint8_t len;
+
+  f = f ? f + 1 : p;
+  len = strlen(f);
+  if (len > 32)
+    len = 32;
+
   vdp_noblank();
 
-  // style_white_on_blue();
+  // bar_clear() repaints the bar's row blue, so before clrscr()
+  bar_clear(false);
+  style_white_on_black();
   clrscr();
-
-  show_status("Copying file...");
   hide_menu();
 
-  gotoxy(0,0); vdp_color(15,4,7); cprintf("%32s","COPYING FILE FROM:");
-  gotoxy(0,1); cprintf("%32s",sh);
-  gotoxy(0,2); vdp_color(1,15,7); cprintf("%-128s",p);
-  gotoxy(0,6); vdp_color(15,4,7); cprintf("%32s",dh);
-  gotoxy(0,7); vdp_color(1,15,7); cprintf("%-128s",dp);
+  gotoxy(8,10); cputs("Copying file...");
+  gotoxy((32-len)/2,12); cprintf("%.32s",f);
 
   vdp_blank();
 }

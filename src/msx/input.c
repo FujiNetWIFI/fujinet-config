@@ -347,8 +347,11 @@ SFSubState input_select_file_choose(void)
 		return SF_NEW;
 	case 'C':
 	case 'c':
+		if (copy_mode)
+			return SF_DONE; // copy into this folder
 		pos += bar_get();
 		select_file_set_source_filename();
+		copy_host_slot = selected_host_slot;
 		return SF_COPY;
 	case 'B':
 	case 'b':
@@ -512,7 +515,45 @@ unsigned char input_select_slot_mode(char *mode)
 
 DHSubState input_destination_host_slot_choose(void)
 {
-  return DH_CHOOSE;
+  unsigned char k = 0;
+  while (k == 0)
+    k = input();
+
+  switch (k)
+  {
+  case KEY_UP_ARROW:
+  case KEY_LEFT_ARROW:
+    bar_up();
+    return DH_CHOOSE;
+  case KEY_DOWN_ARROW:
+  case KEY_RIGHT_ARROW:
+    bar_down();
+    return DH_CHOOSE;
+  case KEY_1:
+  case KEY_2:
+  case KEY_3:
+  case KEY_4:
+  case KEY_5:
+  case KEY_6:
+  case KEY_7:
+  case KEY_8:
+    bar_jump(k-KEY_1);
+    return DH_CHOOSE;
+  case KEY_RETURN:
+    if (hostSlots[bar_get()][0] == 0x00)
+      return DH_CHOOSE;
+    selected_host_slot = bar_get();
+    strcpy((char *)selected_host_name, (char *)hostSlots[selected_host_slot]);
+    copy_mode = true;
+    return DH_DONE;
+  case KEY_ESCAPE:
+    copy_mode = false;
+    screen_should_be_cleared = true;
+    state = HOSTS_AND_DEVICES;
+    return DH_ABORT;
+  default:
+    return DH_CHOOSE;
+  }
 }
 
 SISubState input_show_info(void)
