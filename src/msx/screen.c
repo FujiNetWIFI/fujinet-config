@@ -25,10 +25,13 @@ static const uint8_t *KEY_ADDRESSES[] = {
 };
 
 #define MAX(x, y)  ((x) > (y) ? (x) : (y))
+#define MIN(x, y)  ((x) < (y) ? (x) : (y))
 
 #define MENU_LINE 23
 #define DEVICES_Y 10
 #define LONG_FILENAME_Y 18
+#define HOST_NUM_X 3   // first column of the bar, after its left cap
+#define MEDIA_NAME_X 4
 
 // #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_DARK_BLUE)
 #define style_black_on_white() vdp_color(VDP_INK_BLACK, VDP_INK_WHITE, VDP_INK_BLACK)
@@ -44,9 +47,7 @@ extern bool copy_mode;
 extern char copy_host_name;
 extern unsigned char copy_host_slot;
 
-// static const char *empty="EMPTY";
-static const char *empty="-empty-";
-static const char *off="-off-";
+static const char *empty="empty";
 
 char *filter_str;
 
@@ -212,7 +213,7 @@ void draw_card(uint8_t y, uint8_t h, uint8_t margin, char *title, bool watermark
     if (margin) vdp_vfill(addr+8, 0x1F, margin << 3);
 
     if (watermark) {
-      for (uint8_t i = row_lengths[row]; i < 31; i++) {
+      for (uint8_t i = row_lengths[y+row]; i < 31; i++) {
         vdp_vwrite(watermark_pattern, addr+i*8, 8);
       }
     }
@@ -379,7 +380,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  show_menu(5, 'b',"_boot", 'e',"_edit", 'd',"_disks", 's',"ba_sic", 'c',"_config");
+  show_menu(5, 'b',"_boot", 'e',"_edit", 'm',"_media", 's',"ba_sic", 'c',"_config");
   clear_status();
   watermark_visible = true;
   bar_set(0,3,8,selected_host_slot);
@@ -390,22 +391,18 @@ void screen_hosts_and_devices_devices(void)
   uint8_t n = msx_visible_device_slots();
 
   show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
-  watermark_visible = false;
+  watermark_visible = true;
 
   if (selected_device_slot >= n)
     selected_device_slot = n-1;
 
-  bar_set(DEVICES_Y, 3, n, selected_device_slot);
+  bar_set(DEVICES_Y, HOST_NUM_X, n, selected_device_slot);
+  bar_dim_first();
 }
 
 const char* screen_hosts_and_devices_device_slot(uint8_t hs, bool e, const char *fn)
 {
-  if (fn[0]!=0x00)
-    return fn;
-  else if (e==false)
-    return &off[0];
-  else
-    return &empty[0];
+  return fn[0]!=0x00 ? fn : &empty[0];
 }
 
 char* screen_hosts_and_devices_host_slot(char *hs)
@@ -421,8 +418,8 @@ void screen_hosts_and_devices_host_slots(HostSlot *h)
     gotoxy(1, i+1);
     cputc('1'+i);
     cprintf(" %.28s", screen_hosts_and_devices_host_slot(h[i]));
-    // TODO: kind of wasteful
-    row_lengths[i] = 3 + strlen(screen_hosts_and_devices_host_slot(h[i]));
+    // Columns past the name take the watermark colors, so "empty" is dimmed
+    row_lengths[i] = 3 + strlen(h[i]);
   }
 
   draw_card(0, 10, 1, "Hosts", true);
@@ -467,18 +464,22 @@ static void draw_device_slots(unsigned char y, DeviceSlot *d, bool *e, uint8_t n
     //   cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     // }
 
+    // Host slot number, then the name; "empty" lines up with the number
     if (filename[0] == '\0') {
-      cprintf(" %.28s",
-        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      cprintf(" %.28s", empty);
+      row_lengths[y+i] = HOST_NUM_X;
     }
     else {
-      cprintf(" %u:%.25s",
-        d[i].hostSlot+1,
-        screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
+      cprintf(" %c%.27s", '1'+d[i].hostSlot, filename);
+      row_lengths[y+i] = MEDIA_NAME_X + MIN(strlen(filename), 27);
     }
   }
 
-  draw_card(y, n+2, 1, "Devices", false);
+  draw_card(y, n+2, 1, "Media", true);
+
+  // Host number column: watermark colors
+  for (char i=0;i<n;i++)
+    vdp_vwrite(watermark_pattern, MODE2_ATTR + (y+i+1)*0x100 + HOST_NUM_X*8, 8);
 }
 
 void screen_hosts_and_devices_device_slots(unsigned char y, DeviceSlot *d, bool *e)
@@ -526,7 +527,8 @@ void screen_hosts_and_devices_eject(uint8_t ds)
   if (selected_device_slot >= n)
     selected_device_slot = n-1;
 
-  bar_set(DEVICES_Y, 3, n, selected_device_slot);
+  bar_set(DEVICES_Y, HOST_NUM_X, n, selected_device_slot);
+  bar_dim_first();
 }
 
 void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
@@ -537,6 +539,7 @@ void screen_hosts_and_devices_host_slot_empty(uint_fast8_t hs)
   vdp_vfill(0x0100 + hs*0x100, 0, 240);
   gotoxy(3,1+hs);
   cputs(empty);
+  row_lengths[hs] = 3;
   gfx_fill_attr(0, hs+1, 30, 1);
   bar_jump(bar_get());
 }
@@ -733,7 +736,8 @@ void screen_select_slot(char *e)
 
   draw_device_slots(0,&deviceSlots[0],&deviceEnabled[0],n);
 
-  bar_set(0,3,n,msx_first_mount_slot());
+  bar_set(0,HOST_NUM_X,n,msx_first_mount_slot());
+  bar_dim_first();
 
   vdp_blank();
 }
@@ -754,9 +758,9 @@ void screen_select_slot_choose(void)
 
 void screen_select_slot_eject(unsigned char ds)
 {
-  textcolor(BLACK);
-  textbackground(WHITE);
-  gotoxy(1,1+ds); cprintf("%s",empty);
+  gotoxy(1,1+ds); cprintf("  %-28s",empty);
+  row_lengths[ds] = HOST_NUM_X;
+  gfx_fill_attr(3, 1+ds, 28, 1);
   bar_jump(bar_get());
 }
 
