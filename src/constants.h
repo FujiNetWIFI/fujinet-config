@@ -14,6 +14,8 @@
 #define ENTRIES_PER_PAGE 13
 #elif defined(BUILD_H89) || defined(BUILD_MODEL2)
 #define ENTRIES_PER_PAGE 17
+#elif defined(BUILD_TRS80M1)
+#define ENTRIES_PER_PAGE 10
 #elif defined(BUILD_ATARI)
 /* 14, not 15. The file list occupies rows FILES_START_Y(6)..6+EPP-1 and
    the "Next Page" line sits at FILES_START_Y+EPP, which the directory

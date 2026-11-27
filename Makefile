@@ -28,6 +28,10 @@ PLATFORMS += pmd85
 #PLATFORMS += s100-cpm
 #PLATFORMS += s100-rom
 
+# Needs a fujinet-lib with the TRS-80 Model I card, not in a release yet:
+#   make FUJINET_LIB=<fujinet-lib checkout> trs80m1/r2r
+#PLATFORMS += trs80m1
+
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
 # Example shortcuts:
@@ -241,6 +245,17 @@ LDFLAGS_EXTRA_ADAM = -lndos
 
 # CCP refuses a .COM that reaches past the TPA; the startup zeroes BSS anyway.
 LDFLAGS_EXTRA_MODEL2 = -pragma-define:CRT_TRIM_BSS=1
+
+########################################
+# TRS-80 Model I customization
+
+# config.cmd is the card's boot image: its boot sector loads it at 5200h and
+# runs it with no DOS, and the stack is the top of RAM.
+LDFLAGS_EXTRA_TRS80M1 = -lndos -pragma-define:CRT_TRIM_BSS=1 -pragma-define:REGISTER_SP=0
+
+# CRT_TRIM_BSS also writes BSS to a file of zeros nothing needs
+trs80m1/executable-post::
+	rm -f $(R2R_PD)/$(PRODUCT_BASE)_BSS.bin
 
 ########################################
 # MSX customization
