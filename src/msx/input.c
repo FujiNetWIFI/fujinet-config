@@ -172,8 +172,8 @@ HDSubState input_hosts_and_devices_hosts(void)
     mount_and_boot();
     return HD_HOSTS;
   case KEY_TAB:
-  case 'D':
-  case 'd':
+  case 'M':
+  case 'm':
     bar_clear(false);
     return HD_DEVICES;
   case KEY_RETURN:

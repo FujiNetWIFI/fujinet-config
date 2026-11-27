@@ -26,6 +26,7 @@
  */
 // static unsigned char bar_y=3, bar_c=1, bar_m=1, bar_i=0, bar_oldi=0, bar_co=0x13;
 static unsigned char bar_y=3, bar_c=3, bar_m=1, bar_i=0, bar_oldi=0, bar_co=0x17;
+static bool bar_dim_col; // first column takes the watermark colors
 
 /**
 * Reset text to default
@@ -40,19 +41,24 @@ void bar_clear(bool oldRow)
   uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+(oldRow==true ? bar_oldi : bar_i)) + coff;
 
   // TODO: Make this watermark stuff less convoluted
-  uint8_t row_len = row_lengths[oldRow==true ? bar_oldi : bar_i];
+  uint8_t row_len = row_lengths[bar_y + (oldRow==true ? bar_oldi : bar_i)];
   if (!watermark_visible || row_len >= 28) {
     vdp_vwrite(row_pattern + coff, addr, 256 - coff - 16);
   }
   else {
     uint8_t bright_len = row_len*8 - coff;
     uint8_t dim_len = 27*8 - bright_len;
-    vdp_vwrite(row_pattern + coff, addr, bright_len);
+    // A zero count would write 64K of VRAM
+    if (bright_len)
+      vdp_vwrite(row_pattern + coff, addr, bright_len);
     // vdp_vfill(addr, 0xF6, bright_len);
     for (uint8_t i = row_len; i < 31; i++) {
       vdp_vwrite(watermark_pattern, addr-coff+i*8, 8);
     }
   }
+
+  if (bar_dim_col)
+    vdp_vwrite(watermark_pattern, addr, 8);
 }
 
 /**
@@ -66,16 +72,21 @@ void bar_update(void)
   uint16_t addr = ADDR_FILE_LIST + ROW(bar_y+bar_i) + coff;
 
   // TODO: Make this watermark stuff less convoluted
-  uint8_t row_len = row_lengths[bar_i];
+  uint8_t row_len = row_lengths[bar_y + bar_i];
   if (!watermark_visible || row_len >= 28) {
     vdp_vfill(addr, 0xF6, 256 - coff - 16);
   }
   else {
     uint8_t bright_len = row_len*8 - coff;
-    uint8_t dim_len = 27*8 - bright_len;
-    vdp_vfill(addr, 0xF6, bright_len);
+    // The bar stops short of the right pill cap's column
+    uint8_t dim_len = 30*8 - coff - bright_len;
+    if (bright_len)
+      vdp_vfill(addr, 0xF6, bright_len);
     vdp_vfill(addr+bright_len, 0x96, dim_len);
   }
+
+  if (bar_dim_col)
+    vdp_vfill(addr, 0x96, 8);
 
   uint8_t y = (bar_y+bar_i+1) << 3;
   vdp_put_sprite_8(1, coff-8, y, 1, VDP_INK_DARK_RED);
@@ -96,11 +107,21 @@ void bar_set(unsigned char y, unsigned char c, unsigned char m, unsigned char i)
   bar_m = (m == 0 ? 0 : m-1);
   bar_i = i;
   bar_oldi = bar_i;
+  bar_dim_col = false;
 
   bar_update();
 
   vdp_set_sprite_8(1, m ? pill_left : blank);
   vdp_set_sprite_8(2, m ? pill_right : blank);
+}
+
+/**
+ * Draw the bar's first column in the dim watermark colors, on and off the bar.
+ */
+void bar_dim_first(void)
+{
+  bar_dim_col = true;
+  bar_update();
 }
 
 /**
