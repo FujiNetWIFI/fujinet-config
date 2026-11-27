@@ -380,7 +380,7 @@ void screen_hosts_and_devices(HostSlot *h, DeviceSlot *d, bool *e)
 
 void screen_hosts_and_devices_hosts(void)
 {
-  show_menu(5, 'b',"_boot", 'e',"_edit", 'm',"_media", 's',"ba_sic", 'c',"_config");
+  show_menu(5, 'b',"_boot", 'e',"_edit", 'm',"_media", 'l',"_lobby", 'c',"_config");
   clear_status();
   watermark_visible = true;
   bar_set(0,3,8,selected_host_slot);
@@ -818,6 +818,25 @@ void screen_mount_and_boot()
   bar_clear(false);
   clrscr();
   show_status("Mounting and booting...");
+}
+
+bool screen_mount_and_boot_lobby(void)
+{
+  unsigned char k;
+
+  show_status("Boot games lobby? Y/N");
+  do
+    k = cgetc() & ~32; // upper case
+  while (k != 'Y' && k != 'N');
+
+  if (k == 'Y')
+  {
+    screen_should_be_cleared = true;
+    return true;
+  }
+
+  screen_hosts_and_devices_hosts();
+  return false;
 }
 
 void screen_end(void)

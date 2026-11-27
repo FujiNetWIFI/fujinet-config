@@ -1,3 +1,7 @@
+## 2026-11-27
+
+* [MSX] - The hosts menu's BASIC option is replaced by Lobby, which asks for confirmation and boots the games lobby ROM from TNFS (override with `make LOBBY_URL=<url>`).
+
 ## 2026-11-25
 
 * [S-100] - Follows the card's new pipe layout: CONTROL at +1, TICK at +2 (FujiNetWIFI/fujinet-firmware#2530).
