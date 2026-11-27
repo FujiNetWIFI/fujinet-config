@@ -70,6 +70,10 @@ void input_select_slot_build_eos_directory_failed(void);
 #include "model2/key_codes.h"
 #endif /* BUILD_MODEL2 */
 
+#ifdef BUILD_TRS80M1
+#include "trs80m1/key_codes.h"
+#endif /* BUILD_TRS80M1 */
+
 #if defined(BUILD_APPLE2) || defined(BUILD_ATARI)
 #include <conio.h>
 #define KEY_ABORT CH_ESC
