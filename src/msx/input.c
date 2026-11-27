@@ -199,11 +199,10 @@ HDSubState input_hosts_and_devices_hosts(void)
     screen_should_be_cleared = true;
     hosts_and_devices_edit_host_slot(selected_host_slot);
     return HD_HOSTS;
-  case 'S':
-  case 's':
-    show_status("Dropping into BASIC...");
-    boot_to_basic();
-    return HD_DONE;
+  case 'L':
+  case 'l':
+    mount_and_boot_lobby();
+    return HD_HOSTS;
   default:
     return HD_HOSTS;
   }

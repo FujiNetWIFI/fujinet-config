@@ -246,6 +246,9 @@ LDFLAGS_EXTRA_MODEL2 = -pragma-define:CRT_TRIM_BSS=1
 # MSX customization
 
 LDFLAGS_EXTRA_MSXROM = -pragma-redirect:fputc_cons=fputc_cons_generic -pragma-redirect:CRT_FONT=_font_shifted -Ca-Isrc/msx/header
+ifdef LOBBY_URL
+CFLAGS_EXTRA_MSXROM += -DLOBBY_URL=$(DSTRING_OPEN)$(LOBBY_URL)$(DSTRING_CLOSE)
+endif
 
 ########################################
 # MS-DOS customization
