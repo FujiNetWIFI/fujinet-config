@@ -390,7 +390,7 @@ void screen_hosts_and_devices_devices(void)
 {
   uint8_t n = msx_visible_device_slots();
 
-  show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/w", 'c',"_config");
+  show_menu(5, 'b',"_boot", 'e',"_eject", 'h',"_hosts", 'r'," _r/_w", 'c',"_config");
   watermark_visible = true;
 
   if (selected_device_slot >= n)
@@ -464,14 +464,15 @@ static void draw_device_slots(unsigned char y, DeviceSlot *d, bool *e, uint8_t n
     //   cprintf(" %c=%-27s",label, screen_hosts_and_devices_device_slot(d[i].hostSlot,e[i],d[i].file));
     // }
 
-    // Host slot number, then the name; "empty" lines up with the number
+    // Host slot number, R) or W) for the mode, then the name; "empty" lines up with the number
     if (filename[0] == '\0') {
       cprintf(" %.28s", empty);
       row_lengths[y+i] = HOST_NUM_X;
     }
     else {
-      cprintf(" %c%.27s", '1'+d[i].hostSlot, filename);
-      row_lengths[y+i] = MEDIA_NAME_X + MIN(strlen(filename), 27);
+      cprintf(" %c%c)%.25s", '1'+d[i].hostSlot,
+              d[i].mode == FUJI_DISK_MODE_WRITE ? 'W' : 'R', filename);
+      row_lengths[y+i] = MEDIA_NAME_X + 2 + MIN(strlen(filename), 25);
     }
   }
 
@@ -514,10 +515,15 @@ void screen_hosts_and_devices_edit_host_slot(uint_fast8_t i)
 
 void screen_hosts_and_devices_eject(uint8_t ds)
 {
-  uint8_t n;
-
   // Ejecting a ROM shrinks the list and pulls the slots below it up one
   // row, so the whole card is repainted rather than just the ejected row.
+  msx_repaint_device_slots();
+}
+
+void msx_repaint_device_slots(void)
+{
+  uint8_t n;
+
   vdp_noblank();
   vdp_vfill(DEVICES_Y*0x100, 0, (MSX_MAX_SLOTS+2)*0x100);
   screen_hosts_and_devices_device_slots(DEVICES_Y, deviceSlots, deviceEnabled);
@@ -749,7 +755,7 @@ void screen_select_slot_choose(void)
   else
     show_status("Choose where to mount");
   if (create) {
-    show_menu(5, 'r',"_read-only", 0,NULL, 0,NULL, 0,NULL, 'w',"r/_w");
+    show_menu(5, 'r',"_read-only", 0,NULL, 0,NULL, 0,NULL, 'w',"_r/_w");
   }
   else {
     hide_menu();
