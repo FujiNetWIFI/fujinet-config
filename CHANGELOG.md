@@ -1,5 +1,6 @@
 ## 2026-11-27
 
+* [MSX] - New disk creates a formatted 360K or 720K image: blank, MSX-DOS 1 or Nextor 3 bootable.
 * [TRS-80 Model I] - CONFIG for the FujiNet Model I card: hosts, drives, WiFi, the card's RAM, disk and RS-232 settings, and Mount & Boot from slot 1.
 * [MSX] - The hosts menu's BASIC option is replaced by Lobby, which asks for confirmation and boots the games lobby ROM from TNFS (override with `make LOBBY_URL=<url>`).
 

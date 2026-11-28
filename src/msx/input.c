@@ -379,16 +379,20 @@ unsigned char input_select_file_new_type(void)
 	while (k == 0)
 	  k = input();
 
-  // TODO: Actually define disk types
 	switch (k)
 	{
-	case '1':
+	case 'M':
+	case 'm':
+	  system_create_type = NEW_DISK_TYPE_MSX_MSXDOS1;
 	  return 1;
-	case '2':
-	  return 2;
+	case 'N':
+	case 'n':
+	  system_create_type = NEW_DISK_TYPE_MSX_NEXTOR;
+	  return 1;
 	case 'B':
 	case 'b':
-	  return 3;
+	  system_create_type = NEW_DISK_TYPE_MSX_BLANK;
+	  return 1;
 	}
   return 0;
 }
@@ -399,24 +403,20 @@ unsigned long input_select_file_new_size(unsigned char t)
 	while (k == 0)
 	  k = input();
 
-  // TODO: Actually define disk types
 	switch (k)
 	{
 	case '3':
 	  return 360;
 	case '7':
 	  return 720;
-	case 'C':
-	case 'c':
-	  return 1;
 	}
   return 0;
 }
 
+// The size menu offers no custom size
 unsigned long input_select_file_new_custom(void)
 {
-  char s[9];
-  input_line(0,22,0,s,8,false);
+  return 0;
 }
 
 void input_select_file_new_name(char *c)
