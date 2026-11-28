@@ -87,4 +87,9 @@ uint8_t msx_first_mount_slot(void);
  */
 uint8_t msx_next_mount_slot(uint8_t ds, bool down);
 
+/**
+ * Redraw the Media card and its selection bar, e.g. after an eject or a mode change.
+ */
+void msx_repaint_device_slots(void);
+
 #endif /* MSX_DEVICE_SLOTS_H */

@@ -264,12 +264,14 @@ HDSubState input_hosts_and_devices_devices(void)
     case 'r':
       selected_device_slot=bar_get();
       hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_READ);
+      msx_repaint_device_slots();
       return HD_DEVICES;
       break;
     case 'W':
     case 'w':
       selected_device_slot=bar_get();
       hosts_and_devices_devices_set_mode(FUJI_DISK_MODE_WRITE);
+      msx_repaint_device_slots();
       return HD_DEVICES;
       break;
     // case KEY_CLEAR:
