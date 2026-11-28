@@ -695,13 +695,13 @@ void screen_select_file_filter(void)
 void screen_select_file_new_type(void)
 {
   show_status("What type of disk?");
-  show_menu(5, '1',"MSX-DOS _1", '2'," MSX-DOS _2", 0,NULL, 0,NULL, 'b',"_blank");
+  show_menu(5, 'm',"_MSX-DOS 1", 'n'," _Nextor", 0,NULL, 0,NULL, 'b',"_blank");
 }
 
 void screen_select_file_new_size(unsigned char k)
 {
   show_status("Disk size?");
-  show_menu(5, '3',"_360K", '7',"_720K", 0,NULL, 0,NULL, 'c',"_custom");
+  show_menu(5, '3',"_360K", '7',"_720K", 0,NULL, 0,NULL, 0,NULL);
 }
 
 void screen_select_file_new_custom(void)
